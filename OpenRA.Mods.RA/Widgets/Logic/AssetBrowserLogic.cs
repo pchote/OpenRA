@@ -101,6 +101,7 @@ namespace OpenRA.Mods.RA.Widgets.Logic
 			template = panel.Get<ScrollItemWidget>("ASSET_TEMPLATE");
 			PopulateAssetList();
 
+			// TODO: let the user choose himself from all available *.pal files
 			var palette = (WidgetUtils.ActiveModId() == "d2k") ? "d2k.pal" : "egopal.pal";
 
 			panel.Get<ButtonWidget>("EXPORT_BUTTON").OnClick = () =>

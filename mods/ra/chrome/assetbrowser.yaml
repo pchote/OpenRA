@@ -70,51 +70,65 @@ Background@ASSETBROWSER_BG:
 					Width:246
 					Height:246
 					Image:mouse
-					Palette:colorpicker
-		Label@ACTIONS_TITLE:
-			X:PARENT_RIGHT - 150
-			Y:45
-			Width:PARENT_RIGHT
-			Height:25
-			Text:Actions
-			Font:Bold
-		Button@EXPORT_BUTTON:
-			X:PARENT_RIGHT - 200
+					Palette:colorpicker # TODO: actually use the ColorPickerWidget and/or make this configurable (terrain, player, chrome, effect, ...)
+		Background@EXPORT_BG:
+			X:PARENT_RIGHT - 210
 			Y:80
-			Width:160
-			Height:25
-			Text:Selected to PNG
-			Font:Bold
-		Button@EXTRACT_BUTTON:
-			X:PARENT_RIGHT - 200
-			Y:115
-			Width:160
-			Height:25
-			Text:Extract all to PNG
-			Font:Bold
-		TextField@IMAGE_FILENAME_INPUT:
-			X:PARENT_RIGHT - 200
-			Y:PARENT_BOTTOM - 235
-			Width:100
-			Height:25
-			Text:pixelart.png
-		TextField@IMAGE_SIZE_INPUT:
-			X:PARENT_RIGHT - 90
-			Y:PARENT_BOTTOM - 235
-			Width:50
-			Height:25
-			Text:width
-		Button@IMPORT_BUTTON:
-			X:PARENT_RIGHT - 200
-			Y:PARENT_BOTTOM - 200
-			Width:160
-			Height:25
-			Text:Import from PNG
-			Font:Bold
+			Width:180
+			Height:120
+			Background:dialog3
+			Children:
+				Label@EXPORT_TITLE:
+					X:60
+					Y:5
+					Width:PARENT_RIGHT
+					Height:25
+					Text:Export
+					Font:Bold
+				Button@EXPORT_BUTTON:
+					X:10
+					Y:40
+					Width:160
+					Height:25
+					Text:Selected to PNG
+					Font:Bold
+				Button@EXTRACT_BUTTON:
+					X:10
+					Y:75
+					Width:160
+					Height:25
+					Text:Extract all to PNG
+					Font:Bold
+		Background@IMPORT_BG:
+			X:PARENT_RIGHT - 210
+			Y:210
+			Width:180
+			Height:80
+			Background:dialog3
+			Children:
+				TextField@IMAGE_FILENAME_INPUT:
+					X:10
+					Y:10
+					Width:100
+					Height:25
+					Text:pixelart.png
+				TextField@IMAGE_SIZE_INPUT:
+					X:120
+					Y:10
+					Width:50
+					Height:25
+					Text:width
+				Button@IMPORT_BUTTON:
+					X:10
+					Y:45
+					Width:160
+					Height:25
+					Text:Import from PNG
+					Font:Bold
 		Button@CLOSE_BUTTON:
-			X:PARENT_RIGHT - 200
-			Y:PARENT_BOTTOM - 115
-			Width:160
+			X:PARENT_RIGHT - 210
+			Y:PARENT_BOTTOM - 105
+			Width:180
 			Height:25
 			Text:Close
 			Font:Bold
