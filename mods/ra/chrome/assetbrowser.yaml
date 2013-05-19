@@ -70,7 +70,7 @@ Background@ASSETBROWSER_BG:
 					Width:246
 					Height:246
 					Image:mouse
-					Palette:colorpicker
+					Palette:colorpicker # TODO: actually use the ColorPickerWidget and/or make this configurable (terrain, player, chrome, effect, ...)
 		Background@EXPORT_BG:
 			X:PARENT_RIGHT - 210
 			Y:80
