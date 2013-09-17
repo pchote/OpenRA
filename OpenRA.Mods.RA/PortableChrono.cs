@@ -63,7 +63,7 @@ namespace OpenRA.Mods.RA
 				self.World.OrderGenerator = new PortableChronoOrderGenerator(self);
 
 			if (order.OrderID == "PortableChronoTeleport")
-				return new Order(order.OrderID, self, queued) { TargetLocation = target.CenterPosition.ToCPos() };
+				return new Order(order.OrderID, self, queued) { TargetLocation = self.World.CellContaining(target.CenterPosition) };
 
 			return new Order(order.OrderID, self, queued) { TargetActor = target.Actor };
 		}
@@ -121,7 +121,7 @@ namespace OpenRA.Mods.RA
 			// TODO: When target modifiers are configurable this needs to be revisited
 			if (modifiers.HasModifier(TargetModifiers.ForceMove) || modifiers.HasModifier(TargetModifiers.ForceQueue))
 			{
-				var xy = target.CenterPosition.ToCPos();
+				var xy = self.World.CellContaining(target.CenterPosition);
 
 				IsQueued = modifiers.HasModifier(TargetModifiers.ForceQueue);
 
@@ -154,7 +154,7 @@ namespace OpenRA.Mods.RA
 				yield break;
 			}
 
-			if (self.IsInWorld && self.CenterPosition.ToCPos() != xy
+			if (self.IsInWorld && self.Location != xy
 				&& self.Trait<PortableChrono>().CanTeleport && self.Owner.Shroud.IsExplored(xy))
 			{
 				world.CancelInputMode();
@@ -191,7 +191,7 @@ namespace OpenRA.Mods.RA
 
 		public string GetCursor(World world, CPos xy, MouseInput mi)
 		{
-			if (self.IsInWorld && self.CenterPosition.ToCPos() != xy
+			if (self.IsInWorld && self.Location != xy
 				&& self.Trait<PortableChrono>().CanTeleport && self.Owner.Shroud.IsExplored(xy))
 				return "chrono-target";
 			else

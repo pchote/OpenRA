@@ -42,7 +42,7 @@ namespace OpenRA.Mods.RA
 		public Order IssueOrder( Actor self, IOrderTargeter order, Target target, bool queued )
 		{
 			if( order.OrderID == "SetRallyPoint" )
-				return new Order(order.OrderID, self, false) { TargetLocation = target.CenterPosition.ToCPos() };
+				return new Order(order.OrderID, self, false) { TargetLocation = self.World.CellContaining(target.CenterPosition) };
 
 			return null;
 		}
@@ -63,7 +63,7 @@ namespace OpenRA.Mods.RA
 				if (target.Type != TargetType.Terrain)
 					return false;
 
-				var location = target.CenterPosition.ToCPos();
+				var location = self.World.CellContaining(target.CenterPosition);
 				if (self.World.Map.IsInMap(location))
 				{
 					cursor = "ability";

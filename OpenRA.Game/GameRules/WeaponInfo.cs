@@ -179,7 +179,7 @@ namespace OpenRA.GameRules
 
 			if (target.Type == TargetType.Terrain)
 			{
-				var cell = target.CenterPosition.ToCPos();
+				var cell = world.CellContaining(target.CenterPosition);
 				if (!world.Map.IsInMap(cell))
 					return false;
 

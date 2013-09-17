@@ -53,7 +53,7 @@ namespace OpenRA.Mods.RA
 			if (!(order is BeginMinefieldOrderTargeter))
 				return null;
 
-			var start = target.CenterPosition.ToCPos();
+			var start = self.World.CellContaining(target.CenterPosition);
 			self.World.OrderGenerator = new MinefieldOrderGenerator(self, start);
 			return new Order("BeginMinefield", self, false) { TargetLocation = start };
 		}
@@ -184,7 +184,7 @@ namespace OpenRA.Mods.RA
 				if (target.Type != TargetType.Terrain)
 					return false;
 
-				var location = target.CenterPosition.ToCPos();
+				var location = self.World.CellContaining(target.CenterPosition);
 				if (!self.World.Map.IsInMap(location))
 					return false;
 

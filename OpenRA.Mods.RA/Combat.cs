@@ -34,7 +34,7 @@ namespace OpenRA.Mods.RA
 		public static void DoImpact(WPos pos, WarheadInfo warhead, WeaponInfo weapon, Actor firedBy, float firepowerModifier)
 		{
 			var world = firedBy.World;
-			var targetTile = pos.ToCPos();
+			var targetTile = world.CellContaining(pos);
 
 			if (!world.Map.IsInMap(targetTile))
 				return;

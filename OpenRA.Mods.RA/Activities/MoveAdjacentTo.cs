@@ -45,13 +45,13 @@ namespace OpenRA.Mods.RA.Activities
 			if (IsCanceled || !target.IsValidFor(self))
 				return NextActivity;
 
-			var targetPosition = target.CenterPosition.ToCPos();
+			var targetPosition = self.World.CellContaining(target.CenterPosition);
 
 			// Calculate path to target
 			if (inner == null && repath)
 			{
 				cachedTargetPosition = targetPosition;
-				adjacentCells = Util.AdjacentCells(target).ToArray();
+				adjacentCells = Util.AdjacentCells(self.World, target).ToArray();
 				repath = false;
 
 
@@ -78,7 +78,8 @@ namespace OpenRA.Mods.RA.Activities
 						ps1.AddInitialCell(cell);
 
 					ps1.heuristic = PathSearch.DefaultEstimator(mobile.toCell);
-					var ps2 = PathSearch.FromPoint(self.World, mobile.Info, self, mobile.toCell, target.CenterPosition.ToCPos(), true);
+					var targetCell = self.World.CellContaining(target.CenterPosition);
+					var ps2 = PathSearch.FromPoint(self.World, mobile.Info, self, mobile.toCell, targetCell, true);
 					var ret = pathFinder.FindBidiPath(ps1, ps2);
 
 					inner = mobile.MoveTo(() => ret);

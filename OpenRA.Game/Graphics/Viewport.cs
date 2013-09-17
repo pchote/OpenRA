@@ -98,6 +98,11 @@ namespace OpenRA.Graphics
 			Zoom = Game.Settings.Graphics.PixelDouble ? 2 : 1;
 		}
 
+		public CPos ViewToWorld(int2 view)
+		{
+			return worldRenderer.world.CellContaining(worldRenderer.Position(ViewToWorldPx(view)));
+		}
+
 		public int2 ViewToWorldPx(int2 view) { return (1f / Zoom * view.ToFloat2()).ToInt2() + TopLeft; }
 		public int2 WorldToViewPx(int2 world) { return (Zoom * (world - TopLeft).ToFloat2()).ToInt2(); }
 
@@ -152,8 +157,8 @@ namespace OpenRA.Graphics
 				if (cellBoundsDirty)
 				{
 					var boundary = new CVec(1, 1);
-					var tl = worldRenderer.Position(TopLeft).ToCPos() - boundary;
-					var br = worldRenderer.Position(BottomRight).ToCPos() + boundary;
+					var tl = worldRenderer.world.CellContaining(worldRenderer.Position(TopLeft)) - boundary;
+					var br = worldRenderer.world.CellContaining(worldRenderer.Position(BottomRight)) + boundary;
 
 					cachedRect = Rectangle.Intersect(Rectangle.FromLTRB(tl.X, tl.Y, br.X, br.Y), worldRenderer.world.Map.Bounds);
 					cellBoundsDirty = false;

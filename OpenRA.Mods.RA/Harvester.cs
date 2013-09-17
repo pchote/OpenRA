@@ -259,7 +259,7 @@ namespace OpenRA.Mods.RA
 				return new Order(order.OrderID, self, queued) { TargetActor = target.Actor };
 
 			if (order.OrderID == "Harvest")
-				return new Order(order.OrderID, self, queued) { TargetLocation = target.CenterPosition.ToCPos() };
+				return new Order(order.OrderID, self, queued) { TargetLocation = self.World.CellContaining(target.CenterPosition) };
 
 			return null;
 		}
@@ -436,7 +436,7 @@ namespace OpenRA.Mods.RA
 				if (modifiers.HasModifier(TargetModifiers.ForceMove))
 					return false;
 
-				var location = target.CenterPosition.ToCPos();
+				var location = self.World.CellContaining(target.CenterPosition);
 				// Don't leak info about resources under the shroud
 				if (!self.Owner.Shroud.IsExplored(location))
 					return false;

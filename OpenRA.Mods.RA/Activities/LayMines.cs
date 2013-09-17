@@ -38,7 +38,7 @@ namespace OpenRA.Mods.RA.Activities
 
 				return Util.SequenceActivities(
 					new MoveAdjacentTo(self, Target.FromActor(rearmTarget)),
-					movement.MoveTo(rearmTarget.CenterPosition.ToCPos(), rearmTarget),
+					movement.MoveTo(self.World.CellContaining(rearmTarget.CenterPosition), rearmTarget),
 					new Rearm(self),
 					new Repair(rearmTarget),
 					this );

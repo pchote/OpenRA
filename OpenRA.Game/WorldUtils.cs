@@ -142,6 +142,11 @@ namespace OpenRA
 			return new WPos(1024 * c.X + 512, 1024 * c.Y + 512, 0);
 		}
 
+		public static CPos CellContaining(this World w, WPos pos)
+		{
+			return new CPos(pos.X / 1024, pos.Y / 1024);
+		}
+
 		public static bool HasVoices(this Actor a)
 		{
 			var selectable = a.Info.Traits.GetOrDefault<SelectableInfo>();
