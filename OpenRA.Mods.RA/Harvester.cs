@@ -335,7 +335,7 @@ namespace OpenRA.Mods.RA
 
 				idleSmart = true;
 
-				self.SetTargetLine(Target.FromOrder(order), Color.Green);
+				self.SetTargetLine(Target.FromOrder(self.World, order), Color.Green);
 
 				self.CancelActivity();
 				self.QueueActivity(new DeliverResources());

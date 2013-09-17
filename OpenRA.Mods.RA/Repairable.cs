@@ -70,11 +70,11 @@ namespace OpenRA.Mods.RA
 		{
 			if (order.OrderString == "Repair")
 			{
-				if( !CanRepairAt( order.TargetActor ) || !CanRepair() )
+				if (!CanRepairAt(order.TargetActor) || !CanRepair())
 					return;
 
 				var movement = self.Trait<IMove>();
-				var target = Target.FromOrder(order);
+				var target = Target.FromOrder(self.World, order);
 				self.SetTargetLine(target, Color.Green);
 
 				self.CancelActivity();
