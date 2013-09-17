@@ -25,7 +25,7 @@ namespace OpenRA.Mods.Cnc.Effects
 		public IonCannon(Actor firedBy, World world, CPos location)
 		{
 			this.firedBy = firedBy;
-			target = Target.FromCell(location);
+			target = Target.FromCell(world, location);
 			anim = new Animation("ionsfx");
 			anim.PlayThen("idle", () => Finish(world));
 		}

@@ -50,7 +50,7 @@ namespace OpenRA.Mods.RA.Air
 			if (order.OrderString == "Move")
 			{
 				var cell = self.World.ClampToWorld(order.TargetLocation);
-				var t = Target.FromCell(cell);
+				var t = Target.FromCell(self.World, cell);
 
 				self.SetTargetLine(t, Color.Green);
 				self.CancelActivity();
@@ -153,8 +153,8 @@ namespace OpenRA.Mods.RA.Air
 			return (d * 1024 * 8) / (int)distSq;
 		}
 
-		public Activity MoveTo(CPos cell, int nearEnough) { return new HeliFly(self, Target.FromCell(cell)); }
-		public Activity MoveTo(CPos cell, Actor ignoredActor) { return new HeliFly(self, Target.FromCell(cell)); }
+		public Activity MoveTo(CPos cell, int nearEnough) { return new HeliFly(self, Target.FromCell(self.World, cell)); }
+		public Activity MoveTo(CPos cell, Actor ignoredActor) { return new HeliFly(self, Target.FromCell(self.World, cell)); }
 		public Activity MoveWithinRange(Target target, WRange range) { return new HeliFly(self, target, WRange.Zero, range); }
 		public Activity MoveWithinRange(Target target, WRange minRange, WRange maxRange) { return new HeliFly(self, target, minRange, maxRange); }
 		public Activity MoveFollow(Actor self, Target target, WRange range) { return new Follow(self, target, range); }
@@ -162,7 +162,7 @@ namespace OpenRA.Mods.RA.Air
 
 		public Activity MoveIntoWorld(Actor self, CPos cell)
 		{
-			return new HeliFly(self, Target.FromCell(cell));
+			return new HeliFly(self, Target.FromCell(self.World, cell));
 		}
 
 		public Activity VisualMove(Actor self, WPos fromPos, WPos toPos)

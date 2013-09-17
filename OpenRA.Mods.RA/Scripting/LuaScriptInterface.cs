@@ -293,7 +293,7 @@ namespace OpenRA.Mods.RA.Scripting
 		[LuaGlobal]
 		public void FlyAttackCell(Actor actor, CPos location)
 		{
-			actor.QueueActivity(new FlyAttack(Target.FromCell(location)));
+			actor.QueueActivity(new FlyAttack(Target.FromCell(actor.World, location)));
 		}
 
 		[LuaGlobal]

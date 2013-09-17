@@ -44,7 +44,7 @@ namespace OpenRA.Mods.RA
 		{
 			self.CancelActivity();
 			self.QueueActivity(new AttackMoveActivity(self, move.MoveTo(TargetLocation.Value, 1)));
-			self.SetTargetLine(Target.FromCell(TargetLocation.Value), Color.Red);
+			self.SetTargetLine(Target.FromCell(self.World, TargetLocation.Value), Color.Red);
 		}
 
 		public void TickIdle(Actor self)

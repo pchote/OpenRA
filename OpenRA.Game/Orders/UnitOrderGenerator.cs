@@ -33,7 +33,7 @@ namespace OpenRA.Orders
 					.Where(a => a.Info.Traits.Contains<ITargetableInfo>())
 					.OrderByDescending(a => a.Info.SelectionPriority())
 					.FirstOrDefault();
-				target = frozen != null ? Target.FromFrozenActor(frozen) : Target.FromCell(xy);
+				target = frozen != null ? Target.FromFrozenActor(frozen) : Target.FromCell(world, xy);
 			}
 
 			var orders = world.Selection.Actors
@@ -80,7 +80,7 @@ namespace OpenRA.Orders
 					.Where(a => a.Info.Traits.Contains<ITargetableInfo>())
 					.OrderByDescending(a => a.Info.SelectionPriority())
 					.FirstOrDefault();
-				target = frozen != null ? Target.FromFrozenActor(frozen) : Target.FromCell(xy);
+				target = frozen != null ? Target.FromFrozenActor(frozen) : Target.FromCell(world, xy);
 			}
 
 			var orders = world.Selection.Actors

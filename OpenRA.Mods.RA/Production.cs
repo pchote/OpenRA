@@ -69,7 +69,7 @@ namespace OpenRA.Mods.RA
 				newUnit.QueueActivity(move.MoveIntoWorld(newUnit, exit));
 
 			var target = MoveToRallyPoint(self, newUnit, exit);
-			newUnit.SetTargetLine(Target.FromCell(target), Color.Green, false);
+			newUnit.SetTargetLine(Target.FromCell(self.World, target), Color.Green, false);
 			foreach (var t in self.TraitsImplementing<INotifyProduction>())
 				t.UnitProduced(self, newUnit, exit);
 		}

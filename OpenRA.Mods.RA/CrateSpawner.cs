@@ -99,7 +99,7 @@ namespace OpenRA.Mods.RA
 					});
 
 					plane.CancelActivity();
-					plane.QueueActivity(new FlyAttack(Target.FromCell(p)));
+					plane.QueueActivity(new FlyAttack(Target.FromCell(w, p)));
 					plane.Trait<ParaDrop>().SetLZ(p);
 					plane.Trait<Cargo>().Load(plane, crate);
 				}

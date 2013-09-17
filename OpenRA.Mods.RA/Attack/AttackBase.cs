@@ -220,7 +220,7 @@ namespace OpenRA.Mods.RA
 				if (negativeDamage)
 					return false;
 
-				if (!ab.HasAnyValidWeapons(Target.FromCell(location)))
+				if (!ab.HasAnyValidWeapons(Target.FromCell(self.World, location)))
 					return false;
 
 				if (modifiers.HasModifier(TargetModifiers.ForceAttack))
