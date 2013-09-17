@@ -68,11 +68,12 @@ namespace OpenRA.Mods.RA
 
 		public virtual void Activate(Actor self, Order order, SupportPowerManager manager)
 		{
+			var targetPos = self.World.CenterOfCell(order.TargetLocation);
 			if (Info.DisplayBeacon)
 			{
 				beacon = new Beacon(
 					order.Player,
-					order.TargetLocation.CenterPosition,
+					targetPos,
 					Info.BeaconDuration,
 					Info.BeaconPalettePrefix,
 					Info.BeaconPoster,
@@ -84,7 +85,7 @@ namespace OpenRA.Mods.RA
 			if (Info.DisplayRadarPing && manager.RadarPings != null)
 				manager.RadarPings.Value.Add(
 					() => order.Player.IsAlliedWith(self.World.RenderPlayer),
-					order.TargetLocation.CenterPosition,
+					targetPos,
 					order.Player.Color.RGB,
 					Info.BeaconDuration);
 		}

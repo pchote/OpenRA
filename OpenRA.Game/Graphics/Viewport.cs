@@ -88,8 +88,10 @@ namespace OpenRA.Graphics
 
 			// Calculate map bounds in world-px
 			var b = map.Bounds;
-			var tl = wr.ScreenPxPosition(new CPos(b.Left, b.Top).TopLeft);
-			var br = wr.ScreenPxPosition(new CPos(b.Right, b.Bottom).BottomRight);
+
+			// Expand to corners of cells
+			var tl = wr.ScreenPxPosition(wr.world.CenterOfCell(new CPos(b.Left, b.Top)) - new WVec(512, 512, 0));
+			var br = wr.ScreenPxPosition(wr.world.CenterOfCell(new CPos(b.Right, b.Bottom)) + new WVec(511, 511, 0));
 			mapBounds = Rectangle.FromLTRB(tl.X, tl.Y, br.X, br.Y);
 
 			CenterLocation = (tl + br) / 2;
@@ -130,8 +132,11 @@ namespace OpenRA.Graphics
 			get
 			{
 				var r = CellBounds;
-				var ctl = new CPos(r.Left, r.Top).TopLeft;
-				var cbr = new CPos(r.Right, r.Bottom).TopLeft;
+
+				// Expand to corners of cells
+				var offset = new WVec(512, 512, 0);
+				var ctl = worldRenderer.world.CenterOfCell(new CPos(r.Left, r.Top)) - offset;
+				var cbr = worldRenderer.world.CenterOfCell(new CPos(r.Right, r.Bottom)) - offset;
 				var tl = WorldToViewPx(worldRenderer.ScreenPxPosition(ctl)).Clamp(ScreenClip);
 				var br = WorldToViewPx(worldRenderer.ScreenPxPosition(cbr)).Clamp(ScreenClip);
 				return Rectangle.FromLTRB(tl.X, tl.Y, br.X, br.Y);

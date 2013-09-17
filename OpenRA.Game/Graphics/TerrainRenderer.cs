@@ -33,7 +33,7 @@ namespace OpenRA.Graphics
 				for (var i = map.Bounds.Left; i < map.Bounds.Right; i++)
 				{
 					var tile = wr.Theater.TileSprite(map.MapTiles.Value[i, j]);
-					var pos = wr.ScreenPosition(new CPos(i, j).CenterPosition) - 0.5f * tile.size;
+					var pos = wr.ScreenPosition(world.CenterOfCell(new CPos(i, j))) - 0.5f * tile.size;
 					Util.FastCreateQuad(vertices, pos, tile, terrainPalette, nv, tile.size);
 					nv += 4;
 				}

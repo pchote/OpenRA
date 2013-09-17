@@ -23,8 +23,10 @@ namespace OpenRA
 	{
 		public static IEnumerable<Actor> FindActorsInBox(this World world, CPos tl, CPos br)
 		{
-			// TODO: Support diamond boxes for isometric maps?
-			return world.FindActorsInBox(tl.TopLeft, br.BottomRight);
+			// Expand to corners of cells
+			var wtl = world.CenterOfCell(tl) - new WVec(512, 512, 0);
+			var wbr = world.CenterOfCell(br) + new WVec(511, 511, 0);
+			return world.FindActorsInBox(wtl, wbr);
 		}
 
 		public static IEnumerable<Actor> FindActorsInBox(this World world, WPos tl, WPos br)
@@ -126,11 +128,18 @@ namespace OpenRA
 
 		public static WRange DistanceToMapEdge(this World w, WPos pos, WVec dir)
 		{
-			var tl = w.Map.Bounds.TopLeftAsCPos().TopLeft;
-			var br = w.Map.Bounds.BottomRightAsCPos().BottomRight;
+			var b = w.Map.Bounds;
+			var tl = w.CenterOfCell(new CPos(b.Left, b.Top)) - new WVec(512, 512, 0);
+			var br = w.CenterOfCell(new CPos(b.Right, b.Bottom)) + new WVec(511, 511, 0);
+
 			var x = dir.X == 0 ? int.MaxValue : ((dir.X < 0 ? tl.X : br.X) - pos.X) / dir.X;
 			var y = dir.Y == 0 ? int.MaxValue : ((dir.Y < 0 ? tl.Y : br.Y) - pos.Y) / dir.Y;
 			return new WRange(Math.Min(x, y) * dir.Length);
+		}
+
+		public static WPos CenterOfCell(this World w, CPos c)
+		{
+			return new WPos(1024 * c.X + 512, 1024 * c.Y + 512, 0);
 		}
 
 		public static bool HasVoices(this Actor a)

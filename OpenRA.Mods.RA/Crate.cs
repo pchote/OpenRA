@@ -113,7 +113,7 @@ namespace OpenRA.Mods.RA
 		{
 			self.World.ActorMap.RemoveInfluence(self, this);
 			Location = cell;
-			CenterPosition = cell.CenterPosition;
+			CenterPosition = self.World.CenterOfCell(cell);
 
 			if (self.IsInWorld)
 			{

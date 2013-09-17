@@ -103,7 +103,7 @@ namespace OpenRA.Mods.RA
 
 			var pal = wr.Palette("terrain");
 			foreach (var c in minefield)
-				new SpriteRenderable(tile, c.CenterPosition,
+				new SpriteRenderable(tile, self.World.CenterOfCell(c),
 					WVec.Zero, -511, pal, 1f, true).Render(wr);
 		}
 
@@ -166,7 +166,7 @@ namespace OpenRA.Mods.RA
 				foreach (var c in minefield)
 				{
 					var tile = movement.CanEnterCell(c) ? tileOk : tileBlocked;
-					new SpriteRenderable(tile, c.CenterPosition,
+					new SpriteRenderable(tile, world.CenterOfCell(c),
 						WVec.Zero, -511, pal, 1f, true).Render(wr);
 				}
 			}

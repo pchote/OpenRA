@@ -79,7 +79,7 @@ namespace OpenRA.Mods.RA
 
 			self.World.AddFrameEndTask(w => w.Add(new NukeLaunch(self, npi.MissileWeapon,
 				self.CenterPosition + body.LocalToWorld(npi.SpawnOffset),
-				order.TargetLocation.CenterPosition,
+				self.World.CenterOfCell(order.TargetLocation),
 				npi.FlightVelocity, npi.FlightDelay, npi.SkipAscent)));
 
 			if (npi.CameraActor != null)

@@ -71,11 +71,16 @@ namespace OpenRA.Traits
 			var max = (position + new CVec(r, r)).Clamp(world.Map.Bounds);
 
 			var circleArea = radius.Range * radius.Range;
-			var pos = position.CenterPosition;
+			var pos = world.CenterOfCell(position);
 			for (var j = min.Y; j <= max.Y; j++)
+			{
 				for (var i = min.X; i <= max.X; i++)
-					if (circleArea >= (new CPos(i, j).CenterPosition - pos).LengthSquared)
-						yield return new CPos(i, j);
+				{
+					var c = new CPos(i, j);
+					if (circleArea >= (world.CenterOfCell(c) - pos).LengthSquared)
+						yield return c;
+				}
+			}
 		}
 
 		void AddVisibility(Actor a)

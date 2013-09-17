@@ -182,7 +182,7 @@ namespace OpenRA.Mods.RA
 				{
 					var k = j * tileStride + i;
 					tiles[k].Position = new CPos(i, j);
-					tiles[k].ScreenPosition = wr.ScreenPosition(tiles[k].Position.CenterPosition);
+					tiles[k].ScreenPosition = wr.ScreenPosition(w.CenterOfCell(tiles[k].Position));
 				}
 			}
 

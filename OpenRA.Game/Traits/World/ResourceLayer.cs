@@ -34,13 +34,13 @@ namespace OpenRA.Traits
 			{
 				for (var y = clip.Top; y < clip.Bottom; y++)
 				{
-					var pos = new CPos(x, y);
-					if (world.ShroudObscures(pos))
+					var cell = new CPos(x, y);
+					if (world.ShroudObscures(cell))
 						continue;
 
 					var c = render[x, y];
 					if (c.Sprite != null)
-						new SpriteRenderable(c.Sprite, pos.CenterPosition,
+						new SpriteRenderable(c.Sprite, wr.world.CenterOfCell(cell),
 							WVec.Zero, -511, c.Type.Palette, 1f, true).Render(wr);
 				}
 			}

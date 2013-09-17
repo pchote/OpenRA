@@ -40,7 +40,7 @@ namespace OpenRA.Mods.RA
 
 			self.Trait<RenderBuilding>().PlayCustomAnim(self, "active");
 
-			Sound.Play("ironcur9.aud", order.TargetLocation.CenterPosition);
+			Sound.Play("ironcur9.aud", self.World.CenterOfCell(order.TargetLocation));
 
 			foreach (var target in UnitsInRange(order.TargetLocation)
 				.Where(a => a.Owner.Stances[self.Owner] == Stance.Ally))
@@ -101,7 +101,7 @@ namespace OpenRA.Mods.RA
 				var xy = wr.Position(wr.Viewport.ViewToWorldPx(Viewport.LastMousePos)).ToCPos();
 				var pal = wr.Palette("terrain");
 				foreach (var t in world.FindTilesInCircle(xy, range))
-					yield return new SpriteRenderable(tile, t.CenterPosition, WVec.Zero, -511, pal, 1f, true);
+					yield return new SpriteRenderable(tile, wr.world.CenterOfCell(t), WVec.Zero, -511, pal, 1f, true);
 			}
 
 			public string GetCursor(World world, CPos xy, MouseInput mi)

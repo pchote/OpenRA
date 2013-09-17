@@ -74,7 +74,7 @@ namespace OpenRA.Mods.RA
 				if (wr.world.ShroudObscures(kv.Key))
 					continue;
 
-				new SpriteRenderable(kv.Value, kv.Key.CenterPosition,
+				new SpriteRenderable(kv.Value, wr.world.CenterOfCell(kv.Key),
 					WVec.Zero, -511, pal, 1f, true).Render(wr);
 			}
 		}
