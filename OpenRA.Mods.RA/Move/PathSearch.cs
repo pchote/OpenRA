@@ -93,13 +93,17 @@ namespace OpenRA.Mods.RA.Move
 		public CPos Expand(World world)
 		{
 			var p = queue.Pop();
-			while (cellInfo[p.Location.X, p.Location.Y].Seen)
+			var mc = new MapCell(world.Map, p.Location);
+			while (cellInfo[mc.U, mc.V].Seen)
 				if (queue.Empty)
 					return p.Location;
 				else
+				{
 					p = queue.Pop();
+					mc = new MapCell(world.Map, p.Location);
+				}
 
-			cellInfo[p.Location.X, p.Location.Y].Seen = true;
+			cellInfo[mc.U, mc.V].Seen = true;
 
 			var thisCost = mobileInfo.MovementCostForCell(world, p.Location);
 
@@ -126,7 +130,9 @@ namespace OpenRA.Mods.RA.Move
 				// Is this direction flat-out unusable or already seen?
 				if (!world.Map.IsInMap(newHere))
 					continue;
-				if (cellInfo[newHere.X, newHere.Y].Seen)
+
+				var newHereMc = new MapCell(world.Map, newHere);
+				if (cellInfo[newHereMc.U, newHereMc.V].Seen)
 					continue;
 
 				// Now we may seriously consider this direction using heuristics:
@@ -167,14 +173,14 @@ namespace OpenRA.Mods.RA.Move
 					else if (uy == 1 && d.X > 0) cellCost += LaneBias;
 				}
 
-				int newCost = cellInfo[p.Location.X, p.Location.Y].MinCost + cellCost;
+				int newCost = cellInfo[mc.U, mc.V].MinCost + cellCost;
 
 				// Cost is even higher; next direction:
-				if (newCost > cellInfo[newHere.X, newHere.Y].MinCost)
+				if (newCost > cellInfo[newHereMc.U, newHereMc.V].MinCost)
 					continue;
 
-				cellInfo[newHere.X, newHere.Y].Path = p.Location;
-				cellInfo[newHere.X, newHere.Y].MinCost = newCost;
+				cellInfo[newHereMc.U, newHereMc.V].Path = p.Location;
+				cellInfo[newHereMc.U, newHereMc.V].MinCost = newCost;
 
 				nextDirections[i].Second = newCost + est;
 				queue.Add(new PathDistance(newCost + est, newHere));
@@ -194,7 +200,8 @@ namespace OpenRA.Mods.RA.Move
 			if (!world.Map.IsInMap(location))
 				return;
 
-			cellInfo[location.X, location.Y] = new CellInfo(0, location, false);
+			var mc = new MapCell(world.Map, location);
+			cellInfo[mc.U, mc.V] = new CellInfo(0, location, false);
 			queue.Add(new PathDistance(heuristic(location), location));
 		}
 

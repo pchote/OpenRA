@@ -126,8 +126,8 @@ namespace OpenRA.Graphics
 			CenterLocation += (1f / Zoom * delta).ToInt2();
 			cellBoundsDirty = true;
 
-			if (!ignoreBorders)
-				CenterLocation = CenterLocation.Clamp(mapBounds);
+			//if (!ignoreBorders)
+			//	CenterLocation = CenterLocation.Clamp(mapBounds);
 		}
 
 		// Rectangle (in viewport coords) that contains things to be drawn
@@ -136,6 +136,9 @@ namespace OpenRA.Graphics
 		{
 			get
 			{
+				// TODO: Have removed optimization
+				return ScreenClip;
+				/*
 				var r = CellBounds;
 
 				// Expand to corners of cells
@@ -145,10 +148,11 @@ namespace OpenRA.Graphics
 				var tl = WorldToViewPx(worldRenderer.ScreenPxPosition(ctl)).Clamp(ScreenClip);
 				var br = WorldToViewPx(worldRenderer.ScreenPxPosition(cbr)).Clamp(ScreenClip);
 				return Rectangle.FromLTRB(tl.X, tl.Y, br.X, br.Y);
+				*/
 			}
 		}
 
-		// Rectangle (in cell coords) of cells that are currently visible on the screen
+		// Rectangle (in map cell coords) of cells that are currently visible on the screen
 		Rectangle cachedRect;
 		public Rectangle CellBounds
 		{
@@ -156,16 +160,15 @@ namespace OpenRA.Graphics
 			{
 				if (cellBoundsDirty)
 				{
-					var boundary = new CVec(1, 1);
-					var tl = worldRenderer.world.CellContaining(worldRenderer.Position(TopLeft)) - boundary;
-					var br = worldRenderer.world.CellContaining(worldRenderer.Position(BottomRight)) + boundary;
+					var tl = new MapCell(worldRenderer.world.Map, worldRenderer.world.CellContaining(worldRenderer.Position(TopLeft)));
+					var br = new MapCell(worldRenderer.world.Map, worldRenderer.world.CellContaining(worldRenderer.Position(BottomRight)));
 
-					cachedRect = Rectangle.Intersect(Rectangle.FromLTRB(tl.X, tl.Y, br.X, br.Y), worldRenderer.world.Map.Bounds);
+					cachedRect = Rectangle.Intersect(Rectangle.FromLTRB(tl.U - 1, tl.V - 1, br.U + 1, br.V + 1), worldRenderer.world.Map.Bounds);
 					cellBoundsDirty = false;
 				}
 
-				var b = worldRenderer.world.VisibleBounds;
-				return b.HasValue ? Rectangle.Intersect(cachedRect, b.Value) : cachedRect;
+				// TODO: Have removed the world.VisibleBounds optimization
+				return cachedRect;
 			}
 		}
 	}

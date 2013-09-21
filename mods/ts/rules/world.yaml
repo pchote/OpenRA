@@ -54,13 +54,13 @@ World:
 		G: 0
 		B: 0
 		A: 180
-	ShroudPalette@shroud:
+	TSShroudPalette@shroud:
 		Type: Shroud
-	ShroudPalette@fog:
+	TSShroudPalette@fog:
 		Name: fog
 		Fog: true
 	ShroudRenderer:
-		Index: 255, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240, 20, 40, 56, 65, 97, 130, 148, 194, 24, 33, 66, 132, 28, 41, 67, 134, 1, 2, 4, 8, 3, 6, 12, 9, 7, 14, 13, 11, 5, 10, 15, 255
+		Index: 255, 64, 32, 96, 16, 80, 48, 112, 128, 192, 160, 224, 144, 208, 176, 240, 72, 33, 97, 18, 50, 132, 200, 148, 65, 34, 20, 136, 73, 35, 22, 140, 8, 4, 2, 1, 6, 12, 9, 3, 14, 13, 11, 7, 10, 5, 15, 255
 		UseExtendedIndex: true
 	VoxelNormalsPalette@normals:
 		Name: normals

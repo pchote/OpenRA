@@ -46,13 +46,13 @@ namespace OpenRA.Graphics
 
 		public void Draw(WorldRenderer wr, Viewport viewport)
 		{
-			var verticesPerRow = 4*map.Size.Width;
-			var bounds = viewport.CellBounds;
-			if (bounds.Bottom < 0 || bounds.Top > map.Bounds.Height)
-				return;
+			//var verticesPerRow = 4*map.Size.Width;
+			//var bounds = viewport.CellBounds;
+			//if (bounds.Bottom < 0 || bounds.Top > map.Bounds.Height)
+			//	return;
 
 			Game.Renderer.WorldSpriteRenderer.DrawVertexBuffer(
-				vertexBuffer, verticesPerRow * bounds.Top, verticesPerRow * bounds.Height,
+				vertexBuffer, 0, 4 * map.Size.Width * map.Size.Height,
 				PrimitiveType.QuadList, wr.Theater.Sheet);
 
 			foreach (var r in world.WorldActor.TraitsImplementing<IRenderOverlay>())

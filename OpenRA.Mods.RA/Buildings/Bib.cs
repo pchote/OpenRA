@@ -64,6 +64,7 @@ namespace OpenRA.Mods.RA.Buildings
 
 				// Z-order is one set to the top of the footprint
 				var offset = self.World.CenterOfCell(cell) - self.World.CenterOfCell(location) - centerOffset;
+
 				tiles.Add(new AnimationWithOffset(anim, () => offset, null, -(offset.Y + centerOffset.Y + 512)));
 			}
 		}

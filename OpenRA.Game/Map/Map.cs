@@ -72,6 +72,8 @@ namespace OpenRA
 		public bool AllowStartUnitConfig = true;
 		public Bitmap CustomPreview;
 
+		public readonly TileShape TileShape;
+
 		[FieldLoader.LoadUsing("LoadOptions")]
 		public MapOptions Options;
 
@@ -227,6 +229,7 @@ namespace OpenRA
 
 			MapTiles = Exts.Lazy(() => LoadMapTiles());
 			MapResources = Exts.Lazy(() => LoadResourceTiles());
+			TileShape = Game.modData.Manifest.TileShape;
 
 			// The Uid is calculated from the data on-disk, so
 			// format changes must be flushed to disk.
@@ -418,8 +421,12 @@ namespace OpenRA
 			return dataStream.ToArray();
 		}
 
-		public bool IsInMap(CPos xy) { return IsInMap(xy.X, xy.Y); }
 		public bool IsInMap(int x, int y) { return Bounds.Contains(x, y); }
+		public bool IsInMap(CPos c)
+		{
+			var mc = new MapCell(this, c);
+			return IsInMap(mc.U, mc.V);
+		}
 
 		public void Resize(int width, int height)		// editor magic.
 		{
@@ -527,16 +534,41 @@ namespace OpenRA
 		public MapCell(Map map, CPos c)
 		{
 			this.map = map;
-			U = c.X;
-			V = c.Y;
+			if (map.TileShape == TileShape.Rectangle)
+			{
+				U = c.X;
+				V = c.Y;
+			}
+			else
+			{
+				U = (c.X + c.Y) / 2;
+				V = c.X - c.Y;
+			}
+		}
+
+
+		public CPos Location
+		{
+			get
+			{
+				if (map.TileShape == TileShape.Rectangle)
+					return new CPos(U, V);
+
+				var x = U + (V + 1) / 2;
+				return new CPos(x, x - V);
+			}
 		}
 
 		public int Index { get { return U + map.Size.Width * V; } }
-		public CPos Location { get { return new CPos(U, V); } }
 		public bool IsInMap { get { return map.IsInMap(U, V); } }
 		public TileReference<ushort, byte> Tile { get { return map.MapTiles.Value[U, V]; } }
 		public TileReference<byte, byte> Resource { get { return map.MapResources.Value[U, V]; } }
 		public MapCell WithOffset(int du, int dv) { return new MapCell(map, U + du, V + dv); }
+
+		public MapCell Clamp(Rectangle r)
+		{
+			return new MapCell(map, Math.Min(r.Right, Math.Max(U, r.Left)), Math.Min(r.Bottom, Math.Max(V, r.Top)));
+		}
 
 		public static bool operator ==(MapCell me, MapCell other) { return (me.U == other.U && me.V == other.V && me.map == other.map); }
 		public static bool operator !=(MapCell me, MapCell other) { return !(me == other); }

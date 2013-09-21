@@ -35,6 +35,7 @@
 	Guardable:
 		Range: 3
 	BodyOrientation:
+		CameraPitch: 45
 	Huntable:
 	LuaScriptEvents:
 	Demolishable:

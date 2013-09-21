@@ -210,6 +210,8 @@ namespace OpenRA.Mods.RA.Move
 			// Use LocationInit if you want to insert the actor into the ActorMap!
 			if (init.Contains<CenterPositionInit>())
 				SetVisualPosition(self, init.Get<CenterPositionInit, WPos>());
+
+			Console.WriteLine("Spawning {0} at {1} {2}", self, toCell, CenterPosition);
 		}
 
 		public void SetPosition(Actor self, CPos cell)

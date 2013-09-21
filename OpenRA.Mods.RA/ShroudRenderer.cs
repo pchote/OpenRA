@@ -84,14 +84,28 @@ namespace OpenRA.Mods.RA
 			// Mapping of shrouded directions -> sprite index
 			spriteMap = new int[useExtendedIndex ? 256 : 16];
 			for (var i = 0; i < info.Index.Length; i++)
+			{
+				/*
+				var ha = info.Index[i] & 0x80;
+				var hb = info.Index[i] & 0x40;
+				var hc = info.Index[i] & 0x20;
+				var hd = info.Index[i] & 0x10;
+				var la = info.Index[i] & 0x8;
+				var lb = info.Index[i] & 0x4;
+				var lc = info.Index[i] & 0x2;
+				var ld = info.Index[i] & 0x1;
+				//var index = (ha >> 3) | (hb >> 1) | (hc << 1) | (hd << 3) | la | lb | lc | ld;
+				//Console.WriteLine("{0} -> {1} {2} {3} {4} {5} {6} {7} {8} -> {9}", info.Index[i], ha, hb, hc, hd, la, lb, lc, ld, index);
+				Console.Write(", {0}", index);
+				*/
 				spriteMap[info.Index[i]] = i;
-
+			}
 			// Set individual tile variants to reduce tiling
 			for (var i = 0; i < tiles.Length; i++)
 				tiles[i].Variant = Game.CosmeticRandom.Next(info.Variants.Length);
 
 			// Synthesize unexplored tile if it isn't defined
-			if (!info.Index.Contains(0))
+			if (!info.Index.Contains(240))
 			{
 				var ts = Game.modData.Manifest.TileSize;
 				var data = Exts.MakeArray<byte>(ts.Width * ts.Height, _ => (byte)info.ShroudColor);
@@ -99,26 +113,26 @@ namespace OpenRA.Mods.RA
 				unexploredTile = new Sprite(s.sheet, s.bounds, s.offset, s.channel, info.ShroudBlend);
 			}
 			else
-				unexploredTile = sprites[spriteMap[0]];
+				unexploredTile = sprites[spriteMap[240]];
 		}
 
-		static int FoggedEdges(Shroud s, CPos p, bool useExtendedIndex)
+		static int FoggedEdges(Shroud s, CPos c, bool useExtendedIndex)
 		{
-			if (!s.IsVisible(p.X, p.Y))
+			if (!s.IsVisible(c))
 				return 15;
 
 			// If a side is shrouded then we also count the corners
 			var u = 0;
-			if (!s.IsVisible(p.X, p.Y - 1)) u |= 0x13;
-			if (!s.IsVisible(p.X + 1, p.Y)) u |= 0x26;
-			if (!s.IsVisible(p.X, p.Y + 1)) u |= 0x4C;
-			if (!s.IsVisible(p.X - 1, p.Y)) u |= 0x89;
+			if (!s.IsVisible(c + new CVec(0, -1))) u |= 0x13;
+			if (!s.IsVisible(c + new CVec(1, 0))) u |= 0x26;
+			if (!s.IsVisible(c + new CVec(0, 1))) u |= 0x4C;
+			if (!s.IsVisible(c + new CVec(-1, 0))) u |= 0x89;
 
 			var uside = u & 0x0F;
-			if (!s.IsVisible(p.X - 1, p.Y - 1)) u |= 0x01;
-			if (!s.IsVisible(p.X + 1, p.Y - 1)) u |= 0x02;
-			if (!s.IsVisible(p.X + 1, p.Y + 1)) u |= 0x04;
-			if (!s.IsVisible(p.X - 1, p.Y + 1)) u |= 0x08;
+			if (!s.IsVisible(c + new CVec(-1, -1))) u |= 0x01;
+			if (!s.IsVisible(c + new CVec(1, -1))) u |= 0x02;
+			if (!s.IsVisible(c + new CVec(1, 1))) u |= 0x04;
+			if (!s.IsVisible(c + new CVec(-1, 1))) u |= 0x08;
 
 			// RA provides a set of frames for tiles with shrouded
 			// corners but unshrouded edges. We want to detect this
@@ -129,23 +143,23 @@ namespace OpenRA.Mods.RA
 			return useExtendedIndex ? u ^ uside : u & 0x0F;
 		}
 
-		static int ShroudedEdges(Shroud s, CPos p, bool useExtendedIndex)
+		static int ShroudedEdges(Shroud s, CPos c, bool useExtendedIndex)
 		{
-			if (!s.IsExplored(p.X, p.Y))
+			if (!s.IsExplored(c))
 				return 15;
 
 			// If a side is shrouded then we also count the corners
 			var u = 0;
-			if (!s.IsExplored(p.X, p.Y - 1)) u |= 0x13;
-			if (!s.IsExplored(p.X + 1, p.Y)) u |= 0x26;
-			if (!s.IsExplored(p.X, p.Y + 1)) u |= 0x4C;
-			if (!s.IsExplored(p.X - 1, p.Y)) u |= 0x89;
+			if (!s.IsExplored(c + new CVec(0, -1))) u |= 0x13;
+			if (!s.IsExplored(c + new CVec(1, 0))) u |= 0x26;
+			if (!s.IsExplored(c + new CVec(0, 1))) u |= 0x4C;
+			if (!s.IsExplored(c + new CVec(-1, 0))) u |= 0x89;
 
 			var uside = u & 0x0F;
-			if (!s.IsExplored(p.X - 1, p.Y - 1)) u |= 0x01;
-			if (!s.IsExplored(p.X + 1, p.Y - 1)) u |= 0x02;
-			if (!s.IsExplored(p.X + 1, p.Y + 1)) u |= 0x04;
-			if (!s.IsExplored(p.X - 1, p.Y + 1)) u |= 0x08;
+			if (!s.IsExplored(c + new CVec(-1, -1))) u |= 0x01;
+			if (!s.IsExplored(c + new CVec(1, -1))) u |= 0x02;
+			if (!s.IsExplored(c + new CVec(1, 1))) u |= 0x04;
+			if (!s.IsExplored(c + new CVec(-1, 1))) u |= 0x08;
 
 			// RA provides a set of frames for tiles with shrouded
 			// corners but unshrouded edges. We want to detect this
@@ -156,19 +170,20 @@ namespace OpenRA.Mods.RA
 			return useExtendedIndex ? u ^ uside : u & 0x0F;
 		}
 
-		static int ObserverShroudedEdges(CPos p, Rectangle bounds, bool useExtendedIndex)
+		static int ObserverShroudedEdges(Map map, CPos c, Rectangle bounds, bool useExtendedIndex)
 		{
+			var mc = new MapCell(map, c);
 			var u = 0;
-			if (p.Y == bounds.Top) u |= 0x13;
-			if (p.X == bounds.Right - 1) u |= 0x26;
-			if (p.Y == bounds.Bottom - 1) u |= 0x4C;
-			if (p.X == bounds.Left)	u |= 0x89;
+			if (mc.V == bounds.Top) u |= 0x13;
+			if (mc.U == bounds.Right - 1) u |= 0x26;
+			if (mc.V == bounds.Bottom - 1) u |= 0x4C;
+			if (mc.U == bounds.Left) u |= 0x89;
 
 			var uside = u & 0x0F;
-			if (p.X == bounds.Left && p.Y == bounds.Top) u |= 0x01;
-			if (p.X == bounds.Right - 1 && p.Y == bounds.Top) u |= 0x02;
-			if (p.X == bounds.Right - 1 && p.Y == bounds.Bottom - 1) u |= 0x04;
-			if (p.X == bounds.Left && p.Y == bounds.Bottom - 1) u |= 0x08;
+			if (mc.U == bounds.Left && mc.V == bounds.Top) u |= 0x01;
+			if (mc.U == bounds.Right - 1 && mc.V == bounds.Top) u |= 0x02;
+			if (mc.U == bounds.Right - 1 && mc.V == bounds.Bottom - 1) u |= 0x04;
+			if (mc.U == bounds.Left && mc.V == bounds.Bottom - 1) u |= 0x08;
 
 			return useExtendedIndex ? u ^ uside : u & 0x0F;
 		}
@@ -181,7 +196,7 @@ namespace OpenRA.Mods.RA
 				for (var j = bounds.Top; j < bounds.Bottom; j++)
 				{
 					var k = j * tileStride + i;
-					tiles[k].Position = new CPos(i, j);
+					tiles[k].Position = new MapCell(w.Map, i, j).Location;
 					tiles[k].ScreenPosition = wr.ScreenPosition(w.CenterOfCell(tiles[k].Position));
 				}
 			}
@@ -201,7 +216,7 @@ namespace OpenRA.Mods.RA
 			return sprites[variant * variantStride + spriteMap[flags]];
 		}
 
-		void Update(Shroud shroud)
+		void Update(Map map, Shroud shroud)
 		{
 			var hash = shroud != null ? shroud.Hash : 0;
 			if (shroudHash == hash)
@@ -213,7 +228,7 @@ namespace OpenRA.Mods.RA
 				// Players with no shroud see the whole map so we only need to set the edges
 				for (var k = 0; k < tiles.Length; k++)
 				{
-					var shrouded = ObserverShroudedEdges(tiles[k].Position, bounds, useExtendedIndex);
+					var shrouded = ObserverShroudedEdges(map, tiles[k].Position, bounds, useExtendedIndex);
 					tiles[k].Shroud = GetTile(shrouded, tiles[k].Variant);
 					tiles[k].Fog = GetTile(shrouded, tiles[k].Variant);
 				}
@@ -233,10 +248,11 @@ namespace OpenRA.Mods.RA
 
 		public void RenderShroud(WorldRenderer wr, Shroud shroud)
 		{
-			Update(shroud);
+			Update(wr.world.Map, shroud);
 
 			var clip = wr.Viewport.CellBounds;
 			var width = clip.Width;
+
 			for (var j = clip.Top; j < clip.Bottom; j++)
 			{
 				var start = j * tileStride + clip.Left;

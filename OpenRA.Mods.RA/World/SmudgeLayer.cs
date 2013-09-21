@@ -122,12 +122,13 @@ namespace OpenRA.Mods.RA
 
 		public void Render(WorldRenderer wr)
 		{
-			var cliprect = wr.Viewport.CellBounds;
+			var clip = wr.Viewport.CellBounds;
 			var pal = wr.Palette("terrain");
 
 			foreach (var kv in tiles)
 			{
-				if (!cliprect.Contains(kv.Key.X, kv.Key.Y))
+				var mc = new MapCell(world.Map, kv.Key);
+				if (!clip.Contains(mc.U, mc.V))
 					continue;
 
 				if (world.ShroudObscures(kv.Key))

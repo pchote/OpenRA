@@ -64,10 +64,10 @@ namespace OpenRA
 
 			for(var i = 0; i <= r; i++)
 			{
-				foreach(var offset in TilesByDistance[i])
+				foreach (var offset in TilesByDistance[i])
 				{
 					var t = offset + a;
-					if (world.Map.Bounds.Contains(t.X, t.Y))
+					if (world.Map.IsInMap(t))
 						yield return t;
 				}
 			}
@@ -90,10 +90,15 @@ namespace OpenRA
 		public const int MaxRange = 50;
 		static List<CVec>[] TilesByDistance = InitTilesByDistance(MaxRange);
 
-		public static string GetTerrainType(this World world, CPos cell)
+		public static string GetTerrainType(this World world, MapCell c)
 		{
-			var custom = world.Map.CustomTerrain[cell.X, cell.Y];
-			return custom ?? world.TileSet.GetTerrainType(world.Map.MapTiles.Value[cell.X, cell.Y]);
+			var custom = world.Map.CustomTerrain[c.U, c.V];
+			return custom ?? world.TileSet.GetTerrainType(c.Tile);
+		}
+
+		public static string GetTerrainType(this World world, CPos c)
+		{
+			return world.GetTerrainType(new MapCell(world.Map, c));
 		}
 
 		public static TerrainTypeInfo GetTerrainInfo(this World world, CPos cell)
@@ -101,36 +106,32 @@ namespace OpenRA
 			return world.TileSet.Terrain[world.GetTerrainType(cell)];
 		}
 
-		public static CPos ClampToWorld(this World world, CPos xy)
+		public static CPos ClampToWorld(this World world, CPos c)
 		{
-			var r = world.Map.Bounds;
-			return xy.Clamp(new Rectangle(r.X,r.Y,r.Width-1, r.Height-1));
+			return new MapCell(world.Map, c).Clamp(world.Map.Bounds).Location;
 		}
 
 		public static CPos ChooseRandomEdgeCell(this World w)
 		{
 			var isX = w.SharedRandom.Next(2) == 0;
 			var edge = w.SharedRandom.Next(2) == 0;
-
-			return new CPos(
-				isX ? w.SharedRandom.Next(w.Map.Bounds.Left, w.Map.Bounds.Right)
-					: (edge ? w.Map.Bounds.Left : w.Map.Bounds.Right),
-				!isX ? w.SharedRandom.Next(w.Map.Bounds.Top, w.Map.Bounds.Bottom)
-					: (edge ? w.Map.Bounds.Top : w.Map.Bounds.Bottom));
+			var b = w.Map.Bounds;
+			return new MapCell(w.Map,
+				isX ? w.SharedRandom.Next(b.Left, b.Right) : (edge ? b.Left : b.Right),
+				!isX ? w.SharedRandom.Next(b.Top, b.Bottom)	: (edge ? b.Top : b.Bottom)).Location;
 		}
 
 		public static CPos ChooseRandomCell(this World w, Support.Random r)
 		{
-			return new CPos(
-				r.Next(w.Map.Bounds.Left, w.Map.Bounds.Right),
-				r.Next(w.Map.Bounds.Top, w.Map.Bounds.Bottom));
+			var b = w.Map.Bounds;
+			return new MapCell(w.Map, r.Next(b.Left, b.Right), r.Next(b.Top, b.Bottom)).Location;
 		}
 
 		public static WRange DistanceToMapEdge(this World w, WPos pos, WVec dir)
 		{
 			var b = w.Map.Bounds;
-			var tl = w.CenterOfCell(new CPos(b.Left, b.Top)) - new WVec(512, 512, 0);
-			var br = w.CenterOfCell(new CPos(b.Right, b.Bottom)) + new WVec(511, 511, 0);
+			var tl = w.CenterOfCell(new MapCell(w.Map, b.Left, b.Top).Location) - new WVec(512, 512, 0);
+			var br = w.CenterOfCell(new MapCell(w.Map, b.Right, b.Bottom).Location) + new WVec(511, 511, 0);
 
 			var x = dir.X == 0 ? int.MaxValue : ((dir.X < 0 ? tl.X : br.X) - pos.X) / dir.X;
 			var y = dir.Y == 0 ? int.MaxValue : ((dir.Y < 0 ? tl.Y : br.Y) - pos.Y) / dir.Y;
@@ -139,12 +140,20 @@ namespace OpenRA
 
 		public static WPos CenterOfCell(this World w, CPos c)
 		{
-			return new WPos(1024 * c.X + 512, 1024 * c.Y + 512, 0);
+			if (w.Map.TileShape == TileShape.Rectangle)
+				return new WPos(1024 * c.X + 512, 1024 * c.Y + 512, 0);
+
+			return new WPos(512 * (c.X + c.Y + 1), 512 * (c.X - c.Y + 1), 0);
 		}
 
 		public static CPos CellContaining(this World w, WPos pos)
 		{
-			return new CPos(pos.X / 1024, pos.Y / 1024);
+			if (w.Map.TileShape == TileShape.Rectangle)
+				return new CPos(pos.X / 1024, pos.Y / 1024);
+
+			var u = (pos.X + pos.Y - 512) / 1024;
+			var v = (pos.X - pos.Y + 512) / 1024;
+			return new CPos(u, v);
 		}
 
 		public static int FacingBetween(this World world, CPos cell, CPos towards, int fallbackfacing)

@@ -16,6 +16,8 @@ using OpenRA.Primitives;
 
 namespace OpenRA
 {
+	public enum TileShape { Rectangle, Diamond }
+
 	// Describes what is to be loaded in order to run a mod
 	public class Manifest
 	{
@@ -31,6 +33,7 @@ namespace OpenRA
 		public readonly MiniYaml LobbyDefaults;
 		public readonly Dictionary<string, Pair<string, int>> Fonts;
 		public readonly Size TileSize = new Size(24, 24);
+		public readonly TileShape TileShape = TileShape.Rectangle;
 
 		public Manifest(string mod)
 		{
@@ -72,6 +75,9 @@ namespace OpenRA
 
 			if (yaml.ContainsKey("TileSize"))
 				TileSize = FieldLoader.GetValue<Size>("TileSize", yaml["TileSize"].Value);
+
+			if (yaml.ContainsKey("TileShape"))
+				TileShape = FieldLoader.GetValue<TileShape>("TileShape", yaml["TileShape"].Value);
 
 			// Allow inherited mods to import parent maps.
 			var compat = new List<string>();
