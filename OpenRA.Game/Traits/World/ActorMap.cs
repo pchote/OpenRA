@@ -56,10 +56,10 @@ namespace OpenRA.Traits
 		{
 			this.info = info;
 			map = world.Map;
-			influence = new InfluenceNode[world.Map.MapSize.X, world.Map.MapSize.Y];
+			influence = new InfluenceNode[world.Map.Size.Width, world.Map.Size.Height];
 
-			cols = world.Map.MapSize.X / info.BinSize + 1;
-			rows = world.Map.MapSize.Y / info.BinSize + 1;
+			cols = world.Map.Size.Width / info.BinSize + 1;
+			rows = world.Map.Size.Height / info.BinSize + 1;
 			actors = new List<Actor>[rows * cols];
 			for (var j = 0; j < rows; j++)
 				for (var i = 0; i < cols; i++)

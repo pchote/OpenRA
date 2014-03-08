@@ -26,7 +26,7 @@ namespace OpenRA.Mods.RA.Buildings
 		{
 			map = world.Map;
 
-			influence = new Actor[map.MapSize.X, map.MapSize.Y];
+			influence = new Actor[map.Size.Width, map.Size.Height];
 
 			world.ActorAdded +=	a =>
 			{

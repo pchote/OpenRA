@@ -37,8 +37,8 @@ namespace OpenRA.Traits
 		{
 			this.info = info;
 			var ts = Game.modData.Manifest.TileSize;
-			cols = world.Map.MapSize.X * ts.Width / info.BinSize + 1;
-			rows = world.Map.MapSize.Y * ts.Height / info.BinSize + 1;
+			cols = world.Map.Size.Width * ts.Width / info.BinSize + 1;
+			rows = world.Map.Size.Height * ts.Height / info.BinSize + 1;
 
 			frozen = new Cache<Player, Dictionary<FrozenActor, Rectangle>[]>(InitializeFrozenActors);
 			actors = new Dictionary<Actor, Rectangle>[rows * cols];

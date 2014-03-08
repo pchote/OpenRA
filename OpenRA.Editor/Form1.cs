@@ -312,8 +312,8 @@ namespace OpenRA.Editor
 		{
 			using (var rd = new ResizeDialog())
 			{
-				rd.MapWidth.Value = surface1.Map.MapSize.X;
-				rd.MapHeight.Value = surface1.Map.MapSize.Y;
+				rd.MapWidth.Value = surface1.Map.Size.Width;
+				rd.MapHeight.Value = surface1.Map.Size.Height;
 				rd.CordonLeft.Value = surface1.Map.Bounds.Left;
 				rd.CordonTop.Value = surface1.Map.Bounds.Top;
 				rd.CordonRight.Value = surface1.Map.Bounds.Right;
@@ -327,7 +327,7 @@ namespace OpenRA.Editor
 					(int)rd.CordonRight.Value,
 					(int)rd.CordonBottom.Value);
 
-				if ((int)rd.MapWidth.Value != surface1.Map.MapSize.X || (int)rd.MapHeight.Value != surface1.Map.MapSize.Y)
+				if ((int)rd.MapWidth.Value != surface1.Map.Size.Width || (int)rd.MapHeight.Value != surface1.Map.Size.Height)
 				{
 					surface1.Map.Resize((int)rd.MapWidth.Value, (int)rd.MapHeight.Value);
 					surface1.Bind(surface1.Map, surface1.TileSet, surface1.TileSetRenderer, surface1.Palette, surface1.PlayerPalette);	// rebind it to invalidate all caches
@@ -632,8 +632,8 @@ namespace OpenRA.Editor
 		public int CalculateTotalResource()
 		{
 			int totalResource = 0;
-			for (int i = 0; i < surface1.Map.MapSize.X; i++)
-				for (int j = 0; j < surface1.Map.MapSize.Y; j++)
+			for (int i = 0; i < surface1.Map.Size.Width; i++)
+				for (int j = 0; j < surface1.Map.Size.Height; j++)
 				{
 					if (surface1.Map.MapResources.Value[i, j].Type != 0)
 						totalResource += GetResourceValue(i, j);

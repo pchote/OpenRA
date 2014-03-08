@@ -1,6 +1,6 @@
 Selectable: False
 
-MapFormat: 6
+MapFormat: 7
 
 RequiresMod: ts
 
@@ -12,7 +12,7 @@ Author: Matthias Mailänder
 
 Tileset: INTERIOR
 
-MapSize: 128,128
+Size: 128,128
 
 Bounds: 16,16,96,96
 

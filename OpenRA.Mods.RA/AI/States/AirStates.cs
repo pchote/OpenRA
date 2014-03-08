@@ -57,8 +57,8 @@ namespace OpenRA.Mods.RA.AI
 		{
 			var world = owner.world;
 			detectedEnemyTarget = null;
-			var x = (world.Map.MapSize.X % DangerRadius) == 0 ? world.Map.MapSize.X : world.Map.MapSize.X + DangerRadius;
-			var y = (world.Map.MapSize.Y % DangerRadius) == 0 ? world.Map.MapSize.Y : world.Map.MapSize.Y + DangerRadius;
+			var x = (world.Map.Size.Width % DangerRadius) == 0 ? world.Map.Size.Width : world.Map.Size.Width + DangerRadius;
+			var y = (world.Map.Size.Height % DangerRadius) == 0 ? world.Map.Size.Height : world.Map.Size.Height + DangerRadius;
 
 			for (var i = 0; i < x; i += DangerRadius * 2)
 			{

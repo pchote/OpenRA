@@ -730,7 +730,7 @@ namespace OpenRA.Mods.RA.AI
 		// backup location within the main base.
 		void FindAndDeployBackupMcv(Actor self)
 		{
-			var maxBaseDistance = Math.Max(world.Map.MapSize.X, world.Map.MapSize.Y);
+			var maxBaseDistance = Math.Max(world.Map.Size.Width, world.Map.Size.Height);
 
 			// HACK: Assumes all MCVs deploy into the same construction yard footprint
 			var mcvInfo = GetUnitInfoByCommonName("Mcv", p);
@@ -783,8 +783,8 @@ namespace OpenRA.Mods.RA.AI
 			CPos? resLoc = null;
 			var countUnits = 0;
 
-			var x = (world.Map.MapSize.X % radiusOfPower) == 0 ? world.Map.MapSize.X : world.Map.MapSize.X + radiusOfPower;
-			var y = (world.Map.MapSize.Y % radiusOfPower) == 0 ? world.Map.MapSize.Y : world.Map.MapSize.Y + radiusOfPower;
+			var x = (world.Map.Size.Width % radiusOfPower) == 0 ? world.Map.Size.Width : world.Map.Size.Width + radiusOfPower;
+			var y = (world.Map.Size.Height % radiusOfPower) == 0 ? world.Map.Size.Height : world.Map.Size.Height + radiusOfPower;
 
 			for (int i = 0; i < x; i += radiusOfPower * 2)
 			{

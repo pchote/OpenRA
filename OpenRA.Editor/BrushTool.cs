@@ -73,7 +73,7 @@ namespace OpenRA.Editor
 		{
 			var queue = new Queue<CPos>();
 			var replace = s.Map.MapTiles.Value[pos.X, pos.Y];
-			var touched = new bool[s.Map.MapSize.X, s.Map.MapSize.Y];
+			var touched = new bool[s.Map.Size.Width, s.Map.Size.Height];
 
 			Action<int, int> maybeEnqueue = (x, y) =>
 			{

@@ -42,7 +42,7 @@ namespace OpenRA.Mods.RA
 			int[,] layer;
 			if (!layers.TryGetValue(pl, out layer))
 			{
-				layer = new int[world.Map.MapSize.X, world.Map.MapSize.Y];
+				layer = new int[world.Map.Size.Width, world.Map.Size.Height];
 				layers.Add(pl, layer);
 			}
 

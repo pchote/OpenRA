@@ -59,8 +59,8 @@ namespace OpenRA.Traits
 		public void WorldLoaded(World w, WorldRenderer wr)
 		{
 			this.world = w;
-			content = new CellContents[w.Map.MapSize.X, w.Map.MapSize.Y];
-			render = new CellContents[w.Map.MapSize.X, w.Map.MapSize.Y];
+			content = new CellContents[w.Map.Size.Width, w.Map.Size.Height];
+			render = new CellContents[w.Map.Size.Width, w.Map.Size.Height];
 			dirty = new List<CPos>();
 
 			var resources = w.WorldActor.TraitsImplementing<ResourceType>()

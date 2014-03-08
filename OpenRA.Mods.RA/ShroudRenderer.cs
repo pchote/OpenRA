@@ -65,8 +65,8 @@ namespace OpenRA.Mods.RA
 			bounds = map.Bounds;
 			useExtendedIndex = info.UseExtendedIndex;
 
-			tiles = new ShroudTile[map.MapSize.X * map.MapSize.Y];
-			tileStride = map.MapSize.X;
+			tiles = new ShroudTile[map.Size.Width * map.Size.Height];
+			tileStride = map.Size.Width;
 
 			// Force update on first render
 			shroudHash = -1;

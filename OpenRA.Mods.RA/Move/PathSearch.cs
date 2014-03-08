@@ -253,8 +253,8 @@ namespace OpenRA.Mods.RA.Move
 			while (cellInfoPool.Count > 0)
 			{
 				var cellInfo = GetFromPool();
-				if (cellInfo.GetUpperBound(0) != world.Map.MapSize.X - 1 ||
-					cellInfo.GetUpperBound(1) != world.Map.MapSize.Y - 1)
+				if (cellInfo.GetUpperBound(0) != world.Map.Size.Width - 1 ||
+					cellInfo.GetUpperBound(1) != world.Map.Size.Height - 1)
 				{
 					Log.Write("debug", "Discarding old pooled CellInfo of wrong size.");
 					continue;
@@ -265,10 +265,10 @@ namespace OpenRA.Mods.RA.Move
 			}
 
 			if (result == null)
-				result = new CellInfo[world.Map.MapSize.X, world.Map.MapSize.Y];
+				result = new CellInfo[world.Map.Size.Width, world.Map.Size.Height];
 
-			for (int x = 0; x < world.Map.MapSize.X; x++)
-				for (int y = 0; y < world.Map.MapSize.Y; y++)
+			for (int x = 0; x < world.Map.Size.Width; x++)
+				for (int y = 0; y < world.Map.Size.Height; y++)
 					result[ x, y ] = new CellInfo( int.MaxValue, new CPos( x, y ), false );
 
 			return result;

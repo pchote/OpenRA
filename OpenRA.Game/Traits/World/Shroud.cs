@@ -45,9 +45,9 @@ namespace OpenRA.Traits
 			this.self = self;
 			map = self.World.Map;
 
-			visibleCount = new int[map.MapSize.X, map.MapSize.Y];
-			generatedShroudCount = new int[map.MapSize.X, map.MapSize.Y];
-			explored = new bool[map.MapSize.X, map.MapSize.Y];
+			visibleCount = new int[map.Size.Width, map.Size.Height];
+			generatedShroudCount = new int[map.Size.Width, map.Size.Height];
+			explored = new bool[map.Size.Width, map.Size.Height];
 
 			self.World.ActorAdded += AddVisibility;
 			self.World.ActorRemoved += RemoveVisibility;

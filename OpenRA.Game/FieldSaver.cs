@@ -66,6 +66,13 @@ namespace OpenRA
 					((int)c.B).Clamp(0, 255));
 			}
 
+			// Size.ToString() does the wrong thing; force it to format as an array
+			if (t == typeof(Size))
+			{
+				var s = (Size)v;
+				return "{0},{1}".F(s.Width, s.Height);
+			}
+
 			// Don't save floats in settings.yaml using country-specific decimal separators which can be misunderstood as group seperators.
 			if (t == typeof(float))
 				return ((float)v).ToString(CultureInfo.InvariantCulture);

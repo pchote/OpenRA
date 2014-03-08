@@ -39,7 +39,7 @@ namespace OpenRA.Mods.RA
 
 		public void WorldLoaded(World w, WorldRenderer wr)
 		{
-			bridges = new Bridge[w.Map.MapSize.X, w.Map.MapSize.Y];
+			bridges = new Bridge[w.Map.Size.Width, w.Map.Size.Height];
 
 			// Build a list of templates that should be overlayed with bridges
 			foreach (var bridge in info.Bridges)

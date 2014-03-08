@@ -104,7 +104,7 @@ namespace OpenRA
 
 		// Binary map data
 		[FieldLoader.Ignore] public byte TileFormat = 1;
-		public int2 MapSize;
+		public Size Size;
 
 		[FieldLoader.Ignore] public Lazy<TileReference<ushort, byte>[,]> MapTiles;
 		[FieldLoader.Ignore] public Lazy<TileReference<byte, byte>[,]> MapResources;
@@ -120,7 +120,7 @@ namespace OpenRA
 				Title = "Name your map here",
 				Description = "Describe your map here",
 				Author = "Your name here",
-				MapSize = new int2(1, 1),
+				Size = new Size(1, 1),
 				Tileset = tileset.Id,
 				Options = new MapOptions(),
 				MapResources = Exts.Lazy(() => new TileReference<byte, byte>[1, 1]),
@@ -166,7 +166,7 @@ namespace OpenRA
 				throw new InvalidDataException("Map format {0} is not supported.\n File: {1}".F(MapFormat, path));
 
 			// Format 5 -> 6 enforces the use of RequiresMod
-			if (MapFormat == 5)
+			if (MapFormat < 6)
 			{
 				if (upgradeForMod == null)
 					throw new InvalidDataException("Map format {0} is not supported, but can be upgraded.\n File: {1}".F(MapFormat, path));
@@ -177,6 +177,14 @@ namespace OpenRA
 				// of finding the mod early during the engine initialization.
 				RequiresMod = upgradeForMod;
 			}
+
+			if (MapFormat < 7)
+			{
+				Console.WriteLine("Upgrading {0} from Format 6 to Format 7", path);
+
+				Size = FieldLoader.GetValue<Size>("MapSize", yaml.NodesDict["MapSize"].Value);
+			}
+
 
 			// Load players
 			foreach (var kv in yaml.NodesDict["Players"].NodesDict)
@@ -215,7 +223,7 @@ namespace OpenRA
 			Notifications = MiniYaml.NodesOrEmpty(yaml, "Notifications");
 			Translations = MiniYaml.NodesOrEmpty(yaml, "Translations");
 
-			CustomTerrain = new string[MapSize.X, MapSize.Y];
+			CustomTerrain = new string[Size.Width, Size.Height];
 
 			MapTiles = Exts.Lazy(() => LoadMapTiles());
 			MapResources = Exts.Lazy(() => LoadResourceTiles());
@@ -223,7 +231,7 @@ namespace OpenRA
 			// The Uid is calculated from the data on-disk, so
 			// format changes must be flushed to disk.
 			// TODO: this isn't very nice
-			if (MapFormat < 6)
+			if (MapFormat < 7)
 				Save(path);
 
 			Uid = ComputeHash();
@@ -242,7 +250,7 @@ namespace OpenRA
 
 		public void Save(string toPath)
 		{
-			MapFormat = 6;
+			MapFormat = 7;
 
 			var root = new List<MiniYamlNode>();
 			var fields = new[]
@@ -254,7 +262,7 @@ namespace OpenRA
 				"Description",
 				"Author",
 				"Tileset",
-				"MapSize",
+				"Size",
 				"Bounds",
 				"UseAsShellmap",
 				"Type",
@@ -319,7 +327,7 @@ namespace OpenRA
 
 		public TileReference<ushort, byte>[,] LoadMapTiles()
 		{
-			var tiles = new TileReference<ushort, byte>[MapSize.X, MapSize.Y];
+			var tiles = new TileReference<ushort, byte>[Size.Width, Size.Height];
 			using (var dataStream = Container.GetContent("map.bin"))
 			{
 				if (dataStream.ReadUInt8() != 1)
@@ -329,12 +337,12 @@ namespace OpenRA
 				var width = dataStream.ReadUInt16();
 				var height = dataStream.ReadUInt16();
 
-				if (width != MapSize.X || height != MapSize.Y)
+				if (width != Size.Width || height != Size.Height)
 					throw new InvalidDataException("Invalid tile data");
 
 				// Load tile data
-				for (int i = 0; i < MapSize.X; i++)
-					for (int j = 0; j < MapSize.Y; j++)
+				for (int i = 0; i < Size.Width; i++)
+					for (int j = 0; j < Size.Height; j++)
 					{
 						var tile = dataStream.ReadUInt16();
 						var index = dataStream.ReadUInt8();
@@ -350,7 +358,7 @@ namespace OpenRA
 
 		public TileReference<byte, byte>[,] LoadResourceTiles()
 		{
-			var resources = new TileReference<byte, byte>[MapSize.X, MapSize.Y];
+			var resources = new TileReference<byte, byte>[Size.Width, Size.Height];
 
 			using (var dataStream = Container.GetContent("map.bin"))
 			{
@@ -361,15 +369,15 @@ namespace OpenRA
 				var width = dataStream.ReadUInt16();
 				var height = dataStream.ReadUInt16();
 
-				if (width != MapSize.X || height != MapSize.Y)
+				if (width != Size.Width || height != Size.Height)
 					throw new InvalidDataException("Invalid tile data");
 
 				// Skip past tile data
-				dataStream.Seek(3 * MapSize.X * MapSize.Y, SeekOrigin.Current);
+				dataStream.Seek(3 * Size.Width * Size.Height, SeekOrigin.Current);
 
 				// Load resource data
-				for (var i = 0; i < MapSize.X; i++)
-					for (var j = 0; j < MapSize.Y; j++)
+				for (var i = 0; i < Size.Width; i++)
+					for (var j = 0; j < Size.Height; j++)
 				{
 					var type = dataStream.ReadUInt8();
 					var index = dataStream.ReadUInt8();
@@ -387,20 +395,20 @@ namespace OpenRA
 			{
 				// File header consists of a version byte, followed by 2 ushorts for width and height
 				writer.Write(TileFormat);
-				writer.Write((ushort)MapSize.X);
-				writer.Write((ushort)MapSize.Y);
+				writer.Write((ushort)Size.Width);
+				writer.Write((ushort)Size.Height);
 
 				// Tile data
-				for (var i = 0; i < MapSize.X; i++)
-					for (var j = 0; j < MapSize.Y; j++)
+				for (var i = 0; i < Size.Width; i++)
+					for (var j = 0; j < Size.Height; j++)
 					{
 						writer.Write(MapTiles.Value[i, j].Type);
 						writer.Write(MapTiles.Value[i, j].Index);
 					}
 
 				// Resource data
-				for (var i = 0; i < MapSize.X; i++)
-					for (var j = 0; j < MapSize.Y; j++)
+				for (var i = 0; i < Size.Width; i++)
+					for (var j = 0; j < Size.Height; j++)
 					{
 						writer.Write(MapResources.Value[i, j].Type);
 						writer.Write(MapResources.Value[i, j].Index);
@@ -420,7 +428,7 @@ namespace OpenRA
 
 			MapTiles = Exts.Lazy(() => Exts.ResizeArray(oldMapTiles, oldMapTiles[0, 0], width, height));
 			MapResources = Exts.Lazy(() => Exts.ResizeArray(oldMapResources, oldMapResources[0, 0], width, height));
-			MapSize = new int2(width, height);
+			Size = new Size(width, height);
 		}
 
 		public void ResizeCordon(int left, int top, int right, int bottom)

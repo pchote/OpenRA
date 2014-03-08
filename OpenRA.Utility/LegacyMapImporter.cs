@@ -139,8 +139,8 @@ namespace OpenRA.Utility
 			map.Title = basic.GetValue("Name", Path.GetFileNameWithoutExtension(iniFile));
 			map.Author = "Westwood Studios";
 			map.Tileset = Truncate(mapSection.GetValue("Theater", "TEMPERAT"), 8);
-			map.MapSize.X = mapSize;
-			map.MapSize.Y = mapSize;
+			map.Size.Width = mapSize;
+			map.Size.Height = mapSize;
 			map.Bounds = Rectangle.FromLTRB(offsetX, offsetY, offsetX + width, offsetY + height);
 			map.Selectable = true;
 
