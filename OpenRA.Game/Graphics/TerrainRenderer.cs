@@ -25,15 +25,16 @@ namespace OpenRA.Graphics
 			this.map = world.Map;
 
 			var terrainPalette = wr.Palette("terrain").Index;
-			var vertices = new Vertex[4 * map.Bounds.Height * map.Bounds.Width];
+			var vertices = new Vertex[4 * map.Size.Width * map.Size.Height];
 			int nv = 0;
 
-			for (var j = map.Bounds.Top; j < map.Bounds.Bottom; j++)
+			for (var j = 0; j < map.Size.Height; j++)
 			{
-				for (var i = map.Bounds.Left; i < map.Bounds.Right; i++)
+				for (var i = 0; i < map.Size.Width; i++)
 				{
-					var tile = wr.Theater.TileSprite(map.MapTiles.Value[i, j]);
-					var pos = wr.ScreenPosition(world.CenterOfCell(new CPos(i, j))) - 0.5f * tile.size;
+					var mc = new MapCell(map, i, j);
+					var tile = wr.Theater.TileSprite(mc.Tile);
+					var pos = wr.ScreenPosition(world.CenterOfCell(mc.Location)) - 0.5f * tile.size;
 					Util.FastCreateQuad(vertices, pos, tile, terrainPalette, nv, tile.size);
 					nv += 4;
 				}
@@ -45,16 +46,13 @@ namespace OpenRA.Graphics
 
 		public void Draw(WorldRenderer wr, Viewport viewport)
 		{
-			var verticesPerRow = 4*map.Bounds.Width;
+			var verticesPerRow = 4*map.Size.Width;
 			var bounds = viewport.CellBounds;
-			var firstRow = bounds.Top - map.Bounds.Top;
-			var lastRow = bounds.Bottom - map.Bounds.Top;
-
-			if (lastRow < 0 || firstRow > map.Bounds.Height)
+			if (bounds.Bottom < 0 || bounds.Top > map.Bounds.Height)
 				return;
 
 			Game.Renderer.WorldSpriteRenderer.DrawVertexBuffer(
-				vertexBuffer, verticesPerRow * firstRow, verticesPerRow * (lastRow - firstRow),
+				vertexBuffer, verticesPerRow * bounds.Top, verticesPerRow * bounds.Height,
 				PrimitiveType.QuadList, wr.Theater.Sheet);
 
 			foreach (var r in world.WorldActor.TraitsImplementing<IRenderOverlay>())
