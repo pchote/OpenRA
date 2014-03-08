@@ -29,7 +29,7 @@ namespace OpenRA.Mods.RA
 		readonly BridgeLayerInfo info;
 		readonly World world;
 		Dictionary<ushort, Pair<string, float>> bridgeTypes = new Dictionary<ushort, Pair<string, float>>();
-		Bridge[,] bridges;
+		Bridge[] bridges;
 
 		public BridgeLayer(Actor self, BridgeLayerInfo info)
 		{
@@ -39,7 +39,8 @@ namespace OpenRA.Mods.RA
 
 		public void WorldLoaded(World w, WorldRenderer wr)
 		{
-			bridges = new Bridge[w.Map.Size.Width, w.Map.Size.Height];
+			var s = w.Map.Size;
+			bridges = new Bridge[s.Width * s.Height];
 
 			// Build a list of templates that should be overlayed with bridges
 			foreach (var bridge in info.Bridges)
@@ -50,28 +51,33 @@ namespace OpenRA.Mods.RA
 			}
 
 			// Loop through the map looking for templates to overlay
-			for (int i = w.Map.Bounds.Left; i < w.Map.Bounds.Right; i++)
-				for (int j = w.Map.Bounds.Top; j < w.Map.Bounds.Bottom; j++)
-					if (bridgeTypes.Keys.Contains(w.Map.MapTiles.Value[i, j].Type))
-							ConvertBridgeToActor(w, i, j);
+			for (var j = 0; j < s.Height; j++)
+			{
+				for (var i = 0; i < s.Width; i++)
+				{
+					var mc = new MapCell(w.Map, i, j);
+					if (bridgeTypes.Keys.Contains(mc.Tile.Type))
+						ConvertBridgeToActor(w, mc);
+				}
+			}
 
 			// Link adjacent (long)-bridges so that artwork is updated correctly
 			foreach (var b in w.Actors.SelectMany(a => a.TraitsImplementing<Bridge>()))
 				b.LinkNeighbouringBridges(w, this);
 		}
 
-		void ConvertBridgeToActor(World w, int i, int j)
+		void ConvertBridgeToActor(World w, MapCell mc)
 		{
 			// This cell already has a bridge overlaying it from a previous iteration
-			if (bridges[i, j] != null)
+			if (bridges[mc.Index] != null)
 				return;
 
 			// Correlate the tile "image" aka subtile with its position to find the template origin
-			var tile = w.Map.MapTiles.Value[i, j].Type;
-			var index = w.Map.MapTiles.Value[i, j].Index;
+			var tile = mc.Tile.Type;
+			var index = mc.Tile.Index;
 			var template = w.TileSet.Templates[tile];
-			var ni = i - index % template.Size.X;
-			var nj = j - index / template.Size.X;
+			var ni = mc.U - index % template.Size.X;
+			var nj = mc.V - index / template.Size.X;
 
 			// Create a new actor for this bridge and keep track of which subtiles this bridge includes
 			var bridge = w.CreateActor(bridgeTypes[tile].First, new TypeDictionary
@@ -81,34 +87,35 @@ namespace OpenRA.Mods.RA
 				new HealthInit(bridgeTypes[tile].Second),
 			}).Trait<Bridge>();
 
-			var subTiles = new Dictionary<CPos, byte>();
+			var subTiles = new Dictionary<MapCell, byte>();
 
 			// For each subtile in the template
 			for (byte ind = 0; ind < template.Size.X * template.Size.Y; ind++)
 			{
 				// Where do we expect to find the subtile
-				var x = ni + ind % template.Size.X;
-				var y = nj + ind / template.Size.X;
+				var du = ind % template.Size.X - index % template.Size.X;
+				var dv = ind / template.Size.X - index / template.Size.X;
+				var smc = mc.WithOffset(du, dv);
 
 				// This isn't the bridge you're looking for
-				if (!w.Map.IsInMap(x, y) || w.Map.MapTiles.Value[x, y].Type != tile ||
-				    w.Map.MapTiles.Value[x, y].Index != ind)
+				if (!smc.IsInMap || smc.Tile.Type != tile || smc.Tile.Index != ind)
 					continue;
 
-				subTiles.Add(new CPos(x, y), ind);
-				bridges[x, y] = bridge;
+				subTiles.Add(smc, ind);
+				bridges[smc.Index] = bridge;
 			}
 
 			bridge.Create(tile, subTiles);
 		}
 
 		// Used to check for neighbouring bridges
-		public Bridge GetBridge(CPos cell)
+		public Bridge GetBridge(CPos c)
 		{
-			if (!world.Map.IsInMap(cell))
+			var mc = new MapCell(world.Map, c);
+			if (!mc.IsInMap)
 				return null;
 
-			return bridges[cell.X, cell.Y];
+			return bridges[mc.Index];
 		}
 	}
 }

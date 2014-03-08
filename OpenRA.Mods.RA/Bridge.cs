@@ -84,14 +84,14 @@ namespace OpenRA.Mods.RA
 			this.Type = self.Info.Name;
 		}
 
-		public void Create(ushort template, Dictionary<CPos, byte> footprint)
+		public void Create(ushort template, Dictionary<MapCell, byte> footprint)
 		{
 			this.template = template;
-			this.footprint = footprint;
+			this.footprint = footprint.ToDictionary(kv => kv.Key.Location, kv => kv.Value);
 
 			// Set the initial custom terrain types
-			foreach (var c in footprint.Keys)
-				self.World.Map.CustomTerrain[c.X, c.Y] = GetTerrainType(c);
+			foreach (var mc in footprint.Keys)
+				self.World.Map.CustomTerrain[mc.U, mc.V] = GetTerrainType(mc.Location);
 		}
 
 		string GetTerrainType(CPos cell)
