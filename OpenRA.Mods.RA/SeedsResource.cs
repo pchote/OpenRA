@@ -59,7 +59,7 @@ namespace OpenRA.Mods.RA
 
 			var cell = RandomWalk(self.Location, self.World.SharedRandom)
 				.Take(info.MaxRange)
-				.SkipWhile(p => resLayer.GetResource(p) == resourceType && resLayer.IsFull(p.X, p.Y))
+				.SkipWhile(p => resLayer.GetResource(p) == resourceType && resLayer.IsFull(p))
 				.Cast<CPos?>().FirstOrDefault();
 
 			if (cell != null && self.World.Map.IsInMap(cell.Value) &&

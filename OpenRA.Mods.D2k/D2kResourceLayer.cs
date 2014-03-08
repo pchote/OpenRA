@@ -95,31 +95,31 @@ namespace OpenRA.Traits
 			{ ClearSides.Bottom | ClearSides.TopLeft | ClearSides.BottomLeft | ClearSides.BottomRight, 49 },
 		};
 
-		ClearSides FindClearSides(ResourceType t, CPos p)
+		ClearSides FindClearSides(ResourceType t, CPos c)
 		{
 			var ret = ClearSides.None;
-			if (render[p.X, p.Y - 1].Type != t)
+			if (render[new MapCell(world.Map, c + new CVec(0, -1)).Index].Type != t)
 				ret |= ClearSides.Top | ClearSides.TopLeft | ClearSides.TopRight;
 
-			if (render[p.X - 1, p.Y].Type != t)
+			if (render[new MapCell(world.Map, c + new CVec(-1, 0)).Index].Type != t)
 				ret |= ClearSides.Left | ClearSides.TopLeft | ClearSides.BottomLeft;
 
-			if (render[p.X + 1, p.Y].Type != t)
+			if (render[new MapCell(world.Map, c + new CVec(1, 0)).Index].Type != t)
 				ret |= ClearSides.Right | ClearSides.TopRight | ClearSides.BottomRight;
 
-			if (render[p.X, p.Y + 1].Type != t)
+			if (render[new MapCell(world.Map, c + new CVec(0, 1)).Index].Type != t)
 				ret |= ClearSides.Bottom | ClearSides.BottomLeft | ClearSides.BottomRight;
 
-			if (render[p.X - 1, p.Y - 1].Type != t)
+			if (render[new MapCell(world.Map, c + new CVec(-1, -1)).Index].Type != t)
 				ret |= ClearSides.TopLeft;
 			
-			if (render[p.X + 1, p.Y - 1].Type != t)
+			if (render[new MapCell(world.Map, c + new CVec(1, -1)).Index].Type != t)
 				ret |= ClearSides.TopRight;
 			
-			if (render[p.X - 1, p.Y + 1].Type != t)
+			if (render[new MapCell(world.Map, c + new CVec(-1, 1)).Index].Type != t)
 				ret |= ClearSides.BottomLeft;
 			
-			if (render[p.X + 1, p.Y + 1].Type != t)
+			if (render[new MapCell(world.Map, c + new CVec(1, 1)).Index].Type != t)
 				ret |= ClearSides.BottomRight;
 			
 			return ret;
@@ -127,7 +127,8 @@ namespace OpenRA.Traits
 
 		void UpdateRenderedTileInner(CPos p)
 		{
-			var t = render[p.X, p.Y];
+			var i = new MapCell(world.Map, p).Index;
+			var t = render[i];
 			if (t.Density > 0)
 			{
 				var clear = FindClearSides(t.Type, p);
@@ -147,21 +148,22 @@ namespace OpenRA.Traits
 			else
 				t.Sprite = null;
 
-			render[p.X, p.Y] = t;
+			render[i] = t;
 		}
 
-		protected override void UpdateRenderedSprite(CPos p)
+		protected override void UpdateRenderedSprite(MapCell mc)
 		{
 			// Need to update neighbouring tiles too
-			UpdateRenderedTileInner(p);
-			UpdateRenderedTileInner(p + new CVec(-1, -1));
-			UpdateRenderedTileInner(p + new CVec(0, -1));
-			UpdateRenderedTileInner(p + new CVec(1, -1));
-			UpdateRenderedTileInner(p + new CVec(-1, 0));
-			UpdateRenderedTileInner(p + new CVec(1, 0));
-			UpdateRenderedTileInner(p + new CVec(-1, 1));
-			UpdateRenderedTileInner(p + new CVec(0, 1));
-			UpdateRenderedTileInner(p + new CVec(1, 1));
+			var c = mc.Location;
+			UpdateRenderedTileInner(c);
+			UpdateRenderedTileInner(c + new CVec(-1, -1));
+			UpdateRenderedTileInner(c + new CVec(0, -1));
+			UpdateRenderedTileInner(c + new CVec(1, -1));
+			UpdateRenderedTileInner(c + new CVec(-1, 0));
+			UpdateRenderedTileInner(c + new CVec(1, 0));
+			UpdateRenderedTileInner(c + new CVec(-1, 1));
+			UpdateRenderedTileInner(c + new CVec(0, 1));
+			UpdateRenderedTileInner(c + new CVec(1, 1));
 		}
 
 		protected override string ChooseRandomVariant(ResourceType t)
