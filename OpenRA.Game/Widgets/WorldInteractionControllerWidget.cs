@@ -160,7 +160,9 @@ namespace OpenRA.Widgets
 						world.AddFrameEndTask(w => w.Add(new FlashTarget(o.TargetActor)));
 						flashed = true;
 					}
-					else if (o.Subject != world.LocalPlayer.PlayerActor && o.TargetLocation != CPos.Zero) // TODO: this filters building placement, but also suppport powers :(
+
+					// TODO: this filters building placement, but also suppport powers :(
+					else if (o.Subject != world.LocalPlayer.PlayerActor && o.TargetLocation != CPos.Zero)
 					{
 						world.AddFrameEndTask(w => w.Add(new MoveFlash(worldRenderer.Position(worldRenderer.Viewport.ViewToWorldPx(mi.Location)), world)));
 						flashed = true;
@@ -198,30 +200,35 @@ namespace OpenRA.Widgets
 		{
 			if (e.Event == KeyInputEvent.Down)
 			{
-				if (Hotkey.FromKeyInput(e) == Game.Settings.Keys.PauseKey && World.LocalPlayer != null) // Disable pausing for spectators
+				var h = Hotkey.FromKeyInput(e);
+				if (h == Game.Settings.Keys.PauseKey && World.LocalPlayer != null) // Disable pausing for spectators
 					World.SetPauseState(!World.Paused);
-				else if (Hotkey.FromKeyInput(e) == Game.Settings.Keys.SelectAllUnitsKey)
+				else if (h == Game.Settings.Keys.SelectAllUnitsKey)
 				{
 					var ownUnitsOnScreen = SelectActorsInBox(World, worldRenderer.Viewport.TopLeft, worldRenderer.Viewport.BottomRight,
 						a => a.Owner == World.RenderPlayer);
 					World.Selection.Combine(World, ownUnitsOnScreen, false, false);
 				}
-				else if (Hotkey.FromKeyInput(e) == Game.Settings.Keys.SelectUnitsByTypeKey)
+				else if (h == Game.Settings.Keys.SelectUnitsByTypeKey)
 				{
-					var selectedTypes = World.Selection.Actors.Where(
-						x => x.Owner == World.RenderPlayer).Select(a => a.Info);
+					var selectedTypes = World.Selection.Actors
+						.Where(x => x.Owner == World.RenderPlayer)
+						.Select(a => a.Info);
+
 					Func<Actor, bool> cond = a => a.Owner == World.RenderPlayer && selectedTypes.Contains(a.Info);
-					IEnumerable<Actor> newSelection = SelectActorsInBox(
-						World, worldRenderer.Viewport.TopLeft, worldRenderer.Viewport.BottomRight, cond); 
+
+					var tl = worldRenderer.Viewport.TopLeft;
+					var br = worldRenderer.Viewport.BottomRight;
+					var newSelection = SelectActorsInBox(World, tl, br, cond);
+
 					if (newSelection.Count() > selectedTypes.Count())
 						Game.Debug("Selected across screen");
 					else
 					{
-						newSelection = World.ActorMap.ActorsInBox(
-							World.Map.Bounds.TopLeftAsCPos().TopLeft,
-							World.Map.Bounds.BottomRightAsCPos().BottomRight).Where(cond);
+						newSelection = World.ActorMap.ActorsInWorld().Where(cond);
 						Game.Debug("Selected across map");
 					}
+
 					World.Selection.Combine(World, newSelection, true, false);
 				}
 			}
