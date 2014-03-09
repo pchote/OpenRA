@@ -8,6 +8,7 @@
  */
 #endregion
 
+using System.Linq;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.RA.Buildings
@@ -19,14 +20,15 @@ namespace OpenRA.Mods.RA.Buildings
 
 	public class BuildingInfluence
 	{
-		Actor[,] influence;
 		Map map;
+		Actor[] influence;
 
 		public BuildingInfluence(World world)
 		{
 			map = world.Map;
+			var s = map.Size;
 
-			influence = new Actor[map.Size.Width, map.Size.Height];
+			influence = new Actor[s.Width * s.Height];
 
 			world.ActorAdded +=	a =>
 			{
@@ -34,9 +36,12 @@ namespace OpenRA.Mods.RA.Buildings
 				if (b == null)
 					return;
 
-				foreach (var u in FootprintUtils.Tiles(a.Info.Name, b.Info, a.Location))
-					if (map.IsInMap(u) && influence[u.X, u.Y] == null)
-						influence[u.X, u.Y] = a;
+				var cells = FootprintUtils.Tiles(a.Info.Name, b.Info, a.Location)
+					.Select(u => new MapCell(map, u));
+
+				foreach (var mc in cells)
+					if (mc.IsInMap && influence[mc.Index] == null)
+						influence[mc.Index] = a;
 			};
 
 			world.ActorRemoved += a =>
@@ -45,18 +50,22 @@ namespace OpenRA.Mods.RA.Buildings
 				if (b == null)
 					return;
 
-				foreach (var u in FootprintUtils.Tiles(a.Info.Name, b.Info, a.Location))
-					if (map.IsInMap(u) && influence[u.X, u.Y] == a)
-						influence[u.X, u.Y] = null;
+				var cells = FootprintUtils.Tiles(a.Info.Name, b.Info, a.Location)
+					.Select(u => new MapCell(map, u));
+
+				foreach (var mc in cells)
+					if (mc.IsInMap && influence[mc.Index] == a)
+						influence[mc.Index] = null;
 			};
 		}
 
-		public Actor GetBuildingAt(CPos cell)
+		public Actor GetBuildingAt(CPos c)
 		{
-			if (!map.IsInMap(cell))
+			var mc = new MapCell(map, c);
+			if (!mc.IsInMap)
 				return null;
 
-			return influence[cell.X, cell.Y];
+			return influence[mc.Index];
 		}
 	}
 }
