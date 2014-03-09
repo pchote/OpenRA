@@ -42,7 +42,7 @@ namespace OpenRA.Traits
 
 		readonly ActorMapInfo info;
 		readonly Map map;
-		InfluenceNode[,] influence;
+		InfluenceNode[] influence;
 
 		List<Actor>[] actors;
 		int rows, cols;
@@ -56,7 +56,9 @@ namespace OpenRA.Traits
 		{
 			this.info = info;
 			map = world.Map;
-			influence = new InfluenceNode[world.Map.Size.Width, world.Map.Size.Height];
+
+			var s = world.Map.Size;
+			influence = new InfluenceNode[s.Width * s.Height];
 
 			cols = world.Map.Size.Width / info.BinSize + 1;
 			rows = world.Map.Size.Height / info.BinSize + 1;
@@ -71,20 +73,22 @@ namespace OpenRA.Traits
 
 		public IEnumerable<Actor> GetUnitsAt(CPos a)
 		{
-			if (!map.IsInMap(a))
+			var mc = new MapCell(map, a);
+			if (!mc.IsInMap)
 				yield break;
 
-			for (var i = influence[a.X, a.Y]; i != null; i = i.Next)
+			for (var i = influence[mc.Index]; i != null; i = i.Next)
 				if (!i.Actor.Destroyed)
 					yield return i.Actor;
 		}
 
 		public IEnumerable<Actor> GetUnitsAt(CPos a, SubCell sub)
 		{
-			if (!map.IsInMap(a))
+			var mc = new MapCell(map, a);
+			if (!mc.IsInMap)
 				yield break;
 
-			for (var i = influence[a.X, a.Y]; i != null; i = i.Next)
+			for (var i = influence[mc.Index]; i != null; i = i.Next)
 				if (!i.Actor.Destroyed && (i.SubCell == sub || i.SubCell == SubCell.FullCell))
 					yield return i.Actor;
 		}
@@ -107,12 +111,14 @@ namespace OpenRA.Traits
 
 		public bool AnyUnitsAt(CPos a)
 		{
-			return influence[a.X, a.Y] != null;
+			var mc = new MapCell(map, a);
+			return influence[mc.Index] != null;
 		}
 
 		public bool AnyUnitsAt(CPos a, SubCell sub)
 		{
-			for (var i = influence[a.X, a.Y]; i != null; i = i.Next)
+			var mc = new MapCell(map, a);
+			for (var i = influence[mc.Index]; i != null; i = i.Next)
 				if (i.SubCell == sub || i.SubCell == SubCell.FullCell)
 					return true;
 
@@ -122,13 +128,19 @@ namespace OpenRA.Traits
 		public void AddInfluence(Actor self, IOccupySpace ios)
 		{
 			foreach (var c in ios.OccupiedCells())
-				influence[c.First.X, c.First.Y] = new InfluenceNode { Next = influence[c.First.X, c.First.Y], SubCell = c.Second, Actor = self };
+			{
+				var mc = new MapCell(map, c.First);
+				influence[mc.Index] = new InfluenceNode { Next = influence[mc.Index], SubCell = c.Second, Actor = self };
+			}
 		}
 
 		public void RemoveInfluence(Actor self, IOccupySpace ios)
 		{
 			foreach (var c in ios.OccupiedCells())
-				RemoveInfluenceInner(ref influence[c.First.X, c.First.Y], self);
+			{
+				var mc = new MapCell(map, c.First);
+				RemoveInfluenceInner(ref influence[mc.Index], self);
+			}
 		}
 
 		void RemoveInfluenceInner(ref InfluenceNode influenceNode, Actor toRemove)
