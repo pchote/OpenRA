@@ -511,4 +511,43 @@ namespace OpenRA
 			}
 		}
 	}
+
+	public struct MapCell
+	{
+		public readonly int U, V;
+		readonly Map map;
+
+		public MapCell(Map map, int u, int v)
+		{
+			this.map = map;
+			U = u;
+			V = v;
+		}
+
+		public MapCell(Map map, CPos c)
+		{
+			this.map = map;
+			U = c.X;
+			V = c.Y;
+		}
+
+		public int Index { get { return U + map.Size.Width * V; } }
+		public CPos Location { get { return new CPos(U, V); } }
+		public bool IsInMap { get { return map.IsInMap(U, V); } }
+		public TileReference<ushort, byte> Tile { get { return map.MapTiles.Value[U, V]; } }
+		public TileReference<byte, byte> Resource { get { return map.MapResources.Value[U, V]; } }
+		public MapCell WithOffset(int du, int dv) { return new MapCell(map, U + du, V + dv); }
+
+		public static bool operator ==(MapCell me, MapCell other) { return (me.U == other.U && me.V == other.V && me.map == other.map); }
+		public static bool operator !=(MapCell me, MapCell other) { return !(me == other); }
+
+		public override bool Equals(object obj)
+		{
+			var o = obj as MapCell?;
+			return o != null && o == this;
+		}
+
+		public override int GetHashCode() { return U.GetHashCode() ^ V.GetHashCode(); }
+		public override string ToString() { return "{0},{1}".F(U, V); }
+	}
 }
