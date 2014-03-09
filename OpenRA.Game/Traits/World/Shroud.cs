@@ -64,22 +64,26 @@ namespace OpenRA.Traits
 			Hash = Sync.hash_player(self.Owner) + self.World.WorldTick * 3;
 		}
 
-		static IEnumerable<MapCell> FindVisibleTiles(World world, CPos position, WRange radius)
+		static IEnumerable<MapCell> FindVisibleTiles(World world, CPos c, WRange r)
 		{
-			// TODO: Make this fast again
-			var r = (radius.Range + 1023) / 1024;
-			var min = position - new CVec(r, r);
-			var max = position + new CVec(r, r);
+			var cr = (r.Range + 1023) / 1024;
+			var rSq = r.Range * r.Range;
+			var pos = world.CenterOfCell(c);
 
-			var circleArea = radius.Range * radius.Range;
-			var pos = world.CenterOfCell(position);
-			for (var j = min.Y; j <= max.Y; j++)
+			for (var j = -cr; j <= cr; j++)
 			{
-				for (var i = min.X; i <= max.X; i++)
+				for (var i = -cr; i <= cr; i++)
 				{
-					var c = new CPos(i, j);
-					var mc = new MapCell(world.Map, c);
-					if (mc.IsInMap && circleArea >= (world.CenterOfCell(c) - pos).LengthSquared)
+					var n = new CPos(c.X + i, c.Y + j);
+
+					// Exclude cells outside the visible range
+					var dp = world.CenterOfCell(n) - pos;
+					if (dp.HorizontalLengthSquared > rSq)
+						continue;
+
+					// Exclude cells outside the map
+					var mc = new MapCell(world.Map, n);
+					if (mc.IsInMap)
 						yield return mc;
 				}
 			}
