@@ -52,10 +52,10 @@ namespace OpenRA.Mods.RA
 
 	class MovementClassDomainIndex
 	{
-		Rectangle bounds;
+		Map map;
 
 		uint movementClass;
-		int[,] domains;
+		int[] domains;
 		Dictionary<int, HashSet<int>> transientConnections;
 
 		// Each terrain has an offset corresponding to its location in a
@@ -64,9 +64,9 @@ namespace OpenRA.Mods.RA
 
 		public MovementClassDomainIndex(World world, uint movementClass)
 		{
-			bounds = world.Map.Bounds;
+			map = world.Map;
 			this.movementClass = movementClass;
-			domains = new int[(bounds.Width + bounds.X), (bounds.Height + bounds.Y)];
+			domains = new int[map.Size.Width * map.Size.Height];
 			transientConnections = new Dictionary<int, HashSet<int>>();
 
 			terrainOffsets = new Dictionary<string, int>();
@@ -82,41 +82,45 @@ namespace OpenRA.Mods.RA
 
 		public bool IsPassable(CPos p1, CPos p2)
 		{
-			if (!bounds.Contains(p1.X, p1.Y) || !bounds.Contains(p2.X, p2.Y))
+			var mc1 = new MapCell(map, p1);
+			var mc2 = new MapCell(map, p2);
+
+			if (!mc1.IsInMap || !mc2.IsInMap)
 				return false;
 
-			if (domains[p1.X, p1.Y] == domains[p2.X, p2.Y])
+			if (domains[mc1.Index] == domains[mc2.Index])
 				return true;
 
 			// Even though p1 and p2 are in different domains, it's possible
 			// that some dynamic terrain (i.e. bridges) may connect them.
-			return HasConnection(GetDomainOf(p1), GetDomainOf(p2));
+			return HasConnection(domains[mc1.Index], domains[mc2.Index]);
 		}
 
 		public void UpdateCells(World world, HashSet<CPos> dirtyCells)
 		{
 			var neighborDomains = new List<int>();
+			var dirtyMap = dirtyCells.Select(c => new MapCell(map, c));
 
-			foreach (var cell in dirtyCells)
+			foreach (var mc in dirtyMap)
 			{
 				// Select all neighbors inside the map boundries
-				var neighbors = CVec.directions.Select(d => d + cell)
-					.Where(c => bounds.Contains(c.X, c.Y));
+				var neighbors = CVec.directions
+					.Select(d => new MapCell(map, d + mc.Location))
+					.Where(e => e.IsInMap);
 
 				var found = false;
-				foreach (var neighbor in neighbors)
+				foreach (var n in neighbors)
 				{
-					if (!dirtyCells.Contains(neighbor))
+					if (!dirtyMap.Contains(n))
 					{
-						var neighborDomain = GetDomainOf(neighbor);
-
-						var match = CanTraverseTile(world, neighbor);
-						if (match) neighborDomains.Add(neighborDomain);
+						var nd = domains[n.Index];
+						if (CanTraverseTile(world, n))
+							neighborDomains.Add(nd);
 
 						// Set ourselves to the first non-dirty neighbor we find.
 						if (!found)
 						{
-							SetDomain(cell, neighborDomain);
+							domains[mc.Index] = nd;
 							found = true;
 						}
 					}
@@ -124,20 +128,8 @@ namespace OpenRA.Mods.RA
 			}
 
 			foreach (var c1 in neighborDomains)
-			{
 				foreach (var c2 in neighborDomains)
 					CreateConnection(c1, c2);
-			}
-		}
-
-		int GetDomainOf(CPos p)
-		{
-			return domains[p.X, p.Y];
-		}
-
-		void SetDomain(CPos p, int domain)
-		{
-			domains[p.X, p.Y] = domain;
 		}
 
 		bool HasConnection(int d1, int d2)
@@ -157,6 +149,7 @@ namespace OpenRA.Mods.RA
 				{
 					if (neighbor == d2)
 						return true;
+
 					if (!visited.Contains(neighbor))
 						toProcess.Push(neighbor);
 				}
@@ -178,9 +171,9 @@ namespace OpenRA.Mods.RA
 			transientConnections[d2].Add(d1);
 		}
 
-		bool CanTraverseTile(World world, CPos p)
+		bool CanTraverseTile(World world, MapCell mc)
 		{
-			var currentTileType = WorldUtils.GetTerrainType(world, p);
+			var currentTileType = WorldUtils.GetTerrainType(world, mc.Location);
 			var terrainOffset = terrainOffsets[currentTileType];
 			return (movementClass & (1 << terrainOffset)) > 0;
 		}
@@ -188,14 +181,13 @@ namespace OpenRA.Mods.RA
 		void BuildDomains(World world)
 		{
 			var timer = new Stopwatch();
-			var map = world.Map;
 
 			var domain = 1;
 
-			var visited = new bool[(bounds.Width + bounds.X), (bounds.Height + bounds.Y)];
+			var visited = new bool[map.Size.Width * map.Size.Height];
 
-			var toProcess = new Queue<CPos>();
-			toProcess.Enqueue(new CPos(map.Bounds.Left, map.Bounds.Top));
+			var toProcess = new Queue<MapCell>();
+			toProcess.Enqueue(new MapCell(map, map.Bounds.Left, map.Bounds.Top));
 
 			// Flood-fill over each domain
 			while (toProcess.Count != 0)
@@ -204,10 +196,10 @@ namespace OpenRA.Mods.RA
 
 				// Technically redundant with the check in the inner loop, but prevents
 				// ballooning the domain counter.
-				if (visited[start.X, start.Y])
+				if (visited[start.Index])
 					continue;
 
-				var domainQueue = new Queue<CPos>();
+				var domainQueue = new Queue<MapCell>();
 				domainQueue.Enqueue(start);
 
 				var currentPassable = CanTraverseTile(world, start);
@@ -217,7 +209,7 @@ namespace OpenRA.Mods.RA
 				while (domainQueue.Count != 0)
 				{
 					var n = domainQueue.Dequeue();
-					if (visited[n.X, n.Y])
+					if (visited[n.Index])
 						continue;
 
 					var candidatePassable = CanTraverseTile(world, n);
@@ -227,12 +219,12 @@ namespace OpenRA.Mods.RA
 						continue;
 					}
 
-					visited[n.X, n.Y] = true;
-					SetDomain(n, domain);
+					visited[n.Index] = true;
+					domains[n.Index] = domain;
 
 					// Don't crawl off the map, or add already-visited cells
-					var neighbors = CVec.directions.Select(d => n + d)
-						.Where(p => bounds.Contains(p.X, p.Y) && !visited[p.X, p.Y]);
+					var neighbors = CVec.directions.Select(d => new MapCell(map, n.Location + d))
+						.Where(mc => mc.IsInMap && !visited[mc.Index]);
 
 					foreach (var neighbor in neighbors)
 						domainQueue.Enqueue(neighbor);
