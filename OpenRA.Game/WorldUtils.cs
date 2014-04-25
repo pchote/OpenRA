@@ -143,7 +143,7 @@ namespace OpenRA
 			if (w.Map.TileShape == TileShape.Rectangle)
 				return new WPos(1024 * c.X + 512, 1024 * c.Y + 512, 0);
 
-			return new WPos(512 * (c.X + c.Y + 1), 512 * (c.X - c.Y + 1), 0);
+			return new WPos(512 * (c.X + c.Y + 1), 512 * (c.Y - c.X + 1), 0);
 		}
 
 		public static CPos CellContaining(this World w, WPos pos)
@@ -151,8 +151,8 @@ namespace OpenRA
 			if (w.Map.TileShape == TileShape.Rectangle)
 				return new CPos(pos.X / 1024, pos.Y / 1024);
 
-			var u = (pos.X + pos.Y - 512) / 1024;
-			var v = (pos.X - pos.Y + 512) / 1024;
+			var u = (pos.X - pos.Y - 512) / 1024;
+			var v = (pos.Y + pos.X - 512) / 1024;
 			return new CPos(u, v);
 		}
 

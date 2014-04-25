@@ -542,7 +542,7 @@ namespace OpenRA
 			else
 			{
 				U = (c.X + c.Y) / 2;
-				V = c.X - c.Y;
+				V = c.Y - c.X;
 			}
 		}
 
@@ -554,8 +554,8 @@ namespace OpenRA
 				if (map.TileShape == TileShape.Rectangle)
 					return new CPos(U, V);
 
-				var x = U + (V + 1) / 2;
-				return new CPos(x, x - V);
+				var x = U - (((V & 1) == 1 ? V : V + 1) / 2);
+				return new CPos(x, x + V);
 			}
 		}
 
