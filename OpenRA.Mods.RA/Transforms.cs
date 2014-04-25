@@ -20,7 +20,7 @@ namespace OpenRA.Mods.RA
 	class TransformsInfo : ITraitInfo
 	{
 		[ActorReference] public readonly string IntoActor = null;
-		public readonly int2 Offset = int2.Zero;
+		public readonly CVec Offset = CVec.Zero;
 		public readonly int Facing = 96;
 		public readonly string[] TransformSounds = {};
 		public readonly string[] NoTransformSounds = {};
@@ -52,7 +52,7 @@ namespace OpenRA.Mods.RA
 			if (b != null && b.Locked)
 				return false;
 
-			return (bi == null || self.World.CanPlaceBuilding(Info.IntoActor, bi, self.Location + (CVec)Info.Offset, self));
+			return (bi == null || self.World.CanPlaceBuilding(Info.IntoActor, bi, self.Location + Info.Offset, self));
 		}
 
 		public IEnumerable<IOrderTargeter> Orders
@@ -89,7 +89,7 @@ namespace OpenRA.Mods.RA
 			if (rb != null && self.Info.Traits.Get<RenderBuildingInfo>().HasMakeAnimation)
 				self.QueueActivity(new MakeAnimation(self, true, () => rb.PlayCustomAnim(self, "make")));
 
-			self.QueueActivity(new Transform(self, Info.IntoActor) { Offset = (CVec)Info.Offset, Facing = Info.Facing, Sounds = Info.TransformSounds });
+			self.QueueActivity(new Transform(self, Info.IntoActor) { Offset = Info.Offset, Facing = Info.Facing, Sounds = Info.TransformSounds });
 		}
 
 		public void ResolveOrder( Actor self, Order order )
