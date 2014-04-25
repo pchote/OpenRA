@@ -40,7 +40,7 @@ namespace OpenRA.Mods.RA.Buildings
 			var building = self.Info.Traits.Get<BuildingInfo>();
 			var width = building.Dimensions.X;
 			var bibOffset = building.Dimensions.Y - 1;
-			var centerOffset = FootprintUtils.CenterOffset(building);
+			var centerOffset = FootprintUtils.CenterOffset(self.World, building);
 			var location = self.Location;
 			tiles = new List<AnimationWithOffset>();
 
@@ -53,16 +53,17 @@ namespace OpenRA.Mods.RA.Buildings
 				var index = i;
 				var anim = new Animation(rs.GetImage(self));
 				var cellOffset = new CVec(i % width, i / width + bibOffset);
+				var cell = location + cellOffset;
 
 				// Some mods may define terrain-specific bibs
-				var terrain = self.World.GetTerrainType(location + cellOffset);
+				var terrain = self.World.GetTerrainType(cell);
 				var testSequence = info.Sequence + "-" + terrain;
 				var sequence = anim.HasSequence(testSequence) ? testSequence : info.Sequence;
 				anim.PlayFetchIndex(sequence, () => index);
 				anim.IsDecoration = true;
 
 				// Z-order is one set to the top of the footprint
-				var offset = cellOffset.ToWVec() - centerOffset;
+				var offset = self.World.CenterOfCell(cell) - self.World.CenterOfCell(location) - centerOffset;
 				tiles.Add(new AnimationWithOffset(anim, () => offset, null, -(offset.Y + centerOffset.Y + 512)));
 			}
 		}

@@ -60,7 +60,7 @@ namespace OpenRA.Mods.RA
 				{
 					new CenterPositionInit(w.CenterOfCell(startPos) + new WVec(WRange.Zero, WRange.Zero, altitude)),
 					new OwnerInit(self.Owner),
-					new FacingInit(Util.GetFacing(order.TargetLocation - startPos, 0))
+					new FacingInit(w.FacingBetween(startPos, order.TargetLocation, 0))
 				});
 
 				a.CancelActivity();

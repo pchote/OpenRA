@@ -147,6 +147,11 @@ namespace OpenRA
 			return new CPos(pos.X / 1024, pos.Y / 1024);
 		}
 
+		public static int FacingBetween(this World world, CPos cell, CPos towards, int fallbackfacing)
+		{
+			return Util.GetFacing(world.CenterOfCell(towards) - world.CenterOfCell(cell), fallbackfacing);
+		}
+
 		public static bool HasVoices(this Actor a)
 		{
 			var selectable = a.Info.Traits.GetOrDefault<SelectableInfo>();

@@ -44,8 +44,6 @@ namespace OpenRA
 		public int LengthSquared { get { return X * X + Y * Y; } }
 		public int Length { get { return (int)Math.Sqrt(LengthSquared); } }
 
-		public WVec ToWVec() { return new WVec(X*1024, Y*1024, 0); }
-
 		public CVec Clamp(Rectangle r)
 		{
 			return new CVec(

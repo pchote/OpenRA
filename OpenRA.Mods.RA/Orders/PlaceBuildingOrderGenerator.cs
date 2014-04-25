@@ -104,7 +104,7 @@ namespace OpenRA.Mods.RA.Orders
 					initialized = true;
 				}
 
-				var offset = world.CenterOfCell(topLeft) + FootprintUtils.CenterOffset(BuildingInfo) - WPos.Zero;
+				var offset = world.CenterOfCell(topLeft) + FootprintUtils.CenterOffset(world, BuildingInfo) - WPos.Zero;
 				foreach (var r in preview)
 					r.OffsetBy(offset).Render(wr);
 

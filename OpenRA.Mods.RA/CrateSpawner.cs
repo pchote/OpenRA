@@ -95,7 +95,7 @@ namespace OpenRA.Mods.RA
 					{
 						new CenterPositionInit(w.CenterOfCell(startPos) + new WVec(WRange.Zero, WRange.Zero, altitude)),
 						new OwnerInit(w.WorldActor.Owner),
-						new FacingInit(Util.GetFacing(p - startPos, 0))
+						new FacingInit(w.FacingBetween(startPos, p, 0))
 					});
 
 					plane.CancelActivity();
