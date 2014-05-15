@@ -41,7 +41,7 @@ Players:
 
 Actors:
 	Actor0: mpspawn
-		Location: 5,0
+		Location: 5,20
 		Owner: Neutral
 
 Smudges:
