@@ -520,6 +520,10 @@
     <Compile Include="Widgets\Logic\InstallMusicLogic.cs" />
     <Compile Include="Render\WithActiveAnimation.cs" />
     <Compile Include="SupportPowers\SpawnActorPower.cs" />
+    <Compile Include="Widgets\ProductionPaletteWidget.cs" />
+    <Compile Include="Widgets\ProductionTabsWidget.cs" />
+    <Compile Include="Widgets\ProductionTypeButtonWidget.cs" />
+    <Compile Include="Widgets\Logic\ProductionTooltipLogic.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenRA.Game\OpenRA.Game.csproj">
