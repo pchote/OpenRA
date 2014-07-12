@@ -198,7 +198,7 @@ namespace OpenRA.Mods.RA.Widgets
 				i++;
 			}
 
-			eventBounds = icons.Keys.Aggregate(Rectangle.Union);
+			eventBounds = icons.Any() ? icons.Keys.Aggregate(Rectangle.Union) : Rectangle.Empty;
 		}
 
 		public override void Draw()
