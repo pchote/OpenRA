@@ -5,6 +5,9 @@ chrome-allies: chrome-allies.png
 	moneybin: 192,0,320,31
 	radar: 297,31,210,222
 	tooltip-bg: 0,288,272,136
+	production-tab-normal: 44,53,33,41
+	production-tab-ready: 75,53,33,41
+	production-tab-selected: 108,53,33,41
 
 power-allies: chrome-allies.png
 	power-indicator: 187,4,4,7
@@ -42,6 +45,9 @@ chrome-soviet: chrome-soviet.png
 	moneybin: 192,0,320,31
 	radar: 297,31,210,222
 	tooltip-bg: 0,288,272,136
+	production-tab-normal: 44,53,33,41
+	production-tab-ready: 75,53,33,41
+	production-tab-selected: 108,53,33,41
 
 power-soviet: chrome-soviet.png
 	power-indicator: 187,4,4,7
