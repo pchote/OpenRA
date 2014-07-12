@@ -19,13 +19,32 @@ namespace OpenRA.Mods.RA.Widgets.Logic
 		public GameTimerLogic(Widget widget, OrderManager orderManager, World world)
 		{
 			var timer = widget.GetOrNull<LabelWidget>("GAME_TIMER");
-			if (timer != null)
-				timer.GetText = () => WidgetUtils.FormatTime(world.WorldTick);
-
 			var status = widget.GetOrNull<LabelWidget>("GAME_TIMER_STATUS");
+			var startTick = Ui.LastTickTime;
+
+			if (timer != null)
+			{
+				timer.GetText = () => 
+				{
+					if (status == null
+						&& (world.Paused || world.Timestep != Game.Timestep)
+						&& (Ui.LastTickTime - startTick) / 1000 % 2 == 0)
+					{
+						if (world.Paused || world.Timestep == 0)
+							return "Paused";
+
+						if (world.Timestep == 1)
+							return "Max Speed";
+
+						return "{0:F1}x Speed".F(Game.Timestep * 1f / world.Timestep);
+					}
+
+					return WidgetUtils.FormatTime(world.WorldTick);
+				};
+			}
+
 			if (status != null)
 			{
-				var startTick = Ui.LastTickTime;
 				// Blink the status line
 				status.IsVisible = () => (world.Paused || world.Timestep != Game.Timestep)
 					&& (Ui.LastTickTime - startTick) / 1000 % 2 == 0;
