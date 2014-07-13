@@ -8,7 +8,66 @@ chrome-allies: chrome-allies.png
 	production-tab-normal: 44,53,33,41
 	production-tab-ready: 75,53,33,41
 	production-tab-selected: 108,53,33,41
+	background-top: 272,165,240,291
+	background-iconrow: 272,456,240,48
+	background-bottom: 272,504,240,8
 
+production-tab-allies: chrome-allies.png
+	background: 29,29,28,29
+production-tab-allies-hover: chrome-allies.png
+	background: 29,0,28,29
+production-tab-allies-pressed: chrome-allies.png
+	background: 29,29,28,29
+production-tab-allies-highlighted: chrome-allies.png
+	background: 57,29,28,29
+production-tab-allies-highlighted-hover: chrome-allies.png
+	background: 57,0,28,29
+production-tab-allies-highlighted-pressed: chrome-allies.png
+	background: 57,29,28,29
+production-tab-allies-disabled: chrome-allies.png
+	background: 85,0,28,29
+production-tab-allies-highlighted-disabled: chrome-allies.png
+	background: 85,0,28,29
+
+production-icons: chrome.png
+	building: 384,0,16,16
+	building-disabled: 384,16,16,16
+	building-alert: 384,32,16,16
+	defense: 400,0,16,16
+	defense-disabled: 400,16,16,16
+	defense-alert: 400,32,16,16
+	infantry: 416,0,16,16
+	infantry-disabled: 416,16,16,16
+	infantry-alert: 416,32,16,16
+	vehicle: 432,0,16,16
+	vehicle-disabled: 432,16,16,16
+	vehicle-alert: 432,32,16,16
+	plane: 448,0,16,16
+	plane-disabled: 448,16,16,16
+	plane-alert: 448,32,16,16
+	ship: 496,48,16,16
+	ship-disabled: 496,64,16,16
+	ship-active: 496,80,16,16
+
+order-icons: chrome.png
+	options: 480,0,16,16
+	options-disabled: 480,16,16,16
+	options-active: 480,32,16,16
+	diplomacy: 464,0,16,16
+	diplomacy-disabled: 464,16,16,16
+	diplomacy-active: 464,32,16,16
+	sell: 496,0,16,16
+	sell-disabled: 496,16,16,16
+	sell-active: 496,32,16,16
+	repair: 384,48,16,16
+	repair-disabled: 384,64,16,16
+	repair-active: 384,80,16,16
+	beacon: 400,48,16,16
+	beacon-disabled: 400,64,16,16
+	beacon-active: 400,80,16,16
+	power: 480,48,16,16
+	power-disabled: 480,64,16,16
+	power-active: 480,80,16,16
 power-allies: chrome-allies.png
 	power-indicator: 187,4,4,7
 
@@ -186,20 +245,6 @@ strategic: strategic.png
 	critical_unowned: 0,32,32,32
 	enemy_owned: 32,32,32,32
 	player_owned: 96,0,32,32
-
-order-icons: buttons.png
-	sell: 0,0,34,28
-	sell-disabled: 68,0,34,28
-	sell-active: 34,0,34,28
-	repair: 0,28,34,28
-	repair-disabled: 68,28,34,28
-	repair-active: 34,28,34,28
-	power: 0,56,34,28
-	power-disabled: 68,56,34,28
-	power-active: 34,56,34,28
-	beacon: 0,84,34,28
-	beacon-disabled: 68,84,34,28
-	beacon-active: 34,84,34,28
 
 flags: buttons.png
 	allies: 30,112,30,15

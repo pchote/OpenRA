@@ -29,11 +29,12 @@ namespace OpenRA.Mods.RA.Widgets.Logic
 			gameRoot = Ui.Root.Get("INGAME_ROOT");
 			playerRoot = gameRoot.Get("PLAYER_ROOT");
 
-			InitRootWidgets();
 			if (world.LocalPlayer == null)
 				InitObserverWidgets();
 			else
 				InitPlayerWidgets();
+
+			InitRootWidgets();
 		}
 
 		void InitRootWidgets()
@@ -110,7 +111,7 @@ namespace OpenRA.Mods.RA.Widgets.Logic
 				objectivesButton.Visible = true;
 				objectivesButton.OnClick += () => objectivesWidget.Visible ^= true;
 			}
-
+			/*
 			var radarActive = false;
 			var binState = RadarBinState.Closed;
 			var radarBin = playerWidgets.Get<SlidingContainerWidget>("INGAME_RADAR_BIN");
@@ -160,6 +161,7 @@ namespace OpenRA.Mods.RA.Widgets.Logic
 						InitObserverWidgets();
 					});
 			};
+*/
 		}
 	}
 }

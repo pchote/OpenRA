@@ -31,7 +31,7 @@ namespace OpenRA.Mods.RA
 
 		public void SelectionChanged()
 		{
-			var palette = Ui.Root.GetOrNull<BuildPaletteWidget>("INGAME_BUILD_PALETTE");
+			var palette = Ui.Root.GetOrNull<ProductionPaletteWidget>("PRODUCTION_PALETTE");
 			if (palette == null)
 				return;
 
@@ -41,7 +41,7 @@ namespace OpenRA.Mods.RA
 
 			if (perqueue != null)
 			{
-				palette.SetCurrentTab(perqueue.TraitsImplementing<ProductionQueue>().First(q => q.Enabled));
+				palette.CurrentQueue = perqueue.TraitsImplementing<ProductionQueue>().First(q => q.Enabled);
 				return;
 			}
 
@@ -54,8 +54,8 @@ namespace OpenRA.Mods.RA
 			if (types.Length == 0)
 				return;
 
-			palette.SetCurrentTab(world.LocalPlayer.PlayerActor.TraitsImplementing<ProductionQueue>()
-				.FirstOrDefault(q => q.Enabled && types.Contains(q.Info.Type)));
+			palette.CurrentQueue = world.LocalPlayer.PlayerActor.TraitsImplementing<ProductionQueue>()
+				.FirstOrDefault(q => q.Enabled && types.Contains(q.Info.Type));
 		}
 	}
 }
