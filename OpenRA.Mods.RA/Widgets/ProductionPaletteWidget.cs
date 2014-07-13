@@ -54,6 +54,7 @@ namespace OpenRA.Mods.RA.Widgets
 		readonly OrderManager orderManager;
 
 		Lazy<TooltipContainerWidget> tooltipContainer;
+		Lazy<Logic.IngamePowerCounterLogic> powerCounter;
 		ProductionQueue currentQueue;
 
 		public ProductionQueue CurrentQueue
@@ -78,6 +79,8 @@ namespace OpenRA.Mods.RA.Widgets
 			this.worldRenderer = worldRenderer;
 			tooltipContainer = Exts.Lazy(() =>
 				Ui.Root.Get<TooltipContainerWidget>(TooltipContainer));
+			powerCounter = Exts.Lazy(() =>
+				(Logic.IngamePowerCounterLogic)Ui.Root.Get("PLAYER_WIDGETS").Get<LabelWidget>("POWER").LogicObject);
 
 			cantBuild = new Animation(world, "clock");
 			cantBuild.PlayFetchIndex("idle", () => 0);
@@ -104,12 +107,42 @@ namespace OpenRA.Mods.RA.Widgets
 		{
 			if (TooltipContainer != null)
 				tooltipContainer.Value.RemoveTooltip();
+
+			UpdateExpectedPowerDelta(null);
+		}
+
+		string lastEPDActorName;
+		int lastEPDActorPower;
+
+		void UpdateExpectedPowerDelta(ProductionIcon icon)
+		{
+			var powerDelta = 0;
+			var actorName = icon == null ? null : icon.Name;
+
+			if (actorName != lastEPDActorName)
+			{
+				lastEPDActorName = actorName;
+
+				if (actorName != null)
+				{
+					var info = this.World.Map.Rules.Actors[actorName];
+					var bi = info.Traits.GetOrDefault<BuildingInfo>();
+					lastEPDActorPower = bi != null ? bi.Power : 0;
+				}
+			}
+
+			if (icon != null)// && icon.Queued.Count > 0 && icon.Queued[0].Done)
+				powerDelta = lastEPDActorPower;
+
+			powerCounter.Value.SetPowerDelta(powerDelta);
 		}
 
 		public override bool HandleMouseInput(MouseInput mi)
 		{
 			var icon = icons.Where(i => i.Key.Contains(mi.Location))
 				.Select(i => i.Value).FirstOrDefault();
+
+			UpdateExpectedPowerDelta(icon);
 
 			if (mi.Event == MouseInputEvent.Move)
 				TooltipActor = icon != null ? icon.Name : null;
