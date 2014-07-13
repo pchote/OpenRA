@@ -8,6 +8,9 @@
  */
 #endregion
 
+#define TEST2
+
+using System;
 using System.Drawing;
 using System.Linq;
 using OpenRA.Mods.RA;
@@ -16,7 +19,7 @@ using OpenRA.Mods.RA.Widgets;
 using OpenRA.Traits;
 using OpenRA.Widgets;
 
-namespace OpenRA.Mods.Cnc.Widgets.Logic
+namespace OpenRA.Mods.RA.Widgets.Logic
 {
 	public class IngameRadarDisplayLogic
 	{
@@ -55,13 +58,65 @@ namespace OpenRA.Mods.Cnc.Widgets.Logic
 
 	public class IngamePowerCounterLogic
 	{
+		int powerDelta;
+		#if TEST1
+		int deltaTimestamp;
+		#endif
+
 		[ObjectCreator.UseCtor]
 		public IngamePowerCounterLogic(Widget widget, World world)
 		{
 			var powerManager = world.LocalPlayer.PlayerActor.Trait<PowerManager>();
 			var power = widget.Get<LabelWidget>("POWER");
+			var defaultColor = power.GetColor();
+			var color = defaultColor;
 
-			power.GetText = () => powerManager.PowerProvided == 1000000 ? "inf" : powerManager.ExcessPower.ToString();
+			power.GetText = () =>
+			{
+				if (powerManager.PowerProvided >= 1000000)
+					return "inf";
+
+				#if TEST1
+				var time = (Environment.TickCount - deltaTimestamp).Clamp(0, 100);
+				var value = powerManager.ExcessPower + (powerDelta * time / 100);
+				var finalValue = powerManager.ExcessPower + powerDelta;
+
+				color = finalValue >= 0 ? (powerDelta <= 0 ? defaultColor : Color.Green) : Color.Red;
+
+				return value.ToString();
+				#endif
+
+				#if TEST2
+				if (powerDelta != 0)
+				{
+					var currentValue = powerManager.ExcessPower;
+					var finalValue = currentValue + powerDelta;
+
+					if (currentValue >= 0 && finalValue < 0)
+						color = Color.Red;
+					else if (currentValue < 0 && finalValue >= 0)
+						color = Color.Green;
+					else
+						color = defaultColor;
+
+					return string.Format("{0} → {1}", powerManager.ExcessPower, finalValue);
+				}
+				return powerManager.ExcessPower.ToString();
+				#endif
+			};
+
+			power.GetColor = () => color;
+		}
+
+		public void SetPowerDelta(int delta)
+		{
+			if (delta == powerDelta)
+				return;
+
+			powerDelta = delta;
+			#if TEST1
+			deltaTimestamp = Environment.TickCount;
+			#endif
 		}
 	}
 
