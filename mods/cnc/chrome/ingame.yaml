@@ -389,6 +389,7 @@ Container@PLAYER_WIDGETS:
 			Y: 287
 			TooltipContainer: TOOLTIP_CONTAINER
 			ReadyText: Ready
+			ReadyTextStyle: Blinking
 			HoldText: On Hold
 		ProductionTabs@PRODUCTION_TABS:
 			Logic: ProductionTabsLogic
