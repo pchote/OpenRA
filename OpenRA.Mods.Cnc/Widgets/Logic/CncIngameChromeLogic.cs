@@ -70,64 +70,6 @@ namespace OpenRA.Mods.Cnc.Widgets.Logic
 			// Real player
 			var playerWidgets = Game.LoadWidget(world, "PLAYER_WIDGETS", playerRoot, new WidgetArgs());
 			playerWidgets.IsVisible = () => true;
-
-			var sidebarRoot = playerWidgets.Get("SIDEBAR_BACKGROUND");
-			var powerManager = world.LocalPlayer.PlayerActor.Trait<PowerManager>();
-			var playerResources = world.LocalPlayer.PlayerActor.Trait<PlayerResources>();
-			sidebarRoot.Get<LabelWidget>("CASH").GetText = () =>
-				"${0}".F(playerResources.DisplayCash + playerResources.DisplayResources);
-
-			playerWidgets.Get<ButtonWidget>("OPTIONS_BUTTON").OnClick = OptionsClicked;
-
-			var radarEnabled = false;
-			var cachedRadarEnabled = false;
-			sidebarRoot.Get<RadarWidget>("RADAR_MINIMAP").IsEnabled = () => radarEnabled;
-
-			var sidebarTicker = playerWidgets.Get<LogicTickerWidget>("SIDEBAR_TICKER");
-			sidebarTicker.OnTick = () =>
-			{
-				// Update radar bin
-				radarEnabled = world.ActorsWithTrait<ProvidesRadar>()
-					.Any(a => a.Actor.Owner == world.LocalPlayer && a.Trait.IsActive);
-
-				if (radarEnabled != cachedRadarEnabled)
-					Sound.PlayNotification(world.Map.Rules, null, "Sounds", radarEnabled ? "RadarUp" : "RadarDown", null);
-				cachedRadarEnabled = radarEnabled;
-
-				// Switch to observer mode after win/loss
-				if (world.LocalPlayer.WinState != WinState.Undefined)
-					Game.RunAfterTick(() =>
-					{
-						playerRoot.RemoveChildren();
-						InitObserverWidgets(world, playerRoot);
-					});
-			};
-
-			var siloBar = playerWidgets.Get<ResourceBarWidget>("SILOBAR");
-			siloBar.GetProvided = () => playerResources.ResourceCapacity;
-			siloBar.GetUsed = () => playerResources.Resources;
-			siloBar.TooltipFormat = "Silo Usage: {0}/{1}";
-			siloBar.GetBarColor = () =>
-			{
-				if (playerResources.Resources == playerResources.ResourceCapacity)
-					return Color.Red;
-				if (playerResources.Resources >= 0.8 * playerResources.ResourceCapacity)
-					return Color.Orange;
-				return Color.LimeGreen;
-			};
-
-			var powerBar = playerWidgets.Get<ResourceBarWidget>("POWERBAR");
-			powerBar.GetProvided = () => powerManager.PowerProvided;
-			powerBar.GetUsed = () => powerManager.PowerDrained;
-			powerBar.TooltipFormat = "Power Usage: {0}/{1}";
-			powerBar.GetBarColor = () =>
-			{
-				if (powerManager.PowerState == PowerState.Critical)
-					return Color.Red;
-				if (powerManager.PowerState == PowerState.Low)
-					return Color.Orange;
-				return Color.LimeGreen;
-			};
 		}
 	}
 }

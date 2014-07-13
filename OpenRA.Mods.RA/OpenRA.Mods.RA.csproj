@@ -524,6 +524,7 @@
     <Compile Include="Widgets\ProductionTabsWidget.cs" />
     <Compile Include="Widgets\ProductionTypeButtonWidget.cs" />
     <Compile Include="Widgets\Logic\ProductionTooltipLogic.cs" />
+    <Compile Include="Widgets\Logic\IngameSidebarComponentsLogic.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenRA.Game\OpenRA.Game.csproj">
