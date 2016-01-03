@@ -63,9 +63,10 @@ using System;
 
 namespace OpenRA.Mods.TS.UtilityCommands
 {
+	// TODO: Clean this up further for better readability and maintenance.
 	public static class MiniLZO
 	{
-		unsafe static int lzo1x_decompress(byte* @in, uint in_len, byte* @out, ref uint out_len, void* wrkmem)
+		static unsafe int Decompress1X(byte* @in, uint in_len, byte* @out, ref uint out_len, void* wrkmem)
 		{
 			byte* op;
 			byte* ip;
@@ -77,18 +78,22 @@ namespace OpenRA.Mods.TS.UtilityCommands
 			ip = @in;
 			bool gt_first_literal_run = false;
 			bool gt_match_done = false;
-			if (*ip > 17) {
+			if (*ip > 17)
+			{
 				t = (uint)(*ip++ - 17);
-				if (t < 4) {
-					match_next(ref op, ref ip, ref t);
-				}
-				else {
+				if (t < 4)
+					MatchNext(ref op, ref ip, ref t);
+				else
+				{
 					do *op++ = *ip++; while (--t > 0);
 					gt_first_literal_run = true;
 				}
 			}
-			while (true) {
-				if (gt_first_literal_run) {
+
+			while (true)
+			{
+				if (gt_first_literal_run)
+				{
 					gt_first_literal_run = false;
 					goto first_literal_run;
 				}
@@ -96,30 +101,41 @@ namespace OpenRA.Mods.TS.UtilityCommands
 				t = *ip++;
 				if (t >= 16)
 					goto match;
-				if (t == 0) {
-					while (*ip == 0) {
+
+				if (t == 0)
+				{
+					while (*ip == 0)
+					{
 						t += 255;
 						ip++;
 					}
+
 					t += (uint)(15 + *ip++);
 				}
+
 				*(uint*)op = *(uint*)ip;
 				op += 4; ip += 4;
 				if (--t > 0) {
-					if (t >= 4) {
-						do {
+					if (t >= 4)
+					{
+						do
+						{
 							*(uint*)op = *(uint*)ip;
 							op += 4; ip += 4; t -= 4;
-						} while (t >= 4);
-						if (t > 0) do *op++ = *ip++; while (--t > 0);
+						}
+						while (t >= 4);
+							if (t > 0)
+								do *op++ = *ip++; while (--t > 0);
 					}
 					else
 						do *op++ = *ip++; while (--t > 0);
 				}
+
 			first_literal_run:
 				t = *ip++;
 				if (t >= 16)
 					goto match;
+
 				m_pos = op - (1 + 0x0800);
 				m_pos -= t >> 2;
 				m_pos -= *ip++ << 2;
@@ -128,52 +144,63 @@ namespace OpenRA.Mods.TS.UtilityCommands
 				gt_match_done = true;
 
 			match:
-				do {
-					if (gt_match_done) {
+				do
+				{
+					if (gt_match_done)
+					{
 						gt_match_done = false;
 						goto match_done;
-						;
 					}
-					if (t >= 64) {
+
+					if (t >= 64)
+					{
 						m_pos = op - 1;
 						m_pos -= (t >> 2) & 7;
 						m_pos -= *ip++ << 3;
 						t = (t >> 5) - 1;
 
-						copy_match(ref op, ref m_pos, ref t);
+						CopyMatch(ref op, ref m_pos, ref t);
 						goto match_done;
 					}
-					else if (t >= 32) {
+					else if (t >= 32)
+					{
 						t &= 31;
 						if (t == 0) {
 							while (*ip == 0) {
 								t += 255;
 								ip++;
 							}
+
 							t += (uint)(31 + *ip++);
 						}
+
 						m_pos = op - 1;
-						m_pos -= (*(ushort*)(void*)(ip)) >> 2;
+						m_pos -= (*(ushort*)(void*)ip) >> 2;
 						ip += 2;
 					}
 					else if (t >= 16) {
 						m_pos = op;
 						m_pos -= (t & 8) << 11;
 						t &= 7;
-						if (t == 0) {
-							while (*ip == 0) {
+						if (t == 0)
+						{
+							while (*ip == 0)
+							{
 								t += 255;
 								ip++;
 							}
+
 							t += (uint)(7 + *ip++);
 						}
+
 						m_pos -= (*(ushort*)ip) >> 2;
 						ip += 2;
 						if (m_pos == op)
 							goto eof_found;
 						m_pos -= 0x4000;
 					}
-					else {
+					else
+					{
 						m_pos = op - 1;
 						m_pos -= t >> 2;
 						m_pos -= *ip++ << 2;
@@ -181,44 +208,54 @@ namespace OpenRA.Mods.TS.UtilityCommands
 						goto match_done;
 					}
 
-					if (t >= 2 * 4 - (3 - 1) && (op - m_pos) >= 4) {
+					if (t >= 2 * 4 - (3 - 1) && (op - m_pos) >= 4)
+					{
 						*(uint*)op = *(uint*)m_pos;
 						op += 4; m_pos += 4; t -= 4 - (3 - 1);
-						do {
+						do
+						{
 							*(uint*)op = *(uint*)m_pos;
 							op += 4; m_pos += 4; t -= 4;
 						} while (t >= 4);
 						if (t > 0) do *op++ = *m_pos++; while (--t > 0);
 					}
-					else {
+					else
+					{
 					// copy_match:
 						*op++ = *m_pos++; *op++ = *m_pos++;
 						do *op++ = *m_pos++; while (--t > 0);
 					}
+
 				match_done:
 					t = (uint)(ip[-2] & 3);
 					if (t == 0)
 						break;
+
 				// match_next:
 					*op++ = *ip++;
-					if (t > 1) { *op++ = *ip++; if (t > 2) { *op++ = *ip++; } }
+					if (t > 1)
+					{
+						*op++ = *ip++;
+						if (t > 2)
+							*op++ = *ip++;
+					}
+
 					t = *ip++;
 				} while (true);
 			}
-		eof_found:
 
-			out_len = ((uint)((op) - (@out)));
-			return (ip == ip_end ? 0 :
-				   (ip < ip_end ? (-8) : (-4)));
+		eof_found:
+			out_len = (uint)(op - @out);
+			return ip == ip_end ? 0 : (ip < ip_end ? (-8) : (-4));
 		}
 
-		static unsafe void match_next(ref byte* op, ref byte* ip, ref uint t)
+		static unsafe void MatchNext(ref byte* op, ref byte* ip, ref uint t)
 		{
 			do *op++ = *ip++; while (--t > 0);
 			t = *ip++;
 		}
 
-		static unsafe void copy_match(ref byte* op, ref byte* m_pos, ref uint t)
+		static unsafe void CopyMatch(ref byte* op, ref byte* m_pos, ref uint t)
 		{
 			*op++ = *m_pos++; *op++ = *m_pos++;
 			do *op++ = *m_pos++; while (--t > 0);
@@ -230,7 +267,7 @@ namespace OpenRA.Mods.TS.UtilityCommands
 			{
 				fixed (byte* r = src, w = dest, wrkmem = new byte[IntPtr.Size * 16384])
 				{
-					lzo1x_decompress(r + srcOffset, srcLength, w + destOffset, ref destLength, wrkmem);
+					Decompress1X(r + srcOffset, srcLength, w + destOffset, ref destLength, wrkmem);
 				}
 			}
 		}
