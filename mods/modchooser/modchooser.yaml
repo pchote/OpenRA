@@ -148,7 +148,7 @@ Background@MODCHOOSER_DIALOG:
 					Children:
 						Image:
 							X: (PARENT_RIGHT - WIDTH) / 2
-							Y: 0-28
+							Y: 0-28-4
 							Width: 280
 							ImageCollection: modchooser
 							ImageName: logo
