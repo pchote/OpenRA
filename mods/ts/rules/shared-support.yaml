@@ -1,3 +1,36 @@
+GAPAVE:
+	AlwaysVisible:
+	Building:
+		Adjacent: 3
+		TerrainTypes: Clear
+		BuildSounds: CHUNG.WAV
+		AllowInvalidPlacement: true
+	LaysTerrain:
+		Template: 671
+		TerrainTypes: Clear
+	Tooltip:
+		Name: Concrete
+	RenderSprites:
+	KillsSelf:
+		RemoveInstead: true
+	Buildable:
+		Queue: Defense
+		Prerequisites: barracks
+		BuildPaletteOrder: 10
+		Description: Provides defense agains subterranean units.
+	Building:
+		Footprint: xxxx xxxx xxxx xxxx
+		Dimensions: 4, 4
+		TerrainTypes: Clear
+	Tooltip:
+		Name: Pavement
+	Valued:
+		Cost: 75
+	Buildable:
+		BuildPaletteOrder: 10
+		BuildDuration: 54
+		BuildDurationModifier: 40
+
 NAPULS:
 	Inherits: ^Defense
 	Valued:

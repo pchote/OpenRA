@@ -2,7 +2,7 @@
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{C0B0465C-6BE2-409C-8770-3A9BF64C4344}</ProjectGuid>
@@ -67,14 +67,12 @@
     <Compile Include="Activities\SwallowActor.cs" />
     <Compile Include="SpriteLoaders\R8Loader.cs" />
     <Compile Include="Traits\AttackSwallow.cs" />
-    <Compile Include="Traits\Buildings\LaysTerrain.cs" />
     <Compile Include="Traits\Player\HarvesterInsurance.cs" />
     <Compile Include="Traits\Render\WithCrumbleOverlay.cs" />
     <Compile Include="Traits\Render\WithDeliveryOverlay.cs" />
     <Compile Include="Traits\Sandworm.cs" />
     <Compile Include="Traits\SpiceBloom.cs" />
     <Compile Include="Traits\TemporaryOwnerManager.cs" />
-    <Compile Include="Traits\World\BuildableTerrainLayer.cs" />
     <Compile Include="Traits\World\D2kResourceLayer.cs" />
     <Compile Include="Traits\World\FogPaletteFromR8.cs" />
     <Compile Include="Traits\World\PaletteFromR8.cs" />
@@ -122,24 +120,19 @@ cd "$(SolutionDir)"</PostBuildEvent>
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Traits\Buildings\" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
-    <MakeDir Directories="$(SolutionDir)mods/d2k/"/>
-    <Copy
-      SourceFiles="$(TargetPath)"
-      DestinationFolder="$(SolutionDir)mods/d2k/"/>
+    <MakeDir Directories="$(SolutionDir)mods/d2k/" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)mods/d2k/" />
     <!--
         We need to copy OpenRA.Mods.D2k.pdb (not `.dll.pdb`). This is only necessary on Windows.
         Mono outputs a `.dll.mdb` so we can just append `.mdb` directly.
     -->
-    <Copy
-      SourceFiles="$(TargetDir)$(TargetName).pdb"
-      DestinationFolder="$(SolutionDir)mods/d2k/"
-      Condition="'$(OS)' == 'Windows_NT'"/>
-    <Copy
-      SourceFiles="$(TargetPath).mdb"
-      DestinationFolder="$(SolutionDir)mods/d2k/"
-      Condition="'$(OS)' == 'Unix'"/>
+    <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFolder="$(SolutionDir)mods/d2k/" Condition="'$(OS)' == 'Windows_NT'" />
+    <Copy SourceFiles="$(TargetPath).mdb" DestinationFolder="$(SolutionDir)mods/d2k/" Condition="'$(OS)' == 'Unix'" />
     <!-- Uncomment these lines when debugging or adding to this target
     <Message Text="DEBUG OS:                     $(OS)"/>
     <Message Text="DEBUG SolutionDir:            $(SolutionDir)"/>

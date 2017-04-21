@@ -1905,3 +1905,6 @@ gaplug2:
 
 gaplug3:
 	icon: rad3icon
+
+gapave:
+	icon: paveicon

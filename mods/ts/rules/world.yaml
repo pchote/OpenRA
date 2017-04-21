@@ -62,6 +62,7 @@
 	CliffBackImpassabilityLayer:
 	SubterraneanActorLayer:
 	JumpjetActorLayer:
+	BuildableTerrainLayer:
 
 World:
 	Inherits: ^BaseWorld
