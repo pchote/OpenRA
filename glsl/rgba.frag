@@ -1,7 +1,10 @@
+#version 140
+
 uniform sampler2D DiffuseTexture;
 uniform bool EnableDepthPreview;
 
-varying vec4 vTexCoord;
+in vec4 vTexCoord;
+out vec4 fragColor;
 
 float jet_r(float x)
 {
@@ -20,7 +23,7 @@ float jet_b(float x)
 
 void main()
 {
-	vec4 c = texture2D(DiffuseTexture, vTexCoord.st);
+	vec4 c = texture(DiffuseTexture, vTexCoord.st);
 	// Discard any transparent fragments (both color and depth)
 	if (c.a == 0.0)
 		discard;
@@ -36,8 +39,8 @@ void main()
 		float r = clamp(jet_r(x), 0.0, 1.0);
 		float g = clamp(jet_g(x), 0.0, 1.0);
 		float b = clamp(jet_b(x), 0.0, 1.0);
-		gl_FragColor = vec4(r, g, b, 1.0);
+		fragColor = vec4(r, g, b, 1.0);
 	}
 	else
-		gl_FragColor = c;
+		fragColor = c;
 }

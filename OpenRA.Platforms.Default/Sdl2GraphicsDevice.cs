@@ -50,6 +50,9 @@ namespace OpenRA.Platforms.Default
 			SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_BLUE_SIZE, 8);
 			SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_ALPHA_SIZE, 0);
 
+			SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+			SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, 1);
+			SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_PROFILE_MASK, 0x0001);
 			SDL.SDL_DisplayMode display;
 			SDL.SDL_GetCurrentDisplayMode(0, out display);
 
@@ -145,6 +148,13 @@ namespace OpenRA.Platforms.Default
 				throw new InvalidOperationException("Can not create OpenGL context. (Error: {0})".F(SDL.SDL_GetError()));
 
 			OpenGL.Initialize();
+
+			uint vao;
+			OpenGL.CheckGLError();
+			OpenGL.glGenVertexArrays(1, out vao);
+			OpenGL.CheckGLError();
+			OpenGL.glBindVertexArray(vao);
+			OpenGL.CheckGLError();
 
 			OpenGL.glEnableVertexAttribArray(Shader.VertexPosAttributeIndex);
 			OpenGL.CheckGLError();

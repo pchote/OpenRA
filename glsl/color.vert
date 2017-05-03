@@ -1,9 +1,11 @@
+#version 140
+
 uniform vec3 Scroll;
 uniform vec3 r1, r2;
 
-attribute vec4 aVertexPosition;
-attribute vec4 aVertexTexCoord;
-varying vec4 vColor;
+in vec4 aVertexPosition;
+in vec4 aVertexTexCoord;
+out vec4 vColor;
 
 void main()
 {

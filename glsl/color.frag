@@ -1,5 +1,10 @@
-varying vec4 vColor;
+#version 140
+
+in vec4 vColor;
 uniform bool EnableDepthPreview;
+
+out vec4 fragColor;
+out float fragDepth;
 
 float jet_r(float x)
 {
@@ -29,8 +34,8 @@ void main()
 		float r = clamp(jet_r(x), 0.0, 1.0);
 		float g = clamp(jet_g(x), 0.0, 1.0);
 		float b = clamp(jet_b(x), 0.0, 1.0);
-		gl_FragColor = vec4(r, g, b, 1.0);
+		fragColor = vec4(r, g, b, 1.0);
 	}
 	else
-		gl_FragColor = vColor;
+		fragColor = vColor;
 }

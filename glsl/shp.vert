@@ -1,13 +1,14 @@
+#version 140
 uniform vec3 Scroll;
 uniform vec3 r1, r2;
 
-attribute vec4 aVertexPosition;
-attribute vec4 aVertexTexCoord;
-attribute vec2 aVertexTexMetadata;
-varying vec4 vTexCoord;
-varying vec2 vTexMetadata;
-varying vec4 vChannelMask;
-varying vec4 vDepthMask;
+in vec4 aVertexPosition;
+in vec4 aVertexTexCoord;
+in vec2 aVertexTexMetadata;
+out vec4 vTexCoord;
+out vec2 vTexMetadata;
+out vec4 vChannelMask;
+out vec4 vDepthMask;
 
 vec4 DecodeChannelMask(float x)
 {

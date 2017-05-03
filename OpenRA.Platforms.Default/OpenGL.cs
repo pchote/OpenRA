@@ -241,6 +241,12 @@ namespace OpenRA.Platforms.Default
 		public delegate void BindBuffer(int target, uint buffer);
 		public static BindBuffer glBindBuffer { get; private set; }
 
+		public delegate void GenVertexArrays(int n, out uint buffers);
+		public static GenVertexArrays glGenVertexArrays { get; private set; }
+
+		public delegate void BindVertexArray(uint buffer);
+		public static BindVertexArray glBindVertexArray { get; private set; }
+
 		public delegate void BufferData(int target, IntPtr size, IntPtr data, int usage);
 		public static BufferData glBufferData { get; private set; }
 
@@ -414,6 +420,8 @@ namespace OpenRA.Platforms.Default
 				glBufferData = Bind<BufferData>("glBufferData");
 				glBufferSubData = Bind<BufferSubData>("glBufferSubData");
 				glDeleteBuffers = Bind<DeleteBuffers>("glDeleteBuffers");
+				glGenVertexArrays = Bind<GenVertexArrays>("glGenVertexArrays");
+				glBindVertexArray = Bind<BindVertexArray>("glBindVertexArray");
 				glBindAttribLocation = Bind<BindAttribLocation>("glBindAttribLocation");
 				glVertexAttribPointer = Bind<VertexAttribPointer>("glVertexAttribPointer");
 				glEnableVertexAttribArray = Bind<EnableVertexAttribArray>("glEnableVertexAttribArray");
@@ -437,16 +445,16 @@ namespace OpenRA.Platforms.Default
 				glGetTexImage = Bind<GetTexImage>("glGetTexImage");
 				glTexParameteri = Bind<TexParameteri>("glTexParameteri");
 				glTexParameterf = Bind<TexParameterf>("glTexParameterf");
-				glGenFramebuffers = Bind<GenFramebuffers>("glGenFramebuffersEXT");
-				glBindFramebuffer = Bind<BindFramebuffer>("glBindFramebufferEXT");
-				glFramebufferTexture2D = Bind<FramebufferTexture2D>("glFramebufferTexture2DEXT");
-				glDeleteFramebuffers = Bind<DeleteFramebuffers>("glDeleteFramebuffersEXT");
-				glGenRenderbuffers = Bind<GenRenderbuffers>("glGenRenderbuffersEXT");
-				glBindRenderbuffer = Bind<BindRenderbuffer>("glBindRenderbufferEXT");
-				glRenderbufferStorage = Bind<RenderbufferStorage>("glRenderbufferStorageEXT");
-				glDeleteRenderbuffers = Bind<DeleteRenderbuffers>("glDeleteRenderbuffersEXT");
-				glFramebufferRenderbuffer = Bind<FramebufferRenderbuffer>("glFramebufferRenderbufferEXT");
-				glCheckFramebufferStatus = Bind<CheckFramebufferStatus>("glCheckFramebufferStatusEXT");
+				glGenFramebuffers = Bind<GenFramebuffers>("glGenFramebuffers");
+				glBindFramebuffer = Bind<BindFramebuffer>("glBindFramebuffer");
+				glFramebufferTexture2D = Bind<FramebufferTexture2D>("glFramebufferTexture2D");
+				glDeleteFramebuffers = Bind<DeleteFramebuffers>("glDeleteFramebuffers");
+				glGenRenderbuffers = Bind<GenRenderbuffers>("glGenRenderbuffers");
+				glBindRenderbuffer = Bind<BindRenderbuffer>("glBindRenderbuffer");
+				glRenderbufferStorage = Bind<RenderbufferStorage>("glRenderbufferStorage");
+				glDeleteRenderbuffers = Bind<DeleteRenderbuffers>("glDeleteRenderbuffers");
+				glFramebufferRenderbuffer = Bind<FramebufferRenderbuffer>("glFramebufferRenderbuffer");
+				glCheckFramebufferStatus = Bind<CheckFramebufferStatus>("glCheckFramebufferStatus");
 			}
 			catch (Exception e)
 			{
@@ -475,12 +483,8 @@ namespace OpenRA.Platforms.Default
 				if (version.Length > 1)
 					int.TryParse(version[1], out minor);
 
-				if (major >= 2 && minor >= 0)
-					Features |= GLFeatures.GL2OrGreater;
-
-				var hasFramebufferExt = SDL.SDL_GL_ExtensionSupported("GL_EXT_framebuffer_object") == SDL.SDL_bool.SDL_TRUE;
-				if (hasFramebufferExt)
-					Features |= GLFeatures.FramebufferExt;
+				if (major >= 3 && minor >= 0)
+					Features |= GLFeatures.GL2OrGreater | GLFeatures.FramebufferExt;
 			}
 			catch (Exception) { }
 		}
