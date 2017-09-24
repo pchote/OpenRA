@@ -32,6 +32,7 @@ namespace OpenRA.Mods.Common.UtilityCommands
 			  "Convert a shp/tmp/R8 to a series of PNGs, optionally removing shadow")]
 		void IUtilityCommand.Run(Utility utility, string[] args)
 		{
+
 			// HACK: The engine code assumes that Game.modData is set.
 			var modData = Game.ModData = utility.ModData;
 
@@ -46,6 +47,38 @@ namespace OpenRA.Mods.Common.UtilityCommands
 			}
 
 			var palette = new ImmutablePalette(args[2], shadowIndex);
+
+			using (var bitmap = new Bitmap(192, 144, PixelFormat.Format8bppIndexed))
+			{
+				bitmap.Palette = palette.AsSystemPalette();
+				var data = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+					ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
+
+				unsafe
+				{
+					var colors = (byte*)data.Scan0;
+					for (var y = 0; y < bitmap.Height; y++)
+					{
+						var yy = bitmap.Height - 1 - y;
+						for (var x = 0; x < bitmap.Width; x++)
+						{
+							var xx = bitmap.Width - 1 - x;
+							if (2 * yy < x - 1)
+								colors[yy * bitmap.Width + xx] = (byte)(y - 40);
+							else if (2 * yy >= x + 96)
+								colors[yy * bitmap.Width + xx] = (byte)(y + 56);
+							else
+								colors[yy * bitmap.Width + xx] = (byte)(xx / 2 + 56);
+						}
+					}
+				}
+
+				bitmap.UnlockBits(data);
+
+				bitmap.Save("dcliff02-depth 0000.png");
+			}
+			return;
+			/*
 
 			var frames = SpriteLoader.GetFrames(File.OpenRead(src), modData.SpriteLoaders);
 
@@ -93,6 +126,7 @@ namespace OpenRA.Mods.Common.UtilityCommands
 			}
 
 			Console.WriteLine("Saved {0}-[0..{1}].png", prefix, count - 1);
+			*/
 		}
 	}
 }

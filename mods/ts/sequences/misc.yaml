@@ -640,8 +640,9 @@ tuntop04:
 dcliff01:
 	idle: dcliff01-placeholder
 		UseTilesetExtension: true
-		Offset: 0, 0, 129
+		Offset: 0, 24, 56
 		DepthSprite: dcliff01-depth.shp
+		DepthSpriteOffset: 0, -24
 
 dcliff02:
 	Inherits: dcliff01
