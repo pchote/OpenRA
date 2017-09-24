@@ -581,6 +581,9 @@ namespace OpenRA.Mods.Cnc.UtilityCommands
 		/// </summary>
 		static void SetupDestroyableCliffs(Map map)
 		{
+			var aLocations = new HashSet<CPos>();
+			var bLocations = new HashSet<CPos>();
+
 			var heightOffsets = new int[] {
 				0, -1, -1, -1, -1, 0,
 				0, -1, -2, -2, -1, 0,
@@ -599,6 +602,7 @@ namespace OpenRA.Mods.Cnc.UtilityCommands
 					var dy = tile.Index / 6;
 					var newIndex = 3 * dy + dx % 3;
 
+					aLocations.Add(cell - new CVec(dx, dy));
 					map.Tiles[cell] = new TerrainTile((ushort)(dx < 3 ? 403 : 404), (byte)newIndex);
 					map.Height[cell] = (byte)(map.Height[cell] + heightOffsets[tile.Index]);
 				}
@@ -613,9 +617,32 @@ namespace OpenRA.Mods.Cnc.UtilityCommands
 					// Transpose tile.Index so that we can reuse the height offsets from the x-axis cliffs
 					var transposedIndex = 6 * dx + dy;
 
+					bLocations.Add(cell - new CVec(dx, dy));
 					map.Tiles[cell] = new TerrainTile((ushort)(dy < 3 ? 406 : 405), (byte)newIndex);
 					map.Height[cell] = (byte)(map.Height[cell] + heightOffsets[transposedIndex]);
 				}
+			}
+
+			foreach (var cell in aLocations)
+			{
+				var ar = new ActorReference("dcliff01")
+				{
+					new LocationInit(cell),
+					new OwnerInit("Neutral")
+				};
+
+				map.ActorDefinitions.Add(new MiniYamlNode("Actor" + map.ActorDefinitions.Count, ar.Save()));
+			}
+
+			foreach (var cell in bLocations)
+			{
+				var ar = new ActorReference("dcliff02")
+				{
+					new LocationInit(cell),
+					new OwnerInit("Neutral")
+				};
+
+				map.ActorDefinitions.Add(new MiniYamlNode("Actor" + map.ActorDefinitions.Count, ar.Save()));
 			}
 		}
 	}

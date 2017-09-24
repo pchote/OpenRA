@@ -1087,7 +1087,7 @@
 	ChangesTerrain:
 		TerrainType: Rail
 	EditorTilesetFilter:
-		Categories: Railway
+		Categories: Terrain
 
 ^Tunnel:
 	RenderSprites:
@@ -1106,7 +1106,51 @@
 	TunnelEntrance:
 		Dimensions: 3, 3
 	EditorTilesetFilter:
-		Categories: Tunnel
+		Categories: Terrain
+
+^DestroyableCliff:
+	Inherits@1: ^ExistsInWorld
+	Inherits@2: ^SpriteActor
+	RenderSprites:
+		Palette: terraindecoration
+	Targetable:
+		TargetTypes: Ground, C4
+	HitShape:
+		UseTargetableCellsOffsets: true
+		Type: Rectangle
+			LocalYaw: -128
+			TopLeft: -512, -512
+			BottomRight: 512, 512
+	Building:
+		Dimensions: 1,1
+		Footprint: x
+	FrozenUnderFog:
+	SoundOnDamageTransition:
+		DamagedSounds: expnew01.aud
+		DestroyedSounds: crmble2.aud
+	WithSpriteBody:
+	Explodes:
+		Weapon: BuildingExplosions
+		EmptyWeapon: BuildingExplosions
+		Type: Footprint
+	ShakeOnDeath:
+	Demolishable:
+	ThrowsShrapnel@SMALL:
+		Weapons: SmallDebris
+		Pieces: 2, 4
+		Range: 2c0, 5c0
+	ThrowsShrapnel@LARGE:
+		Weapons: LargeDebris, LargeDebrisWithTrail
+		Pieces: 1, 2
+		Range: 2c0, 5c0
+	EditorTilesetFilter:
+		Categories: Terrain
+	Health:
+		HP: 200
+	Armor:
+		Type: Heavy
+	CustomSelectionSize:
+		CustomBounds: 144, 144
 
 ^Gate:
 	Inherits: ^Building

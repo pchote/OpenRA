@@ -637,6 +637,17 @@ tuntop04:
 	idle:
 		Offset: -24, -49, 24
 
+dcliff01:
+	idle: dcliff01-placeholder
+		UseTilesetExtension: true
+		Offset: 0, 0, 129
+		DepthSprite: dcliff01-depth.shp
+
+dcliff02:
+	Inherits: dcliff01
+	idle: dcliff02-placeholder
+		DepthSprite: dcliff02-depth.shp
+
 dig:
 	idle:
 		Length: *
