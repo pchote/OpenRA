@@ -1,6 +1,6 @@
 #version 140
 
-uniform sampler2D DiffuseTexture;
+uniform sampler2DArray DiffuseTexture;
 uniform bool EnableDepthPreview;
 
 in vec4 vTexCoord;
@@ -23,7 +23,7 @@ float jet_b(float x)
 
 void main()
 {
-	vec4 c = texture(DiffuseTexture, vTexCoord.st);
+	vec4 c = texture(DiffuseTexture, vec3(vTexCoord.st, 0));
 	// Discard any transparent fragments (both color and depth)
 	if (c.a == 0.0)
 		discard;

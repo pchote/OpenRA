@@ -119,7 +119,7 @@ namespace OpenRA.Platforms.Default
 				var sampler = sb.ToString();
 				OpenGL.CheckGLError();
 
-				if (type == OpenGL.GL_SAMPLER_2D)
+				if (type == OpenGL.GL_SAMPLER_2D_ARRAY)
 				{
 					samplers.Add(sampler, nextTexUnit);
 
@@ -142,7 +142,7 @@ namespace OpenRA.Platforms.Default
 			foreach (var kv in textures)
 			{
 				OpenGL.glActiveTexture(OpenGL.GL_TEXTURE0 + kv.Key);
-				OpenGL.glBindTexture(OpenGL.GL_TEXTURE_2D, ((Texture)kv.Value).ID);
+				OpenGL.glBindTexture(OpenGL.GL_TEXTURE_2D_ARRAY, ((Texture)kv.Value).ID);
 			}
 
 			OpenGL.CheckGLError();

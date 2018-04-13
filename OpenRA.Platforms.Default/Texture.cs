@@ -60,23 +60,23 @@ namespace OpenRA.Platforms.Default
 		void PrepareTexture()
 		{
 			OpenGL.CheckGLError();
-			OpenGL.glBindTexture(OpenGL.GL_TEXTURE_2D, texture);
+			OpenGL.glBindTexture(OpenGL.GL_TEXTURE_2D_ARRAY, texture);
 			OpenGL.CheckGLError();
 
 			var filter = scaleFilter == TextureScaleFilter.Linear ? OpenGL.GL_LINEAR : OpenGL.GL_NEAREST;
-			OpenGL.glTexParameteri(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MAG_FILTER, filter);
+			OpenGL.glTexParameteri(OpenGL.GL_TEXTURE_2D_ARRAY, OpenGL.GL_TEXTURE_MAG_FILTER, filter);
 			OpenGL.CheckGLError();
-			OpenGL.glTexParameteri(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MIN_FILTER, filter);
-			OpenGL.CheckGLError();
-
-			OpenGL.glTexParameterf(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_WRAP_S, OpenGL.GL_CLAMP_TO_EDGE);
-			OpenGL.CheckGLError();
-			OpenGL.glTexParameterf(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_WRAP_T, OpenGL.GL_CLAMP_TO_EDGE);
+			OpenGL.glTexParameteri(OpenGL.GL_TEXTURE_2D_ARRAY, OpenGL.GL_TEXTURE_MIN_FILTER, filter);
 			OpenGL.CheckGLError();
 
-			OpenGL.glTexParameteri(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_BASE_LEVEL, 0);
+			OpenGL.glTexParameterf(OpenGL.GL_TEXTURE_2D_ARRAY, OpenGL.GL_TEXTURE_WRAP_S, OpenGL.GL_CLAMP_TO_EDGE);
 			OpenGL.CheckGLError();
-			OpenGL.glTexParameteri(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MAX_LEVEL, 0);
+			OpenGL.glTexParameterf(OpenGL.GL_TEXTURE_2D_ARRAY, OpenGL.GL_TEXTURE_WRAP_T, OpenGL.GL_CLAMP_TO_EDGE);
+			OpenGL.CheckGLError();
+
+			OpenGL.glTexParameteri(OpenGL.GL_TEXTURE_2D_ARRAY, OpenGL.GL_TEXTURE_BASE_LEVEL, 0);
+			OpenGL.CheckGLError();
+			OpenGL.glTexParameteri(OpenGL.GL_TEXTURE_2D_ARRAY, OpenGL.GL_TEXTURE_MAX_LEVEL, 0);
 			OpenGL.CheckGLError();
 		}
 
@@ -93,7 +93,7 @@ namespace OpenRA.Platforms.Default
 				{
 					var intPtr = new IntPtr((void*)ptr);
 					PrepareTexture();
-					OpenGL.glTexImage2D(OpenGL.GL_TEXTURE_2D, 0, OpenGL.GL_RGBA8, width, height,
+					OpenGL.glTexImage3D(OpenGL.GL_TEXTURE_2D_ARRAY, 0, OpenGL.GL_RGBA8, width, height, 1,
 						0, OpenGL.GL_BGRA, OpenGL.GL_UNSIGNED_BYTE, intPtr);
 					OpenGL.CheckGLError();
 				}
@@ -117,7 +117,7 @@ namespace OpenRA.Platforms.Default
 				{
 					var intPtr = new IntPtr((void*)ptr);
 					PrepareTexture();
-					OpenGL.glTexImage2D(OpenGL.GL_TEXTURE_2D, 0, OpenGL.GL_RGBA8, width, height,
+					OpenGL.glTexImage3D(OpenGL.GL_TEXTURE_2D_ARRAY, 0, OpenGL.GL_RGBA8, width, height, 1,
 						0, OpenGL.GL_BGRA, OpenGL.GL_UNSIGNED_BYTE, intPtr);
 					OpenGL.CheckGLError();
 				}
@@ -141,7 +141,7 @@ namespace OpenRA.Platforms.Default
 					ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 
 				PrepareTexture();
-				OpenGL.glTexImage2D(OpenGL.GL_TEXTURE_2D, 0, OpenGL.GL_RGBA8, bits.Width, bits.Height,
+				OpenGL.glTexImage3D(OpenGL.GL_TEXTURE_2D_ARRAY, 0, OpenGL.GL_RGBA8, bits.Width, bits.Height, 1,
 					0, OpenGL.GL_BGRA, OpenGL.GL_UNSIGNED_BYTE, bits.Scan0); // TODO: weird strides
 				OpenGL.CheckGLError();
 				bitmap.UnlockBits(bits);
@@ -159,13 +159,13 @@ namespace OpenRA.Platforms.Default
 			var data = new byte[4 * Size.Width * Size.Height];
 
 			OpenGL.CheckGLError();
-			OpenGL.glBindTexture(OpenGL.GL_TEXTURE_2D, texture);
+			OpenGL.glBindTexture(OpenGL.GL_TEXTURE_2D_ARRAY, texture);
 			unsafe
 			{
 				fixed (byte* ptr = &data[0])
 				{
 					var intPtr = new IntPtr((void*)ptr);
-					OpenGL.glGetTexImage(OpenGL.GL_TEXTURE_2D, 0, OpenGL.GL_BGRA,
+					OpenGL.glGetTexImage(OpenGL.GL_TEXTURE_2D_ARRAY, 0, OpenGL.GL_BGRA,
 						OpenGL.GL_UNSIGNED_BYTE, intPtr);
 				}
 			}
@@ -182,7 +182,7 @@ namespace OpenRA.Platforms.Default
 
 			Size = new Size(width, height);
 			PrepareTexture();
-			OpenGL.glTexImage2D(OpenGL.GL_TEXTURE_2D, 0, OpenGL.GL_RGBA8, width, height,
+			OpenGL.glTexImage3D(OpenGL.GL_TEXTURE_2D_ARRAY, 0, OpenGL.GL_RGBA8, width, height, 1,
 				0, OpenGL.GL_BGRA, OpenGL.GL_UNSIGNED_BYTE, IntPtr.Zero);
 			OpenGL.CheckGLError();
 		}
