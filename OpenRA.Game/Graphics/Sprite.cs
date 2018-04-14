@@ -19,6 +19,7 @@ namespace OpenRA.Graphics
 		public readonly Rectangle Bounds;
 		public readonly Sheet Sheet;
 		public readonly BlendMode BlendMode;
+		public readonly int Layer;
 		public readonly TextureChannel Channel;
 		public readonly float ZRamp;
 		public readonly float3 Size;
@@ -27,14 +28,18 @@ namespace OpenRA.Graphics
 		public readonly float Top, Left, Bottom, Right;
 
 		public Sprite(Sheet sheet, Rectangle bounds, TextureChannel channel)
-			: this(sheet, bounds, 0, float2.Zero, channel) { }
+			: this(sheet, bounds, 0, float2.Zero, 0, channel) { }
 
-		public Sprite(Sheet sheet, Rectangle bounds, float zRamp, float3 offset, TextureChannel channel, BlendMode blendMode = BlendMode.Alpha)
+		public Sprite(Sheet sheet, Rectangle bounds, int layer, TextureChannel channel)
+			: this(sheet, bounds, 0, float2.Zero, layer, channel) { }
+
+		public Sprite(Sheet sheet, Rectangle bounds, float zRamp, float3 offset, int layer, TextureChannel channel, BlendMode blendMode = BlendMode.Alpha)
 		{
 			Sheet = sheet;
 			Bounds = bounds;
 			Offset = offset;
 			ZRamp = zRamp;
+			Layer = layer;
 			Channel = channel;
 			Size = new float3(bounds.Size.Width, bounds.Size.Height, bounds.Size.Height * zRamp);
 			BlendMode = blendMode;
@@ -53,12 +58,14 @@ namespace OpenRA.Graphics
 		public readonly Rectangle SecondaryBounds;
 		public readonly TextureChannel SecondaryChannel;
 		public readonly float SecondaryTop, SecondaryLeft, SecondaryBottom, SecondaryRight;
+		public readonly int SecondaryLayer;
 
-		public SpriteWithSecondaryData(Sprite s, Rectangle secondaryBounds, TextureChannel secondaryChannel)
-			: base(s.Sheet, s.Bounds, s.ZRamp, s.Offset, s.Channel, s.BlendMode)
+		public SpriteWithSecondaryData(Sprite s, Rectangle secondaryBounds, TextureChannel secondaryChannel, int secondaryLayer)
+			: base(s.Sheet, s.Bounds, s.ZRamp, s.Offset, s.Layer, s.Channel, s.BlendMode)
 		{
 			SecondaryBounds = secondaryBounds;
 			SecondaryChannel = secondaryChannel;
+			SecondaryLayer = secondaryLayer;
 			SecondaryLeft = (float)Math.Min(secondaryBounds.Left, secondaryBounds.Right) / s.Sheet.Size.Width;
 			SecondaryTop = (float)Math.Min(secondaryBounds.Top, secondaryBounds.Bottom) / s.Sheet.Size.Height;
 			SecondaryRight = (float)Math.Max(secondaryBounds.Left, secondaryBounds.Right) / s.Sheet.Size.Width;

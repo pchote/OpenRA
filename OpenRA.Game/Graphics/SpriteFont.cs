@@ -178,7 +178,7 @@ namespace OpenRA.Graphics
 						{
 							if (p[i] != 0)
 							{
-								var q = destStride * (j + s.Bounds.Top) + 4 * (i + s.Bounds.Left);
+								var q = destStride * s.Sheet.Size.Height * s.Layer + destStride * (j + s.Bounds.Top) + 4 * (i + s.Bounds.Left);
 								var pmc = Util.PremultiplyAlpha(Color.FromArgb(p[i], c.Second));
 
 								dest[q] = pmc.B;

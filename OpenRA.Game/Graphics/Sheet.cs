@@ -24,6 +24,7 @@ namespace OpenRA.Graphics
 		ITexture texture;
 		byte[] data;
 
+		public int Layers { get; private set; }
 		public readonly Size Size;
 		public readonly SheetType Type;
 
@@ -39,6 +40,7 @@ namespace OpenRA.Graphics
 		{
 			Type = type;
 			Size = size;
+			Layers = 1;
 		}
 
 		public Sheet(SheetType type, ITexture texture)
@@ -46,6 +48,7 @@ namespace OpenRA.Graphics
 			Type = type;
 			this.texture = texture;
 			Size = texture.Size;
+			Layers = 1;
 		}
 
 		public Sheet(SheetType type, Stream stream)
@@ -60,6 +63,7 @@ namespace OpenRA.Graphics
 
 			Type = type;
 			ReleaseBuffer();
+			Layers = 1;
 		}
 
 		public ITexture GetTexture()
@@ -72,7 +76,7 @@ namespace OpenRA.Graphics
 
 			if (data != null && dirty)
 			{
-				texture.SetData(data, Size.Width, Size.Height);
+				texture.SetData(data, Size.Width, Size.Height, Layers);
 				dirty = false;
 				if (releaseBufferOnCommit)
 					data = null;
@@ -129,11 +133,27 @@ namespace OpenRA.Graphics
 		{
 			if (data != null)
 				return;
+			
 			if (texture == null)
+			{
 				data = new byte[4 * Size.Width * Size.Height];
+				Layers = 1;
+			}
 			else
 				data = texture.GetData();
 			releaseBufferOnCommit = false;
+		}
+
+		public void AddLayer()
+		{
+			if (data == null)
+				throw new InvalidOperationException("What are you doing?");
+
+			var oldData = data;
+			data = new byte[oldData.Length + 4 * Size.Width * Size.Height];
+			Array.Copy(oldData, data, oldData.Length);
+
+			Layers += 1;
 		}
 
 		public void CommitBufferedData()

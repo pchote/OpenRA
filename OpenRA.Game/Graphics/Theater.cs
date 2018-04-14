@@ -42,18 +42,8 @@ namespace OpenRA.Graphics
 		public Theater(TileSet tileset)
 		{
 			this.tileset = tileset;
-			var allocated = false;
 
-			Func<Sheet> allocate = () =>
-			{
-				if (allocated)
-					throw new SheetOverflowException("Terrain sheet overflow. Try increasing the tileset SheetSize parameter.");
-				allocated = true;
-
-				return new Sheet(SheetType.Indexed, new Size(tileset.SheetSize, tileset.SheetSize));
-			};
-
-			sheetBuilder = new SheetBuilder(SheetType.Indexed, allocate);
+			sheetBuilder = new SheetBuilder(SheetType.Indexed);
 			random = new MersenneTwister();
 
 			var frameCache = new FrameCache(Game.ModData.DefaultFileSystem, Game.ModData.SpriteLoaders);
@@ -82,10 +72,7 @@ namespace OpenRA.Graphics
 						{
 							var ss = sheetBuilder.Allocate(f.Size, zRamp, offset);
 							Util.FastCopyIntoChannel(ss, allFrames[j + frameCount].Data);
-
-							// s and ss are guaranteed to use the same sheet
-							// because of the custom terrain sheet allocation
-							s = new SpriteWithSecondaryData(s, ss.Bounds, ss.Channel);
+							s = new SpriteWithSecondaryData(s, ss.Bounds, ss.Channel, ss.Layer);
 						}
 
 						return s;
@@ -96,7 +83,7 @@ namespace OpenRA.Graphics
 
 				// Ignore the offsets baked into R8 sprites
 				if (tileset.IgnoreTileSpriteOffsets)
-					allSprites = allSprites.Select(s => new Sprite(s.Sheet, s.Bounds, s.ZRamp, new float3(float2.Zero, s.Offset.Z), s.Channel, s.BlendMode));
+					allSprites = allSprites.Select(s => new Sprite(s.Sheet, s.Bounds, s.ZRamp, new float3(float2.Zero, s.Offset.Z), 0, s.Channel, s.BlendMode));
 
 				templates.Add(t.Value.Id, new TheaterTemplate(allSprites.ToArray(), variants.First().Count(), t.Value.Images.Length));
 			}

@@ -35,8 +35,10 @@ namespace OpenRA.Graphics
 			float st = 0;
 			float sr = 0;
 			float sb = 0;
-			var attribC = ChannelSelect[(int)r.Channel];
 
+			var attribC = ChannelSelect[(int)r.Channel] | (uint)(r.Layer & 0xFFU) << 8;
+
+			// TODO: Depth sprite layer
 			var ss = r as SpriteWithSecondaryData;
 			if (ss != null)
 			{
@@ -44,7 +46,7 @@ namespace OpenRA.Graphics
 				st = ss.SecondaryTop;
 				sr = ss.SecondaryRight;
 				sb = ss.SecondaryBottom;
-				attribC |= ChannelSelect[(int)ss.SecondaryChannel] << 3;
+				attribC |= ChannelSelect[(int)ss.SecondaryChannel] << 3 | (uint)(ss.SecondaryLayer & 0xFFU) << 16;
 			}
 
 			vertices[nv] = new Vertex(a, r.Left, r.Top, sl, st, paletteTextureIndex, attribC);
@@ -60,7 +62,7 @@ namespace OpenRA.Graphics
 			var data = dest.Sheet.GetData();
 			var srcStride = dest.Bounds.Width;
 			var destStride = dest.Sheet.Size.Width * 4;
-			var destOffset = destStride * dest.Bounds.Top + dest.Bounds.Left * 4 + ChannelMasks[(int)dest.Channel];
+			var destOffset = destStride * dest.Sheet.Size.Height * dest.Layer + destStride * dest.Bounds.Top + dest.Bounds.Left * 4 + ChannelMasks[(int)dest.Channel];
 			var destSkip = destStride - 4 * srcStride;
 			var height = dest.Bounds.Height;
 

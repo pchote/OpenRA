@@ -99,6 +99,7 @@ namespace OpenRA
 		void SetData(Bitmap bitmap);
 		void SetData(uint[,] colors);
 		void SetData(byte[] colors, int width, int height);
+		void SetData(byte[] colors, int width, int height, int layers);
 		byte[] GetData();
 		Size Size { get; }
 		TextureScaleFilter ScaleFilter { get; set; }

@@ -34,7 +34,6 @@ namespace OpenRA.Graphics
 	{
 		public readonly SheetType Type;
 		readonly List<Sheet> sheets = new List<Sheet>();
-		readonly Func<Sheet> allocateSheet;
 
 		Sheet current;
 		TextureChannel channel;
@@ -58,7 +57,6 @@ namespace OpenRA.Graphics
 			Type = t;
 			current = allocateSheet();
 			sheets.Add(current);
-			this.allocateSheet = allocateSheet;
 		}
 
 		public Sprite Add(ISpriteFrame frame) { return Add(frame.Data, frame.Size, 0, frame.Offset); }
@@ -67,7 +65,7 @@ namespace OpenRA.Graphics
 		{
 			// Don't bother allocating empty sprites
 			if (size.Width == 0 || size.Height == 0)
-				return new Sprite(current, Rectangle.Empty, 0, spriteOffset, channel, BlendMode.Alpha);
+				return new Sprite(current, Rectangle.Empty, 0, spriteOffset, 0, channel, BlendMode.Alpha);
 
 			var rect = Allocate(size, zRamp, spriteOffset);
 			Util.FastCopyIntoChannel(rect, src);
@@ -118,9 +116,7 @@ namespace OpenRA.Graphics
 				var next = NextChannel(channel);
 				if (next == null)
 				{
-					current.ReleaseBuffer();
-					current = allocateSheet();
-					sheets.Add(current);
+					current.AddLayer();
 					channel = TextureChannel.Red;
 				}
 				else
@@ -130,7 +126,7 @@ namespace OpenRA.Graphics
 				p = new Point(0, 0);
 			}
 
-			var rect = new Sprite(current, new Rectangle(p, imageSize), zRamp, spriteOffset, channel, BlendMode.Alpha);
+			var rect = new Sprite(current, new Rectangle(p, imageSize), zRamp, spriteOffset, current.Layers - 1, channel, BlendMode.Alpha);
 			p.X += imageSize.Width;
 
 			return rect;

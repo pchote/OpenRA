@@ -82,6 +82,11 @@ namespace OpenRA.Platforms.Default
 
 		public void SetData(byte[] colors, int width, int height)
 		{
+			SetData(colors, width, height, 1);
+		}
+
+		public void SetData(byte[] colors, int width, int height, int layers)
+		{
 			VerifyThreadAffinity();
 			if (!Exts.IsPowerOf2(width) || !Exts.IsPowerOf2(height))
 				throw new InvalidDataException("Non-power-of-two array {0}x{1}".F(width, height));
@@ -93,7 +98,7 @@ namespace OpenRA.Platforms.Default
 				{
 					var intPtr = new IntPtr((void*)ptr);
 					PrepareTexture();
-					OpenGL.glTexImage3D(OpenGL.GL_TEXTURE_2D_ARRAY, 0, OpenGL.GL_RGBA8, width, height, 1,
+					OpenGL.glTexImage3D(OpenGL.GL_TEXTURE_2D_ARRAY, 0, OpenGL.GL_RGBA8, width, height, layers,
 						0, OpenGL.GL_BGRA, OpenGL.GL_UNSIGNED_BYTE, intPtr);
 					OpenGL.CheckGLError();
 				}

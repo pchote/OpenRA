@@ -6,7 +6,8 @@ uniform sampler2DArray Palette;
 uniform bool EnableDepthPreview;
 uniform float DepthTextureScale;
 
-in vec4 vTexCoord;
+in vec3 vTexCoord;
+in vec3 vDepthCoord;
 in float vTexPalette;
 in vec4 vChannelMask;
 in vec4 vDepthMask;
@@ -29,7 +30,7 @@ float jet_b(float x)
 
 void main()
 {
-	vec4 x = texture(DiffuseTexture, vec3(vTexCoord.st, 0));
+	vec4 x = texture(DiffuseTexture, vTexCoord);
 	vec3 p = vec3(dot(x, vChannelMask), vTexPalette, 0);
 	vec4 c = texture(Palette, p);
 
@@ -40,7 +41,7 @@ void main()
 	float depth = gl_FragCoord.z;
 	if (length(vDepthMask) > 0.0)
 	{
-		vec4 y = texture(DiffuseTexture, vec3(vTexCoord.pq, 0));
+		vec4 y = texture(DiffuseTexture, vDepthCoord);
 		depth = depth + DepthTextureScale * dot(y, vDepthMask);
 	}
 

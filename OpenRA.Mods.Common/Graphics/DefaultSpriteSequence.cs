@@ -171,7 +171,7 @@ namespace OpenRA.Mods.Common.Graphics
 							s => new Sprite(s.Sheet,
 								FlipRectangle(s.Bounds, subFlipX, subFlipY), ZRamp,
 								new float3(subFlipX ? -s.Offset.X : s.Offset.X, subFlipY ? -s.Offset.Y : s.Offset.Y, s.Offset.Z) + subOffset + offset,
-								s.Channel, blendMode));
+								s.Layer, s.Channel, blendMode));
 
 						var subLength = 0;
 						MiniYaml subLengthYaml;
@@ -194,7 +194,7 @@ namespace OpenRA.Mods.Common.Graphics
 						s => new Sprite(s.Sheet,
 							FlipRectangle(s.Bounds, flipX, flipY), ZRamp,
 							new float3(flipX ? -s.Offset.X : s.Offset.X, flipY ? -s.Offset.Y : s.Offset.Y, s.Offset.Z) + offset,
-							s.Channel, blendMode)).ToArray();
+							s.Layer, s.Channel, blendMode)).ToArray();
 				}
 
 				var depthSprite = LoadField<string>(d, "DepthSprite", null);
@@ -216,12 +216,6 @@ namespace OpenRA.Mods.Common.Graphics
 							ds = cache.Reload(depthSprite)[depthSpriteFrame];
 							depthSprites = cache.AllCached(depthSprite)
 								.Select(ss => ss[depthSpriteFrame]);
-
-							// If that doesn't work then we may be referencing a cached sprite from an earlier sheet
-							// TODO: We could try and reallocate the main sprite, but that requires more complicated code and a perf hit
-							// We'll only cross that bridge if this becomes a problem in reality
-							if (ds.Sheet != s.Sheet)
-								throw new SheetOverflowException("Cross-sheet depth sprite reference: {0}.{1}: {2}");
 						}
 
 						var cw = (ds.Bounds.Left + ds.Bounds.Right) / 2 + (int)(s.Offset.X + depthOffset.X);
@@ -230,7 +224,7 @@ namespace OpenRA.Mods.Common.Graphics
 						var h = s.Bounds.Height / 2;
 
 						var r = Rectangle.FromLTRB(cw - w, ch - h, cw + w, ch + h);
-						return new SpriteWithSecondaryData(s, r, ds.Channel);
+						return new SpriteWithSecondaryData(s, r, ds.Channel, ds.Layer);
 					}).ToArray();
 				}
 
