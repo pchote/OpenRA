@@ -16,12 +16,36 @@ namespace OpenRA.Graphics
 	[StructLayout(LayoutKind.Sequential)]
 	public struct Vertex
 	{
-		public readonly float X, Y, Z, S, T, U, V, P, C;
+		// Vertex position
+		public readonly float X, Y, Z;
+		
+		// Sprites: Texcoords for color and depth textures
+		// Colors: RGBA color
+		// Voxels: Texcoords for color and normal textures
+		public readonly float S, T, U, V;
+		
+		// Sprites: Palette row
+		// Colors: Unused
+		// Voxels: Unused
+		public readonly float P;
+		
+		// Sprites: bitfield
+		//   0: Uses color sprite
+		// 1-2: Color channel select
+		//   3: Uses depth sprite
+		// 4-5: Depth channel select
+		// Colors: Unused
+		// Voxels: bitfield
+		//   0: Uses color sprite
+		// 1-2: Color channel select
+		//   3: Uses normal sprite
+		// 4-5: Normal channel select
+		public readonly uint C;
 
-		public Vertex(float3 xyz, float s, float t, float u, float v, float p, float c)
+		public Vertex(float3 xyz, float s, float t, float u, float v, float p, uint c)
 			: this(xyz.X, xyz.Y, xyz.Z, s, t, u, v, p, c) { }
 
-		public Vertex(float x, float y, float z, float s, float t, float u, float v, float p, float c)
+		public Vertex(float x, float y, float z, float s, float t, float u, float v, float p, uint c)
 		{
 			X = x; Y = y; Z = z;
 			S = s; T = t;

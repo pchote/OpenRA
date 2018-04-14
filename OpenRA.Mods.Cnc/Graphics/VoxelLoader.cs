@@ -22,7 +22,7 @@ namespace OpenRA.Mods.Cnc.Graphics
 {
 	public sealed class VoxelLoader : IDisposable
 	{
-		static readonly float[] ChannelSelect = { 0.75f, 0.25f, -0.25f, -0.75f };
+		static readonly uint[] ChannelSelect = { 0x01, 0x03, 0x05, 0x07 };
 
 		readonly List<Vertex[]> vertices = new List<Vertex[]>();
 		readonly Cache<Pair<string, string>, Voxel> voxels;
@@ -85,16 +85,15 @@ namespace OpenRA.Mods.Cnc.Graphics
 			// of the custom voxel sheet allocation implementation
 			s.Sheet.CommitBufferedData();
 
-			var channelP = ChannelSelect[(int)s.Channel];
-			var channelC = ChannelSelect[(int)t.Channel];
+			var channelC = ChannelSelect[(int)t.Channel] << 3 | ChannelSelect[(int)s.Channel];
 			return new Vertex[6]
 			{
-				new Vertex(coord(0, 0), s.Left, s.Top, t.Left, t.Top, channelP, channelC),
-				new Vertex(coord(su, 0), s.Right, s.Top, t.Right, t.Top, channelP, channelC),
-				new Vertex(coord(su, sv), s.Right, s.Bottom, t.Right, t.Bottom, channelP, channelC),
-				new Vertex(coord(su, sv), s.Right, s.Bottom, t.Right, t.Bottom, channelP, channelC),
-				new Vertex(coord(0, sv), s.Left, s.Bottom, t.Left, t.Bottom, channelP, channelC),
-				new Vertex(coord(0, 0), s.Left, s.Top, t.Left, t.Top, channelP, channelC)
+				new Vertex(coord(0, 0), s.Left, s.Top, t.Left, t.Top, 0, channelC),
+				new Vertex(coord(su, 0), s.Right, s.Top, t.Right, t.Top, 0, channelC),
+				new Vertex(coord(su, sv), s.Right, s.Bottom, t.Right, t.Bottom, 0, channelC),
+				new Vertex(coord(su, sv), s.Right, s.Bottom, t.Right, t.Bottom, 0, channelC),
+				new Vertex(coord(0, sv), s.Left, s.Bottom, t.Left, t.Bottom, 0, channelC),
+				new Vertex(coord(0, 0), s.Left, s.Top, t.Left, t.Top, 0, channelC)
 			};
 		}
 

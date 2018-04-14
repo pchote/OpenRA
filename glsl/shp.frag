@@ -6,7 +6,7 @@ uniform bool EnableDepthPreview;
 uniform float DepthTextureScale;
 
 in vec4 vTexCoord;
-in vec2 vTexMetadata;
+in float vTexPalette;
 in vec4 vChannelMask;
 in vec4 vDepthMask;
 out vec4 fragColor;
@@ -29,7 +29,7 @@ float jet_b(float x)
 void main()
 {
 	vec4 x = texture(DiffuseTexture, vTexCoord.st);
-	vec2 p = vec2(dot(x, vChannelMask), vTexMetadata.s);
+	vec2 p = vec2(dot(x, vChannelMask), vTexPalette);
 	vec4 c = texture(Palette, p);
 
 	// Discard any transparent fragments (both color and depth)

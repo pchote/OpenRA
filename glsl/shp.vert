@@ -1,38 +1,35 @@
 #version 140
+
 uniform vec3 Scroll;
 uniform vec3 r1, r2;
 
 in vec4 aVertexPosition;
 in vec4 aVertexTexCoord;
-in vec2 aVertexTexMetadata;
+in float aVertexTexPalette;
+in uint aVertexTexFlags;
 out vec4 vTexCoord;
-out vec2 vTexMetadata;
+out float vTexPalette;
 out vec4 vChannelMask;
 out vec4 vDepthMask;
 
-vec4 DecodeChannelMask(float x)
+vec4 DecodeChannelMask(uint x)
 {
-	if (x > 0.7)
+	if ((x & 0x07U) == 0x07U)
 		return vec4(0,0,0,1);
-	if (x > 0.5)
+	if ((x & 0x05U) == 0x05U)
 		return vec4(0,0,1,0);
-	if (x > 0.3)
+	if ((x & 0x03U) == 0x03U)
 		return vec4(0,1,0,0);
-	else
+	if ((x & 0x01U) == 0x01U)
 		return vec4(1,0,0,0);
+	return vec4(0,0,0,0);
 }
 
 void main()
 {
 	gl_Position = vec4((aVertexPosition.xyz - Scroll.xyz) * r1 + r2, 1);
 	vTexCoord = aVertexTexCoord;
-	vTexMetadata = aVertexTexMetadata;
-	vChannelMask = DecodeChannelMask(abs(aVertexTexMetadata.t));
-	if (aVertexTexMetadata.t < 0.0)
-	{
-		float x = -aVertexTexMetadata.t * 10.0;
-		vDepthMask = DecodeChannelMask(x - floor(x));
-	}
-	else
-		vDepthMask = vec4(0,0,0,0);
+	vTexPalette = aVertexTexPalette;
+	vChannelMask = DecodeChannelMask(aVertexTexFlags);
+	vDepthMask = DecodeChannelMask(aVertexTexFlags >> 3);
 } 

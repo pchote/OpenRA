@@ -160,7 +160,9 @@ namespace OpenRA.Platforms.Default
 			OpenGL.CheckGLError();
 			OpenGL.glEnableVertexAttribArray(Shader.TexCoordAttributeIndex);
 			OpenGL.CheckGLError();
-			OpenGL.glEnableVertexAttribArray(Shader.TexMetadataAttributeIndex);
+			OpenGL.glEnableVertexAttribArray(Shader.TexPaletteAttributeIndex);
+			OpenGL.CheckGLError();
+			OpenGL.glEnableVertexAttribArray(Shader.TexFlagsAttributeIndex);
 			OpenGL.CheckGLError();
 
 			SDL.SDL_SetModState(SDL.SDL_Keymod.KMOD_NONE);

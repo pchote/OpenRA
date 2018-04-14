@@ -20,7 +20,8 @@ namespace OpenRA.Platforms.Default
 	{
 		public const int VertexPosAttributeIndex = 0;
 		public const int TexCoordAttributeIndex = 1;
-		public const int TexMetadataAttributeIndex = 2;
+		public const int TexPaletteAttributeIndex = 2;
+		public const int TexFlagsAttributeIndex = 3;
 
 		readonly Dictionary<string, int> samplers = new Dictionary<string, int>();
 		readonly Dictionary<int, ITexture> textures = new Dictionary<int, ITexture>();
@@ -74,7 +75,9 @@ namespace OpenRA.Platforms.Default
 			OpenGL.CheckGLError();
 			OpenGL.glBindAttribLocation(program, TexCoordAttributeIndex, "aVertexTexCoord");
 			OpenGL.CheckGLError();
-			OpenGL.glBindAttribLocation(program, TexMetadataAttributeIndex, "aVertexTexMetadata");
+			OpenGL.glBindAttribLocation(program, TexPaletteAttributeIndex, "aVertexTexPalette");
+			OpenGL.CheckGLError();
+			OpenGL.glBindAttribLocation(program, TexFlagsAttributeIndex, "aVertexTexFlags");
 			OpenGL.CheckGLError();
 			OpenGL.glAttachShader(program, vertexShader);
 			OpenGL.CheckGLError();
