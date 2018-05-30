@@ -62,6 +62,9 @@ namespace OpenRA
 		[Desc("For dedicated servers only, controls whether a game can be started with just one human player in the lobby.")]
 		public bool EnableSingleplayer = false;
 
+		[Desc("For dedicated servers only, a private unique string that is used to group related and hide all but the first empty instance.")]
+		public string Group = null;
+
 		[Desc("Query map information from the Resource Center if they are not available locally.")]
 		public bool QueryMapRepository = true;
 

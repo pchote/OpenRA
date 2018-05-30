@@ -108,6 +108,9 @@ namespace OpenRA.Network
 		[FieldLoader.LoadUsing("LoadClients")]
 		public readonly GameClient[] Clients;
 
+		/// <summary>Private group id to send to the master server to support hiding duplicate empty servers.</summary>
+		readonly string serverGroup = null;
+
 		static object LoadClients(MiniYaml yaml)
 		{
 			var clients = new List<GameClient>();
@@ -193,6 +196,9 @@ namespace OpenRA.Network
 			Version = server.ModData.Manifest.Metadata.Version;
 			Protected = !string.IsNullOrEmpty(server.Settings.Password);
 			Clients = server.LobbyInfo.Clients.Select(c => new GameClient(c)).ToArray();
+
+			if (server.Dedicated)
+				serverGroup = server.Settings.Group;
 		}
 
 		public string ToPOSTData(bool lanGame)
@@ -213,6 +219,8 @@ namespace OpenRA.Network
 				// Included for backwards compatibility with older clients that don't support separated Mod/Version.
 				root.Add(new MiniYamlNode("Mods", Mod + "@" + Version));
 			}
+			else if (serverGroup != null)
+				root.Add(new MiniYamlNode("Group", serverGroup));
 
 			var clientsNode = new MiniYaml("");
 			var i = 0;
