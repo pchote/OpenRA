@@ -161,6 +161,7 @@
     <Compile Include="Traits\GpsDot.cs" />
     <Compile Include="Traits\ConyardChronoReturn.cs" />
     <Compile Include="Traits\TransferTimedExternalConditionOnTransform.cs" />
+    <Compile Include="Traits\KillsActorAboveEnergyWall.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenRA.Game\OpenRA.Game.csproj">
