@@ -65,12 +65,14 @@
     <Compile Include="CncLoadScreen.cs" />
     <Compile Include="Traits\Attack\AttackPopupTurreted.cs" />
     <Compile Include="Traits\Buildings\ProductionAirdrop.cs" />
+    <Compile Include="Traits\DrainPrerequisitePowerOnDamage.cs" />
     <Compile Include="Traits\Infiltration\InfiltrateForTransform.cs" />
     <Compile Include="Traits\Render\WithGunboatBody.cs" />
     <Compile Include="Traits\Render\WithEmbeddedTurretSpriteBody.cs" />
     <Compile Include="Traits\Render\WithCargo.cs" />
     <Compile Include="Traits\Render\WithDeliveryAnimation.cs" />
     <Compile Include="Traits\Render\WithRoof.cs" />
+    <Compile Include="Traits\SupportPowers\GrantPrerequisiteChargeDrainPower.cs" />
     <Compile Include="Traits\SupportPowers\IonCannonPower.cs" />
     <Compile Include="UtilityCommands\ImportTiberianDawnLegacyMapCommand.cs" />
     <Compile Include="Projectiles\IonCannon.cs" />
