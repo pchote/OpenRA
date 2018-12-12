@@ -29,6 +29,7 @@ FireballLauncher:
 		Speed: 250
 		TrailImage: fb2
 		Image: FB1
+		BlockingTypes: Wall
 	Warhead@1Dam: SpreadDamage
 		Versus:
 			Light: 50
@@ -44,6 +45,7 @@ Flamer:
 		Image: fb3
 		LaunchAngle: 62
 		Inaccuracy: 853
+		BlockingTypes: Wall
 	Warhead@1Dam: SpreadDamage
 		Spread: 341
 		Damage: 1000
@@ -63,7 +65,6 @@ Napalm:
 	Projectile: Bullet
 		Image: BOMBLET
 		Speed: 85
-		Blockable: false
 	Warhead@1Dam: SpreadDamage
 		Spread: 170
 		Damage: 10000
@@ -150,6 +151,7 @@ Claw:
 	Range: 1c512
 	Projectile: Bullet
 		Speed: 1c682
+		BlockingTypes: Wall
 	Warhead@1Dam: SpreadDamage
 		Spread: 213
 		Damage: 3000

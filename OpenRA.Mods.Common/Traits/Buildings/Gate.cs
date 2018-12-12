@@ -11,6 +11,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using OpenRA.Primitives;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits
@@ -29,6 +30,12 @@ namespace OpenRA.Mods.Common.Traits
 
 		[Desc("Blocks bullets scaled to open value.")]
 		public readonly WDist BlocksProjectilesHeight = new WDist(640);
+
+		[Desc("Block projectiles with overlapping BlockingTypes.")]
+		public readonly BitSet<ProjectileBlockingType> BlocksProjectilesTypes = default(BitSet<ProjectileBlockingType>);
+
+		[Desc("Projectile owner stances to block.")]
+		public readonly Stance BlocksProjectilesStances = Stance.Ally | Stance.Neutral | Stance.Enemy;
 
 		public override object Create(ActorInitializer init) { return new Gate(init, this); }
 	}
@@ -140,5 +147,8 @@ namespace OpenRA.Mods.Common.Traits
 				return new WDist(Info.BlocksProjectilesHeight.Length * (OpenPosition - Position) / OpenPosition);
 			}
 		}
+
+		Stance IBlocksProjectiles.BlockingStances { get { return Info.BlocksProjectilesStances; } }
+		BitSet<ProjectileBlockingType> IBlocksProjectiles.BlockingTypes { get { return Info.BlocksProjectilesTypes; } }
 	}
 }

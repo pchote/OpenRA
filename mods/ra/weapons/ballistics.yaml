@@ -6,6 +6,7 @@
 		Speed: 682
 		Image: 120MM
 		Shadow: True
+		BlockingTypes: Wall
 	Warhead@1Dam: SpreadDamage
 		Spread: 128
 		Damage: 4000
@@ -93,7 +94,7 @@ TurretGun:
 	Range: 12c0
 	Projectile: Bullet
 		Speed: 204
-		Blockable: false
+		-BlockingTypes:
 		LaunchAngle: 62
 		Inaccuracy: 1c938
 	Warhead@1Dam: SpreadDamage

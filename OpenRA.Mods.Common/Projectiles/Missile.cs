@@ -17,6 +17,8 @@ using OpenRA.Graphics;
 using OpenRA.Mods.Common.Effects;
 using OpenRA.Mods.Common.Graphics;
 using OpenRA.Mods.Common.Traits;
+using OpenRA.Mods.Common.Warheads;
+using OpenRA.Primitives;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Projectiles
@@ -59,8 +61,8 @@ namespace OpenRA.Mods.Common.Projectiles
 		[Desc("How many ticks before this missile is armed and can explode.")]
 		public readonly int Arm = 0;
 
-		[Desc("Is the missile blocked by actors with BlocksProjectiles: trait.")]
-		public readonly bool Blockable = true;
+		[Desc("BlocksProjectiles types that will block this projectile.")]
+		public readonly BitSet<ProjectileBlockingType> BlockingTypes = default(BitSet<ProjectileBlockingType>);
 
 		[Desc("Is the missile aware of terrain height levels. Only needed for mods with real, non-visual height levels.")]
 		public readonly bool TerrainHeightAware = false;
@@ -836,11 +838,18 @@ namespace OpenRA.Mods.Common.Projectiles
 			// Check for walls or other blocking obstacles
 			var shouldExplode = false;
 			WPos blockedPos;
-			if (info.Blockable && BlocksProjectiles.AnyBlockingActorsBetween(world, lastPos, pos, info.Width,
-				out blockedPos))
+			var blocker = BlocksProjectiles.FirstBlockerOnLineOrDefault(world, SourceActor.Owner, info.BlockingTypes,
+				lastPos, pos, info.Width, out blockedPos);
+
+			if (blocker != null)
 			{
 				pos = blockedPos;
 				shouldExplode = true;
+
+				// Display blocked effect
+				foreach (var w in args.Weapon.Warheads)
+					if (w is CreateBlockedEffectWarhead)
+						((CreateBlockedEffectWarhead)w).DoBlockedImpact(pos, args.SourceActor, blocker.BlockingTypes);
 			}
 
 			// Create the sprite trail effect

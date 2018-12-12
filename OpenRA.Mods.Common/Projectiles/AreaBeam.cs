@@ -16,6 +16,8 @@ using OpenRA.GameRules;
 using OpenRA.Graphics;
 using OpenRA.Mods.Common.Graphics;
 using OpenRA.Mods.Common.Traits;
+using OpenRA.Mods.Common.Warheads;
+using OpenRA.Primitives;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Projectiles
@@ -49,8 +51,8 @@ namespace OpenRA.Mods.Common.Projectiles
 		[Desc("Maximum offset at the maximum range.")]
 		public readonly WDist Inaccuracy = WDist.Zero;
 
-		[Desc("Can this projectile be blocked when hitting actors with an IBlocksProjectiles trait.")]
-		public readonly bool Blockable = false;
+		[Desc("BlocksProjectiles types that will block this projectile.")]
+		public readonly BitSet<ProjectileBlockingType> BlockingTypes = default(BitSet<ProjectileBlockingType>);
 
 		[Desc("Does the beam follow the target.")]
 		public readonly bool TrackTarget = false;
@@ -203,14 +205,21 @@ namespace OpenRA.Mods.Common.Projectiles
 					tailPos = WPos.LerpQuadratic(args.Source, target, WAngle.Zero, tailTicks, length);
 			}
 
-			// Check for blocking actors
+			// Check for walls or other blocking obstacles
 			WPos blockedPos;
-			if (info.Blockable && BlocksProjectiles.AnyBlockingActorsBetween(world, tailPos, headPos,
-				info.Width, out blockedPos))
+			var blocker = BlocksProjectiles.FirstBlockerOnLineOrDefault(world, args.SourceActor.Owner, info.BlockingTypes,
+				tailPos, headPos, info.Width, out blockedPos);
+
+			if (blocker != null)
 			{
 				headPos = blockedPos;
 				target = headPos;
 				length = Math.Min(headTicks, length);
+
+				// Display blocked effect
+				foreach (var w in args.Weapon.Warheads)
+					if (w is CreateBlockedEffectWarhead)
+						((CreateBlockedEffectWarhead)w).DoBlockedImpact(headPos, args.SourceActor, blocker.BlockingTypes);
 			}
 
 			// Damage is applied to intersected actors every DamageInterval ticks

@@ -2010,6 +2010,7 @@ BRIK:
 	Crushable:
 		CrushClasses: heavywall
 	BlocksProjectiles:
+		Types: Wall
 	LineBuild:
 		NodeTypes: concrete
 	LineBuildNode:

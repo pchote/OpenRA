@@ -1,10 +1,10 @@
 FireballLauncher:
 	Projectile:
-		Blockable: false
+		-BlockingTypes:
 
 TurretGun:
 	Projectile:
-		Blockable: false
+		-BlockingTypes:
 
 SuperTankPrimary:
 	Inherits: 120mm

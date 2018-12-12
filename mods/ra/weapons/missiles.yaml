@@ -6,7 +6,6 @@
 	Projectile: Missile
 		Speed: 213
 		Arm: 2
-		Blockable: false
 		ContrailLength: 10
 		Inaccuracy: 128
 		Image: DRAGON
@@ -296,7 +295,6 @@ SubMissile:
 	-Projectile:
 	Projectile: Bullet
 		Speed: 162
-		Blockable: false
 		LaunchAngle: 120
 		Inaccuracy: 0c614
 		Image: MISSILE
@@ -319,7 +317,6 @@ SCUD:
 	-Projectile:
 	Projectile: Bullet
 		Speed: 170
-		Blockable: false
 		TrailImage: smokey
 		TrailDelay: 5
 		Inaccuracy: 213

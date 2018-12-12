@@ -9,13 +9,24 @@
  */
 #endregion
 
+using System.Collections.Generic;
 using System.Linq;
+using OpenRA.Primitives;
+using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits
 {
+	public sealed class ProjectileBlockingType { ProjectileBlockingType() { } }
+
 	[Desc("This actor blocks bullets and missiles with 'Blockable' property.")]
 	public class BlocksProjectilesInfo : ConditionalTraitInfo, IBlocksProjectilesInfo
 	{
+		[Desc("Block projectiles with overlapping BlockingTypes.")]
+		public readonly BitSet<ProjectileBlockingType> Types = default(BitSet<ProjectileBlockingType>);
+
+		[Desc("Projectile owner stances to block.")]
+		public readonly Stance Stances = Stance.Ally | Stance.Neutral | Stance.Enemy;
+
 		public readonly WDist Height = WDist.FromCells(1);
 
 		public override object Create(ActorInitializer init) { return new BlocksProjectiles(init.Self, this); }
@@ -27,41 +38,45 @@ namespace OpenRA.Mods.Common.Traits
 			: base(info) { }
 
 		WDist IBlocksProjectiles.BlockingHeight { get { return Info.Height; } }
+		Stance IBlocksProjectiles.BlockingStances { get { return Info.Stances; } }
+		BitSet<ProjectileBlockingType> IBlocksProjectiles.BlockingTypes { get { return Info.Types; } }
 
-		public static bool AnyBlockingActorAt(World world, WPos pos)
-		{
-			var dat = world.Map.DistanceAboveTerrain(pos);
-
-			return world.ActorMap.GetActorsAt(world.Map.CellContaining(pos))
-				.Any(a => a.TraitsImplementing<IBlocksProjectiles>()
-					.Where(t => t.BlockingHeight > dat)
-					.Any(Exts.IsTraitEnabled));
-		}
-
-		public static bool AnyBlockingActorsBetween(World world, WPos start, WPos end, WDist width, out WPos hit)
+		public static IBlocksProjectiles FirstBlockerOnLineOrDefault(World world, Player owner, BitSet<ProjectileBlockingType> types,
+			WPos start, WPos end, WDist width, out WPos blockerPos)
 		{
 			var actors = world.FindBlockingActorsOnLine(start, end, width);
 			var length = (end - start).Length;
 
+			IBlocksProjectiles blocker = null;
+			int blockerRange = 0;
+			blockerPos = WPos.Zero;
+
 			foreach (var a in actors)
 			{
+				var stance = owner.Stances[a.Owner];
 				var blockers = a.TraitsImplementing<IBlocksProjectiles>()
-					.Where(Exts.IsTraitEnabled).ToList();
+					.Where(t => t.IsTraitEnabled() && t.BlockingStances.HasStance(stance) && t.BlockingTypes.Overlaps(types));
 
 				if (!blockers.Any())
 					continue;
 
 				var hitPos = WorldExtensions.MinimumPointLineProjection(start, end, a.CenterPosition);
 				var dat = world.Map.DistanceAboveTerrain(hitPos);
-				if ((hitPos - start).Length < length && blockers.Any(t => t.BlockingHeight > dat))
+
+				var range = (hitPos - start).Length;
+				if (range >= length || (blocker != null && range > blockerRange))
+					continue;
+
+				var testBlocker = blockers.FirstOrDefault(b => b.BlockingHeight > dat);
+				if (testBlocker != null)
 				{
-					hit = hitPos;
-					return true;
+					blocker = testBlocker;
+					blockerPos = hitPos;
+					blockerRange = range;
 				}
 			}
 
-			hit = WPos.Zero;
-			return false;
+			return blocker;
 		}
 	}
 }

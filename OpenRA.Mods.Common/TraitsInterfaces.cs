@@ -40,6 +40,8 @@ namespace OpenRA.Mods.Common.Traits
 	public interface IBlocksProjectiles
 	{
 		WDist BlockingHeight { get; }
+		Stance BlockingStances { get; }
+		BitSet<ProjectileBlockingType> BlockingTypes { get; }
 	}
 
 	[RequireExplicitImplementation]

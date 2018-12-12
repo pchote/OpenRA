@@ -14,6 +14,8 @@ using System.Linq;
 using OpenRA.GameRules;
 using OpenRA.Graphics;
 using OpenRA.Mods.Common.Traits;
+using OpenRA.Mods.Common.Warheads;
+using OpenRA.Primitives;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Projectiles
@@ -24,8 +26,8 @@ namespace OpenRA.Mods.Common.Projectiles
 		[Desc("Maximum offset at the maximum range.")]
 		public readonly WDist Inaccuracy = WDist.Zero;
 
-		[Desc("Projectile can be blocked.")]
-		public readonly bool Blockable = false;
+		[Desc("BlocksProjectiles types that will block this projectile.")]
+		public readonly BitSet<ProjectileBlockingType> BlockingTypes = default(BitSet<ProjectileBlockingType>);
 
 		[Desc("The width of the projectile.")]
 		public readonly WDist Width = new WDist(1);
@@ -65,12 +67,19 @@ namespace OpenRA.Mods.Common.Projectiles
 
 		public void Tick(World world)
 		{
-			// Check for blocking actors
+			// Check for walls or other blocking obstacles
 			WPos blockedPos;
-			if (info.Blockable && BlocksProjectiles.AnyBlockingActorsBetween(world, source, target.CenterPosition,
-				info.Width, out blockedPos))
+			var blocker = BlocksProjectiles.FirstBlockerOnLineOrDefault(world, args.SourceActor.Owner, info.BlockingTypes,
+				source, target.CenterPosition, info.Width, out blockedPos);
+
+			if (blocker != null)
 			{
 				target = Target.FromPos(blockedPos);
+
+				// Display blocked effect
+				foreach (var w in args.Weapon.Warheads)
+					if (w is CreateBlockedEffectWarhead)
+						((CreateBlockedEffectWarhead)w).DoBlockedImpact(blockedPos, args.SourceActor, blocker.BlockingTypes);
 			}
 
 			args.Weapon.Impact(target, args.SourceActor, args.DamageModifiers);

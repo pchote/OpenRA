@@ -15,6 +15,8 @@ using OpenRA.GameRules;
 using OpenRA.Graphics;
 using OpenRA.Mods.Common.Graphics;
 using OpenRA.Mods.Common.Traits;
+using OpenRA.Mods.Common.Warheads;
+using OpenRA.Primitives;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Projectiles
@@ -28,8 +30,8 @@ namespace OpenRA.Mods.Common.Projectiles
 		[Desc("Maximum offset at the maximum range.")]
 		public readonly WDist Inaccuracy = WDist.Zero;
 
-		[Desc("Can this projectile be blocked when hitting actors with an IBlocksProjectiles trait.")]
-		public readonly bool Blockable = false;
+		[Desc("BlocksProjectiles types that will block this projectile.")]
+		public readonly BitSet<ProjectileBlockingType> BlockingTypes = default(BitSet<ProjectileBlockingType>);
 
 		[Desc("Duration of the beam and helix")]
 		public readonly int Duration = 15;
@@ -136,11 +138,20 @@ namespace OpenRA.Mods.Common.Projectiles
 
 		void CalculateVectors()
 		{
-			// Check for blocking actors
+			// Check for walls or other blocking obstacles
 			WPos blockedPos;
-			if (info.Blockable && BlocksProjectiles.AnyBlockingActorsBetween(args.SourceActor.World, target, args.Source,
-					info.BeamWidth, out blockedPos))
+			var blocker = BlocksProjectiles.FirstBlockerOnLineOrDefault(args.SourceActor.World, args.SourceActor.Owner, info.BlockingTypes,
+				args.Source, target, info.BeamWidth, out blockedPos);
+
+			if (blocker != null)
+			{
 				target = blockedPos;
+
+				// Display blocked effect
+				foreach (var w in args.Weapon.Warheads)
+					if (w is CreateBlockedEffectWarhead)
+						((CreateBlockedEffectWarhead)w).DoBlockedImpact(target, args.SourceActor, blocker.BlockingTypes);
+			}
 
 			// Note: WAngle.Sin(x) = 1024 * Math.Sin(2pi/1024 * x)
 			AngleStep = new WAngle(1024 / info.QuantizationCount);
