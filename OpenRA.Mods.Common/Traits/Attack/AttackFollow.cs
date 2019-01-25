@@ -28,6 +28,7 @@ namespace OpenRA.Mods.Common.Traits
 		protected Target requestedTarget;
 		protected bool requestedForceAttack;
 		protected int requestedTargetLastTick;
+		protected Target opportunityTarget;
 		Mobile mobile;
 
 		public AttackFollow(Actor self, AttackFollowInfo info)
@@ -59,7 +60,7 @@ namespace OpenRA.Mods.Common.Traits
 		protected override void Tick(Actor self)
 		{
 			if (IsTraitDisabled)
-				requestedTarget = Target.Invalid;
+				requestedTarget = opportunityTarget = Target.Invalid;
 
 			if (requestedTargetLastTick != self.World.WorldTick)
 			{
@@ -78,6 +79,12 @@ namespace OpenRA.Mods.Common.Traits
 				IsAiming = CanAimAtTarget(self, requestedTarget, requestedForceAttack);
 				if (IsAiming)
 					DoAttack(self, requestedTarget);
+			}
+			else if (opportunityTarget.Type != TargetType.Invalid)
+			{
+				IsAiming = CanAimAtTarget(self, opportunityTarget, false);
+				if (IsAiming)
+					DoAttack(self, opportunityTarget);
 			}
 			else
 				IsAiming = false;
@@ -105,18 +112,13 @@ namespace OpenRA.Mods.Common.Traits
 
 		public override void OnStopOrder(Actor self)
 		{
-			requestedTarget = Target.Invalid;
+			requestedTarget = opportunityTarget = Target.Invalid;
 			base.OnStopOrder(self);
-		}
-
-		public bool HasReachableTarget(bool allowMove)
-		{
-			return IsReachableTarget(requestedTarget, allowMove);
 		}
 
 		void INotifyOwnerChanged.OnOwnerChanged(Actor self, Player oldOwner, Player newOwner)
 		{
-			requestedTarget = Target.Invalid;
+			requestedTarget = opportunityTarget = Target.Invalid;
 		}
 
 		class AttackActivity : Activity
@@ -157,7 +159,12 @@ namespace OpenRA.Mods.Common.Traits
 			public override Activity Tick(Actor self)
 			{
 				if (IsCanceled)
+				{
+					// Cancel the requested target, but keep firing on it while in range
+					attack.opportunityTarget = attack.requestedTarget;
+					attack.requestedTarget = Target.Invalid;
 					return NextActivity;
+				}
 
 				// Check that AttackFollow hasn't cancelled the target by modifying attack.Target
 				// Having both this and AttackFollow modify that field is a horrible hack.
