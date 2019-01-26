@@ -1,6 +1,6 @@
 Metadata:
 	Title: Dune 2000
-	Version: {DEV_VERSION}
+	Version: release-20181215
 	Website: https://www.openra.net
 	WebIcon32: https://www.openra.net/images/icons/d2k_32x32.png
 
@@ -23,7 +23,7 @@ Packages:
 
 MapFolders:
 	d2k|maps: System
-	~^maps/d2k/{DEV_VERSION}: User
+	~^maps/d2k/release-20181215: User
 
 Rules:
 	d2k|rules/misc.yaml
