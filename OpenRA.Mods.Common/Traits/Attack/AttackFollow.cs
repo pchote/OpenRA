@@ -20,6 +20,9 @@ namespace OpenRA.Mods.Common.Traits
 	[Desc("Actor will follow units until in range to attack them.")]
 	public class AttackFollowInfo : AttackBaseInfo
 	{
+		[Desc("Automatically acquire and fire on targets of opportunity when not actively attacking.")]
+		public readonly bool OpportunityFire = true;
+
 		public override object Create(ActorInitializer init) { return new AttackFollow(init.Self, this); }
 	}
 
@@ -28,7 +31,9 @@ namespace OpenRA.Mods.Common.Traits
 		protected Target requestedTarget;
 		protected bool requestedForceAttack;
 		protected int requestedTargetLastTick;
+		protected Target opportunityTarget;
 		Mobile mobile;
+		AutoTarget autoTarget;
 
 		public AttackFollow(Actor self, AttackFollowInfo info)
 			: base(self, info) { }
@@ -36,6 +41,7 @@ namespace OpenRA.Mods.Common.Traits
 		protected override void Created(Actor self)
 		{
 			mobile = self.TraitOrDefault<Mobile>();
+			autoTarget = self.TraitOrDefault<AutoTarget>();
 			base.Created(self);
 		}
 
@@ -59,7 +65,7 @@ namespace OpenRA.Mods.Common.Traits
 		protected override void Tick(Actor self)
 		{
 			if (IsTraitDisabled)
-				requestedTarget = Target.Invalid;
+				requestedTarget = opportunityTarget = Target.Invalid;
 
 			if (requestedTargetLastTick != self.World.WorldTick)
 			{
@@ -80,7 +86,22 @@ namespace OpenRA.Mods.Common.Traits
 					DoAttack(self, requestedTarget);
 			}
 			else
+			{
 				IsAiming = false;
+
+				if (opportunityTarget.Type != TargetType.Invalid)
+					IsAiming = CanAimAtTarget(self, opportunityTarget, false);
+
+				if (!IsAiming && ((AttackFollowInfo)Info).OpportunityFire && autoTarget != null)
+				{
+					opportunityTarget = autoTarget.ScanForTarget(self, false);
+					if (opportunityTarget.Type != TargetType.Invalid)
+						IsAiming = CanAimAtTarget(self, opportunityTarget, false);
+				}
+
+				if (IsAiming)
+					DoAttack(self, opportunityTarget);
+			}
 
 			base.Tick(self);
 		}
@@ -105,18 +126,13 @@ namespace OpenRA.Mods.Common.Traits
 
 		public override void OnStopOrder(Actor self)
 		{
-			requestedTarget = Target.Invalid;
+			requestedTarget = opportunityTarget = Target.Invalid;
 			base.OnStopOrder(self);
-		}
-
-		public bool HasReachableTarget(bool allowMove)
-		{
-			return IsReachableTarget(requestedTarget, allowMove);
 		}
 
 		void INotifyOwnerChanged.OnOwnerChanged(Actor self, Player oldOwner, Player newOwner)
 		{
-			requestedTarget = Target.Invalid;
+			requestedTarget = opportunityTarget = Target.Invalid;
 		}
 
 		class AttackActivity : Activity
@@ -157,7 +173,12 @@ namespace OpenRA.Mods.Common.Traits
 			public override Activity Tick(Actor self)
 			{
 				if (IsCanceled)
+				{
+					// Cancel the requested target, but keep firing on it while in range
+					attack.opportunityTarget = attack.requestedTarget;
+					attack.requestedTarget = Target.Invalid;
 					return NextActivity;
+				}
 
 				// Check that AttackFollow hasn't cancelled the target by modifying attack.Target
 				// Having both this and AttackFollow modify that field is a horrible hack.
