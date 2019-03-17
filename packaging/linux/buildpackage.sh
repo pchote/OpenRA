@@ -46,7 +46,7 @@ echo "Building core files"
 
 pushd "${SRCDIR}" > /dev/null || exit 1
 make linux-dependencies
-make core SDK="-sdk:4.5"
+make core
 make version VERSION="${TAG}"
 make install-engine prefix="usr" DESTDIR="${BUILTDIR}/"
 make install-common-mod-files prefix="usr" DESTDIR="${BUILTDIR}/"
