@@ -51,10 +51,10 @@ branches:
 
 before_deploy:
  - export PATH=$PATH:$HOME/usr/bin
- - DOTVERSION=`echo ${TRAVIS_TAG} | sed "s/-/\\./g"`
+ - DOTVERSION=`echo release-20190314 | sed "s/-/\\./g"`
  - cd packaging
  - mkdir build
- - ./package-all.sh ${TRAVIS_TAG} ${PWD}/build/
+ - ./package-all.sh release-20190314 ${PWD}/build/
 deploy:
   provider: releases
   api_key:
