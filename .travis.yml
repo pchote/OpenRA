@@ -1,6 +1,10 @@
 # Travis-CI Build for OpenRA
 # see travis-ci.org for details
 
+os:
+  - linux
+  - osx
+
 dist: xenial
 language: csharp
 mono: 5.10.0
@@ -21,6 +25,9 @@ addons:
     - genisoimage
     - fakeroot
     - zsync
+  homebrew:
+    packages:
+    - markdown
 
 # Environment variables
 env:
@@ -32,17 +39,12 @@ env:
 # call OpenRA to check for YAML errors
 # Run the NUnit tests
 script:
- - wget http://mirrors.kernel.org/ubuntu/pool/universe/n/nsis/nsis-common_3.03-2_all.deb
- - wget http://mirrors.kernel.org/ubuntu/pool/universe/n/nsis/nsis_3.03-2_amd64.deb
- - sudo dpkg -i nsis-common_3.03-2_all.deb
- - sudo dpkg -i nsis_3.03-2_amd64.deb
- - makensis -VERSION
  - travis_retry make all-dependencies
  - make all
- - make check
- - make check-scripts
- - make test
- - make nunit
+ - test ${TRAVIS_TAG} || make check
+ - test ${TRAVIS_TAG} || make check-scripts
+ - test ${TRAVIS_TAG} || make test
+ - test ${TRAVIS_TAG} || make nunit
 
 # Only watch the development branch and tagged release.
 branches:
@@ -54,11 +56,16 @@ branches:
    - bleed
 
 before_deploy:
- - export PATH=$PATH:$HOME/usr/bin
- - DOTVERSION=`echo ${TRAVIS_TAG} | sed "s/-/\\./g"`
+ - if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then
+     wget http://mirrors.kernel.org/ubuntu/pool/universe/n/nsis/nsis-common_3.03-2_all.deb;
+     wget http://mirrors.kernel.org/ubuntu/pool/universe/n/nsis/nsis_3.03-2_amd64.deb;
+     sudo dpkg -i nsis-common_3.03-2_all.deb;
+     sudo dpkg -i nsis_3.03-2_amd64.deb;
+   fi;
  - cd packaging
  - mkdir build
  - ./package-all.sh ${TRAVIS_TAG} ${PWD}/build/
+
 deploy:
   provider: releases
   api_key:

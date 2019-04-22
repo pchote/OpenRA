@@ -27,9 +27,13 @@ function build_package() (
 
 #exit on any non-zero exited (failed) command
 set -e
-build_package windows
-build_package osx
-build_package linux
-build_package source
+
+if [[ "$OSTYPE" != "darwin"* ]]; then
+  build_package windows
+  build_package linux
+  build_package source
+else
+  build_package osx
+fi
 
 echo "Package build done."
