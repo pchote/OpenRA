@@ -143,16 +143,6 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			{
 				remapDialogRoot.RemoveChildren();
 
-				if (remapButton.IsHighlighted())
-				{
-					remapButton.IsHighlighted = () => false;
-
-					if (remapDialogPlaceholder != null)
-						remapDialogPlaceholder.Visible = true;
-
-					return;
-				}
-
 				if (remapDialogPlaceholder != null)
 					remapDialogPlaceholder.Visible = false;
 
