@@ -114,8 +114,6 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				hotkeyEntry.YieldKeyboardFocus();
 				Save();
 			}
-			else
-				hotkeyEntry.TakeKeyboardFocus();
 
 			isValidating = false;
 		}
@@ -129,7 +127,6 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		void Cancel()
 		{
-			cancelButton.Disabled = true;
 			hotkeyEntry.Key = currentHotkey;
 			Validate();
 		}
