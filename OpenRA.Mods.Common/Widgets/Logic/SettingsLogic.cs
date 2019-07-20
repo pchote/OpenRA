@@ -125,7 +125,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			ss.OnChange += x => field.SetValue(group, x);
 		}
 
-		static void BindHotkeyPref(HotkeyDefinition hd, HotkeyManager manager, Widget template, Widget parent, Widget remapDialogRoot)
+		static void BindHotkeyPref(HotkeyDefinition hd, HotkeyManager manager, Widget template, Widget parent, Widget remapDialogRoot, bool isFirst)
 		{
 			var key = template.Clone() as Widget;
 			key.Id = hd.Name;
@@ -139,32 +139,38 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			if (manager.GetFirstDuplicate(hd.Name, manager[hd.Name].GetValue(), hd) != null)
 				remapButton.GetColor = () => ChromeMetrics.Get<Color>("HotkeyColorInvalid");
 
-			remapButton.OnClick = () =>
+			var widgetArgs = new WidgetArgs
+			{
+				{
+					"onSave", () =>
+					{
+						WidgetUtils.TruncateButtonToTooltip(remapButton, manager[hd.Name].GetValue().DisplayString());
+						remapButton.GetColor = () => ChromeMetrics.Get<Color>("ButtonTextColor");
+					}
+				},
+				{ "hotkeyDefinition", hd },
+				{ "hotkeyManager", manager },
+			};
+
+			if (isFirst)
 			{
 				remapDialogRoot.RemoveChildren();
+				remapButton.IsHighlighted = () => true;
+				Ui.LoadWidget("HOTKEY_DIALOG", remapDialogRoot, widgetArgs);
+			}
 
-				var siblings = parent.Children;
-				foreach (var sibling in siblings)
+			remapButton.OnClick = () =>
+			{
+				foreach (var sibling in parent.Children)
 				{
 					var button = sibling.GetOrNull<ButtonWidget>("HOTKEY");
 					if (button != null)
 						button.IsHighlighted = () => false;
 				}
 
+				remapDialogRoot.RemoveChildren();
 				remapButton.IsHighlighted = () => true;
-
-				Ui.LoadWidget("HOTKEY_DIALOG", remapDialogRoot, new WidgetArgs
-				{
-					{
-						"onSave", () =>
-						{
-							WidgetUtils.TruncateButtonToTooltip(remapButton, manager[hd.Name].GetValue().DisplayString());
-							remapButton.GetColor = () => ChromeMetrics.Get<Color>("ButtonTextColor");
-						}
-					},
-					{ "hotkeyDefinition", hd },
-					{ "hotkeyManager", manager },
-				});
+				Ui.LoadWidget("HOTKEY_DIALOG", remapDialogRoot, widgetArgs);
 			};
 
 			parent.AddChild(key);
@@ -458,6 +464,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			MiniYaml hotkeyGroups;
 			if (logicArgs.TryGetValue("HotkeyGroups", out hotkeyGroups))
 			{
+				var isFirstHotkey = true;
 				foreach (var hg in hotkeyGroups.Nodes)
 				{
 					var templateNode = hg.Value.Nodes.FirstOrDefault(n => n.Key == "Template");
@@ -473,10 +480,18 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					var added = new HashSet<HotkeyDefinition>();
 					var template = templates.Get(templateNode.Value.Value);
 					var remapDialogRoot = panel.Get("HOTKEY_DIALOG_ROOT");
+
 					foreach (var t in types)
+					{
 						foreach (var hd in modData.Hotkeys.Definitions.Where(k => k.Types.Contains(t)))
+						{
 							if (added.Add(hd))
-								BindHotkeyPref(hd, modData.Hotkeys, template, hotkeyList, remapDialogRoot);
+							{
+								BindHotkeyPref(hd, modData.Hotkeys, template, hotkeyList, remapDialogRoot, isFirstHotkey);
+								isFirstHotkey = false;
+							}
+						}
+					}
 				}
 			}
 
