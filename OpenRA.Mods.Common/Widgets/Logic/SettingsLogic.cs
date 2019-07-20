@@ -125,7 +125,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			ss.OnChange += x => field.SetValue(group, x);
 		}
 
-		static void BindHotkeyPref(HotkeyDefinition hd, HotkeyManager manager, Widget template, Widget parent, Widget remapDialogRoot, Widget remapDialogPlaceholder)
+		static void BindHotkeyPref(HotkeyDefinition hd, HotkeyManager manager, Widget template, Widget parent, Widget remapDialogRoot)
 		{
 			var key = template.Clone() as Widget;
 			key.Id = hd.Name;
@@ -142,9 +142,6 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			remapButton.OnClick = () =>
 			{
 				remapDialogRoot.RemoveChildren();
-
-				if (remapDialogPlaceholder != null)
-					remapDialogPlaceholder.Visible = false;
 
 				var siblings = parent.Children;
 				foreach (var sibling in siblings)
@@ -476,11 +473,10 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					var added = new HashSet<HotkeyDefinition>();
 					var template = templates.Get(templateNode.Value.Value);
 					var remapDialogRoot = panel.Get("HOTKEY_DIALOG_ROOT");
-					var remapDialogPlaceholder = panel.GetOrNull("HOTKEY_DIALOG_PLACEHOLDER");
 					foreach (var t in types)
 						foreach (var hd in modData.Hotkeys.Definitions.Where(k => k.Types.Contains(t)))
 							if (added.Add(hd))
-								BindHotkeyPref(hd, modData.Hotkeys, template, hotkeyList, remapDialogRoot, remapDialogPlaceholder);
+								BindHotkeyPref(hd, modData.Hotkeys, template, hotkeyList, remapDialogRoot);
 				}
 			}
 
