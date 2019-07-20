@@ -45,6 +45,7 @@ Background@HOTKEY_DIALOG:
 			Width: 65
 			Height: 25
 			Text: Clear
+			Font: Bold
 			TooltipText: Unbind the hotkey
 			TooltipContainer: TOOLTIP_CONTAINER
 			TooltipTemplate: SIMPLE_TOOLTIP
@@ -54,6 +55,7 @@ Background@HOTKEY_DIALOG:
 			Width: 65
 			Height: 25
 			Text: Reset
+			Font: Bold
 			TooltipText: Reset to default
 			TooltipContainer: TOOLTIP_CONTAINER
 			TooltipTemplate: SIMPLE_TOOLTIP
@@ -63,6 +65,7 @@ Background@HOTKEY_DIALOG:
 			Width: 65
 			Height: 25
 			Text: Cancel
+			Font: Bold
 			TooltipText: Cancel the operation
 			TooltipContainer: TOOLTIP_CONTAINER
 			TooltipTemplate: SIMPLE_TOOLTIP
