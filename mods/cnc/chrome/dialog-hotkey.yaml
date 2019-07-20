@@ -80,4 +80,3 @@ Background@HOTKEY_DIALOG:
 			TooltipText: Cancel the operation
 			TooltipContainer: TOOLTIP_CONTAINER
 			TooltipTemplate: SIMPLE_TOOLTIP
-		TooltipContainer@TOOLTIP_CONTAINER:
