@@ -34,7 +34,9 @@ namespace OpenRA.Mods.Common.Traits
 		Empty = 0,
 		HasActor = 1,
 		FreeSubCell = 2,
-		Crushable = 4
+		HasMovingActor = 4,
+		Crushable = 8,
+		HasTemporaryBlocker = 16
 	}
 
 	public static class LocomoterExts
@@ -199,7 +201,7 @@ namespace OpenRA.Mods.Common.Traits
 		public virtual object Create(ActorInitializer init) { return new Locomotor(init.Self, this); }
 	}
 
-	public class Locomotor : IWorldLoaded
+	public class Locomotor : ITick, IWorldLoaded
 	{
 		struct CellCache
 		{
@@ -227,11 +229,11 @@ namespace OpenRA.Mods.Common.Traits
 
 		public readonly LocomotorInfo Info;
 		CellLayer<CellCache> pathabilityCache;
-		LongBitSet<PlayerBitMask> allPlayerMask = default(LongBitSet<PlayerBitMask>);
 
 		LocomotorInfo.TerrainInfo[] terrainInfos;
 		World world;
 		readonly HashSet<CPos> updatedTerrainCells = new HashSet<CPos>();
+		readonly HashSet<CPos> dirtyCells = new HashSet<CPos>();
 
 		IActorMap actorMap;
 		bool sharesCell;
@@ -255,7 +257,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (!world.Map.Contains(destNode))
 				return short.MaxValue;
 
-			var cellCache = pathabilityCache[destNode];
+			var cellCache = GetCache(destNode);
 
 			if (cellCache.Cost == short.MaxValue ||
 				!CanMoveFreelyInto(actor, ignoreActor, destNode, check, cellCache))
@@ -267,7 +269,7 @@ namespace OpenRA.Mods.Common.Traits
 		// Determines whether the actor is blocked by other Actors
 		public bool CanMoveFreelyInto(Actor actor, CPos cell, Actor ignoreActor, CellConditions check)
 		{
-			return CanMoveFreelyInto(actor, ignoreActor, cell, check, pathabilityCache[cell]);
+			return CanMoveFreelyInto(actor, ignoreActor, cell, check, GetCache(cell));
 		}
 
 		bool CanMoveFreelyInto(Actor actor, Actor ignoreActor, CPos cell, CellConditions check, CellCache cellCache)
@@ -288,18 +290,23 @@ namespace OpenRA.Mods.Common.Traits
 			if (cellBlocking == CellBlocking.Empty)
 				return true;
 
-			// We are blocked
-			if (ignoreActor == null && blocking.Overlaps(actor.Owner.PlayerMask))
-				return false;
-
-			if (cellBlocking.HasCellBlocking(CellBlocking.Crushable))
-				return true;
-
 			if (sharesCell && cellBlocking.HasCellBlocking(CellBlocking.FreeSubCell))
 				return true;
 
+			// We are blocked
+			if (ignoreActor == null && blocking.Overlaps(actor.Owner.PlayerMask) && cellBlocking < CellBlocking.Crushable)
+				return false;
+
+			if (ignoreActor == null && check == CellConditions.BlockedByMovers && cellBlocking < CellBlocking.Crushable)
+				return false;
+
+			// We can only do an early exit here when we know the unit is not moving.
+			// Because we cant distinguish between crushable and ally moving (which we need to fall back to the old code)
+			if (!blocking.Overlaps(actor.Owner.PlayerMask) && cellBlocking.HasCellBlocking(CellBlocking.Crushable) && !cellBlocking.HasCellBlocking(CellBlocking.HasMovingActor))
+				return true;
+
 			foreach (var otherActor in world.ActorMap.GetActorsAt(cell))
-				if (IsBlockedBy(actor, otherActor, ignoreActor, check))
+				if (IsBlockedBy(actor, otherActor, ignoreActor, check, cellBlocking))
 					return false;
 
 			return true;
@@ -307,12 +314,13 @@ namespace OpenRA.Mods.Common.Traits
 
 		public SubCell GetAvailableSubCell(Actor self, CPos cell, SubCell preferredSubCell = SubCell.Any, Actor ignoreActor = null, CellConditions check = CellConditions.All)
 		{
-			if (MovementCostForCell(cell) == short.MaxValue)
+			var cache = pathabilityCache[cell];
+			if (cache.Cost == short.MaxValue)
 				return SubCell.Invalid;
 
 			if (check.HasCellCondition(CellConditions.TransientActors))
 			{
-				Func<Actor, bool> checkTransient = otherActor => IsBlockedBy(self, otherActor, ignoreActor, check);
+				Func<Actor, bool> checkTransient = otherActor => IsBlockedBy(self, otherActor, ignoreActor, check, cache.CellBlocking);
 
 				if (!sharesCell)
 					return world.ActorMap.AnyActorsAt(cell, SubCell.FullCell, checkTransient) ? SubCell.Invalid : SubCell.FullCell;
@@ -326,25 +334,28 @@ namespace OpenRA.Mods.Common.Traits
 			return world.ActorMap.FreeSubCell(cell, preferredSubCell);
 		}
 
-		bool IsBlockedBy(Actor self, Actor otherActor, Actor ignoreActor, CellConditions check)
+		bool IsBlockedBy(Actor self, Actor otherActor, Actor ignoreActor, CellConditions check, CellBlocking cellBlocking)
 		{
 			if (otherActor == ignoreActor)
 				return false;
 
 			// If the check allows: we are not blocked by allied units moving in our direction.
-			if (!check.HasCellCondition(CellConditions.BlockedByMovers) &&
+			if (!check.HasCellCondition(CellConditions.BlockedByMovers) && cellBlocking.HasCellBlocking(CellBlocking.HasMovingActor) &&
 				self.Owner.Stances[otherActor.Owner] == Stance.Ally &&
 				IsMovingInMyDirection(self, otherActor))
 				return false;
 
 			// PERF: Only perform ITemporaryBlocker trait look-up if mod/map rules contain any actors that are temporary blockers
-			if (self.World.RulesContainTemporaryBlocker)
+			if (cellBlocking.HasCellBlocking(CellBlocking.HasTemporaryBlocker))
 			{
 				// If there is a temporary blocker in our path, but we can remove it, we are not blocked.
 				var temporaryBlocker = otherActor.TraitOrDefault<ITemporaryBlocker>();
 				if (temporaryBlocker != null && temporaryBlocker.CanRemoveBlockage(otherActor, self))
 					return false;
 			}
+
+			if (!cellBlocking.HasCellBlocking(CellBlocking.Crushable))
+				return true;
 
 			// If we cannot crush the other actor in our way, we are blocked.
 			if (Info.Crushes.IsEmpty)
@@ -382,12 +393,10 @@ namespace OpenRA.Mods.Common.Traits
 			world = w;
 			var map = w.Map;
 			actorMap = w.ActorMap;
-			actorMap.CellsUpdated += CellsUpdated;
+			actorMap.CellUpdated += CellUpdated;
 			pathabilityCache = new CellLayer<CellCache>(map);
 
 			terrainInfos = Info.TilesetTerrainInfo[map.Rules.TileSet];
-
-			allPlayerMask = world.AllPlayerMask;
 
 			foreach (var cell in map.AllCells)
 				UpdateCellCost(cell);
@@ -396,15 +405,20 @@ namespace OpenRA.Mods.Common.Traits
 			map.Tiles.CellEntryChanged += MapCellEntryChanged;
 		}
 
-		void CellsUpdated(IEnumerable<CPos> cells)
+		CellCache GetCache(CPos cell)
 		{
-			foreach (var cell in cells)
+			if (dirtyCells.Contains(cell))
+			{
 				UpdateCellBlocking(cell);
+				dirtyCells.Remove(cell);
+			}
 
-			foreach (var cell in updatedTerrainCells)
-				UpdateCellCost(cell);
+			return pathabilityCache[cell];
+		}
 
-			updatedTerrainCells.Clear();
+		void CellUpdated(CPos cell)
+		{
+			dirtyCells.Add(cell);
 		}
 
 		void UpdateCellCost(CPos cell)
@@ -444,32 +458,40 @@ namespace OpenRA.Mods.Common.Traits
 				}
 
 				var cellBits = default(LongBitSet<PlayerBitMask>);
+				var cellIsCrushable = true;
 
 				foreach (var actor in actors)
 				{
-					var actorBits = default(LongBitSet<PlayerBitMask>);
+					var actorBits = world.AllPlayerMask;
 					var crushables = actor.TraitsImplementing<ICrushable>();
 					var mobile = actor.OccupiesSpace as Mobile;
-					var isMoving = mobile != null && mobile.CurrentMovementTypes.HasFlag(MovementType.Horizontal);
+					var isMoving = mobile != null && mobile.CurrentMovementTypes.HasMovementType(MovementType.Horizontal);
 
 					if (crushables.Any())
-					{
-						LongBitSet<PlayerBitMask> crushingBits;
 						foreach (var crushable in crushables)
-							if (crushable.TryCalculatePlayerBlocking(actor, Info.Crushes, out crushingBits))
-							{
-								actorBits = actorBits.Union(crushingBits);
-								cellBlocking |= CellBlocking.Crushable;
-							}
-
-						if (isMoving)
-							actorBits = actorBits.Except(actor.Owner.AllyMask);
-					}
+							actorBits = actorBits.Union(crushable.CrushableBy(actor, Info.Crushes));
 					else
-						actorBits = isMoving ? actor.Owner.EnemyMask : allPlayerMask;
+						cellIsCrushable = false;
+
+					if (isMoving)
+					{
+						actorBits = actorBits.Except(actor.Owner.AlliedPlayerMask);
+						cellBlocking |= CellBlocking.HasMovingActor;
+					}
+
+					// PERF: Only perform ITemporaryBlocker trait look-up if mod/map rules contain any actors that are temporary blockers
+					if (world.RulesContainTemporaryBlocker)
+					{
+						// If there is a temporary blocker in this cell.
+						if (actor.TraitOrDefault<ITemporaryBlocker>() != null)
+							cellBlocking |= CellBlocking.HasTemporaryBlocker;
+					}
 
 					cellBits = cellBits.Union(actorBits);
 				}
+
+				if (cellIsCrushable)
+					cellBlocking |= CellBlocking.Crushable;
 
 				pathabilityCache[cell] = current.WithBlocking(cellBits, cellBlocking);
 			}
@@ -478,6 +500,14 @@ namespace OpenRA.Mods.Common.Traits
 		void MapCellEntryChanged(CPos cell)
 		{
 			updatedTerrainCells.Add(cell);
+		}
+
+		void ITick.Tick(Actor self)
+		{
+			foreach (var cell in updatedTerrainCells)
+				UpdateCellCost(cell);
+
+			updatedTerrainCells.Clear();
 		}
 	}
 }

@@ -76,7 +76,7 @@ namespace OpenRA
 		// Each player is identified with a unique bit in the set
 		// Cache masks for the player's index and ally/enemy player indices for performance.
 		public LongBitSet<PlayerBitMask> PlayerMask;
-		public LongBitSet<PlayerBitMask> AllyMask = default(LongBitSet<PlayerBitMask>);
+		public LongBitSet<PlayerBitMask> AlliedPlayerMask = default(LongBitSet<PlayerBitMask>);
 		public LongBitSet<PlayerBitMask> EnemyMask = default(LongBitSet<PlayerBitMask>);
 
 		public bool UnlockedRenderPlayer
