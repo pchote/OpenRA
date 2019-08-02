@@ -474,7 +474,7 @@ Container@SETTINGS_PANEL:
 							Width: PARENT_RIGHT - 15
 							TopBottomSpacing: 4
 							ItemSpacing: 4
-							Height: 210
+							Height: 242
 							Children:
 								ScrollItem@HEADER:
 									Width: 528
@@ -521,9 +521,9 @@ Container@SETTINGS_PANEL:
 													Align: Left
 													TooltipContainer: TOOLTIP_CONTAINER
 						Container@HOTKEY_DIALOG_ROOT:
-							Y: 225
+							Y: 255
 							Width: PARENT_RIGHT - 15
-							Height: 105
+							Height: 75
 				Container@ADVANCED_PANEL:
 					Width: PARENT_RIGHT
 					Height: PARENT_BOTTOM
@@ -669,18 +669,19 @@ Background@HOTKEY_DIALOG:
 		Label@HOTKEY_LABEL:
 			X: 15
 			Y: 14
-			Width: PARENT_RIGHT - 40
+			Width: 220 - 15 - 10
 			Height: 25
 			Font: Bold
+			Align: Right
 		HotkeyEntry@HOTKEY_ENTRY:
-			X: 15
-			Y: 40
-			Width: 382
+			X: 220
+			Y: 15
+			Width: 254
 			Height: 25
 		Container@NOTICES:
-			X: 15
-			Y: 65
-			Width: PARENT_RIGHT - 40
+			X: 220
+			Y: 40
+			Width: 254
 			Height: 25
 			Children:
 				Label@DEFAULT_NOTICE:
@@ -700,10 +701,10 @@ Background@HOTKEY_DIALOG:
 					Height: PARENT_BOTTOM
 					Font: Tiny
 					Align: Left
-					Text: This hotkey is already used for "{0}"
-		Button@CLEAR_BUTTON:
-			X: PARENT_RIGHT - 65 - 15 - 2 * (WIDTH + 10)
-			Y: 40
+					Text: This is already used for "{0}"
+		Button@CLEAR_HOTKEY_BUTTON:
+			X: PARENT_RIGHT - 25 - 15 - WIDTH - 10
+			Y: 15
 			Width: 25
 			Height: 25
 			TooltipText: Unbind the hotkey
@@ -716,9 +717,9 @@ Background@HOTKEY_DIALOG:
 					X: 7
 					Y: 8
 					IgnoreMouseOver: True
-		Button@RESET_BUTTON:
-			X: PARENT_RIGHT - 65 - 15 - WIDTH - 10
-			Y: 40
+		Button@RESET_HOTKEY_BUTTON:
+			X: PARENT_RIGHT - WIDTH - 15
+			Y: 15
 			Width: 25
 			Height: 25
 			TooltipText: Reset to default
@@ -733,12 +734,3 @@ Background@HOTKEY_DIALOG:
 					ImageCollection: reload-icon
 					ImageName: enabled
 					IgnoreMouseOver: True
-		Button@CANCEL_BUTTON:
-			X: PARENT_RIGHT - WIDTH - 15
-			Y: 40
-			Width: 65
-			Height: 25
-			Text: Cancel
-			TooltipText: Cancel the operation
-			TooltipContainer: TOOLTIP_CONTAINER
-			TooltipTemplate: SIMPLE_TOOLTIP

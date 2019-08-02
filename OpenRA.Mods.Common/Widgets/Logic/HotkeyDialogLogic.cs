@@ -18,7 +18,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 	public class HotkeyDialogLogic : ChromeLogic
 	{
 		readonly Widget panel;
-		readonly ButtonWidget resetButton, clearButton, cancelButton;
+		readonly ButtonWidget resetButton, clearButton;
 		readonly LabelWidget duplicateNotice, defaultNotice, originalNotice;
 		readonly Action onSave;
 		readonly HotkeyDefinition definition;
@@ -39,9 +39,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			manager = hotkeyManager;
 			currentHotkey = manager[definition.Name].GetValue();
 			hotkeyEntry = panel.Get<HotkeyEntryWidget>("HOTKEY_ENTRY");
-			resetButton = panel.Get<ButtonWidget>("RESET_BUTTON");
-			clearButton = panel.Get<ButtonWidget>("CLEAR_BUTTON");
-			cancelButton = panel.Get<ButtonWidget>("CANCEL_BUTTON");
+			resetButton = panel.Get<ButtonWidget>("RESET_HOTKEY_BUTTON");
+			clearButton = panel.Get<ButtonWidget>("CLEAR_HOTKEY_BUTTON");
 			duplicateNotice = panel.Get<LabelWidget>("DUPLICATE_NOTICE");
 			defaultNotice = panel.Get<LabelWidget>("DEFAULT_NOTICE");
 			originalNotice = panel.Get<LabelWidget>("ORIGINAL_NOTICE");
@@ -59,28 +58,18 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			resetButton.OnClick = Reset;
 			clearButton.OnClick = Clear;
-			cancelButton.OnClick = Cancel;
 
 			hotkeyEntry.Key = currentHotkey;
 			hotkeyEntry.IsValid = () => isValid;
-			hotkeyEntry.OnTakeFocus = OnHotkeyEntryTakeFocus;
 			hotkeyEntry.OnLoseFocus = OnHotkeyEntryLoseFocus;
-			hotkeyEntry.OnEscape = Cancel;
-			hotkeyEntry.OnReturn = Cancel;
 			hotkeyEntry.TakeKeyboardFocus();
 
 			Validate();
 			isFirstValidation = false;
 		}
 
-		void OnHotkeyEntryTakeFocus()
-		{
-			cancelButton.Disabled = manager.GetFirstDuplicate(definition.Name, currentHotkey, definition) != null;
-		}
-
 		void OnHotkeyEntryLoseFocus()
 		{
-			cancelButton.Disabled = true;
 			if (!isValidating)
 				Validate();
 		}
@@ -123,12 +112,6 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			manager.Set(definition.Name, hotkeyEntry.Key);
 			Game.Settings.Save();
 			onSave();
-		}
-
-		void Cancel()
-		{
-			hotkeyEntry.Key = currentHotkey;
-			Validate();
 		}
 
 		void Reset()
