@@ -49,6 +49,31 @@ namespace OpenRA.Mods.Cnc.Activities
 				minefield = new CPos[] { self.Location }.ToList();
 		}
 
+		CPos? ClosestValidCell(Actor self)
+		{
+			if (minefield == null)
+				return null;
+
+			var loc = self.Location;
+
+			// Assume that the closest cell will be valid
+			var candidateCells = minefield;
+			while (candidateCells.Count > 0)
+			{
+				var nextCell = candidateCells.MinBy(c => (c - loc).LengthSquared);
+				if (CanLayMine(self, nextCell))
+					return nextCell;
+
+				// Make a copy of minefield so we can exclude impassible cells
+				if (candidateCells == minefield)
+					candidateCells = minefield.ToList();
+
+				candidateCells.Remove(nextCell);
+			}
+
+			return null;
+		}
+
 		public override bool Tick(Actor self)
 		{
 			returnToBase = false;
@@ -74,7 +99,7 @@ namespace OpenRA.Mods.Cnc.Activities
 				return false;
 			}
 
-			if ((minefield == null || minefield.Contains(self.Location)) && ShouldLayMine(self, self.Location))
+			if ((minefield == null || minefield.Contains(self.Location)) && CanLayMine(self, self.Location))
 			{
 				LayMine(self);
 				QueueChild(new Wait(20)); // A little wait after placing each mine, for show
@@ -82,18 +107,11 @@ namespace OpenRA.Mods.Cnc.Activities
 				return false;
 			}
 
-			if (minefield != null && minefield.Count > 0)
+			var nextCell = ClosestValidCell(self);
+			if (nextCell != null)
 			{
-				// Don't get stuck forever here
-				for (var n = 0; n < 20; n++)
-				{
-					var p = minefield.Random(self.World.SharedRandom);
-					if (ShouldLayMine(self, p))
-					{
-						QueueChild(movement.MoveTo(p, 0));
-						return false;
-					}
-				}
+				QueueChild(movement.MoveTo(nextCell.Value, 0));
+				return false;
 			}
 
 			// TODO: Return somewhere likely to be safe (near rearm building) so we're not sitting out in the minefield.
@@ -108,15 +126,17 @@ namespace OpenRA.Mods.Cnc.Activities
 			if (minefield == null || minefield.Count == 0)
 				yield break;
 
-			yield return new TargetLineNode(Target.FromCell(self.World, minefield[0]), Color.Crimson);
+			var closestCell = ClosestValidCell(self);
+			if (closestCell != null)
+				yield return new TargetLineNode(Target.FromCell(self.World, closestCell.Value), Color.Crimson);
 
 			foreach (var c in minefield)
 				yield return new TargetLineNode(Target.FromCell(self.World, c), Color.Crimson, tile: minelayer.Tile);
 		}
 
-		static bool ShouldLayMine(Actor self, CPos p)
+		static bool CanLayMine(Actor self, CPos p)
 		{
-			// If there is no unit (other than me) here, we want to place a mine here
+			// If there is no unit (other than me) here, we can place a mine here
 			return self.World.ActorMap.GetActorsAt(p).All(a => a == self);
 		}
 
