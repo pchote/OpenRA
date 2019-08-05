@@ -37,6 +37,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly Dictionary<string, MiniYaml> logicArgs;
 
 		SoundDevice soundDevice;
+		HotkeyDefinition selectedHotkey;
 		PanelType settingsPanel = PanelType.Display;
 
 		static SettingsLogic()
@@ -125,7 +126,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			ss.OnChange += x => field.SetValue(group, x);
 		}
 
-		static void BindHotkeyPref(HotkeyDefinition hd, HotkeyManager manager, Widget template, Widget parent, Widget remapDialogRoot, bool isFirst)
+		void BindHotkeyPref(HotkeyDefinition hd, HotkeyManager manager, Widget template, Widget parent, Widget remapDialogRoot)
 		{
 			var key = template.Clone() as Widget;
 			key.Id = hd.Name;
@@ -135,6 +136,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			var remapButton = key.Get<ButtonWidget>("HOTKEY");
 			WidgetUtils.TruncateButtonToTooltip(remapButton, manager[hd.Name].GetValue().DisplayString());
+
+			remapButton.IsHighlighted = () => selectedHotkey == hd;
 
 			if (manager.GetFirstDuplicate(hd.Name, manager[hd.Name].GetValue(), hd) != null)
 				remapButton.GetColor = () => ChromeMetrics.Get<Color>("HotkeyColorInvalid");
@@ -152,24 +155,16 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				{ "hotkeyManager", manager },
 			};
 
-			if (isFirst)
+			if (selectedHotkey == hd)
 			{
 				remapDialogRoot.RemoveChildren();
-				remapButton.IsHighlighted = () => true;
 				Ui.LoadWidget("HOTKEY_DIALOG", remapDialogRoot, widgetArgs);
 			}
 
 			remapButton.OnClick = () =>
 			{
-				foreach (var sibling in parent.Children)
-				{
-					var button = sibling.GetOrNull<ButtonWidget>("HOTKEY");
-					if (button != null)
-						button.IsHighlighted = () => false;
-				}
-
+				selectedHotkey = hd;
 				remapDialogRoot.RemoveChildren();
-				remapButton.IsHighlighted = () => true;
 				Ui.LoadWidget("HOTKEY_DIALOG", remapDialogRoot, widgetArgs);
 			};
 
@@ -487,8 +482,13 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 						{
 							if (added.Add(hd))
 							{
-								BindHotkeyPref(hd, modData.Hotkeys, template, hotkeyList, remapDialogRoot, isFirstHotkey);
-								isFirstHotkey = false;
+								if (isFirstHotkey)
+								{
+									selectedHotkey = hd;
+									isFirstHotkey = false;
+								}
+
+								BindHotkeyPref(hd, modData.Hotkeys, template, hotkeyList, remapDialogRoot);
 							}
 						}
 					}
