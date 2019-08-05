@@ -395,6 +395,7 @@ namespace OpenRA.Mods.Common.Traits
 			actorMap = w.ActorMap;
 			actorMap.CellUpdated += CellUpdated;
 			pathabilityCache = new CellLayer<CellCache>(map);
+			dirtyCells.Clear();
 
 			terrainInfos = Info.TilesetTerrainInfo[map.Rules.TileSet];
 
