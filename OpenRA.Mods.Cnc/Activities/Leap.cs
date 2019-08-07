@@ -91,6 +91,7 @@ namespace OpenRA.Mods.Cnc.Activities
 				// Move to the correct subcells, if our target actor uses subcells
 				// (This does not update the visual position!)
 				mobile.SetLocation(destinationCell, destinationSubCell, destinationCell, destinationSubCell);
+				mobile.UpdateMovementTypes(self);
 
 				// Revoke the condition before attacking, as it is usually used to pause the attack trait
 				attack.RevokeLeapCondition(self);
