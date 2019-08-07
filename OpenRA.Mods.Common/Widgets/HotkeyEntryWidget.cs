@@ -26,8 +26,6 @@ namespace OpenRA.Mods.Common.Widgets
 
 		public Action OnTakeFocus = () => { };
 		public Action OnLoseFocus = () => { };
-		public Action OnEscape = () => { };
-		public Action OnReturn = () => { };
 
 		public Func<bool> IsDisabled = () => false;
 		public Func<bool> IsValid = () => false;
@@ -95,14 +93,8 @@ namespace OpenRA.Mods.Common.Widgets
 			if (!HasKeyboardFocus || IgnoreKeys.Contains(e.Key))
 				return false;
 
-			if (e.Key != Keycode.ESCAPE && e.Key != Keycode.RETURN)
+			if (e.Key != Keycode.ESCAPE && e.Key != Keycode.RETURN && e.Key != Keycode.KP_ENTER)
 				Key = Hotkey.FromKeyInput(e);
-
-			if (e.Key == Keycode.ESCAPE)
-				OnEscape();
-
-			if (e.Key == Keycode.RETURN)
-				OnReturn();
 
 			YieldKeyboardFocus();
 
