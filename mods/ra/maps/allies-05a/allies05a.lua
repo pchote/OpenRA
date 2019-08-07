@@ -6,6 +6,7 @@
    the License, or (at your option) any later version. For more
    information, see COPYING.
 ]]
+
 if Map.LobbyOption("difficulty") == "easy" then
 	TanyaType = "e7"
 	ReinforceCash = 5000
@@ -83,7 +84,7 @@ GroupPatrol = function(units, waypoints, delay)
 end
 
 Tick = function()
-	if FollowTruk then
+	if FollowTruk and not Truk.IsDead then
 		Camera.Position = Truk.CenterPosition
 	end
 
@@ -202,7 +203,7 @@ FreeTanya = function()
 		Media.PlaySpeechNotification(greece, "TargetFreed")
 	end
 
-	if not SpecialCameras then
+	if not SpecialCameras and PrisonCamera then
 		PrisonCamera.Destroy()
 	end
 end
@@ -234,16 +235,52 @@ end
 
 InitTriggers = function()
 	Trigger.OnInfiltrated(Warfactory, function()
+		if greece.IsObjectiveCompleted(infWarfactory) then
+			return
+		elseif Truk.IsDead then
+			if not greece.IsObjectiveCompleted(mainObj) then
+				ussr.MarkCompletedObjective(ussrObj)
+			end
+
+			return
+		end
+
 		Trigger.ClearAll(Spy)
 		greece.MarkCompletedObjective(infWarfactory)
 		WarfactoryInfiltrated()
 	end)
 
+	Trigger.OnKilled(Truk, function()
+		if not greece.IsObjectiveCompleted(infWarfactory) then
+			greece.MarkFailedObjective(infWarfactory)
+		elseif FollowTruk then
+			ussr.MarkCompletedObjective(ussrObj)
+		end
+	end)
+
 	Trigger.OnInfiltrated(Prison, function()
+		if greece.IsObjectiveCompleted(mainObj) then
+			return
+		end
+
 		if not greece.IsObjectiveCompleted(infWarfactory) then
 			Media.DisplayMessage("Good work! But next time skip the heroics!", "Battlefield Control")
 			greece.MarkCompletedObjective(infWarfactory)
 		end
+
+		if not PrisonCamera then
+			if SpecialCameras then
+				PrisonCamera = Actor.Create("camera", true, { Owner = greece, Location = TrukWaypoint5.Location })
+			else
+				PrisonCamera = Actor.Create("camera.small", true, { Owner = greece, Location = Prison.Location + CVec.New(1, 1) })
+			end
+		end
+
+		if SpecialCameras and SpyCameraA and not SpyCameraA.IsDead then
+			SpyCameraA.Destroy()
+			SpyCameraB.Destroy()
+		end
+
 		Trigger.ClearAll(Spy)
 		Trigger.AfterDelay(DateTime.Seconds(2), MissInfiltrated)
 	end)
@@ -319,7 +356,7 @@ InitTriggers = function()
 					greece.MarkCompletedObjective(mainObj)
 					SendReinforcements()
 
-					if SpecialCameras then
+					if SpecialCameras and PrisonCamera then
 						PrisonCamera.Destroy()
 					end
 				end)
@@ -336,7 +373,7 @@ InitObjectives = function()
 	ussrObj = ussr.AddPrimaryObjective("Deny the Allies.")
 	mainObj = greece.AddPrimaryObjective("Rescue Tanya.")
 	KillAll = greece.AddPrimaryObjective("Eliminate all Soviet units in this area.")
-	infWarfactory = greece.AddPrimaryObjective("Infiltrate the Soviet warfactory.")
+	infWarfactory = greece.AddSecondaryObjective("Infiltrate the Soviet warfactory.")
 
 	Trigger.OnObjectiveCompleted(greece, function(p, id)
 		Media.DisplayMessage(p.GetObjectiveDescription(id), "Objective completed")
