@@ -139,8 +139,12 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			remapButton.IsHighlighted = () => selectedHotkey == hd;
 
-			if (manager.GetFirstDuplicate(hd.Name, manager[hd.Name].GetValue(), hd) != null)
-				remapButton.GetColor = () => ChromeMetrics.Get<Color>("HotkeyColorInvalid");
+			remapButton.GetColor = () =>
+			{
+				return manager.GetFirstDuplicate(hd.Name, manager[hd.Name].GetValue(), hd) != null ?
+					ChromeMetrics.Get<Color>("HotkeyColorInvalid") :
+					ChromeMetrics.Get<Color>("HotkeyColor");
+			};
 
 			var widgetArgs = new WidgetArgs
 			{
@@ -148,7 +152,6 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					"onSave", () =>
 					{
 						WidgetUtils.TruncateButtonToTooltip(remapButton, manager[hd.Name].GetValue().DisplayString());
-						remapButton.GetColor = () => ChromeMetrics.Get<Color>("ButtonTextColor");
 					}
 				},
 				{ "hotkeyDefinition", hd },
