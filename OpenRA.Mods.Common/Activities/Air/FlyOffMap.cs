@@ -11,32 +11,62 @@
 
 using OpenRA.Activities;
 using OpenRA.Mods.Common.Traits;
+using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Activities
 {
 	public class FlyOffMap : Activity
 	{
 		readonly Aircraft aircraft;
+		readonly Target target;
+		readonly bool hasTarget;
+		int endingDelay;
 
-		public FlyOffMap(Actor self)
+		public FlyOffMap(Actor self, int endingDelay = 25)
 		{
 			aircraft = self.Trait<Aircraft>();
+			ChildHasPriority = false;
+			this.endingDelay = endingDelay;
+		}
+
+		public FlyOffMap(Actor self, Target target, int endingDelay = 25)
+		{
+			aircraft = self.Trait<Aircraft>();
+			ChildHasPriority = false;
+			this.target = target;
+			hasTarget = true;
+			this.endingDelay = endingDelay;
+		}
+
+		protected override void OnFirstRun(Actor self)
+		{
+			if (hasTarget)
+			{
+				QueueChild(new Fly(self, target));
+				QueueChild(new FlyTimed(-1, self));
+				return;
+			}
+
+			// VTOLs must take off first if they're not at cruise altitude
+			if (aircraft.Info.VTOL && self.World.Map.DistanceAboveTerrain(aircraft.CenterPosition) != aircraft.Info.CruiseAltitude)
+				QueueChild(new TakeOff(self));
+
+			QueueChild(new FlyTimed(-1, self));
 		}
 
 		public override bool Tick(Actor self)
 		{
 			// Refuse to take off if it would land immediately again.
 			if (aircraft.ForceLanding)
-			{
 				Cancel(self);
-				return true;
-			}
 
-			if (IsCanceling || !self.World.Map.Contains(self.Location))
+			if (IsCanceling)
 				return true;
 
-			Fly.FlyTick(self, aircraft, aircraft.Facing, aircraft.Info.CruiseAltitude);
-			return false;
+			if (!self.World.Map.Contains(self.Location) && --endingDelay < 0)
+				ChildActivity.Cancel(self);
+
+			return TickChild(self);
 		}
 	}
 }
