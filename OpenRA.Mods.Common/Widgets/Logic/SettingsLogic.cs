@@ -37,6 +37,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly Dictionary<string, MiniYaml> logicArgs;
 
 		SoundDevice soundDevice;
+		HotkeyDefinition selectedHotkey;
 		PanelType settingsPanel = PanelType.Display;
 
 		static SettingsLogic()
@@ -125,7 +126,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			ss.OnChange += x => field.SetValue(group, x);
 		}
 
-		static void BindHotkeyPref(HotkeyDefinition hd, HotkeyManager manager, Widget template, Widget parent, Widget remapDialogRoot, Widget remapDialogPlaceholder)
+		void BindHotkeyPref(HotkeyDefinition hd, HotkeyManager manager, Widget template, Widget parent, Widget remapDialogRoot)
 		{
 			var key = template.Clone() as Widget;
 			key.Id = hd.Name;
@@ -136,48 +137,38 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			var remapButton = key.Get<ButtonWidget>("HOTKEY");
 			WidgetUtils.TruncateButtonToTooltip(remapButton, manager[hd.Name].GetValue().DisplayString());
 
-			if (manager.GetFirstDuplicate(hd.Name, manager[hd.Name].GetValue(), hd) != null)
-				remapButton.GetColor = () => ChromeMetrics.Get<Color>("HotkeyColorInvalid");
+			remapButton.IsHighlighted = () => selectedHotkey == hd;
+
+			remapButton.GetColor = () =>
+			{
+				return manager.GetFirstDuplicate(hd.Name, manager[hd.Name].GetValue(), hd) != null ?
+					ChromeMetrics.Get<Color>("HotkeyColorInvalid") :
+					ChromeMetrics.Get<Color>("HotkeyColor");
+			};
+
+			var widgetArgs = new WidgetArgs
+			{
+				{
+					"onSave", () =>
+					{
+						WidgetUtils.TruncateButtonToTooltip(remapButton, manager[hd.Name].GetValue().DisplayString());
+					}
+				},
+				{ "hotkeyDefinition", hd },
+				{ "hotkeyManager", manager },
+			};
+
+			if (selectedHotkey == hd)
+			{
+				remapDialogRoot.RemoveChildren();
+				Ui.LoadWidget("HOTKEY_DIALOG", remapDialogRoot, widgetArgs);
+			}
 
 			remapButton.OnClick = () =>
 			{
+				selectedHotkey = hd;
 				remapDialogRoot.RemoveChildren();
-
-				if (remapButton.IsHighlighted())
-				{
-					remapButton.IsHighlighted = () => false;
-
-					if (remapDialogPlaceholder != null)
-						remapDialogPlaceholder.Visible = true;
-
-					return;
-				}
-
-				if (remapDialogPlaceholder != null)
-					remapDialogPlaceholder.Visible = false;
-
-				var siblings = parent.Children;
-				foreach (var sibling in siblings)
-				{
-					var button = sibling.GetOrNull<ButtonWidget>("HOTKEY");
-					if (button != null)
-						button.IsHighlighted = () => false;
-				}
-
-				remapButton.IsHighlighted = () => true;
-
-				Ui.LoadWidget("HOTKEY_DIALOG", remapDialogRoot, new WidgetArgs
-				{
-					{
-						"onSave", () =>
-						{
-							WidgetUtils.TruncateButtonToTooltip(remapButton, manager[hd.Name].GetValue().DisplayString());
-							remapButton.GetColor = () => ChromeMetrics.Get<Color>("ButtonTextColor");
-						}
-					},
-					{ "hotkeyDefinition", hd },
-					{ "hotkeyManager", manager },
-				});
+				Ui.LoadWidget("HOTKEY_DIALOG", remapDialogRoot, widgetArgs);
 			};
 
 			parent.AddChild(key);
@@ -475,6 +466,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			MiniYaml hotkeyGroups;
 			if (logicArgs.TryGetValue("HotkeyGroups", out hotkeyGroups))
 			{
+				var isFirstHotkey = true;
 				foreach (var hg in hotkeyGroups.Nodes)
 				{
 					var templateNode = hg.Value.Nodes.FirstOrDefault(n => n.Key == "Template");
@@ -490,11 +482,23 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					var added = new HashSet<HotkeyDefinition>();
 					var template = templates.Get(templateNode.Value.Value);
 					var remapDialogRoot = panel.Get("HOTKEY_DIALOG_ROOT");
-					var remapDialogPlaceholder = panel.GetOrNull("HOTKEY_DIALOG_PLACEHOLDER");
+
 					foreach (var t in types)
+					{
 						foreach (var hd in modData.Hotkeys.Definitions.Where(k => k.Types.Contains(t)))
+						{
 							if (added.Add(hd))
-								BindHotkeyPref(hd, modData.Hotkeys, template, hotkeyList, remapDialogRoot, remapDialogPlaceholder);
+							{
+								if (isFirstHotkey)
+								{
+									selectedHotkey = hd;
+									isFirstHotkey = false;
+								}
+
+								BindHotkeyPref(hd, modData.Hotkeys, template, hotkeyList, remapDialogRoot);
+							}
+						}
+					}
 				}
 			}
 
