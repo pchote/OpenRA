@@ -39,12 +39,11 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		SoundDevice soundDevice;
 		PanelType settingsPanel = PanelType.Display;
 
-		Widget hotkeyDialogRoot;
-		ButtonWidget resetHotkeyButton, clearHotkeyButton, selectedHotkeyButton;
-		LabelWidget duplicateHotkeyNotice, defaultHotkeyNotice, originalHotkeyNotice;
+		ButtonWidget selectedHotkeyButton;
 		HotkeyEntryWidget hotkeyEntryWidget;
 		HotkeyDefinition duplicateHotkeyDefinition, selectedHotkeyDefinition;
-		bool isHotkeyValid = false;
+		bool isHotkeyValid;
+		bool isHotkeyDefault;
 
 		static SettingsLogic()
 		{
@@ -451,7 +450,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		Action InitHotkeysPanel(Widget panel)
 		{
-			hotkeyDialogRoot = panel.Get("HOTKEY_DIALOG_ROOT");
+			var hotkeyDialogRoot = panel.Get("HOTKEY_DIALOG_ROOT");
 			var hotkeyList = panel.Get<ScrollPanelWidget>("HOTKEY_LIST");
 			hotkeyList.Layout = new GridLayout(hotkeyList);
 			var hotkeyHeader = hotkeyList.Get<ScrollItemWidget>("HEADER");
@@ -464,7 +463,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			MiniYaml hotkeyGroups;
 			if (logicArgs.TryGetValue("HotkeyGroups", out hotkeyGroups))
 			{
-				InitHotkeyRemapDialog();
+				InitHotkeyRemapDialog(panel);
 
 				foreach (var hg in hotkeyGroups.Nodes)
 				{
@@ -749,31 +748,36 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				Game.Renderer.ReleaseWindowMouseFocus();
 		}
 
-		void InitHotkeyRemapDialog()
+		void InitHotkeyRemapDialog(Widget panel)
 		{
-			hotkeyDialogRoot.Get<LabelWidget>("HOTKEY_LABEL").GetText = () => selectedHotkeyDefinition.Description + ":";
+			panel.Get<LabelWidget>("HOTKEY_LABEL").GetText = () => selectedHotkeyDefinition.Description + ":";
 
-			duplicateHotkeyNotice = hotkeyDialogRoot.Get<LabelWidget>("DUPLICATE_NOTICE");
+			var duplicateHotkeyNotice = panel.Get<LabelWidget>("DUPLICATE_NOTICE");
 			duplicateHotkeyNotice.TextColor = ChromeMetrics.Get<Color>("NoticeErrorColor");
+			duplicateHotkeyNotice.IsVisible = () => !isHotkeyValid;
 			duplicateHotkeyNotice.GetText = () =>
 			{
 				return (duplicateHotkeyDefinition != null) ? duplicateHotkeyNotice.Text.F(duplicateHotkeyDefinition.Description) : duplicateHotkeyNotice.Text;
 			};
 
-			defaultHotkeyNotice = hotkeyDialogRoot.Get<LabelWidget>("DEFAULT_NOTICE");
+			var defaultHotkeyNotice = panel.Get<LabelWidget>("DEFAULT_NOTICE");
 			defaultHotkeyNotice.TextColor = ChromeMetrics.Get<Color>("NoticeInfoColor");
+			defaultHotkeyNotice.IsVisible = () => isHotkeyValid && isHotkeyDefault;
 
-			originalHotkeyNotice = hotkeyDialogRoot.Get<LabelWidget>("ORIGINAL_NOTICE");
+			var originalHotkeyNotice = panel.Get<LabelWidget>("ORIGINAL_NOTICE");
 			originalHotkeyNotice.TextColor = ChromeMetrics.Get<Color>("NoticeInfoColor");
+			originalHotkeyNotice.IsVisible = () => isHotkeyValid && !isHotkeyDefault;
 			originalHotkeyNotice.GetText = () => originalHotkeyNotice.Text.F(selectedHotkeyDefinition.Default.DisplayString());
 
-			resetHotkeyButton = hotkeyDialogRoot.Get<ButtonWidget>("RESET_HOTKEY_BUTTON");
+			var resetHotkeyButton = panel.Get<ButtonWidget>("RESET_HOTKEY_BUTTON");
+			resetHotkeyButton.IsDisabled = () => isHotkeyDefault;
 			resetHotkeyButton.OnClick = ResetHotkey;
 
-			clearHotkeyButton = hotkeyDialogRoot.Get<ButtonWidget>("CLEAR_HOTKEY_BUTTON");
+			var clearHotkeyButton = panel.Get<ButtonWidget>("CLEAR_HOTKEY_BUTTON");
+			clearHotkeyButton.IsDisabled = () => !hotkeyEntryWidget.Key.IsValid();
 			clearHotkeyButton.OnClick = ClearHotkey;
 
-			hotkeyEntryWidget = hotkeyDialogRoot.Get<HotkeyEntryWidget>("HOTKEY_ENTRY");
+			hotkeyEntryWidget = panel.Get<HotkeyEntryWidget>("HOTKEY_ENTRY");
 			hotkeyEntryWidget.IsValid = () => isHotkeyValid;
 			hotkeyEntryWidget.OnLoseFocus = ValidateHotkey;
 		}
@@ -782,22 +786,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		{
 			duplicateHotkeyDefinition = modData.Hotkeys.GetFirstDuplicate(selectedHotkeyDefinition.Name, hotkeyEntryWidget.Key, selectedHotkeyDefinition);
 			isHotkeyValid = duplicateHotkeyDefinition == null;
-
-			duplicateHotkeyNotice.Visible = !isHotkeyValid;
-			clearHotkeyButton.Disabled = !hotkeyEntryWidget.Key.IsValid();
-
-			if (hotkeyEntryWidget.Key == selectedHotkeyDefinition.Default || (!hotkeyEntryWidget.Key.IsValid() && !selectedHotkeyDefinition.Default.IsValid()))
-			{
-				defaultHotkeyNotice.Visible = !duplicateHotkeyNotice.Visible;
-				originalHotkeyNotice.Visible = false;
-				resetHotkeyButton.Disabled = true;
-			}
-			else
-			{
-				defaultHotkeyNotice.Visible = false;
-				originalHotkeyNotice.Visible = !duplicateHotkeyNotice.Visible;
-				resetHotkeyButton.Disabled = false;
-			}
+			isHotkeyDefault = hotkeyEntryWidget.Key == selectedHotkeyDefinition.Default || (!hotkeyEntryWidget.Key.IsValid() && !selectedHotkeyDefinition.Default.IsValid());
 
 			if (isHotkeyValid)
 				SaveHotkey();
