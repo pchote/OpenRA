@@ -279,7 +279,7 @@ namespace OpenRA.Mods.Common.Traits
 				return true;
 
 			// Cache doesn't account for ignored actors - these must use the slow path
-			if (ignoreActor == null)
+			if (ignoreActor == null && !cellFlag.HasCellFlag(CellFlag.HasTemporaryBlocker))
 			{
 				// We are blocked by another actor in the cell.
 				if (cellCache.Blocking.Overlaps(actor.Owner.PlayerMask))
