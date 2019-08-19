@@ -37,12 +37,9 @@ namespace OpenRA.Mods.Cnc.Traits
 		public object Create(ActorInitializer init) { return new Minelayer(init.Self, this); }
 	}
 
-	public class Minelayer : IIssueOrder, IResolveOrder, ISync, IIssueDeployOrder, IOrderVoice
+	public class Minelayer : IIssueOrder, IResolveOrder, ISync, IIssueDeployOrder, IOrderVoice, ITick
 	{
 		public readonly MinelayerInfo Info;
-
-		// TODO: [Sync] when sync can cope with arrays!
-		public CPos[] Minefield = null;
 
 		public readonly Sprite Tile;
 
@@ -104,17 +101,25 @@ namespace OpenRA.Mods.Cnc.Traits
 			if (order.OrderString == "BeginMinefield")
 				minefieldStart = cell;
 			else if (order.OrderString == "PlaceMine")
-				self.QueueActivity(order.Queued, new LayMines(self, null));
+				self.QueueActivity(order.Queued, new LayMines(self));
 			else if (order.OrderString == "PlaceMinefield")
 			{
 				var movement = self.Trait<IPositionable>();
 
-				Minefield = GetMinefieldCells(minefieldStart, cell, Info.MinefieldDepth)
-					.Where(p => movement.CanEnterCell(p, null, false)).ToArray();
+				var minefield = GetMinefieldCells(minefieldStart, cell, Info.MinefieldDepth)
+					.Where(c => movement.CanEnterCell(c, null, false))
+					.OrderBy(c => (c - minefieldStart).LengthSquared).ToList();
 
-				self.QueueActivity(order.Queued, new LayMines(self, Minefield));
+				self.QueueActivity(order.Queued, new LayMines(self, minefield));
 				self.ShowTargetLines();
 			}
+		}
+
+		void ITick.Tick(Actor self)
+		{
+			if (self.CurrentActivity != null)
+				foreach (var field in self.CurrentActivity.ActivitiesImplementing<LayMines>())
+					field.CleanPlacedMines(self);
 		}
 
 		string IOrderVoice.VoicePhraseForOrder(Actor self, Order order)

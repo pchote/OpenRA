@@ -32,21 +32,42 @@ namespace OpenRA.Mods.Cnc.Activities
 		bool returnToBase;
 		Actor rearmTarget;
 
-		public LayMines(Actor self, CPos[] minefield)
+		public LayMines(Actor self, List<CPos> minefield = null)
 		{
 			minelayer = self.Trait<Minelayer>();
 			ammoPools = self.TraitsImplementing<AmmoPool>().ToArray();
 			movement = self.Trait<IMove>();
 			rearmableInfo = self.Info.TraitInfoOrDefault<RearmableInfo>();
-
-			if (minefield != null)
-				this.minefield = minefield.ToList();
+			this.minefield = minefield;
 		}
 
 		protected override void OnFirstRun(Actor self)
 		{
 			if (minefield == null)
-				minefield = new CPos[] { self.Location }.ToList();
+				minefield = new List<CPos> { self.Location };
+		}
+
+		CPos? NextValidCell(Actor self)
+		{
+			if (minefield == null)
+				return null;
+
+			// Assume that the closest cell will be valid
+			var candidateCells = minefield;
+			while (candidateCells.Count > 0)
+			{
+				var nextCell = candidateCells.First();
+				if (CanLayMine(self, nextCell))
+					return nextCell;
+
+				// Make a copy of minefield so we can exclude impassible cells
+				if (candidateCells == minefield)
+					candidateCells = minefield.ToList();
+
+				candidateCells.Remove(nextCell);
+			}
+
+			return null;
 		}
 
 		public override bool Tick(Actor self)
@@ -56,48 +77,48 @@ namespace OpenRA.Mods.Cnc.Activities
 			if (IsCanceling)
 				return true;
 
-			if (rearmableInfo != null && ammoPools.Any(p => p.Info.Name == minelayer.Info.AmmoPoolName && !p.HasAmmo()))
+			if ((minefield == null || minefield.Contains(self.Location)) && CanLayMine(self, self.Location))
 			{
-				// Rearm (and possibly repair) at rearm building, then back out here to refill the minefield some more
-				rearmTarget = self.World.Actors.Where(a => self.Owner.Stances[a.Owner] == Stance.Ally
-					&& rearmableInfo.RearmActors.Contains(a.Info.Name))
-					.ClosestTo(self);
+				if (rearmableInfo != null && ammoPools.Any(p => p.Info.Name == minelayer.Info.AmmoPoolName && !p.HasAmmo()))
+				{
+					// Rearm (and possibly repair) at rearm building, then back out here to refill the minefield some more
+					rearmTarget = self.World.Actors.Where(a => self.Owner.Stances[a.Owner] == Stance.Ally
+					                                           && rearmableInfo.RearmActors.Contains(a.Info.Name))
+						.ClosestTo(self);
 
-				if (rearmTarget == null)
-					return true;
+					if (rearmTarget == null)
+						return true;
 
-				// Add a CloseEnough range of 512 to the Rearm/Repair activities in order to ensure that we're at the host actor
-				QueueChild(new MoveAdjacentTo(self, Target.FromActor(rearmTarget)));
-				QueueChild(movement.MoveTo(self.World.Map.CellContaining(rearmTarget.CenterPosition), rearmTarget));
-				QueueChild(new Resupply(self, rearmTarget, new WDist(512)));
-				returnToBase = true;
-				return false;
-			}
+					// Add a CloseEnough range of 512 to the Rearm/Repair activities in order to ensure that we're at the host actor
+					QueueChild(new MoveAdjacentTo(self, Target.FromActor(rearmTarget)));
+					QueueChild(movement.MoveTo(self.World.Map.CellContaining(rearmTarget.CenterPosition), rearmTarget));
+					QueueChild(new Resupply(self, rearmTarget, new WDist(512)));
+					returnToBase = true;
+					return false;
+				}
 
-			if ((minefield == null || minefield.Contains(self.Location)) && ShouldLayMine(self, self.Location))
-			{
 				LayMine(self);
 				QueueChild(new Wait(20)); // A little wait after placing each mine, for show
 				minefield.Remove(self.Location);
 				return false;
 			}
 
-			if (minefield != null && minefield.Count > 0)
+			var nextCell = NextValidCell(self);
+			if (nextCell != null)
 			{
-				// Don't get stuck forever here
-				for (var n = 0; n < 20; n++)
-				{
-					var p = minefield.Random(self.World.SharedRandom);
-					if (ShouldLayMine(self, p))
-					{
-						QueueChild(movement.MoveTo(p, 0));
-						return false;
-					}
-				}
+				QueueChild(movement.MoveTo(nextCell.Value, 0));
+				return false;
 			}
 
 			// TODO: Return somewhere likely to be safe (near rearm building) so we're not sitting out in the minefield.
 			return true;
+		}
+
+		public void CleanPlacedMines(Actor self)
+		{
+			// Remove cells that have already been mined
+			minefield.RemoveAll(c => self.World.ActorMap.GetActorsAt(c)
+				.Any(a => a.Info.Name == minelayer.Info.Mine.ToLowerInvariant()));
 		}
 
 		public override IEnumerable<TargetLineNode> TargetLineNodes(Actor self)
@@ -108,15 +129,17 @@ namespace OpenRA.Mods.Cnc.Activities
 			if (minefield == null || minefield.Count == 0)
 				yield break;
 
-			yield return new TargetLineNode(Target.FromCell(self.World, minefield[0]), Color.Crimson);
+			var nextCell = NextValidCell(self);
+			if (nextCell != null)
+				yield return new TargetLineNode(Target.FromCell(self.World, nextCell.Value), Color.Crimson);
 
 			foreach (var c in minefield)
 				yield return new TargetLineNode(Target.FromCell(self.World, c), Color.Crimson, tile: minelayer.Tile);
 		}
 
-		static bool ShouldLayMine(Actor self, CPos p)
+		static bool CanLayMine(Actor self, CPos p)
 		{
-			// If there is no unit (other than me) here, we want to place a mine here
+			// If there is no unit (other than me) here, we can place a mine here
 			return self.World.ActorMap.GetActorsAt(p).All(a => a == self);
 		}
 
@@ -130,12 +153,11 @@ namespace OpenRA.Mods.Cnc.Activities
 				pool.TakeAmmo(self, 1);
 			}
 
-			self.World.AddFrameEndTask(
-				w => w.CreateActor(minelayer.Info.Mine, new TypeDictionary
-				{
-					new LocationInit(self.Location),
-					new OwnerInit(self.Owner),
-				}));
+			self.World.AddFrameEndTask(w => w.CreateActor(minelayer.Info.Mine, new TypeDictionary
+			{
+				new LocationInit(self.Location),
+				new OwnerInit(self.Owner),
+			}));
 		}
 	}
 }
