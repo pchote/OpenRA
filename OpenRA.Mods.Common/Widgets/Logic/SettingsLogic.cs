@@ -144,11 +144,14 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			remapButton.IsHighlighted = () => selectedHotkeyDefinition == hd;
 
+			var hotkeyValidColor = ChromeMetrics.Get<Color>("HotkeyColorInvalid");
+			var hotkeyInvalidColor = ChromeMetrics.Get<Color>("HotkeyColor");
+
 			remapButton.GetColor = () =>
 			{
 				return modData.Hotkeys.GetFirstDuplicate(hd.Name, modData.Hotkeys[hd.Name].GetValue(), hd) != null ?
-					ChromeMetrics.Get<Color>("HotkeyColorInvalid") :
-					ChromeMetrics.Get<Color>("HotkeyColor");
+					hotkeyValidColor :
+					hotkeyInvalidColor;
 			};
 
 			if (selectedHotkeyDefinition == hd)
@@ -750,32 +753,32 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		void InitHotkeyRemapDialog(Widget panel)
 		{
-			panel.Get<LabelWidget>("HOTKEY_LABEL").GetText = () => selectedHotkeyDefinition.Description + ":";
+			var label = new CachedTransform<HotkeyDefinition, string>(hd => hd.Description + ":");
+			panel.Get<LabelWidget>("HOTKEY_LABEL").GetText = () => label.Update(selectedHotkeyDefinition);
 
-			var duplicateHotkeyNotice = panel.Get<LabelWidget>("DUPLICATE_NOTICE");
-			duplicateHotkeyNotice.TextColor = ChromeMetrics.Get<Color>("NoticeErrorColor");
-			duplicateHotkeyNotice.IsVisible = () => !isHotkeyValid;
-			duplicateHotkeyNotice.GetText = () =>
-			{
-				return (duplicateHotkeyDefinition != null) ? duplicateHotkeyNotice.Text.F(duplicateHotkeyDefinition.Description) : duplicateHotkeyNotice.Text;
-			};
+			var duplicateNotice = panel.Get<LabelWidget>("DUPLICATE_NOTICE");
+			duplicateNotice.TextColor = ChromeMetrics.Get<Color>("NoticeErrorColor");
+			duplicateNotice.IsVisible = () => !isHotkeyValid;
+			var duplicateNoticeText = new CachedTransform<HotkeyDefinition, string>(hd => (hd != null) ? duplicateNotice.Text.F(hd.Description) : duplicateNotice.Text);
+			duplicateNotice.GetText = () => duplicateNoticeText.Update(duplicateHotkeyDefinition);
 
-			var defaultHotkeyNotice = panel.Get<LabelWidget>("DEFAULT_NOTICE");
-			defaultHotkeyNotice.TextColor = ChromeMetrics.Get<Color>("NoticeInfoColor");
-			defaultHotkeyNotice.IsVisible = () => isHotkeyValid && isHotkeyDefault;
+			var defaultNotice = panel.Get<LabelWidget>("DEFAULT_NOTICE");
+			defaultNotice.TextColor = ChromeMetrics.Get<Color>("NoticeInfoColor");
+			defaultNotice.IsVisible = () => isHotkeyValid && isHotkeyDefault;
 
-			var originalHotkeyNotice = panel.Get<LabelWidget>("ORIGINAL_NOTICE");
-			originalHotkeyNotice.TextColor = ChromeMetrics.Get<Color>("NoticeInfoColor");
-			originalHotkeyNotice.IsVisible = () => isHotkeyValid && !isHotkeyDefault;
-			originalHotkeyNotice.GetText = () => originalHotkeyNotice.Text.F(selectedHotkeyDefinition.Default.DisplayString());
+			var originalNotice = panel.Get<LabelWidget>("ORIGINAL_NOTICE");
+			originalNotice.TextColor = ChromeMetrics.Get<Color>("NoticeInfoColor");
+			originalNotice.IsVisible = () => isHotkeyValid && !isHotkeyDefault;
+			var originalNoticeText = new CachedTransform<HotkeyDefinition, string>(hd => originalNotice.Text.F(hd.Default.DisplayString()));
+			originalNotice.GetText = () => originalNoticeText.Update(selectedHotkeyDefinition);
 
-			var resetHotkeyButton = panel.Get<ButtonWidget>("RESET_HOTKEY_BUTTON");
-			resetHotkeyButton.IsDisabled = () => isHotkeyDefault;
-			resetHotkeyButton.OnClick = ResetHotkey;
+			var resetButton = panel.Get<ButtonWidget>("RESET_HOTKEY_BUTTON");
+			resetButton.IsDisabled = () => isHotkeyDefault;
+			resetButton.OnClick = ResetHotkey;
 
-			var clearHotkeyButton = panel.Get<ButtonWidget>("CLEAR_HOTKEY_BUTTON");
-			clearHotkeyButton.IsDisabled = () => !hotkeyEntryWidget.Key.IsValid();
-			clearHotkeyButton.OnClick = ClearHotkey;
+			var clearButton = panel.Get<ButtonWidget>("CLEAR_HOTKEY_BUTTON");
+			clearButton.IsDisabled = () => !hotkeyEntryWidget.Key.IsValid();
+			clearButton.OnClick = ClearHotkey;
 
 			hotkeyEntryWidget = panel.Get<HotkeyEntryWidget>("HOTKEY_ENTRY");
 			hotkeyEntryWidget.IsValid = () => isHotkeyValid;
