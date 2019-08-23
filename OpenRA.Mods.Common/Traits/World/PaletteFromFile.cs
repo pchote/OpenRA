@@ -45,7 +45,12 @@ namespace OpenRA.Mods.Common.Traits
 
 		ImmutablePalette IProvidesCursorPaletteInfo.ReadPalette(IReadOnlyFileSystem fileSystem)
 		{
-			return new ImmutablePalette(fileSystem.Open(Filename), ShadowIndex);
+			var foo = new ImmutablePalette(fileSystem.Open(Filename), ShadowIndex);
+			var foo2 = new MutablePalette(foo);
+			if (Name == "clock")
+				foreach (var si in ShadowIndex)
+					foo2[si] = 92u << 24;
+			return new ImmutablePalette(foo2);
 		}
 	}
 

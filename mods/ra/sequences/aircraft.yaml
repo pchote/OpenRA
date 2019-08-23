@@ -2,6 +2,7 @@ mig:
 	idle:
 		Facings: 16
 	icon: migicon
+	loicon: lores|migicon
 
 yak:
 	idle:
@@ -10,6 +11,7 @@ yak:
 		Length: 6
 		Facings: 8
 	icon: yakicon
+	loicon: lores|yakicon
 
 heli:
 	idle:
@@ -21,6 +23,7 @@ heli:
 		Start: 4
 		Length: 8
 	icon: heliicon
+	loicon: lores|heliicon
 
 hind:
 	idle:
@@ -35,6 +38,7 @@ hind:
 		Length: 6
 		Facings: 8
 	icon: hindicon
+	loicon: lores|hindicon
 
 tran:
 	idle: tran2
@@ -56,6 +60,7 @@ tran:
 	unload: tran2
 		Start: 35
 	icon: tranicon
+	loicon: lores|tranicon
 
 tran1husk:
 	idle:
@@ -84,3 +89,4 @@ mh60:
 		Length: 6
 		Facings: 8
 	icon: mh60icon
+	loicon: lores|mh60icon

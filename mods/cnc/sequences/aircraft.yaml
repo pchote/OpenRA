@@ -3,6 +3,7 @@ c17:
 		Facings: 32
 		UseClassicFacingFudge: True
 	icon: c17icnh
+	loicon: loicon|c17icon
 
 tran:
 	idle:
@@ -25,6 +26,7 @@ tran:
 		Start: 35
 	icon: tranicnh.tem
 		AddExtension: False
+	loicon: loicon|tranicon
 
 heli:
 	idle:
@@ -40,6 +42,7 @@ heli:
 		Facings: 8
 	icon: heliicnh.tem
 		AddExtension: False
+	loicon: loicon|heliicon
 
 orca:
 	idle:
@@ -50,6 +53,7 @@ orca:
 		Facings: 32
 	icon: orcaicnh.tem
 		AddExtension: False
+	loicon: loicon|orcaicon
 
 a10:
 	idle:
@@ -60,3 +64,4 @@ a10:
 		Facings: 8
 	icon: a10icnh.tem
 		AddExtension: False
+	loicon: loicon|a10icon

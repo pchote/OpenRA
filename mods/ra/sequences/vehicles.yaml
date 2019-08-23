@@ -3,6 +3,7 @@ mcv:
 		Facings: 32
 		UseClassicFacingFudge: True
 	icon: mcvicon
+	loicon: lores|mcvicon
 
 mcvhusk:
 	idle:
@@ -32,6 +33,7 @@ harv:
 		Length: 7
 	icon: harvicon
 		Start: 0
+	loicon: lores|harvicon
 
 harvempty:
 	Inherits: harv
@@ -62,6 +64,7 @@ hhusk2:
 	muzzle: gunfire2
 		Length: 2
 	icon: 1tnkicon
+	loicon: lores|1tnkicon
 
 1tnk.destroyed:
 	idle: 1tnk
@@ -85,6 +88,7 @@ hhusk2:
 	muzzle: gunfire2
 		Length: 5
 	icon: 2tnkicon
+	loicon: lores|2tnkicon
 
 2tnk.destroyed:
 	idle: 2tnk
@@ -108,6 +112,7 @@ hhusk2:
 	muzzle: gunfire2
 		Length: 5
 	icon: 3tnkicon
+	loicon: lores|3tnkicon
 
 3tnk.destroyed:
 	idle: 3tnk
@@ -131,6 +136,7 @@ hhusk2:
 	muzzle: gunfire2
 		Length: 5
 	icon: 4tnkicon
+	loicon: lores|4tnkicon
 
 4tnk.destroyed:
 	idle: 4tnk
@@ -152,6 +158,7 @@ v2rl:
 		Facings: 32
 		UseClassicFacingFudge: True
 	icon: v2rlicon
+	loicon: lores|v2rlicon
 
 arty:
 	idle:
@@ -160,6 +167,7 @@ arty:
 	muzzle: gunfire2
 		Length: 5
 	icon: artyicon
+	loicon: lores|artyicon
 
 jeep:
 	idle:
@@ -173,6 +181,7 @@ jeep:
 		Length: 6
 		Facings: 8
 	icon: jeepicon
+	loicon: lores|jeepicon
 
 apc:
 	idle:
@@ -187,12 +196,14 @@ apc:
 	unload:
 		Start: 32
 	icon: apcicon
+	loicon: lores|apcicon
 
 mnly:
 	idle:
 		Facings: 32
 		UseClassicFacingFudge: True
 	icon: mnlyicon
+	loicon: lores|mnlyicon
 
 mrj:
 	idle:
@@ -202,6 +213,7 @@ mrj:
 		Start: 32
 		Length: 32
 	icon: mrjicon
+	loicon: lores|mrjicon
 
 mgg:
 	idle:
@@ -214,6 +226,7 @@ mgg:
 		Start: 32
 		Length: 1
 	icon: mggicon
+	loicon: lores|mggicon
 
 mgg.destroyed:
 	idle: mgg
@@ -235,6 +248,7 @@ ttnk:
 		Start: 32
 		Length: 32
 	icon: ttnkicon
+	loicon: lores|ttnkicon
 
 ftrk:
 	idle:
@@ -253,6 +267,7 @@ dtrk:
 		Facings: 32
 		UseClassicFacingFudge: True
 	icon: dtrkicon
+	loicon: lores|dtrkicon
 
 ctnk:
 	idle:
@@ -261,6 +276,7 @@ ctnk:
 	muzzle: gunfire2
 		Length: 5
 	icon: ctnkicon
+	loicon: lores|ctnkicon
 
 qtnk:
 	idle:
@@ -271,6 +287,7 @@ qtnk:
 		Facings: 8
 		Length: 8
 	icon: qtnkicon
+	loicon: lores|qtnkicon
 
 stnk:
 	idle:
@@ -280,3 +297,4 @@ stnk:
 		Start: 38
 		Facings: 32
 	icon: stnkicon
+	loicon: lores|stnkicon

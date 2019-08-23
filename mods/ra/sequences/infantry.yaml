@@ -81,6 +81,7 @@ e1:
 		Length: 6
 		Facings: 8
 	icon: e1icon
+	loicon: lores|e1icon
 
 sniper:
 	stand:
@@ -237,6 +238,7 @@ e3:
 		Length: 10
 		Facings: 8
 	icon: e3icon
+	loicon: lores|e3icon
 
 e6:
 	stand:
@@ -302,6 +304,7 @@ e6:
 		Facings: 8
 		Tick: 100
 	icon: e6icon
+	loicon: lores|e6icon
 
 medi:
 	stand:
@@ -362,6 +365,7 @@ medi:
 		Facings: 8
 		Tick: 100
 	icon: mediicon
+	loicon: lores|mediicon
 
 mech:
 	stand:
@@ -422,6 +426,7 @@ mech:
 		Facings: 8
 		Tick: 100
 	icon: mechicon
+	loicon: lores|mechicon
 
 e2:
 	stand:
@@ -495,6 +500,7 @@ e2:
 		Length: 12
 		Facings: 8
 	icon: e2icon
+	loicon: lores|e2icon
 
 dog:
 	stand:
@@ -551,6 +557,7 @@ dog:
 		Length: 4
 		Facings: 8
 	icon: dogicon
+	loicon: lores|dogicon
 
 spy:
 	stand:
@@ -622,6 +629,7 @@ spy:
 		Length: 8
 		Facings: 8
 	icon: spyicon
+	loicon: lores|spyicon
 
 thf:
 	stand:
@@ -674,6 +682,7 @@ thf:
 		Facings: 8
 		Tick: 80
 	icon: thficon
+	loicon: lores|thficon
 
 e7:
 	stand:
@@ -742,6 +751,7 @@ e7:
 		Stride: 6
 		Facings: 8
 	icon: e7icon
+	loicon: lores|e7icon
 
 e4:
 	stand:
@@ -815,6 +825,7 @@ e4:
 		Length: 16
 		Facings: 8
 	icon: e4icon
+	loicon: lores|e4icon
 
 gnrl:
 	stand:
@@ -959,6 +970,7 @@ shok:
 			DESERT: TEMPERAT
 			INTERIOR: TEMPERAT
 	icon: shokicon
+	loicon: lores|shokicon
 
 c1:
 	stand:

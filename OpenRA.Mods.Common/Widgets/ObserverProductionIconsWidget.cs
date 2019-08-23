@@ -31,11 +31,12 @@ namespace OpenRA.Mods.Common.Widgets
 
 		public int IconWidth = 32;
 		public int IconHeight = 24;
-		public int IconSpacing = 1;
+		public int IconSpacing = 0;
 
 		public string ClockAnimation = "clock";
 		public string ClockSequence = "idle";
-		public string ClockPalette = "chrome";
+		public string ClockPalette = "clock";
+		public readonly bool Timer = false;
 
 		public ProductionIcon TooltipIcon { get; private set; }
 		public Func<ProductionIcon> GetTooltipIcon;
@@ -131,13 +132,22 @@ namespace OpenRA.Mods.Common.Widgets
 				var icon = new Animation(world, rsi.GetImage(actor, world.Map.Rules.Sequences, faction));
 				var bi = actor.TraitInfo<BuildableInfo>();
 
-				icon.Play(bi.Icon);
+				if (icon.HasSequence("loicon"))
+					icon.Play("loicon");
+				else
+					icon.Play(bi.Icon);
 				var topLeftOffset = new float2(queueCol * (IconWidth + IconSpacing), 0);
 
 				var iconTopLeft = RenderOrigin + topLeftOffset;
 				var centerPosition = iconTopLeft;
 
-				WidgetUtils.DrawSHPCentered(icon.Image, centerPosition + 0.5f * iconSize, worldRenderer.Palette(bi.IconPalette), 0.5f);
+				var pal = "player" + player.InternalName;
+				if (queue.Info.Type == "Infantry")
+					pal = bi.IconPalette;
+
+				WidgetUtils.DrawSHPCentered(icon.Image, centerPosition + 0.5f * iconSize, worldRenderer.Palette(pal), iconSize.X / icon.Image.Bounds.Width);
+				var darkenBounds = new Rectangle((int)iconTopLeft.X, (int)(iconTopLeft.Y + iconSize.Y / 2), (int)iconSize.X, (int)iconSize.Y / 2);
+				WidgetUtils.FillRectWithColor(darkenBounds, Color.Transparent, Color.Transparent, Color.Black, Color.Black);
 
 				productionIcons.Add(new ProductionIcon { Actor = actor, ProductionQueue = current.Queue });
 				productionIconsBounds.Add(new Rectangle((int)iconTopLeft.X, (int)iconTopLeft.Y, (int)iconSize.X, (int)iconSize.Y));
@@ -156,16 +166,19 @@ namespace OpenRA.Mods.Common.Widgets
 				clock.Tick();
 				WidgetUtils.DrawSHPCentered(clock.Image, centerPosition + 0.5f * iconSize, worldRenderer.Palette(ClockPalette), 0.5f);
 
-				var tiny = Game.Renderer.Fonts["Tiny"];
-				var text = GetOverlayForItem(current, timestep);
-				tiny.DrawTextWithContrast(text,
-					centerPosition + new float2(16, 12) - new float2(tiny.Measure(text).X / 2, 0),
-					Color.White, Color.Black, 1);
+				if (Timer)
+				{
+					var tiny = Game.Renderer.Fonts["Tiny"];
+					var text = GetOverlayForItem(current, timestep);
+					tiny.DrawTextWithContrast(text,
+						centerPosition + new float2(16, 12) - new float2(tiny.Measure(text).X / 2, 0),
+						Color.White, Color.Black, 1);
+				}
 
 				if (currentItems.Count() > 1)
 				{
 					var bold = Game.Renderer.Fonts["Small"];
-					text = currentItems.Count().ToString();
+					var text = currentItems.Count().ToString();
 					bold.DrawTextWithContrast(text, centerPosition + new float2(16, 0) - new float2(bold.Measure(text).X / 2, 0),
 						Color.White, Color.Black, 1);
 				}

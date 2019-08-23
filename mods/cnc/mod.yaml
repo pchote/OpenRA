@@ -30,6 +30,7 @@ Packages:
 	cnc|bits/desert
 	cnc|bits/ss
 	cnc|uibits
+	cnc|bits/loicon: loicon
 
 MapFolders:
 	cnc|maps: System
@@ -54,12 +55,12 @@ Rules:
 	cnc|rules/husks.yaml
 
 Sequences:
+	cnc|sequences/misc.yaml
 	cnc|sequences/structures.yaml
 	cnc|sequences/vehicles.yaml
 	cnc|sequences/infantry.yaml
 	cnc|sequences/aircraft.yaml
 	cnc|sequences/decorations.yaml
-	cnc|sequences/misc.yaml
 	cnc|sequences/funpark.yaml
 	cnc|sequences/civilian.yaml
 	cnc|sequences/campaign.yaml

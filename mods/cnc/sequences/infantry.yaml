@@ -135,6 +135,7 @@ e1:
 		ZOffset: -511
 	icon: e1icnh.tem
 		AddExtension: False
+	loicon: loicon|e1icon
 
 e2:
 	stand:
@@ -228,6 +229,7 @@ e2:
 		ZOffset: -511
 	icon: e2icnh.tem
 		AddExtension: False
+	loicon: loicon|e2icon
 
 e3:
 	stand:
@@ -321,6 +323,7 @@ e3:
 		ZOffset: -511
 	icon: e3icnh.tem
 		AddExtension: False
+	loicon: loicon|e3icon
 
 e4:
 	stand:
@@ -442,6 +445,7 @@ e4:
 		Length: 13
 	icon: e4icnh.tem
 		AddExtension: False
+	loicon: loicon|e4icon
 
 e5:
 	stand:
@@ -563,6 +567,7 @@ e5:
 		Length: 13
 	icon: e5icnh.tem
 		AddExtension: False
+	loicon: loicon|e5icon
 
 e6:
 	stand:
@@ -648,6 +653,7 @@ e6:
 		ZOffset: -511
 	icon: e6icnh.tem
 		AddExtension: False
+	loicon: loicon|e6icon
 
 rmbo:
 	stand:
@@ -745,3 +751,4 @@ rmbo:
 		ZOffset: -511
 	icon: rmboicnh.tem
 		AddExtension: False
+	loicon: loicon|rmboicon

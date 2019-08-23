@@ -24,6 +24,7 @@ fact:
 		UseTilesetExtension: true
 		Length: *
 	icon: facticnh
+	loicon: loicon|facticon
 
 nuke:
 	idle:
@@ -44,6 +45,7 @@ nuke:
 		Length: *
 	icon: nukeicnh.tem
 		AddExtension: False
+	loicon: loicon|nukeicon
 
 proc:
 	idle:
@@ -75,6 +77,7 @@ proc:
 		Length: *
 	icon: procicnh.tem
 		AddExtension: False
+	loicon: loicon|procicon
 
 silo:
 	idle:
@@ -107,6 +110,7 @@ silo:
 		Offset: 0,1
 	icon: siloicnh.tem
 		AddExtension: False
+	loicon: loicon|siloicon
 
 hand:
 	Defaults:
@@ -127,6 +131,7 @@ hand:
 	icon: handicnh.tem
 		AddExtension: False
 		Offset: 0,0
+	loicon: loicon|handicon
 
 pyle:
 	idle:
@@ -147,6 +152,7 @@ pyle:
 		Length: *
 	icon: pyleicnh.tem
 		AddExtension: False
+	loicon: loicon|pyleicon
 
 weap:
 	Defaults:
@@ -178,6 +184,7 @@ weap:
 	icon: weapicnh.tem
 		AddExtension: False
 		Offset: 0,0
+	loicon: loicon|weapicon
 
 afld:
 	idle:
@@ -215,6 +222,7 @@ afld:
 		Length: *
 	icon: afldicnh.tem
 		AddExtension: False
+	loicon: loicon|afldicon
 
 hq:
 	idle:
@@ -235,6 +243,7 @@ hq:
 		Length: *
 	icon: hqicnh.tem
 		AddExtension: False
+	loicon: loicon|hqicon
 
 nuk2:
 	idle:
@@ -255,6 +264,7 @@ nuk2:
 		Length: *
 	icon: nuk2icnh.tem
 		AddExtension: False
+	loicon: loicon|nuk2icon
 
 hpad:
 	idle:
@@ -281,6 +291,7 @@ hpad:
 		Tick: 80
 	icon: hpadicnh.tem
 		AddExtension: False
+	loicon: loicon|hpadicon
 
 fix:
 	idle:
@@ -312,6 +323,7 @@ fix:
 		Offset: 0,-9
 	icon: fixicnh.tem
 		AddExtension: False
+	loicon: loicon|fixicon
 
 eye:
 	idle:
@@ -332,6 +344,7 @@ eye:
 		Length: *
 	icon: eyeicnh.tem
 		AddExtension: False
+	loicon: loicon|eyeicon
 
 tmpl:
 	Defaults:
@@ -361,6 +374,7 @@ tmpl:
 	icon: tmplicnh.tem
 		AddExtension: False
 		Offset: 0,0
+	loicon: loicon|tmplicon
 
 obli:
 	Defaults:
@@ -392,6 +406,7 @@ obli:
 	icon: obliicnh.tem
 		AddExtension: False
 		Offset: 0,0
+	loicon: loicon|obliicon
 
 brik:
 	idle:
@@ -404,12 +419,14 @@ brik:
 		Length: 16
 	icon: brikicnh.tem
 		AddExtension: False
+	loicon: loicon|brikicon
 
 sbag:
 	idle:
 		Length: 16
 	icon: sbagicnh.tem
 		AddExtension: False
+	loicon: loicon|sbagicon
 
 cycl:
 	idle:
@@ -419,6 +436,7 @@ cycl:
 		Length: 16
 	icon: cyclicnh.tem
 		AddExtension: False
+	loicon: loicon|cyclicon
 
 barb:
 	idle:
@@ -465,6 +483,7 @@ gun:
 		Offset: -1,-1
 	icon: gunicnh.tem
 		AddExtension: False
+	loicon: loicon|gunicon
 
 sam:
 	closed-idle:
@@ -508,6 +527,7 @@ sam:
 		Facings: 8
 	icon: samicnh.tem
 		AddExtension: False
+	loicon: loicon|samicon
 
 gtwr:
 	idle:
@@ -537,6 +557,7 @@ gtwr:
 		Offset: 0,-2
 	icon: gtwricnh.tem
 		AddExtension: False
+	loicon: loicon|gtwricon
 
 atwr:
 	Defaults:
@@ -563,6 +584,7 @@ atwr:
 	icon: atwricnh.tem
 		AddExtension: False
 		Offset: 0,0
+	loicon: loicon|atwricon
 
 hosp:
 	idle:
