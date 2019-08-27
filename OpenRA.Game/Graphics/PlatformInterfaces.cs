@@ -41,6 +41,8 @@ namespace OpenRA
 
 		Size WindowSize { get; }
 		float WindowScale { get; }
+		Size SurfaceSize { get; }
+
 		event Action<float, float> OnWindowScaleChanged;
 
 		void PumpInput(IInputHandler inputHandler);
@@ -61,7 +63,7 @@ namespace OpenRA
 		ITexture CreateTexture();
 		IFrameBuffer CreateFrameBuffer(Size s);
 		IShader CreateShader(string name);
-		void EnableScissor(int left, int top, int width, int height);
+		void EnableScissor(int x, int y, int width, int height);
 		void DisableScissor();
 		void SaveScreenshot(string path);
 		void Present();
