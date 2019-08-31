@@ -62,6 +62,7 @@ namespace OpenRA
 		IVertexBuffer<Vertex> CreateVertexBuffer(int size);
 		ITexture CreateTexture();
 		IFrameBuffer CreateFrameBuffer(Size s);
+		IFrameBuffer CreateFrameBuffer(Size s, Color clearColor);
 		IShader CreateShader(string name);
 		void EnableScissor(int x, int y, int width, int height);
 		void DisableScissor();
