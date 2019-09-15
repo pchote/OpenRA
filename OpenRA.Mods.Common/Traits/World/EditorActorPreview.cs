@@ -27,7 +27,7 @@ namespace OpenRA.Mods.Common.Traits
 		public readonly WPos CenterPosition;
 		public readonly IReadOnlyDictionary<CPos, SubCell> Footprint;
 		public readonly Rectangle Bounds;
-		public readonly SelectionBoxRenderable SelectionBox;
+		public readonly SelectionBoxAnnotationRenderable SelectionBox;
 
 		public string Tooltip
 		{
@@ -99,7 +99,7 @@ namespace OpenRA.Mods.Common.Traits
 					Bounds = Rectangle.Union(Bounds, rr);
 			}
 
-			SelectionBox = new SelectionBoxRenderable(new WPos(CenterPosition.X, CenterPosition.Y, 8192),
+			SelectionBox = new SelectionBoxAnnotationRenderable(new WPos(CenterPosition.X, CenterPosition.Y, 8192),
 				new Rectangle(Bounds.X, Bounds.Y, Bounds.Width, Bounds.Height), Color.White);
 		}
 
