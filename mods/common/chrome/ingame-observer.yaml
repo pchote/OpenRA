@@ -328,7 +328,7 @@ Container@OBSERVER_WIDGETS:
 									Width: 80
 									Height: PARENT_BOTTOM
 									Font: Bold
-									Text: $ last min
+									Text: Income
 									Align: Right
 									Shadow: True
 								Label@ASSETS_HEADER:
