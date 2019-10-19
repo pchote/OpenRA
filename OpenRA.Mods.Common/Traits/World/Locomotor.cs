@@ -259,7 +259,7 @@ namespace OpenRA.Mods.Common.Traits
 		}
 
 		// Determines whether the actor is blocked by other Actors
-		public bool CanMoveFreelyInto(Actor actor, CPos cell, Actor ignoreActor, CellConditions check)
+		public bool CanMoveFreelyInto(Actor actor, CPos cell, Actor ignoreActor, CellConditions check, SubCell subCell = SubCell.FullCell)
 		{
 			var cellCache = GetCache(cell);
 			var cellFlag = cellCache.CellFlag;
@@ -292,7 +292,8 @@ namespace OpenRA.Mods.Common.Traits
 					return false;
 			}
 
-			foreach (var otherActor in world.ActorMap.GetActorsAt(cell))
+			var otherActors = subCell == SubCell.FullCell ? world.ActorMap.GetActorsAt(cell) : world.ActorMap.GetActorsAt(cell, subCell);
+			foreach (var otherActor in otherActors)
 				if (IsBlockedBy(actor, otherActor, ignoreActor, check, cellFlag))
 					return false;
 
