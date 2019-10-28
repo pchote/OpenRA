@@ -67,6 +67,9 @@ namespace OpenRA.Orders
 
 		public virtual string GetCursor(World world, CPos cell, int2 worldPixel, MouseInput mi)
 		{
+			if (Game.Settings.Game.UseClassicMouseStyle && !InputOverridesSelection(world, worldPixel, mi))
+				return "select";
+
 			var useSelect = false;
 			var target = TargetForInput(world, cell, worldPixel, mi);
 			var actorsAt = world.ActorMap.GetActorsAt(cell).ToList();
