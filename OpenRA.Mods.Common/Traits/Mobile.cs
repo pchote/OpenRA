@@ -225,6 +225,9 @@ namespace OpenRA.Mods.Common.Traits
 			if (FromCell == ToCell)
 				return new[] { Pair.New(FromCell, FromSubCell) };
 
+			if (Info.LocomotorInfo.SharesCell)
+				return new[] { Pair.New(ToCell, ToSubCell) };
+
 			return new[] { Pair.New(FromCell, FromSubCell), Pair.New(ToCell, ToSubCell) };
 		}
 		#endregion
