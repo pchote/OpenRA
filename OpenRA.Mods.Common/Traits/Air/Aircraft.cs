@@ -1189,7 +1189,7 @@ namespace OpenRA.Mods.Common.Traits
 
 			public bool TargetOverridesSelection(Actor self, Target target, List<Actor> actorsAt, CPos xy, TargetModifiers modifiers)
 			{
-				return modifiers.HasModifier(TargetModifiers.ForceMove);
+				return self.World.Selection.Contains(target.Actor) || modifiers.HasModifier(TargetModifiers.ForceMove);
 			}
 
 			public virtual bool CanTarget(Actor self, Target target, List<Actor> othersAtTarget, ref TargetModifiers modifiers, ref string cursor)

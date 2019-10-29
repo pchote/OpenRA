@@ -924,7 +924,7 @@ namespace OpenRA.Mods.Common.Traits
 			readonly bool rejectMove;
 			public bool TargetOverridesSelection(Actor self, Target target, List<Actor> actorsAt, CPos xy, TargetModifiers modifiers)
 			{
-				return modifiers.HasModifier(TargetModifiers.ForceMove);
+				return self.World.Selection.Contains(target.Actor) || modifiers.HasModifier(TargetModifiers.ForceMove);
 			}
 
 			public MoveOrderTargeter(Actor self, Mobile unit)
