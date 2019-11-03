@@ -165,7 +165,7 @@ namespace OpenRA
 			var bufferSize = new Size((int)(surfaceBufferSize.Width / scale), (int)(surfaceBufferSize.Height / scale));
 			if (lastBufferSize != bufferSize)
 			{
-				SpriteRenderer.SetViewportParams(bufferSize, 0f, 0f, 1f, int2.Zero);
+				SpriteRenderer.SetViewportParams(bufferSize, 0f, 0f, int2.Zero);
 				lastBufferSize = bufferSize;
 			}
 		}
@@ -197,8 +197,8 @@ namespace OpenRA
 
 			if (worldBufferSize != lastWorldBufferSize || lastWorldViewport != worldViewport)
 			{
-				WorldSpriteRenderer.SetViewportParams(worldBufferSize, depthScale, depthOffset, 1f, worldViewport.Location);
-				WorldModelRenderer.SetViewportParams(worldBufferSize, 1f, worldViewport.Location);
+				WorldSpriteRenderer.SetViewportParams(worldBufferSize, depthScale, depthOffset, worldViewport.Location);
+				WorldModelRenderer.SetViewportParams(worldBufferSize, worldViewport.Location);
 
 				lastWorldViewport = worldViewport;
 				lastWorldBufferSize = worldBufferSize;
