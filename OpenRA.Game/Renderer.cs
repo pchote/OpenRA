@@ -246,7 +246,7 @@ namespace OpenRA
 			WorldModelRenderer.SetPalette(currentPaletteTexture);
 		}
 
-		public void EndFrame(IInputHandler inputHandler)
+		public void EndFrame(IInputHandler inputHandler, bool display = true)
 		{
 			if (renderType != RenderType.UI)
 				throw new InvalidOperationException("EndFrame called with renderType = {0}, expected RenderType.UI.".F(renderType));
@@ -256,14 +256,20 @@ namespace OpenRA
 
 			screenBuffer.Unbind();
 
-			// Render the compositor buffers to the screen
-			// HACK / PERF: Fudge the coordinates to cover the actual window while keeping the buffer viewport parameters
-			// This saves us two redundant (and expensive) SetViewportParams each frame
-			RgbaSpriteRenderer.DrawSprite(screenSprite, new float3(0, lastBufferSize.Height, 0), new float3(lastBufferSize.Width, -lastBufferSize.Height, 0));
-			Flush();
+			if (display)
+			{
+				// Render the compositor buffers to the screen
+				// HACK / PERF: Fudge the coordinates to cover the actual window while keeping the buffer viewport parameters
+				// This saves us two redundant (and expensive) SetViewportParams each frame
+				RgbaSpriteRenderer.DrawSprite(screenSprite, new float3(0, lastBufferSize.Height, 0), new float3(lastBufferSize.Width, -lastBufferSize.Height, 0));
+				Flush();
+			}
 
-			Window.PumpInput(inputHandler);
-			Context.Present();
+			if (inputHandler != null)
+				Window.PumpInput(inputHandler);
+
+			if (display)
+				Context.Present();
 
 			renderType = RenderType.None;
 		}
@@ -388,25 +394,34 @@ namespace OpenRA
 			Window.ReleaseWindowMouseFocus();
 		}
 
-		public void SaveScreenshot(string path)
+		public void SaveScreenshot(string path, bool worldOnly = false)
 		{
+			var buffer = worldOnly ? worldBuffer : screenBuffer;
+			var sprite = worldOnly ? worldSprite : screenSprite;
+
 			// Pull the data from the Texture directly to prevent the sheet from buffering it
-			var src = screenBuffer.Texture.GetData();
-			var srcWidth = screenSprite.Sheet.Size.Width;
-			var destWidth = screenSprite.Bounds.Width;
-			var destHeight = -screenSprite.Bounds.Height;
+			var src = buffer.Texture.GetData();
+			var srcWidth = sprite.Sheet.Size.Width;
+			var destWidth = sprite.Bounds.Width;
+			var destHeight = sprite.Bounds.Height;
+			var originX = sprite.Bounds.X;
+			var originY = sprite.Bounds.Y;
+			if (!worldOnly)
+				destHeight *= -1;
+
 			var channelOrder = new[] { 2, 1, 0, 3 };
 
 			ThreadPool.QueueUserWorkItem(_ =>
 			{
 				// Convert BGRA to RGBA
+				Console.WriteLine("{0} {1}", destWidth, destHeight);
 				var dest = new byte[4 * destWidth * destHeight];
 				for (var y = 0; y < destHeight; y++)
 				{
 					for (var x = 0; x < destWidth; x++)
 					{
 						var destOffset = 4 * (y * destWidth + x);
-						var srcOffset = 4 * (y * srcWidth + x);
+						var srcOffset = 4 * ((y + originY) * srcWidth + x + originX);
 						for (var i = 0; i < 4; i++)
 							dest[destOffset + i] = src[srcOffset + channelOrder[i]];
 					}

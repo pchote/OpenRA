@@ -158,6 +158,9 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			var save = widget.Get<ButtonWidget>("SAVE_BUTTON");
 			save.OnClick = () =>
 			{
+				// HACK: Trigger a full-world screenshot whenever we save a map
+				Game.TakeEditorWorldScreenshot();
+
 				if (string.IsNullOrEmpty(filename.Text))
 					return;
 

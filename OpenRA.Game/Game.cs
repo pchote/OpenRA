@@ -57,6 +57,7 @@ namespace OpenRA
 
 		static Task discoverNat;
 		static bool takeScreenshot = false;
+		static bool takeEditorWorldScreenshot = false;
 		static Benchmark benchmark = null;
 
 		public static event Action OnShellmapLoaded = () => { };
@@ -548,7 +549,7 @@ namespace OpenRA
 		public static void RunAfterTick(Action a) { delayedActions.Add(a, RunTime); }
 		public static void RunAfterDelay(int delayMilliseconds, Action a) { delayedActions.Add(a, RunTime + delayMilliseconds); }
 
-		static void TakeScreenshotInner()
+		static void TakeScreenshotInner(bool worldOnly)
 		{
 			using (new PerfTimer("Renderer.SaveScreenshot"))
 			{
@@ -560,7 +561,7 @@ namespace OpenRA
 				var path = Path.Combine(directory, string.Concat(filename, ".png"));
 				Log.Write("debug", "Taking screenshot " + path);
 
-				Renderer.SaveScreenshot(path);
+				Renderer.SaveScreenshot(path, worldOnly);
 				Debug("Saved screenshot " + filename);
 			}
 		}
@@ -659,6 +660,11 @@ namespace OpenRA
 			takeScreenshot = true;
 		}
 
+		public static void TakeEditorWorldScreenshot()
+		{
+			takeEditorWorldScreenshot = true;
+		}
+
 		static void RenderTick()
 		{
 			using (new PerfSample("render"))
@@ -715,7 +721,26 @@ namespace OpenRA
 				if (takeScreenshot)
 				{
 					takeScreenshot = false;
-					TakeScreenshotInner();
+					TakeScreenshotInner(false);
+				}
+
+				if (takeScreenshot)
+				{
+					takeScreenshot = false;
+					TakeScreenshotInner(false);
+				}
+
+				if (takeEditorWorldScreenshot && worldRenderer != null)
+				{
+					takeEditorWorldScreenshot = false;
+
+					// Render a dummy frame with a viewport covering the entire world
+					Renderer.BeginWorld(worldRenderer.Viewport.GetScissorBounds(true));
+					worldRenderer.Draw();
+					Renderer.BeginUI();
+					Renderer.EndFrame(null, false);
+
+					TakeScreenshotInner(true);
 				}
 			}
 
