@@ -459,6 +459,7 @@ namespace OpenRA
 
 			PerfHistory.Items["render"].HasNormalTick = false;
 			PerfHistory.Items["batches"].HasNormalTick = false;
+			PerfHistory.Items["render_world"].HasNormalTick = false;
 			PerfHistory.Items["render_widgets"].HasNormalTick = false;
 			PerfHistory.Items["render_flip"].HasNormalTick = false;
 
@@ -686,7 +687,8 @@ namespace OpenRA
 				{
 					Renderer.BeginWorld(worldRenderer.Viewport.Rectangle);
 					Sound.SetListenerPosition(worldRenderer.Viewport.CenterPosition);
-					worldRenderer.Draw();
+					using (new PerfSample("render_world"))
+						worldRenderer.Draw();
 				}
 
 				using (new PerfSample("render_widgets"))
@@ -722,6 +724,7 @@ namespace OpenRA
 
 			PerfHistory.Items["render"].Tick();
 			PerfHistory.Items["batches"].Tick();
+			PerfHistory.Items["render_world"].Tick();
 			PerfHistory.Items["render_widgets"].Tick();
 			PerfHistory.Items["render_flip"].Tick();
 		}
