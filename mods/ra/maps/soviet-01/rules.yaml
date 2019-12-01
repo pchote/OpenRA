@@ -55,3 +55,9 @@ POWR:
 	-Sellable:
 	Demolishable:
 		-Condition:
+
+YAK:
+	Armament@PRIMARY:
+		Weapon: ChainGun.Yak.Left
+	Armament@SECONDARY:
+		Weapon: ChainGun.Yak.Right

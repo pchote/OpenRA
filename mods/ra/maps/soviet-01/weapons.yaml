@@ -1,0 +1,26 @@
+-ChainGun.Yak:
+
+ChainGun.Yak.Left:
+	Inherits: ^HeavyMG
+	Burst: 5
+	FirstBurstTargetOffset: -534,-213,0
+	FollowingBurstTargetOffset: 534,0,0
+	BurstDelay: 3
+	ReloadDelay: 10
+	Range: 5c6
+	MinRange: 3c420
+	MinRange: 3c0
+	Projectile: Bullet
+		Blockable: false
+	Warhead@1Dam: SpreadDamage
+		Damage: 4000
+		Versus:
+			None: 100
+			Wood: 50
+			Light: 60
+			Heavy: 25
+			Concrete: 25
+
+ChainGun.Yak.Right:
+	Inherits: ChainGun.Yak.Left
+	FirstBurstTargetOffset: -534,-213,0
