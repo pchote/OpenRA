@@ -13,7 +13,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using OpenRA.Graphics;
 using OpenRA.Primitives;
 using OpenRA.Traits;
 
@@ -33,6 +32,8 @@ namespace OpenRA
 		Started = 8,
 		Incompatible = 16
 	}
+
+	public enum WorldViewport { Native, Close, Medium, Far }
 
 	public class ServerSettings
 	{
@@ -148,8 +149,8 @@ namespace OpenRA
 
 		public bool HardwareCursors = true;
 
-		public bool PixelDouble = false;
 		public bool CursorDouble = false;
+		public WorldViewport ViewportDistance = WorldViewport.Medium;
 
 		[Desc("Add a frame rate limiter.")]
 		public bool CapFramerate = false;
@@ -210,6 +211,7 @@ namespace OpenRA
 		public MouseButtonPreference MouseButtonPreference = new MouseButtonPreference();
 		public float ViewportEdgeScrollStep = 30f;
 		public float UIScrollSpeed = 50f;
+		public float ZoomSpeed = 0.04f;
 		public int SelectionDeadzone = 24;
 		public int MouseScrollDeadzone = 8;
 
@@ -224,7 +226,6 @@ namespace OpenRA
 		public string AuthProfile = "player.oraid";
 
 		public bool AllowZoom = true;
-		public Modifiers ZoomModifier = Modifiers.Ctrl;
 
 		public bool FetchNews = true;
 

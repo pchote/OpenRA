@@ -159,13 +159,17 @@ Container@SETTINGS_PANEL:
 							Height: 20
 							Font: Regular
 							Text: Enable VSync
-						Checkbox@PIXELDOUBLE_CHECKBOX:
-							X: 310
+						Label@BATTLEFIELD_CAMERA:
+							X: 250
+							Y: 168
+							Width: 145
+							Text: Battlefield Camera:
+							Align: Right
+						DropDownButton@BATTLEFIELD_CAMERA_DROPDOWN:
+							X: 400
 							Y: 155
-							Width: 200
-							Height: 20
-							Font: Regular
-							Text: Enable Pixel Doubling
+							Width: 170
+							Height: 25
 						Slider@FRAME_LIMIT_SLIDER:
 							X: 45
 							Y: 150
@@ -394,21 +398,6 @@ Container@SETTINGS_PANEL:
 							Width: 100
 							Height: 25
 							Font: Regular
-						Label@ZOOM_MODIFIER_LABEL:
-							X: PARENT_RIGHT - WIDTH - 120
-							Y: 101
-							Width: 160
-							Height: 20
-							Font: Regular
-							Text: Scroll-zoom Modifier:
-							Align: Right
-						DropDownButton@ZOOM_MODIFIER:
-							X: PARENT_RIGHT - WIDTH - 15
-							Y: 98
-							Width: 100
-							Height: 25
-							Font: Regular
-							Text: Alt
 						Checkbox@EDGESCROLL_CHECKBOX:
 							X: 15
 							Y: 70
@@ -423,6 +412,21 @@ Container@SETTINGS_PANEL:
 							Height: 20
 							Font: Regular
 							Text: Scroll Zooming
+						Label@ZOOM_SPEED_LABEL:
+							X: PARENT_RIGHT - WIDTH - 270
+							Y: 98
+							Width: 95
+							Height: 25
+							Text: Zoom Speed:
+							Align: Right
+						ExponentialSlider@ZOOMSPEED_SLIDER:
+							X: PARENT_RIGHT - WIDTH - 170
+							Y: 103
+							Width: 100
+							Height: 20
+							Ticks: 5
+							MinimumValue: 0.01
+							MaximumValue: 0.2
 						Checkbox@LOCKMOUSE_CHECKBOX:
 							X: 15
 							Y: 130
