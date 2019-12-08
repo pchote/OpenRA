@@ -152,9 +152,16 @@ Container@SETTINGS_PANEL:
 							Height: 20
 							Font: Regular
 							Text: Enable Frame Limiter
-						Checkbox@PIXELDOUBLE_CHECKBOX:
+						Checkbox@VSYNC_CHECKBOX:
 							X: 310
 							Y: 125
+							Width: 200
+							Height: 20
+							Font: Regular
+							Text: Enable VSync
+						Checkbox@PIXELDOUBLE_CHECKBOX:
+							X: 310
+							Y: 155
 							Width: 200
 							Height: 20
 							Font: Regular

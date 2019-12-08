@@ -198,6 +198,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			BindCheckboxPref(panel, "HARDWARECURSORS_CHECKBOX", ds, "HardwareCursors");
 			BindCheckboxPref(panel, "PIXELDOUBLE_CHECKBOX", ds, "PixelDouble");
 			BindCheckboxPref(panel, "CURSORDOUBLE_CHECKBOX", ds, "CursorDouble");
+			BindCheckboxPref(panel, "VSYNC_CHECKBOX", ds, "VSync");
 			BindCheckboxPref(panel, "FRAME_LIMIT_CHECKBOX", ds, "CapFramerate");
 			BindCheckboxPref(panel, "PLAYER_STANCE_COLORS_CHECKBOX", gs, "UsePlayerStanceColors");
 
@@ -219,6 +220,15 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			targetLinesDropDown.OnMouseDown = _ => ShowTargetLinesDropdown(targetLinesDropDown, gs);
 			targetLinesDropDown.GetText = () => gs.TargetLines == TargetLinesType.Automatic ?
 				"Automatic" : gs.TargetLines == TargetLinesType.Manual ? "Manual" : "Disabled";
+
+			// Update vsync immediately
+			var vsyncCheckbox = panel.Get<CheckboxWidget>("VSYNC_CHECKBOX");
+			var vsyncOnClick = vsyncCheckbox.OnClick;
+			vsyncCheckbox.OnClick = () =>
+			{
+				vsyncOnClick();
+				Game.Renderer.SetVSyncEnabled(ds.VSync);
+			};
 
 			// Update zoom immediately
 			var pixelDoubleCheckbox = panel.Get<CheckboxWidget>("PIXELDOUBLE_CHECKBOX");

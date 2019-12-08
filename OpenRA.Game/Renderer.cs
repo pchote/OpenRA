@@ -421,6 +421,11 @@ namespace OpenRA
 			Window.Dispose();
 		}
 
+		public void SetVSyncEnabled(bool enabled)
+		{
+			Window.Context.SetVSyncEnabled(enabled);
+		}
+
 		public string GetClipboardText()
 		{
 			return Window.GetClipboardText();
