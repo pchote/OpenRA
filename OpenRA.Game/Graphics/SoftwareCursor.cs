@@ -84,18 +84,27 @@ namespace OpenRA.Graphics
 			var doubleCursor = cursorProvider.DoubleCursorSize && cursorName != "default";
 			var cursorSequence = cursorProvider.GetCursorSequence(cursorName);
 			var cursorSprite = sprites[cursorName][(int)cursorFrame % cursorSequence.Length];
-			var cursorSize = doubleCursor ? 2.0f * cursorSprite.Size : cursorSprite.Size;
+			var cursorSize = (doubleCursor ? 2.0f * cursorSprite.Size : cursorSprite.Size);
 
 			var cursorOffset = doubleCursor ?
-				(2 * cursorSequence.Hotspot) + cursorSprite.Size.XY.ToInt2() :
-				cursorSequence.Hotspot + (0.5f * cursorSprite.Size.XY).ToInt2();
+				2 * cursorSequence.Hotspot + cursorSprite.Size.XY :
+				cursorSequence.Hotspot + 0.5f * cursorSprite.Size.XY;
+
+			// Cursor is rendered in native window coordinates
+			// Apply same scaling rules as hardware cursors
+			var ws = Game.Renderer.WindowScale;
+			if (ws > 1.5f)
+			{
+				cursorSize = 2 * cursorSize;
+				cursorOffset *= 2;
+			}
 
 			renderer.SetPalette(palette);
 			var mousePos = isLocked ? lockedPosition : Viewport.LastMousePos;
 			renderer.SpriteRenderer.DrawSprite(cursorSprite,
-				mousePos - cursorOffset,
+				mousePos - cursorOffset / ws,
 				paletteReferences[cursorSequence.Palette],
-				cursorSize);
+				cursorSize / ws);
 		}
 
 		public void Lock()
