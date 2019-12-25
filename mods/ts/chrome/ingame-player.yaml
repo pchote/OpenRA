@@ -428,7 +428,6 @@ Container@PLAYER_WIDGETS:
 					TooltipTemplate: SIMPLE_TOOLTIP
 					Children:
 						Image@CASH_ICON:
-							Logic: AddFactionSuffixLogic
 							X: 0 - 17
 							Y: 3
 							ImageCollection: cash-icons
@@ -446,7 +445,6 @@ Container@PLAYER_WIDGETS:
 					TooltipTemplate: SIMPLE_TOOLTIP
 					Children:
 						Image@POWER_ICON:
-							Logic: AddFactionSuffixLogic
 							X: PARENT_RIGHT + 0
 							Y: 3
 							ImageCollection: power-icons
@@ -511,7 +509,6 @@ Container@PLAYER_WIDGETS:
 							Key: ProductionTypeBuilding
 							Children:
 								Image@ICON:
-									Logic: AddFactionSuffixLogic
 									X: 7
 									Y: 7
 									ImageCollection: production-icons
@@ -529,7 +526,6 @@ Container@PLAYER_WIDGETS:
 							Key: ProductionTypeDefense
 							Children:
 								Image@ICON:
-									Logic: AddFactionSuffixLogic
 									X: 7
 									Y: 7
 									ImageCollection: production-icons
@@ -547,7 +543,6 @@ Container@PLAYER_WIDGETS:
 							Key: ProductionTypeInfantry
 							Children:
 								Image@ICON:
-									Logic: AddFactionSuffixLogic
 									X: 6
 									Y: 7
 									ImageCollection: production-icons
@@ -565,7 +560,6 @@ Container@PLAYER_WIDGETS:
 							Key: ProductionTypeVehicle
 							Children:
 								Image@ICON:
-									Logic: AddFactionSuffixLogic
 									X: 7
 									Y: 7
 									ImageCollection: production-icons
@@ -583,7 +577,6 @@ Container@PLAYER_WIDGETS:
 							Key: ProductionTypeAircraft
 							Children:
 								Image@ICON:
-									Logic: AddFactionSuffixLogic
 									X: 7
 									Y: 7
 									ImageCollection: production-icons
