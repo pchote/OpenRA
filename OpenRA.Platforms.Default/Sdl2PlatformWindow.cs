@@ -33,6 +33,7 @@ namespace OpenRA.Platforms.Default
 		Size surfaceSize;
 		float windowScale = 1f;
 		int2? lockedMousePosition;
+		float scaleModifier;
 
 		internal IntPtr Window
 		{
@@ -43,7 +44,7 @@ namespace OpenRA.Platforms.Default
 			}
 		}
 
-		public Size WindowSize
+		public Size NativeWindowSize
 		{
 			get
 			{
@@ -52,12 +53,30 @@ namespace OpenRA.Platforms.Default
 			}
 		}
 
-		public float WindowScale
+		public Size EffectiveWindowSize
+		{
+			get
+			{
+				lock (syncObject)
+					return new Size((int)(windowSize.Width / scaleModifier), (int)(windowSize.Height / scaleModifier));
+			}
+		}
+
+		public float NativeWindowScale
 		{
 			get
 			{
 				lock (syncObject)
 					return windowScale;
+			}
+		}
+
+		public float EffectiveWindowScale
+		{
+			get
+			{
+				lock (syncObject)
+					return windowScale * scaleModifier;
 			}
 		}
 
@@ -70,16 +89,18 @@ namespace OpenRA.Platforms.Default
 			}
 		}
 
-		public event Action<float, float> OnWindowScaleChanged = (before, after) => { };
+		public event Action<float, float, float, float> OnWindowScaleChanged = (oldNative, oldEffective, newNative, newEffective) => { };
 
 		[DllImport("user32.dll")]
 		static extern bool SetProcessDPIAware();
 
-		public Sdl2PlatformWindow(Size requestEffectiveWindowSize, WindowMode windowMode, int batchSize)
+		public Sdl2PlatformWindow(Size requestEffectiveWindowSize, WindowMode windowMode, float scaleModifier, int batchSize)
 		{
 			// Lock the Window/Surface properties until initialization is complete
 			lock (syncObject)
 			{
+				this.scaleModifier = scaleModifier;
+
 				// Disable legacy scaling on Windows
 				if (Platform.CurrentPlatform == PlatformType.Windows)
 					SetProcessDPIAware();
@@ -288,7 +309,7 @@ namespace OpenRA.Platforms.Default
 			{
 				// Pixel double the cursor on non-OSX if the window scale is large enough
 				// OSX does this for us automatically
-				if (Platform.CurrentPlatform != PlatformType.OSX && WindowScale > 1.5)
+				if (Platform.CurrentPlatform != PlatformType.OSX && NativeWindowScale > 1.5f)
 				{
 					data = DoublePixelData(data, size);
 					size = new Size(2 * size.Width, 2 * size.Height);
@@ -360,7 +381,7 @@ namespace OpenRA.Platforms.Default
 						windowScale = width * 1f / windowSize.Width;
 					}
 
-					OnWindowScaleChanged(oldScale, windowScale);
+					OnWindowScaleChanged(oldScale, oldScale * scaleModifier, windowScale, windowScale * scaleModifier);
 				}
 			}
 		}
