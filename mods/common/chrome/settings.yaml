@@ -224,6 +224,18 @@ Background@SETTINGS_PANEL:
 					Width: 145
 					Height: 25
 					Font: Regular
+				Label@UI_SCALE:
+					X: 15
+					Y: 277
+					Width: 120
+					Text: UI Scale:
+					Align: Right
+				DropDownButton@UI_SCALE_DROPDOWN:
+					X: 140
+					Y: 265
+					Width: 145
+					Height: 25
+					Font: Regular
 				Label@STATUS_BARS:
 					X: 250
 					Y: 277
