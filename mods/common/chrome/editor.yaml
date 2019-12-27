@@ -193,13 +193,15 @@ Container@EDITOR_ROOT:
 				NextMusicKey: NextMusic
 				TakeScreenshotKey: TakeScreenshot
 				MuteAudioKey: ToggleMute
+		LogicKeyListener@WORLD_KEYHANDLER:
+			Logic: ResetZoomHotkeyLogic
+				ResetZoomKey: ResetZoom
 		Container@WORLD_ROOT:
 		Container@MENU_ROOT:
 		TooltipContainer@TOOLTIP_CONTAINER:
 
 Container@EDITOR_WORLD_ROOT:
 	Logic: LoadIngamePerfLogic, MapEditorLogic, ActorEditLogic
-		ChangeZoomKey: TogglePixelDouble
 		EditPanelPadding: 14
 	Children:
 		Container@PERF_ROOT:
@@ -530,22 +532,6 @@ Container@EDITOR_WORLD_ROOT:
 			TooltipContainer: TOOLTIP_CONTAINER
 			Font: Bold
 			Key: f1
-		Label@ZOOM_LABEL:
-			X: 495
-			Width: 50
-			Height: 25
-			Text: Zoom:
-			Align: Right
-			Font: Bold
-			Contrast: true
-		DropDownButton@ZOOM_BUTTON:
-			X: 550
-			Width: 70
-			Height: 25
-			Font: Bold
-			Key: TogglePixelDouble
-			TooltipTemplate: BUTTON_TOOLTIP
-			TooltipText: Zoom
 			TooltipContainer: TOOLTIP_CONTAINER
 		Label@COORDINATE_LABEL:
 			X: 635
