@@ -22,7 +22,8 @@ namespace OpenRA.Mods.Common.Widgets
 		readonly WorldRenderer worldRenderer;
 		readonly World world;
 		readonly EditorViewportControllerWidget editorWidget;
-		readonly SpriteWidget preview;
+		readonly EditorCursorLayer editorCursor;
+		readonly int cursorToken;
 
 		public EditorResourceBrush(EditorViewportControllerWidget editorWidget, ResourceTypeInfo resource, WorldRenderer wr)
 		{
@@ -30,20 +31,9 @@ namespace OpenRA.Mods.Common.Widgets
 			ResourceType = resource;
 			worldRenderer = wr;
 			world = wr.World;
+			editorCursor = world.WorldActor.Trait<EditorCursorLayer>();
 
-			preview = editorWidget.Get<SpriteWidget>("DRAG_LAYER_PREVIEW");
-			preview.Palette = resource.Palette;
-			preview.GetScale = () => worldRenderer.Viewport.Zoom;
-			preview.IsVisible = () => editorWidget.CurrentBrush == this;
-
-			var variant = resource.Sequences.FirstOrDefault();
-			var sequence = wr.World.Map.Rules.Sequences.GetSequence("resources", variant);
-			var sprite = sequence.GetSprite(resource.MaxDensity - 1);
-			preview.GetSprite = () => sprite;
-
-			// The preview widget may be rendered by the higher-level code before it is ticked.
-			// Force a manual tick to ensure the bounds are set correctly for this first draw.
-			Tick();
+			cursorToken = editorCursor.SetResource(wr, resource);
 		}
 
 		public bool HandleMouseInput(MouseInput mi)
@@ -62,6 +52,9 @@ namespace OpenRA.Mods.Common.Widgets
 
 				return false;
 			}
+
+			if (editorCursor.CurrentToken != cursorToken)
+				return false;
 
 			var cell = worldRenderer.Viewport.ViewToWorld(mi.Location);
 
@@ -97,19 +90,11 @@ namespace OpenRA.Mods.Common.Widgets
 			return ResourceType.AllowOnRamps || tileInfo.RampType == 0;
 		}
 
-		public void Tick()
+		public void Tick() { }
+
+		public void Dispose()
 		{
-			var cell = worldRenderer.Viewport.ViewToWorld(Viewport.LastMousePos);
-			var offset = WVec.Zero;
-			var location = world.Map.CenterOfCell(cell) + offset;
-
-			var cellScreenPosition = worldRenderer.ScreenPxPosition(location);
-			var cellScreenPixel = worldRenderer.Viewport.WorldToViewPx(cellScreenPosition);
-
-			preview.Bounds.X = cellScreenPixel.X;
-			preview.Bounds.Y = cellScreenPixel.Y;
+			editorCursor.Clear(cursorToken);
 		}
-
-		public void Dispose() { }
 	}
 }
