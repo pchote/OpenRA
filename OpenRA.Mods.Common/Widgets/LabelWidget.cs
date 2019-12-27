@@ -100,7 +100,7 @@ namespace OpenRA.Mods.Common.Widgets
 			var bgDark = GetContrastColorDark();
 			var bgLight = GetContrastColorLight();
 			if (Contrast)
-				font.DrawTextWithContrast(text, position, color, bgDark, bgLight, 2);
+				font.DrawTextWithContrast(text, position, color, bgDark, bgLight, 1);
 			else if (Shadow)
 				font.DrawTextWithShadow(text, position, color, bgDark, bgLight, 1);
 			else
