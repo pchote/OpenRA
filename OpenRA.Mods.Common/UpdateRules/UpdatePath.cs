@@ -136,6 +136,11 @@ namespace OpenRA.Mods.Common.UpdateRules
 				new RenameSearchRadius(),
 				new RenameChronoshiftFootprint(),
 				new RemoveMoveIntoWorldFromExit(),
+			}),
+
+			new UpdatePath("release-20191117", new UpdateRule[]
+			{
+				new ReplaceAttackTypeStrafe(),
 			})
 		};
 
