@@ -29,6 +29,8 @@ namespace OpenRA.Mods.Common.Traits
 		public readonly Rectangle Bounds;
 		public readonly SelectionBoxAnnotationRenderable SelectionBox;
 
+		public ActorReference Actor { get { return actor; } }
+
 		public string Tooltip
 		{
 			get
