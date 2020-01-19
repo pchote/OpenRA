@@ -147,8 +147,6 @@ namespace OpenRA
 		[Desc("Screen resolution in windowed mode.")]
 		public int2 WindowedSize = new int2(1024, 768);
 
-		public bool HardwareCursors = true;
-
 		public bool CursorDouble = false;
 		public WorldViewport ViewportDistance = WorldViewport.Medium;
 		public float UIScale = 1;
@@ -164,6 +162,9 @@ namespace OpenRA
 
 		[Desc("Disable the OpenGL debug message callback feature.")]
 		public bool DisableGLDebugMessageCallback = false;
+
+		[Desc("Disable operating-system provided cursor rendering.")]
+		public bool DisableHardwareCursors = false;
 
 		[Desc("Use OpenGL ES if both ES and regular OpenGL are available.")]
 		public bool PreferGLES = false;
