@@ -55,7 +55,7 @@ before_deploy:
  - DOTVERSION=`echo ${TRAVIS_TAG} | sed "s/-/\\./g"`
  - cd packaging
  - mkdir build
- - ./package-all.sh ${TRAVIS_TAG} ${PWD}/build/
+ - ./package-all.sh release-20200202 ${PWD}/build/
 
 deploy:
   provider: releases
