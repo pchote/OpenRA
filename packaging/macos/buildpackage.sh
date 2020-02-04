@@ -1,0 +1,131 @@
+#!/bin/bash
+# OpenRA packaging script for macOS
+
+LAUNCHER_TAG="osx-launcher-20191007"
+
+if [ $# -ne "2" ]; then
+	echo "Usage: $(basename "$0") tag outputdir"
+	exit 1
+fi
+
+if [[ "$OSTYPE" != "darwin"* ]]; then
+	echo >&2 "macOS packaging requires a macOS host"
+	exit 1
+fi
+
+# Set the working dir to the location of this script
+cd "$(dirname "$0")" || exit 1
+
+TAG="$1"
+OUTPUTDIR="$2"
+SRCDIR="$(pwd)/../.."
+BUILTDIR="$(pwd)/build"
+
+modify_plist() {
+	sed "s|$1|$2|g" "$3" > "$3.tmp" && mv "$3.tmp" "$3"
+}
+
+# Copies the game files and sets metadata
+populate_template() {
+	TEMPLATE_DIR="${BUILTDIR}/${1}"
+	MOD_ID=${2}
+	MOD_NAME=${3}
+	cp -r "${BUILTDIR}/OpenRA.app" "${TEMPLATE_DIR}"
+
+	# Assemble multi-resolution icon
+	iconutil --convert icns ${MOD_ID}.iconset -o "${TEMPLATE_DIR}/Contents/Resources/${MOD_ID}.icns"
+
+	# Copy macOS specific files
+	modify_plist "{MOD_ID}" "${MOD_ID}" "${TEMPLATE_DIR}/Contents/Info.plist"
+	modify_plist "{MOD_NAME}" "${MOD_NAME}" "${TEMPLATE_DIR}/Contents/Info.plist"
+	modify_plist "{JOIN_SERVER_URL_SCHEME}" "openra-${MOD_ID}-${TAG}" "${TEMPLATE_DIR}/Contents/Info.plist"
+}
+
+# Deletes from the first argument's mod dirs all the later arguments
+delete_mods() {
+	pushd "${BUILTDIR}/${1}/Contents/Resources/mods" > /dev/null || exit 1
+	shift
+	rm -rf "$@"
+	pushd > /dev/null || exit 1
+}
+
+echo "Building launchers"
+curl -s -L -O https://github.com/OpenRA/OpenRALauncherOSX/releases/download/${LAUNCHER_TAG}/launcher.zip || exit 3
+unzip -qq -d "${BUILTDIR}" launcher.zip
+rm launcher.zip
+
+modify_plist "{DEV_VERSION}" "${TAG}" "${BUILTDIR}/OpenRA.app/Contents/Info.plist"
+modify_plist "{FAQ_URL}" "http://wiki.openra.net/FAQ" "${BUILTDIR}/OpenRA.app/Contents/Info.plist"
+echo "Building core files"
+
+pushd "${SRCDIR}" > /dev/null || exit 1
+make clean
+make osx-dependencies
+make core
+make version VERSION="${TAG}"
+make install-core gameinstalldir="/Contents/Resources/" DESTDIR="${BUILTDIR}/OpenRA.app"
+popd > /dev/null || exit 1
+
+populate_template "OpenRA - Red Alert.app" "ra" "Red Alert"
+delete_mods "OpenRA - Red Alert.app" "cnc" "d2k"
+
+populate_template "OpenRA - Tiberian Dawn.app" "cnc" "Tiberian Dawn"
+delete_mods "OpenRA - Tiberian Dawn.app" "ra" "d2k"
+
+populate_template "OpenRA - Dune 2000.app" "d2k" "Dune 2000"
+delete_mods "OpenRA - Dune 2000.app" "ra" "cnc"
+
+rm -rf "${BUILTDIR}/OpenRA.app"
+
+echo "Packaging disk image"
+hdiutil create build.dmg -format UDRW -volname "OpenRA" -fs HFS+ -srcfolder build
+DMG_DEVICE=$(hdiutil attach -readwrite -noverify -noautoopen "build.dmg" | egrep '^/dev/' | sed 1q | awk '{print $1}')
+sleep 2
+
+# Background image is created from source svg in artsrc repository
+mkdir "/Volumes/OpenRA/.background/"
+tiffutil -cathidpicheck background.png background-2x.png -out "/Volumes/OpenRA/.background/background.tiff"
+
+cp "${BUILTDIR}/OpenRA - Red Alert.app/Contents/Resources/ra.icns" "/Volumes/OpenRA/.VolumeIcon.icns"
+
+echo '
+   tell application "Finder"
+     tell disk "'OpenRA'"
+           open
+           set current view of container window to icon view
+           set toolbar visible of container window to false
+           set statusbar visible of container window to false
+           set the bounds of container window to {400, 100, 1040, 580}
+           set theViewOptions to the icon view options of container window
+           set arrangement of theViewOptions to not arranged
+           set icon size of theViewOptions to 72
+           set background picture of theViewOptions to file ".background:background.tiff"
+           make new alias file at container window to POSIX file "/Applications" with properties {name:"Applications"}
+           set position of item "'OpenRA - Tiberian Dawn.app'" of container window to {160, 106}
+           set position of item "'OpenRA - Red Alert.app'" of container window to {320, 106}
+           set position of item "'OpenRA - Dune 2000.app'" of container window to {480, 106}
+           set position of item "Applications" of container window to {320, 298}
+           set position of item ".background" of container window to {160, 298}
+           set position of item ".fseventsd" of container window to {160, 298}
+           set position of item ".VolumeIcon.icns" of container window to {160, 298}
+           update without registering applications
+           delay 5
+           close
+     end tell
+   end tell
+' | osascript
+
+# HACK: Copy the volume icon again - something in the previous step seems to delete it...?
+cp "${BUILTDIR}/OpenRA - Red Alert.app/Contents/Resources/ra.icns" "/Volumes/OpenRA/.VolumeIcon.icns"
+SetFile -c icnC "/Volumes/OpenRA/.VolumeIcon.icns"
+SetFile -a C "/Volumes/OpenRA"
+
+chmod -Rf go-w /Volumes/OpenRA
+sync
+sync
+
+hdiutil detach ${DMG_DEVICE}
+hdiutil convert build.dmg -format UDZO -imagekey zlib-level=9 -ov -o "${OUTPUTDIR}/OpenRA-${TAG}.dmg"
+
+# Clean up
+rm -rf "${BUILTDIR}" build.dmg
