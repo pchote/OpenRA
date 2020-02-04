@@ -1,6 +1,10 @@
 # Travis-CI Build for OpenRA
 # see travis-ci.org for details
 
+os:
+  - linux
+  - macos
+
 dist: xenial
 language: csharp
 mono: 6.4.0
@@ -21,6 +25,9 @@ addons:
     - genisoimage
     - fakeroot
     - zsync
+  homebrew:
+    packages:
+    - markdown
 
 # Environment variables
 env:
@@ -63,11 +70,13 @@ notifications:
     skip_join: true
 
 before_deploy:
- - wget http://mirrors.kernel.org/ubuntu/pool/universe/n/nsis/nsis-common_3.03-2_all.deb
- - wget http://mirrors.kernel.org/ubuntu/pool/universe/n/nsis/nsis_3.03-2_amd64.deb
- - sudo dpkg -i nsis-common_3.03-2_all.deb
- - sudo dpkg -i nsis_3.03-2_amd64.deb
- - makensis -VERSION
+ - if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then
+     wget http://mirrors.kernel.org/ubuntu/pool/universe/n/nsis/nsis-common_3.03-2_all.deb;
+     wget http://mirrors.kernel.org/ubuntu/pool/universe/n/nsis/nsis_3.03-2_amd64.deb;
+     sudo dpkg -i nsis-common_3.03-2_all.deb;
+     sudo dpkg -i nsis_3.03-2_amd64.deb;
+     makensis -VERSION
+   fi;
  - export PATH=$PATH:$HOME/usr/bin
  - DOTVERSION=`echo ${TRAVIS_TAG} | sed "s/-/\\./g"`
  - cd packaging
