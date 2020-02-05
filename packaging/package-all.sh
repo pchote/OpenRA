@@ -29,10 +29,10 @@ function build_package() (
 set -e
 if [[ "$OSTYPE" != "darwin"* ]]; then
   build_package windows
-  build_package osx
   build_package linux
-else
   build_package source
+else
+  build_package osx
 fi
 
 echo "Package build done."

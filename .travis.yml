@@ -1,13 +1,15 @@
 # Travis-CI Build for OpenRA
 # see travis-ci.org for details
 
-os:
-  - linux
-  - macos
-
-dist: xenial
 language: csharp
 mono: 6.4.0
+
+jobs:
+  include:
+    - os: linux
+      dist: xenial
+    - os: osx
+      if: tag IS present
 
 cache:
   directories:
@@ -16,6 +18,7 @@ cache:
 addons:
   apt:
     packages:
+    # TODO: Remove obsolete packages
     - lua5.1
     - dpkg
     - markdown
@@ -27,6 +30,7 @@ addons:
     - zsync
   homebrew:
     packages:
+    # TODO: Do we need this anymore?
     - markdown
 
 # Environment variables
@@ -41,10 +45,10 @@ env:
 script:
  - travis_retry make all-dependencies
  - make all
- - make check
- - make check-scripts
- - make test
- - make nunit
+ - test "$TRAVIS_OS_NAME" == "linux" && make check || echo "Skipping check"
+ - test "$TRAVIS_OS_NAME" == "linux" && make check-scripts || echo "Skipping script check"
+ - test "$TRAVIS_OS_NAME" == "linux" && make test || echo "Skipping tests"
+ - test "$TRAVIS_OS_NAME" == "linux" && make nunit || echo "Skipping nunit tests"
 
 # Only watch the development branch and tagged release.
 branches:
@@ -62,7 +66,6 @@ before_deploy:
      wget http://mirrors.kernel.org/ubuntu/pool/universe/n/nsis/nsis_3.03-2_amd64.deb;
      sudo dpkg -i nsis-common_3.03-2_all.deb;
      sudo dpkg -i nsis_3.03-2_amd64.deb;
-     makensis -VERSION
    fi;
  - export PATH=$PATH:$HOME/usr/bin
  - DOTVERSION=`echo ${TRAVIS_TAG} | sed "s/-/\\./g"`
