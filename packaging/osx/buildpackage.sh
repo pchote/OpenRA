@@ -32,8 +32,10 @@ populate_template() {
 	MOD_NAME=${3}
 	cp -r "${BUILTDIR}/OpenRA.app" "${TEMPLATE_DIR}"
 
+	# Assemble multi-resolution icon
+	iconutil --convert icns ${MOD_ID}.iconset -o "${TEMPLATE_DIR}/Contents/Resources/${MOD_ID}.icns"
+
 	# Copy macOS specific files
-	cp "${MOD_ID}.icns" "${TEMPLATE_DIR}/Contents/Resources/"
 	modify_plist "{MOD_ID}" "${MOD_ID}" "${TEMPLATE_DIR}/Contents/Info.plist"
 	modify_plist "{MOD_NAME}" "${MOD_NAME}" "${TEMPLATE_DIR}/Contents/Info.plist"
 	modify_plist "{JOIN_SERVER_URL_SCHEME}" "openra-${MOD_ID}-${TAG}" "${TEMPLATE_DIR}/Contents/Info.plist"
@@ -81,11 +83,10 @@ DMG_DEVICE=$(hdiutil attach -readwrite -noverify -noautoopen "build.dmg" | egrep
 sleep 2
 
 # Background image is created from source svg in artsrc repository
-# exported to tiff at 72 + 144 DPI, then combined using
-# tiffutil -cathidpicheck bg.tiff bg2x.tiff -out background.tiff
 mkdir "/Volumes/OpenRA/.background/"
-cp background.tiff "/Volumes/OpenRA/.background/background.tiff"
-cp ra.icns "/Volumes/OpenRA/.VolumeIcon.icns"
+tiffutil -cathidpicheck background.png background-2x.png -out "/Volumes/OpenRA/.background/background.tiff"
+
+cp "${BUILTDIR}/OpenRA - Red Alert.app/Contents/Resources/ra.icns" "/Volumes/OpenRA/.VolumeIcon.icns"
 
 echo '
    tell application "Finder"
@@ -115,7 +116,7 @@ echo '
 ' | osascript
 
 # HACK: Copy the volume icon again - something in the previous step seems to delete it...?
-cp ra.icns "/Volumes/OpenRA/.VolumeIcon.icns"
+cp "${BUILTDIR}/OpenRA - Red Alert.app/Contents/Resources/ra.icns" "/Volumes/OpenRA/.VolumeIcon.icns"
 SetFile -c icnC "/Volumes/OpenRA/.VolumeIcon.icns"
 SetFile -a C "/Volumes/OpenRA"
 
