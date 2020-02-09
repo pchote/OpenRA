@@ -1,7 +1,18 @@
 #!/bin/bash
 # OpenRA packaging script for macOS
+#
+# The application bundles will be signed if the following environment variables are defined:
+#   MACOS_DEVELOPER_CERTIFICATE_BASE64: base64 content of the exported .p12 developer ID certificate.
+#                                       Generate using `base64 certificate.p12 | pbcopy`
+#   MACOS_DEVELOPER_CERTIFICATE_PASSWORD: password to unlock the MACOS_DEVELOPER_CERTIFICATE_BASE64 certificate
+#   MACOS_DEVELOPER_IDENTITY: Certificate name, of the form `Developer\ ID\ Application:\ <name with escaped spaces>`
+#
+# The applicaton bundles will be notarized if the following environment variables are defined:
+#   MACOS_DEVELOPER_USERNAME: Email address for the developer account
+#   MACOS_DEVELOPER_PASSWORD: App-specific password for the developer account
+#
 
-LAUNCHER_TAG="osx-launcher-20191007"
+LAUNCHER_TAG="osx-launcher-20200209"
 
 if [ $# -ne "2" ]; then
 	echo "Usage: $(basename "$0") tag outputdir"
@@ -16,6 +27,18 @@ fi
 # Set the working dir to the location of this script
 cd "$(dirname "$0")" || exit 1
 
+# Import code signing certificate
+if [ -n "${MACOS_DEVELOPER_CERTIFICATE_BASE64}" ] && [ -n "${MACOS_DEVELOPER_CERTIFICATE_PASSWORD}" ] && [ -n "${MACOS_DEVELOPER_IDENTITY}" ]; then
+	echo "Importing signing certificate"
+	echo "${MACOS_DEVELOPER_CERTIFICATE_BASE64}" | base64 --decode > build.p12
+	security create-keychain -p travis build.keychain
+	security default-keychain -s build.keychain
+	security unlock-keychain -p travis build.keychain
+	security import build.p12 -k build.keychain -P "${MACOS_DEVELOPER_CERTIFICATE_PASSWORD}" -T /usr/bin/codesign >/dev/null 2>&1
+	security set-key-partition-list -S apple-tool:,apple: -s -k travis build.keychain >/dev/null 2>&1
+	rm -fr build.p12
+fi
+
 TAG="$1"
 OUTPUTDIR="$2"
 SRCDIR="$(pwd)/../.."
@@ -26,7 +49,7 @@ modify_plist() {
 }
 
 # Copies the game files and sets metadata
-populate_template() {
+populate_bundle() {
 	TEMPLATE_DIR="${BUILTDIR}/${1}"
 	MOD_ID=${2}
 	MOD_NAME=${3}
@@ -49,6 +72,14 @@ delete_mods() {
 	pushd > /dev/null || exit 1
 }
 
+# Sign binaries with developer certificate
+sign_bundle() {
+	if [ -n "${MACOS_DEVELOPER_CERTIFICATE_BASE64}" ] && [ -n "${MACOS_DEVELOPER_CERTIFICATE_PASSWORD}" ] && [ -n "${MACOS_DEVELOPER_IDENTITY}" ]; then
+		codesign -s "${MACOS_DEVELOPER_IDENTITY}" --timestamp --options runtime -f --entitlements entitlements.plist "${BUILTDIR}/${1}/Contents/Resources/"*.dylib
+		codesign -s "${MACOS_DEVELOPER_IDENTITY}" --timestamp --options runtime -f --entitlements entitlements.plist --deep "${BUILTDIR}/${1}"
+	fi
+}
+
 echo "Building launchers"
 curl -s -L -O https://github.com/OpenRA/OpenRALauncherOSX/releases/download/${LAUNCHER_TAG}/launcher.zip || exit 3
 unzip -qq -d "${BUILTDIR}" launcher.zip
@@ -66,14 +97,17 @@ make version VERSION="${TAG}"
 make install-core gameinstalldir="/Contents/Resources/" DESTDIR="${BUILTDIR}/OpenRA.app"
 popd > /dev/null || exit 1
 
-populate_template "OpenRA - Red Alert.app" "ra" "Red Alert"
+populate_bundle "OpenRA - Red Alert.app" "ra" "Red Alert"
 delete_mods "OpenRA - Red Alert.app" "cnc" "d2k"
+sign_bundle "OpenRA - Red Alert.app"
 
-populate_template "OpenRA - Tiberian Dawn.app" "cnc" "Tiberian Dawn"
+populate_bundle "OpenRA - Tiberian Dawn.app" "cnc" "Tiberian Dawn"
 delete_mods "OpenRA - Tiberian Dawn.app" "ra" "d2k"
+sign_bundle "OpenRA - Tiberian Dawn.app"
 
-populate_template "OpenRA - Dune 2000.app" "d2k" "Dune 2000"
+populate_bundle "OpenRA - Dune 2000.app" "d2k" "Dune 2000"
 delete_mods "OpenRA - Dune 2000.app" "ra" "cnc"
+sign_bundle "OpenRA - Dune 2000.app"
 
 rm -rf "${BUILTDIR}/OpenRA.app"
 
@@ -124,7 +158,59 @@ chmod -Rf go-w /Volumes/OpenRA
 sync
 sync
 
-hdiutil detach ${DMG_DEVICE}
+hdiutil detach "${DMG_DEVICE}"
+
+# Submit for notarization
+if [ -n "${MACOS_DEVELOPER_USERNAME}" ] && [ -n "${MACOS_DEVELOPER_PASSWORD}" ]; then
+	echo "Submitting disk image for notarization"
+
+	# Reset xcode search path to fix xcrun not finding altool
+	sudo xcode-select -r
+
+	# Create a temporary read-only dmg for submission (notarization service rejects read/write images)
+	hdiutil convert build.dmg -format UDZO -imagekey zlib-level=9 -ov -o notarization.dmg
+
+	NOTARIZATION_UUID=$(xcrun altool --notarize-app --primary-bundle-id "net.openra.packaging" -u "${MACOS_DEVELOPER_USERNAME}" -p "${MACOS_DEVELOPER_PASSWORD}" --file notarization.dmg 2>&1 | awk -F' = ' '/RequestUUID/ { print $2; exit }')
+	if [ -z "${NOTARIZATION_UUID}" ]; then
+		echo "Submission failed"
+		exit 1
+	fi
+
+	echo "Submission UUID is ${NOTARIZATION_UUID}"
+	rm notarization.dmg
+
+	while :; do
+		sleep 30
+		NOTARIZATION_RESULT=$(xcrun altool --notarization-info "${NOTARIZATION_UUID}" -u "${MACOS_DEVELOPER_USERNAME}" -p "${MACOS_DEVELOPER_PASSWORD}" 2>&1 | awk -F': ' '/Status/ { print $2; exit }')
+		echo "Submission status: ${NOTARIZATION_RESULT}"
+
+		if [ "${NOTARIZATION_RESULT}" == "invalid" ]; then
+			NOTARIZATION_LOG_URL=$(xcrun altool --notarization-info "${NOTARIZATION_UUID}" -u "${MACOS_DEVELOPER_USERNAME}" -p "${MACOS_DEVELOPER_PASSWORD}" 2>&1 | awk -F': ' '/LogFileURL/ { print $2; exit }')
+			echo "Notarization failed with error:"
+			curl -s "${NOTARIZATION_LOG_URL}"
+			sleep 1
+			echo ""
+			exit 1
+		fi
+
+		if [ "${NOTARIZATION_RESULT}" == "success" ]; then
+			echo "Stapling notarization tickets"
+			DMG_DEVICE=$(hdiutil attach -readwrite -noverify -noautoopen "build.dmg" | egrep '^/dev/' | sed 1q | awk '{print $1}')
+			sleep 2
+
+			xcrun stapler staple "/Volumes/OpenRA/OpenRA - Red Alert.app"
+			xcrun stapler staple "/Volumes/OpenRA/OpenRA - Tiberian Dawn.app"
+			xcrun stapler staple "/Volumes/OpenRA/OpenRA - Dune 2000.app"
+
+			sync
+			sync
+
+			hdiutil detach "${DMG_DEVICE}"
+			break
+		fi
+	done
+fi
+
 hdiutil convert build.dmg -format UDZO -imagekey zlib-level=9 -ov -o "${OUTPUTDIR}/OpenRA-${TAG}.dmg"
 
 # Clean up
