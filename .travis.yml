@@ -10,6 +10,7 @@ jobs:
       dist: xenial
     - os: osx
       if: tag IS present
+      osx_image: xcode10
 
 cache:
   directories:
