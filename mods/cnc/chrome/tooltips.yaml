@@ -435,7 +435,7 @@ Background@ANONYMOUS_PLAYER_TOOLTIP:
 				Label@LABEL:
 					X: 10
 					Height: 12
-					Text: Game Admin
+					Text: Lead Commander
 					Font: TinyBold
 
 Container@REGISTERED_PLAYER_TOOLTIP:
@@ -481,7 +481,7 @@ Container@REGISTERED_PLAYER_TOOLTIP:
 									X: 10
 									Y: 1
 									Height: 12
-									Text: Game Admin
+									Text: Lead Commander
 									Font: TinyBold
 				Container@MESSAGE_HEADER:
 					Height: 26

@@ -106,7 +106,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			{
 				options.Add(new DropDownOption
 				{
-					Title = "Transfer Admin",
+					Title = "Transfer Lead",
 					OnClick = () => orderManager.IssueOrder(Order.Command("make_admin {0}".F(c.Index)))
 				});
 			}
