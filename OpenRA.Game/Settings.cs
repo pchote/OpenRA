@@ -70,6 +70,9 @@ namespace OpenRA
 		[Desc("For dedicated servers only, if non-empty, always reject players with these user IDs from joining.")]
 		public int[] ProfileIDBlacklist = { };
 
+		[Desc("For dedicated servers only, if non-empty, give players with these user IDs moderator status.")]
+		public int[] ProfileIDModerators = { };
+
 		[Desc("For dedicated servers only, controls whether a game can be started with just one human player in the lobby.")]
 		public bool EnableSingleplayer = false;
 

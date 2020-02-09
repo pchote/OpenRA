@@ -399,10 +399,11 @@ namespace OpenRA.Server
 					return;
 				}
 
-				Action completeConnection = () =>
+				Action<PlayerProfile> completeConnection = profile =>
 				{
 					client.Slot = LobbyInfo.FirstEmptySlot();
 					client.IsAdmin = !LobbyInfo.Clients.Any(c1 => c1.IsAdmin);
+					client.IsModerator = Type == ServerType.Dedicated && profile != null && Settings.ProfileIDModerators.Contains(profile.ProfileID);
 
 					if (client.IsObserver && !LobbyInfo.GlobalSettings.AllowSpectators)
 					{
@@ -470,7 +471,7 @@ namespace OpenRA.Server
 				{
 					// Local servers can only be joined by the local client, so we can trust their identity without validation
 					client.Fingerprint = handshake.Fingerprint;
-					completeConnection();
+					completeConnection(null);
 				}
 				else if (!string.IsNullOrEmpty(handshake.Fingerprint) && !string.IsNullOrEmpty(handshake.AuthSignature))
 				{
@@ -542,7 +543,7 @@ namespace OpenRA.Server
 								DropClient(newConn);
 							}
 							else
-								completeConnection();
+								completeConnection(profile);
 
 							waitingForAuthenticationCallback--;
 						}, 0);
@@ -559,7 +560,7 @@ namespace OpenRA.Server
 						DropClient(newConn);
 					}
 					else
-						completeConnection();
+						completeConnection(null);
 				}
 			}
 			catch (Exception ex)
