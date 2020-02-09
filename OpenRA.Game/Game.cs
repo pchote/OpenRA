@@ -237,16 +237,6 @@ namespace OpenRA
 			om = JoinServer(IPAddress.Loopback.ToString(), CreateLocalServer(mapUID), "");
 		}
 
-		public static bool IsHost
-		{
-			get
-			{
-				var id = OrderManager.Connection.LocalClientId;
-				var client = OrderManager.LobbyInfo.ClientWithIndex(id);
-				return client != null && client.IsAdmin;
-			}
-		}
-
 		static Modifiers modifiers;
 		public static Modifiers GetModifierKeys() { return modifiers; }
 		internal static void HandleModifierKeys(Modifiers mods) { modifiers = mods; }

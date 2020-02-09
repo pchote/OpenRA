@@ -171,7 +171,7 @@ namespace OpenRA
 
 			// Enable the bot logic on the host
 			IsBot = BotType != null;
-			if (IsBot && Game.IsHost)
+			if (IsBot && world.LocalClient.IsAdmin)
 			{
 				var logic = PlayerActor.TraitsImplementing<IBot>().FirstOrDefault(b => b.Info.Type == BotType);
 				if (logic == null)

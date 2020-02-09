@@ -38,7 +38,7 @@ namespace OpenRA.Mods.Common.Commands
 			switch (name)
 			{
 				case "pause":
-					if (Game.IsHost || (world.LocalPlayer != null && world.LocalPlayer.WinState != WinState.Lost))
+					if (world.LocalClient.IsAdmin || (world.LocalPlayer != null && world.LocalPlayer.WinState != WinState.Lost))
 						world.SetPauseState(!world.Paused);
 
 					break;

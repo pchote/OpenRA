@@ -159,7 +159,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				factions.Add(f.InternalName, new LobbyFaction { Selectable = f.Selectable, Name = f.Name, Side = f.Side, Description = f.Description });
 
 			var gameStarting = false;
-			Func<bool> configurationDisabled = () => !Game.IsHost || gameStarting ||
+			Func<bool> configurationDisabled = () => !orderManager.LocalClient.IsAdmin || gameStarting ||
 				panel == PanelType.Kick || panel == PanelType.ForceStart ||
 				!map.RulesLoaded || map.InvalidCustomRules ||
 				orderManager.LocalClient == null || orderManager.LocalClient.IsReady;
@@ -188,7 +188,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 						{ "initialMap", map.Uid },
 						{ "initialTab", MapClassification.System },
 						{ "onExit", DoNothing },
-						{ "onSelect", Game.IsHost ? onSelect : null },
+						{ "onSelect", orderManager.LocalClient.IsAdmin ? onSelect : null },
 						{ "filter", MapVisibility.Lobby },
 					});
 				};
@@ -552,26 +552,26 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		void UpdatePlayerList()
 		{
-			if (orderManager.LocalClient == null)
+			var lc = orderManager.LocalClient;
+			if (lc == null)
 				return;
 
 			// Check if we are not assigned to any team, and are no spectator
 			// If we are a spectator, check if there are more and enable spectator chat
 			// Otherwise check if our assigned team has more players
-			if (orderManager.LocalClient.Team == 0 && !orderManager.LocalClient.IsObserver)
+			if (orderManager.LocalClient.Team == 0 && !lc.IsObserver)
 				disableTeamChat = true;
-			else if (orderManager.LocalClient.IsObserver)
-				disableTeamChat = !orderManager.LobbyInfo.Clients.Any(c => c != orderManager.LocalClient && c.IsObserver);
+			else if (lc.IsObserver)
+				disableTeamChat = !orderManager.LobbyInfo.Clients.Any(c => c != lc && c.IsObserver);
 			else
 				disableTeamChat = !orderManager.LobbyInfo.Clients.Any(c =>
-					c != orderManager.LocalClient &&
+					c != lc &&
 					c.Bot == null &&
-					c.Team == orderManager.LocalClient.Team);
+					c.Team == lc.Team);
 
 			if (disableTeamChat)
 				teamChat = false;
 
-			var isHost = Game.IsHost;
 			var idx = 0;
 			foreach (var kv in orderManager.LobbyInfo.Slots)
 			{
@@ -590,18 +590,17 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					if (template == null || template.Id != emptySlotTemplate.Id)
 						template = emptySlotTemplate.Clone();
 
-					if (isHost)
+					if (lc.IsAdmin)
 						LobbyUtils.SetupEditableSlotWidget(template, slot, client, orderManager, worldRenderer, map);
 					else
 						LobbyUtils.SetupSlotWidget(template, slot, client);
 
 					var join = template.Get<ButtonWidget>("JOIN");
 					join.IsVisible = () => !slot.Closed;
-					join.IsDisabled = () => orderManager.LocalClient.IsReady;
+					join.IsDisabled = () => lc.IsReady;
 					join.OnClick = () => orderManager.IssueOrder(Order.Command("slot " + key));
 				}
-				else if ((client.Index == orderManager.LocalClient.Index) ||
-						 (client.Bot != null && isHost))
+				else if ((client.Index == lc.Index) || (client.Bot != null && lc.IsAdmin))
 				{
 					// Editable player in slot
 					if (template == null || template.Id != editablePlayerTemplate.Id)
@@ -630,7 +629,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					LobbyUtils.SetupColorWidget(template, slot, client);
 					LobbyUtils.SetupFactionWidget(template, slot, client, factions);
 
-					if (isHost)
+					if (lc.IsAdmin)
 					{
 						LobbyUtils.SetupEditableTeamWidget(template, slot, client, orderManager, map);
 						LobbyUtils.SetupEditableSpawnWidget(template, slot, client, orderManager, map);
@@ -686,7 +685,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					if (template == null || template.Id != nonEditableSpectatorTemplate.Id)
 						template = nonEditableSpectatorTemplate.Clone();
 
-					if (isHost)
+					if (lc.IsAdmin)
 						LobbyUtils.SetupPlayerActionWidget(template, null, client, orderManager, worldRenderer,
 							lobby, () => panel = PanelType.Kick, () => panel = PanelType.Players);
 					else

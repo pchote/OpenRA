@@ -59,6 +59,7 @@ namespace OpenRA
 		}
 
 		public Player LocalPlayer { get; private set; }
+		public Session.Client LocalClient { get { return OrderManager.LocalClient; } }
 
 		public event Action GameOver = () => { };
 		public bool IsGameOver { get; private set; }

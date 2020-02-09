@@ -259,12 +259,13 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				.Select(a => a.Second + 1)
 				.FirstOrDefault();
 
-			var locals = orderManager.LobbyInfo.Clients.Where(c => c.Index == orderManager.LocalClient.Index || (Game.IsHost && c.Bot != null));
+			var lc = orderManager.LocalClient;
+			var locals = orderManager.LobbyInfo.Clients.Where(c => c.Index == lc.Index || (lc.IsAdmin && c.Bot != null));
 			var playerToMove = locals.FirstOrDefault(c => ((selectedSpawn == 0) ^ (c.SpawnPoint == 0) && !c.IsObserver));
 			SetSpawnPoint(orderManager, playerToMove, selectedSpawn);
 		}
 
-		private static void SetSpawnPoint(OrderManager orderManager, Session.Client playerToMove, int selectedSpawn)
+		static void SetSpawnPoint(OrderManager orderManager, Session.Client playerToMove, int selectedSpawn)
 		{
 			var owned = orderManager.LobbyInfo.Clients.Any(c => c.SpawnPoint == selectedSpawn);
 			if (selectedSpawn == 0 || !owned)
@@ -430,8 +431,9 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		public static void SetupPlayerActionWidget(Widget parent, Session.Slot s, Session.Client c, OrderManager orderManager,
 			WorldRenderer worldRenderer, Widget lobby, Action before, Action after)
 		{
+			var lc = orderManager.LocalClient;
 			var slot = parent.Get<DropDownButtonWidget>("PLAYER_ACTION");
-			slot.IsVisible = () => Game.IsHost && c.Index != orderManager.LocalClient.Index;
+			slot.IsVisible = () => lc.IsAdmin && c.Index != lc.Index;
 			slot.IsDisabled = () => orderManager.LocalClient.IsReady;
 
 			var truncated = new CachedTransform<string, string>(name =>
