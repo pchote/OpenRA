@@ -67,7 +67,7 @@ namespace OpenRA.Mods.Common.Server
 
 		public static bool ValidateCommand(S server, Connection conn, Session.Client client, string cmd)
 		{
-			if (server.State == ServerState.GameStarted)
+			if (server.State == ServerState.GameStarted && !cmd.StartsWith("kick "))
 			{
 				server.SendOrderTo(conn, "Message", "Cannot change state when game started. ({0})".F(cmd));
 				return false;
@@ -584,6 +584,11 @@ namespace OpenRA.Mods.Common.Server
 			}
 
 			var kickClient = server.GetClient(kickConn);
+			if (server.State == ServerState.GameStarted && !kickClient.IsObserver)
+			{
+				server.SendOrderTo(conn, "Message", "Only spectators can be kicked after the game has started.");
+				return true;
+			}
 
 			Log.Write("server", "Kicking client {0}.", kickClientID);
 			server.SendMessage("{0} kicked {1} from the server.".F(client.Name, kickClient.Name));
