@@ -27,6 +27,16 @@ if [ -z "$liblua51" ]; then
 	echo "Lua 5.1 library detection failed."
 	exit 1
 else
-	sed "s/@LIBLUA51@/${liblua51}/" thirdparty/Eluant.dll.config.in > Eluant.dll.config
+	sed "s/lua51.so/${liblua51}/" Eluant.dll.config a> Eluant.dll.config.temp
+	mv Eluant.dll.config.temp Eluant.dll.config
+
 	echo "Eluant.dll.config has been created successfully."
 fi
+
+sed "s/SDL2.so/libSDL2-2.0.so.0/" SDL2-CS.dll.config > SDL2-CS.dll.config.temp
+mv SDL2-CS.dll.config.temp SDL2-CS.dll.config
+
+sed "s/soft_oal.so/libopenal.so.1/" OpenAL-CS.Core.dll.config > OpenAL-CS.Core.dll.config.temp
+mv OpenAL-CS.Core.dll.config.temp OpenAL-CS.Core.dll.config
+
+
