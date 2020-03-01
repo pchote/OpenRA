@@ -1,4 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\netfx.props" />
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -21,27 +22,11 @@
     <Optimize>false</Optimize>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FuzzyLogicLibrary">
-      <HintPath>..\thirdparty\download\FuzzyLogicLibrary.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="rix0rrr.BeaconLib">
-      <HintPath>..\thirdparty\download\rix0rrr.BeaconLib.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Eluant">
-      <HintPath>..\thirdparty\download\Eluant.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="ICSharpCode.SharpZipLib">
-      <HintPath>..\thirdparty\download\ICSharpCode.SharpZipLib.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\OpenRA.Game\OpenRA.Game.csproj">
       <Private>False</Private>
     </ProjectReference>
+    <PackageReference Include="OpenRA-FuzzyLogicLibrary" Version="1.0.1" />
+    <PackageReference Include="rix0rrr.BeaconLib" Version="1.0.2" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" />
     <AdditionalFiles Include="../stylecop.json" />
   </ItemGroup>

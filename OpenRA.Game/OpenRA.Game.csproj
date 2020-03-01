@@ -1,4 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\netfx.props" />
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net461</TargetFramework>
@@ -18,6 +19,11 @@
     <CodeAnalysisRuleSet>..\OpenRA.ruleset</CodeAnalysisRuleSet>
     <Configurations>Release;Debug;Release-x86</Configurations>
     <ManagedExeLauncher Condition="('$(OS)' != 'Windows_NT')">mono </ManagedExeLauncher>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetPlatform Condition="$([MSBuild]::IsOsPlatform('Windows'))">win-x64</TargetPlatform>
+    <TargetPlatform Condition="$([MSBuild]::IsOsPlatform('Linux'))">linux-x64</TargetPlatform>
+    <TargetPlatform Condition="$([MSBuild]::IsOsPlatform('OSX'))">osx-x64</TargetPlatform>
   </PropertyGroup>
   <ItemGroup>
     <!-- Work around an issue where Rider does not detect files in the project root using the default glob -->
@@ -47,25 +53,14 @@
     <StartArguments>Game.Mod=ts</StartArguments>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Open.Nat">
-      <HintPath>..\thirdparty\download\Open.Nat.dll</HintPath>
-    </Reference>
-    <Reference Include="Eluant">
-      <HintPath>..\thirdparty\download\Eluant.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="ICSharpCode.SharpZipLib">
-      <HintPath>..\thirdparty\download\ICSharpCode.SharpZipLib.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="MaxMind.Db">
-      <HintPath>..\thirdparty\download\MaxMind.Db.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <ProjectReference Include="..\OpenRA.PostProcess\OpenRA.PostProcess.csproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <None Include="App.config" />
+    <PackageReference Include="MaxMind.Db" Version="2.6.1" />
+    <PackageReference Include="Open.NAT.Core" Version="2.1.0.5" />
+    <PackageReference Include="OpenRA-Eluant" Version="1.0.13" />
+    <PackageReference Include="SharpZipLib" Version="1.2.0" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" /> 
     <AdditionalFiles Include="../stylecop.json" />
     <AdditionalFiles Include="Properties/launchSettings.json" />

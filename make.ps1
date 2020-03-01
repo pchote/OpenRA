@@ -96,13 +96,6 @@ function Version-Command
 
 function Dependencies-Command
 {
-	cd thirdparty
-	./fetch-thirdparty-deps.ps1
-	cp download/*.dll ..
-	cp download/windows/*.dll ..
-	cd ..
-	Write-Host "Dependencies copied." -ForegroundColor Cyan
-
 	if ((CheckForDotnet) -eq 1)
 	{
 		return
