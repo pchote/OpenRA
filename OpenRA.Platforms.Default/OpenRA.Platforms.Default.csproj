@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\netfx.props" />
   <PropertyGroup>
-      <TargetFramework>net461</TargetFramework>
+      <TargetFramework>net472</TargetFramework>
       <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
       <Optimize>true</Optimize>
       <LangVersion>5</LangVersion>
@@ -32,6 +31,7 @@
     <PackageReference Include="OpenRA-OpenAL-CS" Version="1.0.11" />
     <PackageReference Include="OpenRA-SDL2-CS" Version="1.0.21" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
     <AdditionalFiles Include="../stylecop.json" />
   </ItemGroup>
   <Target Name="DisableAnalyzers" BeforeTargets="CoreCompile" Condition="'$(Configuration)'=='Release'">

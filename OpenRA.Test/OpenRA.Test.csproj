@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\netfx.props" />
   <PropertyGroup>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>5</LangVersion>
     <DebugSymbols>true</DebugSymbols>
@@ -27,6 +26,7 @@
     </ProjectReference>
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
     <AdditionalFiles Include="../stylecop.json" />
   </ItemGroup>
   <Target Name="DisableAnalyzers" BeforeTargets="CoreCompile" Condition="'$(Configuration)'=='Release'">
