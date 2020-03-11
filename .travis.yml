@@ -3,6 +3,7 @@
 
 language: csharp
 mono: 6.4.0
+dotnet: 3.1.100
 
 jobs:
   include:
@@ -34,7 +35,6 @@ env:
 # call OpenRA to check for YAML errors
 # Run the NUnit tests
 script:
- - travis_retry make all-dependencies
  - make all
  - test "$TRAVIS_OS_NAME" == "linux" && make check || echo "Skipping check"
  - test "$TRAVIS_OS_NAME" == "linux" && make check-scripts || echo "Skipping scripts check"
