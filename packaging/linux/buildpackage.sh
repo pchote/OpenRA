@@ -48,11 +48,7 @@ pushd "${SRCDIR}" > /dev/null || exit 1
 
 make clean
 
-# linux-dependencies target will trigger the lua detection script, which we don't want during packaging
-make cli-dependencies
-sed "s/@LIBLUA51@/liblua5.1.so.0/" thirdparty/Eluant.dll.config.in > Eluant.dll.config
-
-make core
+make core TARGETPLATFORM=linux-x64
 make version VERSION="${TAG}"
 make install-engine prefix="usr" DESTDIR="${BUILTDIR}/"
 make install-common-mod-files prefix="usr" DESTDIR="${BUILTDIR}/"

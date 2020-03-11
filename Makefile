@@ -44,7 +44,7 @@ WHITELISTED_THIRDPARTY_ASSEMBLIES = ICSharpCode.SharpZipLib.dll FuzzyLogicLibrar
 
 # These are shipped in our custom minimal mono runtime and also available in the full system-installed .NET/mono stack
 # This list *must* be kept in sync with the files packaged by the AppImageSupport and OpenRALauncherOSX repositories
-WHITELISTED_CORE_ASSEMBLIES = mscorlib.dll System.dll System.Configuration.dll System.Core.dll System.Numerics.dll System.Security.dll System.Xml.dll Mono.Security.dll netstandard.dll
+WHITELISTED_CORE_ASSEMBLIES = mscorlib.dll System.dll System.Configuration.dll System.Core.dll System.Numerics.dll System.Security.dll System.Xml.dll Mono.Security.dll
 
 NUNIT_LIBS_PATH :=
 NUNIT_LIBS  := $(NUNIT_LIBS_PATH)nunit.framework.dll
@@ -75,22 +75,13 @@ INSTALL_DIR = $(INSTALL) -d
 INSTALL_PROGRAM = $(INSTALL) -m755
 INSTALL_DATA = $(INSTALL) -m644
 
-# Toolchain
-MSBUILD = msbuild -verbosity:m -nologo
-
 # Enable 32 bit builds while generating the windows installer
 WIN32 = false
 
+TARGETPLATFORM = linux-x64
+
 # program targets
 VERSION     = $(shell git name-rev --name-only --tags --no-undefined HEAD 2>/dev/null || echo git-`git rev-parse --short HEAD`)
-
-# dependencies
-UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Darwin)
-os-dependencies = osx-dependencies
-else
-os-dependencies = linux-dependencies
-endif
 
 check-scripts:
 	@echo
@@ -98,10 +89,10 @@ check-scripts:
 	@luac -p $(shell find mods/*/maps/* -iname '*.lua')
 	@luac -p $(shell find lua/* -iname '*.lua')
 
-check: dependencies
+check:
 	@echo
 	@echo "Compiling in debug mode..."
-	@$(MSBUILD) -t:build -p:Configuration=Debug
+	@dotnet build --configuration Debug
 	@echo
 	@echo "Checking runtime assemblies..."
 	@mono --debug OpenRA.Utility.exe all --check-runtime-assemblies $(WHITELISTED_OPENRA_ASSEMBLIES) $(WHITELISTED_THIRDPARTY_ASSEMBLIES) $(WHITELISTED_CORE_ASSEMBLIES)
@@ -112,9 +103,7 @@ check: dependencies
 	@echo "Checking for incorrect conditional trait interface overrides..."
 	@mono --debug OpenRA.Utility.exe all --check-conditional-trait-interface-overrides
 
-
-NUNIT_CONSOLE := $(shell test -f thirdparty/download/nunit3-console.exe && echo mono thirdparty/download/nunit3-console.exe || \
-	which nunit3-console 2>/dev/null || which nunit2-console 2>/dev/null || which nunit-console 2>/dev/null)
+NUNIT_CONSOLE := $(which nunit3-console 2>/dev/null || which nunit2-console 2>/dev/null || which nunit-console 2>/dev/null)
 nunit: core
 	@echo
 	@echo "Checking unit tests..."
@@ -148,51 +137,22 @@ test: core
 
 ########################## MAKE/INSTALL RULES ##########################
 #
-all: dependencies core
+all: core
 
 core:
 	@command -v $(firstword $(MSBUILD)) >/dev/null || (echo "OpenRA requires the '$(MSBUILD)' tool provided by Mono >= 5.4."; exit 1)
 ifeq ($(WIN32), $(filter $(WIN32),true yes y on 1))
-	@$(MSBUILD) -t:build -p:Configuration="Release-x86"
+	@dotnet build --configuration Release /p:TargetPlatform=$(TARGETPLATFORM) -p:Configuration="Release-x86"
 else
-	@$(MSBUILD) -t:build -p:Configuration=Release
+	@dotnet build --configuration Release /p:TargetPlatform=$(TARGETPLATFORM)
 endif
 
 clean:
-	@ $(MSBUILD) -t:clean
+	@ dotnet clean
 	@-$(RM_F) *.config
 	@-$(RM_F) *.exe *.dll *.dylib ./OpenRA*/*.dll *.pdb mods/**/*.dll mods/**/*.pdb *.resources
 	@-$(RM_RF) ./*/bin ./*/obj
-	@-$(RM_RF) ./thirdparty/download
 
-distclean: clean
-
-cli-dependencies:
-	@./thirdparty/fetch-thirdparty-deps.sh
-	@ $(CP_R) thirdparty/download/*.dll .
-	@ $(CP_R) thirdparty/download/*.dll.config .
-	@ test -f OpenRA.Game/obj/project.assets.json || $(MSBUILD) -t:restore
-
-linux-dependencies: cli-dependencies linux-native-dependencies
-
-linux-native-dependencies:
-	@./thirdparty/configure-native-deps.sh
-
-windows-dependencies: cli-dependencies
-ifeq ($(WIN32), $(filter $(WIN32),true yes y on 1))
-	@./thirdparty/fetch-thirdparty-deps-windows.sh x86
-else
-	@./thirdparty/fetch-thirdparty-deps-windows.sh x64
-endif
-
-osx-dependencies: cli-dependencies
-	@./thirdparty/fetch-thirdparty-deps-osx.sh
-	@ $(CP_R) thirdparty/download/osx/*.dylib .
-	@ $(CP_R) thirdparty/download/osx/*.dll.config .
-
-dependencies: $(os-dependencies)
-
-all-dependencies: cli-dependencies windows-dependencies osx-dependencies
 
 version: VERSION mods/ra/mod.yaml mods/cnc/mod.yaml mods/d2k/mod.yaml mods/ts/mod.yaml mods/modcontent/mod.yaml mods/all/mod.yaml
 	@echo "$(VERSION)" > VERSION
@@ -202,9 +162,15 @@ version: VERSION mods/ra/mod.yaml mods/cnc/mod.yaml mods/d2k/mod.yaml mods/ts/mo
 		rm $${i}.tmp; \
 	done
 
-install: dependencies core install-core
+install: core install-core
 
 install-linux-shortcuts: install-linux-scripts install-linux-icons install-linux-desktop
+
+install-engine-win:
+	@$(CP) soft_oal.dll "$(DATA_INSTALL_DIR)"
+	@$(CP) SDL2.dll "$(DATA_INSTALL_DIR)"
+	@$(CP) freetype6.dll "$(DATA_INSTALL_DIR)"
+	@$(CP) lua51.dll "$(DATA_INSTALL_DIR)"
 
 install-engine:
 	@-echo "Installing OpenRA engine to $(DATA_INSTALL_DIR)"
@@ -228,7 +194,8 @@ install-engine:
 	@$(INSTALL_PROGRAM) FuzzyLogicLibrary.dll "$(DATA_INSTALL_DIR)"
 	@$(INSTALL_PROGRAM) Open.Nat.dll "$(DATA_INSTALL_DIR)"
 	@$(INSTALL_PROGRAM) MaxMind.Db.dll "$(DATA_INSTALL_DIR)"
-	@$(INSTALL_PROGRAM) rix0rrr.BeaconLib.dll "$(DATA_INSTALL_DIR)"
+	@$(INSTALL_PROGRAM) BeaconLib.dll "$(DATA_INSTALL_DIR)"
+
 
 install-common-mod-files:
 	@-echo "Installing OpenRA common mod files to $(DATA_INSTALL_DIR)"
@@ -382,4 +349,4 @@ help:
 
 .SUFFIXES:
 
-.PHONY: check-scripts check nunit test all core clean distclean cli-dependencies linux-dependencies linux-native-dependencies windows-dependencies osx-dependencies dependencies all-dependencies version install install-linux-shortcuts install-engine install-common-mod-files install-default-mods install-core install-linux-icons install-linux-desktop install-linux-mime install-linux-appdata install-man-page install-linux-scripts uninstall help
+.PHONY: check-scripts check nunit test all core clean version install install-linux-shortcuts install-engine install-common-mod-files install-default-mods install-core install-linux-icons install-linux-desktop install-linux-mime install-linux-appdata install-man-page install-linux-scripts uninstall help
