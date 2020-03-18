@@ -78,10 +78,16 @@ INSTALL_DATA = $(INSTALL) -m644
 # Enable 32 bit builds while generating the windows installer
 WIN32 = false
 
-TARGETPLATFORM = linux-x64
-
 # program targets
 VERSION     = $(shell git name-rev --name-only --tags --no-undefined HEAD 2>/dev/null || echo git-`git rev-parse --short HEAD`)
+
+# dependencies
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+os-dependencies = osx-x64
+else
+TARGETPLATFORM = linux-x64
+endif
 
 check-scripts:
 	@echo
