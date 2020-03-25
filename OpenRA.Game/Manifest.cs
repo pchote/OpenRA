@@ -241,5 +241,14 @@ namespace OpenRA
 
 			return (T)module;
 		}
+
+		public void Dispose()
+		{
+			foreach (var module in modules)
+			{
+				if (module is IDisposable)
+					((IDisposable)module).Dispose();
+			}
+		}
 	}
 }
