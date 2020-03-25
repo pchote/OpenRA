@@ -116,6 +116,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			orderManager.AddChatLine += AddChatLine;
 			Game.LobbyInfoChanged += UpdateCurrentMap;
 			Game.LobbyInfoChanged += UpdatePlayerList;
+			Game.LobbyInfoChanged += UpdateDiscordStatus;
 			Game.BeforeGameStart += OnGameStart;
 			Game.ConnectionStateChanged += ConnectionStateChanged;
 
@@ -462,6 +463,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				orderManager.AddChatLine -= AddChatLine;
 				Game.LobbyInfoChanged -= UpdateCurrentMap;
 				Game.LobbyInfoChanged -= UpdatePlayerList;
+				Game.LobbyInfoChanged -= UpdateDiscordStatus;
 				Game.BeforeGameStart -= OnGameStart;
 				Game.ConnectionStateChanged -= ConnectionStateChanged;
 			}
@@ -743,9 +745,49 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			tabCompletion.Names = orderManager.LobbyInfo.Clients.Select(c => c.Name).Distinct().ToList();
 		}
 
+		void UpdateDiscordStatus()
+		{
+			string secret = null;
+			if (orderManager.LobbyInfo.GlobalSettings.Dedicated)
+			{
+				var endpoint = orderManager.Endpoint.GetConnectEndPoints().First();
+				secret = string.Concat(endpoint.Address, "|", endpoint.Port);
+			}
+
+			var state = skirmishMode ? DiscordState.InSkirmishLobby : DiscordState.InMultiplayerLobby;
+			DiscordService.UpdateStatus(state, secret: secret);
+
+			if (!skirmishMode)
+			{
+				var numberOfPlayers = 0;
+				var slots = 0;
+				foreach (var kv in orderManager.LobbyInfo.Slots)
+				{
+					if (kv.Value.Closed)
+						continue;
+
+					slots++;
+					var client = orderManager.LobbyInfo.ClientInSlot(kv.Key);
+
+					if (client != null)
+						numberOfPlayers++;
+				}
+
+				DiscordService.UpdatePlayers(numberOfPlayers, slots);
+			}
+
+			DiscordService.UpdateDetails(map.Title);
+		}
+
 		void OnGameStart()
 		{
 			Ui.CloseWindow();
+
+			if (skirmishMode)
+				DiscordService.UpdateStatus(DiscordState.PlayingSkirmish);
+			else
+				DiscordService.UpdateStatus(DiscordState.PlayingMultiplayer);
+
 			onStart();
 		}
 	}
