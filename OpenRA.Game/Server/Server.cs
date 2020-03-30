@@ -676,6 +676,11 @@ namespace OpenRA.Server
 				case "Chat":
 					DispatchOrdersToClients(conn, 0, o.Serialize());
 					break;
+
+				case "ViewportState":
+					DispatchOrdersToClients(conn, 0, o.Serialize());
+					break;
+
 				case "Pong":
 					{
 						long pingSent;

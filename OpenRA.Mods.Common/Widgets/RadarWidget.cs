@@ -354,6 +354,25 @@ namespace OpenRA.Mods.Common.Widgets
 				Game.Renderer.EnableScissor(mapRect);
 				DrawRadarPings();
 				Game.Renderer.RgbaColorRenderer.DrawRect(tl, br, 1, Color.White);
+
+				// Draw other players' viewport rects (if spectator)
+				if (world.LocalPlayer == null || world.LocalPlayer.Spectating)
+				{
+					foreach (var p in world.Players)
+					{
+						if (!p.Playable || p.IsBot)
+							continue;
+
+						var r = p.PredictedScreenRectangle;
+						if (r == null)
+							continue;
+
+						var ptl = CellToMinimapPixel(world.Map.CellContaining(worldRenderer.ProjectedPosition(r.Value.TopLeft)));
+						var pbr = CellToMinimapPixel(world.Map.CellContaining(worldRenderer.ProjectedPosition(r.Value.BottomRight)));
+						Game.Renderer.RgbaColorRenderer.DrawRect(ptl, pbr, 1, p.Color);
+					}
+				}
+
 				Game.Renderer.DisableScissor();
 			}
 		}

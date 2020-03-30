@@ -178,8 +178,10 @@ namespace OpenRA.Mods.Common.Widgets
 		}
 
 		long lastScrollTime = 0;
+		float2 lastScrollOffset;
 		public override void Draw()
 		{
+			lastScrollOffset = float2.Zero;
 			if (IsJoystickScrolling)
 			{
 				// Base the JoystickScrolling speed on the Scroll Speed slider
@@ -202,9 +204,10 @@ namespace OpenRA.Mods.Common.Widgets
 						if (keyboardDirections.Includes(kv.Key) || edgeDirections.Includes(kv.Key))
 							scroll += kv.Value;
 
-					// Scroll rate is defined for a 40ms interval
-					var deltaScale = Math.Min(Game.RunTime - lastScrollTime, 25f);
+					lastScrollOffset = Game.Settings.Game.ViewportEdgeScrollStep / scroll.Length * scroll;
 
+					// Scroll rate is defined for a 25ms(!?) interval
+					var deltaScale = Math.Min(Game.RunTime - lastScrollTime, 25f);
 					var length = Math.Max(1, scroll.Length);
 					scroll *= (deltaScale / (25 * length)) * Game.Settings.Game.ViewportEdgeScrollStep;
 
@@ -215,6 +218,14 @@ namespace OpenRA.Mods.Common.Widgets
 
 			UpdateMouseover();
 			base.Draw();
+		}
+
+		public override void Tick()
+		{
+			if (world.LocalPlayer == null || world.LocalPlayer.Spectating)
+				return;
+
+			world.IssueOrder(world.LocalPlayer.SerializeScreenRectangle(worldRenderer.Viewport, lastScrollOffset / worldRenderer.Viewport.Zoom));
 		}
 
 		public void UpdateMouseover()

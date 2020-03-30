@@ -225,6 +225,54 @@ namespace OpenRA
 			return stanceColors.Neutrals;
 		}
 
+		long screenRectangleEpoch = 0;
+		int2 screenRectangleTopLeft = int2.Zero;
+		Size screenRectangleSize = new Size(0, 0);
+		float2 screenRectangleScrollDelta = float2.Zero;
+
+		public Rectangle? PredictedScreenRectangle
+		{
+			get
+			{
+				// Viewport data expires after 500ms
+				if (Game.RunTime > screenRectangleEpoch + 500)
+					return null;
+
+				// Scroll rate is defined for a 25ms(!?) interval
+				var offset = ((Game.RunTime - screenRectangleEpoch) / 25f * screenRectangleScrollDelta).ToInt2();
+				return new Rectangle(screenRectangleTopLeft + offset, screenRectangleSize);
+			}
+		}
+
+		public void ProcessScreenRectangle(Order o)
+		{
+			var r = o.TargetString.Split(',');
+			int x, y, w, h;
+			if (!int.TryParse(r[0], out x) || !int.TryParse(r[1], out y) || !int.TryParse(r[2], out w) || !int.TryParse(r[3], out h))
+				return;
+
+			float dx, dy;
+			if (!float.TryParse(r[4], out dx) || !float.TryParse(r[5], out dy))
+				return;
+
+			screenRectangleTopLeft = new int2(x, y);
+			screenRectangleSize = new Size(w, h);
+			screenRectangleScrollDelta = new float2(dx, dy);
+			screenRectangleEpoch = Game.RunTime;
+		}
+
+		public Order SerializeScreenRectangle(Viewport viewport, float2 scrollDelta)
+		{
+			// TODO: Serialize time after game start so we can better predict on the observer side
+			// TODO: Use a new order format to avoid massively wasteful order encoding
+			var r = viewport.Rectangle;
+			return new Order("ViewportState", null, false)
+			{
+				IsImmediate = true,
+				TargetString = "{0},{1},{2},{3},{4},{5}".F(r.Left, r.Top, r.Width, r.Height, scrollDelta.X, scrollDelta.Y),
+			};
+		}
+
 		#region Scripting interface
 
 		Lazy<ScriptPlayerInterface> luaInterface;

@@ -335,6 +335,19 @@ namespace OpenRA.Network
 						break;
 					}
 
+				case "ViewportState":
+					{
+						var client = orderManager.LobbyInfo.ClientWithIndex(clientId);
+						if (client == null)
+							break;
+
+						var p = world != null ? world.FindPlayerByClient(client) : null;
+						if (p != null)
+							p.ProcessScreenRectangle(order);
+
+						break;
+					}
+
 				default:
 					{
 						ResolveOrder(order);
