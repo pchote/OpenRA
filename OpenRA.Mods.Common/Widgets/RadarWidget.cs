@@ -328,6 +328,34 @@ namespace OpenRA.Mods.Common.Widgets
 			return true;
 		}
 
+		void DrawViewport(int2 vtl, int2 vbr, Color color, Color shadow)
+		{
+			var tl = CellToMinimapPixel(world.Map.CellContaining(worldRenderer.ProjectedPosition(vtl)));
+			var br = CellToMinimapPixel(world.Map.CellContaining(worldRenderer.ProjectedPosition(vbr)));
+			var tr = new int2(br.X, tl.Y);
+			var bl = new int2(tl.X, br.Y);
+
+			var dx = new float3((br.X - tl.X) / 4, 0, 0);
+			var dy = new float3(0, (br.Y - tl.Y) / 4, 0);
+
+			var shadowOffset = new float3(1, 1, 0);
+			var cr = Game.Renderer.RgbaColorRenderer;
+
+			var ctl = new[] { tl + dy, tl, tl + dx };
+			var ctr = new[] { tr + dy, tr, tr - dx };
+			var cbl = new[] { bl - dy, bl, bl + dx };
+			var cbr = new[] { br - dy, br, br - dx };
+
+			cr.DrawLine(ctl.Select(x => x + shadowOffset).ToArray(), 1, shadow);
+			cr.DrawLine(ctl, 1, color);
+			cr.DrawLine(ctr.Select(x => x + shadowOffset).ToArray(), 1, shadow);
+			cr.DrawLine(ctr, 1, color);
+			cr.DrawLine(cbl.Select(x => x + shadowOffset).ToArray(), 1, shadow);
+			cr.DrawLine(cbl, 1, color);
+			cr.DrawLine(cbr.Select(x => x + shadowOffset).ToArray(), 1, shadow);
+			cr.DrawLine(cbr, 1, color);
+		}
+
 		public override void Draw()
 		{
 			if (world == null)
@@ -353,7 +381,8 @@ namespace OpenRA.Mods.Common.Widgets
 
 				Game.Renderer.EnableScissor(mapRect);
 				DrawRadarPings();
-				Game.Renderer.RgbaColorRenderer.DrawRect(tl, br, 1, Color.White);
+
+				DrawViewport(worldRenderer.Viewport.TopLeft, worldRenderer.Viewport.BottomRight, Color.White, Color.FromArgb(128, Color.Black));
 
 				// Draw other players' viewport rects (if spectator)
 				if (world.LocalPlayer == null || world.LocalPlayer.Spectating)
@@ -367,9 +396,7 @@ namespace OpenRA.Mods.Common.Widgets
 						if (r == null)
 							continue;
 
-						var ptl = CellToMinimapPixel(world.Map.CellContaining(worldRenderer.ProjectedPosition(r.Value.TopLeft)));
-						var pbr = CellToMinimapPixel(world.Map.CellContaining(worldRenderer.ProjectedPosition(r.Value.BottomRight)));
-						Game.Renderer.RgbaColorRenderer.DrawRect(ptl, pbr, 1, p.Color);
+						DrawViewport(r.Value.TopLeft, r.Value.BottomRight, p.Color, Color.FromArgb(128, Color.Black));
 					}
 				}
 
