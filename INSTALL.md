@@ -23,12 +23,11 @@ Mono, version 5.18 or later, is required to compile OpenRA. You can add the [ups
 
 To compile OpenRA, run `make` from the command line. After this one can run the game with `./launch-game.sh`. It is also possible to specify the mod you wish to run from the command line, e.g. with `./launch-game.sh Game.Mod=ts` if you wish to try the experimental Tiberian Sun mod. 
 
-The default behaviour on the x86_64 architecture is to download several pre-compiled native libraries using the Nuget packaging manager. If you prefer to use system libraries, compile instead using make TARGETPLATFORM=unix-generic.
+The default behaviour on the x86_64 architecture is to download several pre-compiled native libraries using the Nuget packaging manager. If you prefer to use system libraries, compile instead using `make TARGETPLATFORM=unix-generic`.
 
-If you choose to use system libraries or your system is not x86_64 you will need to manually install the following libraries:
+If you choose to use system libraries, or your system is not x86_64, you will need to install the following using your system package manager:
 * [SDL 2](http://www.libsdl.org/download-2.0.php)
 * [FreeType](http://gnuwin32.sourceforge.net/packages/freetype.htm)
-* [zlib](http://gnuwin32.sourceforge.net/packages/zlib.htm)
 * [OpenAL](http://kcat.strangesoft.net/openal.html)
 * [liblua 5.1](http://luabinaries.sourceforge.net/download.html)
 
@@ -96,12 +95,17 @@ The EPEL repository is required in order for the following command to run proper
 sudo yum install "pkgconfig(mono)" SDL2 freetype "lua = 5.1" openal-soft xdg-utils zenity
 ```
 
-OSX
+macOS
 =====
 
 Before compiling OpenRA you must install the following dependencies:
 * [Mono >= 5.18](https://www.mono-project.com/download/stable/#download-mac)
 
-To compile OpenRA, run `make` from the command line.
+To compile OpenRA, run `make` from the command line. Run with `./launch-game.sh`.
 
-Run with `./launch-game.sh`.
+The default behaviour is to download several pre-compiled native libraries using the Nuget packaging manager. If you prefer to use system libraries, compile instead using `make TARGETPLATFORM=unix-generic`. If you choose to use system libraries you will need to install:
+* [SDL 2](http://www.libsdl.org/download-2.0.php) (`brew install sdl2`)
+* [FreeType](http://gnuwin32.sourceforge.net/packages/freetype.htm) (`brew install freetype`)
+* [OpenAL](http://kcat.strangesoft.net/openal.html) (`brew install openal-soft`)
+* [liblua 5.1](http://luabinaries.sourceforge.net/download.html) (`brew install lua@5.1`)
+

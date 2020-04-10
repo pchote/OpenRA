@@ -41,11 +41,7 @@
     </ItemGroup>
   </Target>
   <ItemGroup>
-    <Content Include="OpenRA.Platforms.Default-legacy.dll.config" Condition="'$(TargetPlatform)' == 'unix-generic'">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>OpenRA.Platforms.Default.dll.config</Link>
-    </Content>
-    <Content Include="OpenRA.Platforms.Default.dll.config" Condition="'$(TargetPlatform)' == 'linux-x64' Or '$(TargetPlatform)' == 'osx-x64'">
+    <Content Include="OpenRA.Platforms.Default.dll.config" Condition="'$(TargetPlatform)' != 'win-x64' And '$(TargetPlatform)' != 'win-x86'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

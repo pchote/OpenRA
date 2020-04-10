@@ -3,10 +3,13 @@
 # to compile, run:
 #   make [DEBUG=true]
 #
+# to compile using system libraries for native dependencies, run:
+#   make [DEBUG=true] TARGETPLATFORM=unix-generic
+#
 # to check the official mods for erroneous yaml files, run:
 #   make test
 #
-# to check the official mod dlls for StyleCop violations, run:
+# to check the engine and official mod dlls for code style violations, run:
 #   make check
 #
 # to install, run:
@@ -17,6 +20,7 @@
 #
 # to install the engine and common mod files (omitting the default mods):
 #   make install-engine
+#   make install-dependencies
 #   make install-common-mod-files
 #
 # to uninstall, run:
@@ -136,12 +140,12 @@ core:
 	@command -v $(firstword $(MSBUILD)) >/dev/null || (echo "OpenRA requires the '$(MSBUILD)' tool provided by Mono >= 5.18."; exit 1)
 	@$(MSBUILD) -t:Build -restore -p:Configuration=Release -p:TargetPlatform=$(TARGETPLATFORM)
 ifeq ($(TARGETPLATFORM), unix-generic)
-	@./thirdparty/configure-native-deps.sh
+	@./configure-system-libraries.sh
 endif
 
 clean:
 	@-$(RM_F) *.config
-	@-$(RM_F) *.exe *.dll *.so *.dylib ./OpenRA*/*.dll *.pdb mods/**/*.dll mods/**/*.pdb *.resources
+	@-$(RM_F) *.exe *.dll *.dll.config *.so *.dylib ./OpenRA*/*.dll *.pdb mods/**/*.dll mods/**/*.pdb *.resources
 	@-$(RM_RF) ./*/bin ./*/obj
 	@ $(MSBUILD) -t:clean
 
@@ -329,9 +333,15 @@ uninstall:
 
 help:
 	@echo 'to compile, run:'
-	@echo '  make [DEBUG=false]'
+	@echo '  make [DEBUG=true]'
+	@echo
+	@echo 'to compile using system libraries for native dependencies, run:'
+	@echo '  make [DEBUG=true] TARGETPLATFORM=unix-generic'
 	@echo
 	@echo 'to check the official mods for erroneous yaml files, run:'
+	@echo '  make test'
+	@echo
+	@echo 'to check the engine and official mod dlls for code style violations, run:'
 	@echo '  make test'
 	@echo
 	@echo 'to install, run:'
@@ -339,6 +349,11 @@ help:
 	@echo
 	@echo 'to install Linux startup scripts, desktop files and icons'
 	@echo '  make install-linux-shortcuts [DEBUG=false]'
+	@echo
+	@echo ' to install the engine and common mod files (omitting the default mods):'
+	@echo '   make install-engine'
+	@echo '   make install-dependencies'
+	@echo '   make install-common-mod-files'
 	@echo
 	@echo 'to uninstall, run:'
 	@echo '  make uninstall'
