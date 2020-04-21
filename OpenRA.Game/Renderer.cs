@@ -66,7 +66,10 @@ namespace OpenRA
 			this.platform = platform;
 			var resolution = GetResolution(graphicSettings);
 
-			Window = platform.CreateWindow(new Size(resolution.Width, resolution.Height), graphicSettings.Mode, graphicSettings.UIScale, graphicSettings.BatchSize, graphicSettings.VideoDisplay);
+			Window = platform.CreateWindow(new Size(resolution.Width, resolution.Height),
+				graphicSettings.Mode, graphicSettings.UIScale, graphicSettings.BatchSize,
+				graphicSettings.VideoDisplay, graphicSettings.GLProfile);
+
 			Context = Window.Context;
 
 			TempBufferSize = graphicSettings.BatchSize;
