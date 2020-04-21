@@ -53,7 +53,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		public MainMenuLogic(Widget widget, World world, ModData modData)
 		{
 			rootMenu = widget;
-			rootMenu.Get<LabelWidget>("VERSION_LABEL").Text = modData.Manifest.Metadata.Version;
+			rootMenu.Get<LabelWidget>("VERSION_LABEL").Text = "OpenGL: " + Game.Renderer.GLProfile;
 
 			// Menu buttons
 			var mainMenu = widget.Get("MAIN_MENU");
