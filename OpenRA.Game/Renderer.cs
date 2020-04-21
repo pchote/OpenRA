@@ -304,6 +304,8 @@ namespace OpenRA
 		public Size NativeResolution { get { return Window.NativeWindowSize; } }
 		public float WindowScale { get { return Window.EffectiveWindowScale; } }
 		public float NativeWindowScale { get { return Window.NativeWindowScale; } }
+		public GLProfile GLProfile { get { return Window.GLProfile; } }
+		public GLProfile[] SupportedGLProfiles { get { return Window.SupportedGLProfiles; } }
 
 		public interface IBatchRenderer { void Flush(); }
 

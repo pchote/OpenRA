@@ -19,6 +19,7 @@ namespace OpenRA
 	{
 		Modern,
 		Embedded,
+		Legacy
 	}
 
 	public interface IPlatform
@@ -67,9 +68,9 @@ namespace OpenRA
 		void SetRelativeMouseMode(bool mode);
 		void SetScaleModifier(float scale);
 
-		GLProfile Profile { get; }
+		GLProfile GLProfile { get; }
 
-		GLProfile[] SupportedProfiles { get; }
+		GLProfile[] SupportedGLProfiles { get; }
 	}
 
 	public interface IGraphicsContext : IDisposable
