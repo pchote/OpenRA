@@ -61,6 +61,7 @@ namespace OpenRA
 		static Benchmark benchmark = null;
 
 		public static event Action OnShellmapLoaded = () => { };
+		public static event Action OnTick = () => { };
 
 		public static OrderManager JoinServer(string host, int port, string password, bool recordReplay = true)
 		{
@@ -609,6 +610,8 @@ namespace OpenRA
 					// Wait until we have done our first world Tick before TickRendering
 					if (orderManager.LocalFrameNumber > 0)
 						Sync.RunUnsynced(Settings.Debug.SyncCheckUnsyncedCode, world, () => world.TickRender(worldRenderer));
+
+					OnTick();
 				}
 
 				if (benchmark != null)

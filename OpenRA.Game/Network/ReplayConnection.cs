@@ -30,6 +30,12 @@ namespace OpenRA.Network
 		int ordersFrame;
 		Dictionary<int, int> lastClientsFrame = new Dictionary<int, int>();
 
+		string host = "127.0.0.1";
+		int port = 1234;
+
+		public string Host { get { return host; } }
+		public int Port { get { return port; } }
+
 		public int LocalClientId { get { return -1; } }
 		public ConnectionState ConnectionState { get { return ConnectionState.Connected; } }
 		public readonly int TickCount;

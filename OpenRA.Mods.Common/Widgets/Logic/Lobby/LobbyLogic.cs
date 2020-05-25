@@ -61,6 +61,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		bool addBotOnMapLoad;
 		bool disableTeamChat;
 		bool teamChat;
+		bool canJoinDiscord;
 
 		readonly string chatLineSound = ChromeMetrics.Get<string>("ChatLineSound");
 
@@ -118,6 +119,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			Game.LobbyInfoChanged += UpdatePlayerList;
 			Game.BeforeGameStart += OnGameStart;
 			Game.ConnectionStateChanged += ConnectionStateChanged;
+
+			canJoinDiscord = orderManager.LobbyInfo.GlobalSettings.Dedicated;
 
 			var name = lobby.GetOrNull<LabelWidget>("SERVER_NAME");
 			if (name != null)
@@ -451,6 +454,15 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			MiniYaml yaml;
 			if (logicArgs.TryGetValue("ChatLineSound", out yaml))
 				chatLineSound = yaml.Value;
+
+			var state = skirmishMode ? DiscordState.InSinglePlayer : DiscordState.InMultiplayerLobby;
+			string secret = null;
+			if (canJoinDiscord)
+			{
+				secret = string.Concat(orderManager.Connection.Host, "|", orderManager.Connection.Port);
+			}
+
+			DiscordService.UpdateStatus(state, secret: secret);
 		}
 
 		bool disposed;
@@ -548,6 +560,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				LoadMapPreviewRules(map);
 			else if (Game.Settings.Game.AllowDownloading)
 				modData.MapCache.QueryRemoteMapDetails(services.MapRepository, new[] { uid }, LoadMapPreviewRules);
+
+			DiscordService.UpdateDetails(map.Title);
 		}
 
 		void UpdatePlayerList()
@@ -573,12 +587,16 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			var isHost = Game.IsHost;
 			var idx = 0;
+			var numberOfPlayers = 0;
+			var slots = 0;
+
 			foreach (var kv in orderManager.LobbyInfo.Slots)
 			{
 				var key = kv.Key;
 				var slot = kv.Value;
 				var client = orderManager.LobbyInfo.ClientInSlot(key);
 				Widget template = null;
+				slots++;
 
 				// get template for possible reuse
 				if (idx < players.Children.Count)
@@ -603,6 +621,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				else if ((client.Index == orderManager.LocalClient.Index) ||
 						 (client.Bot != null && isHost))
 				{
+					numberOfPlayers++;
+
 					// Editable player in slot
 					if (template == null || template.Id != editablePlayerTemplate.Id)
 						template = editablePlayerTemplate.Clone();
@@ -622,6 +642,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				}
 				else
 				{
+					numberOfPlayers++;
+
 					// Non-editable player in slot
 					if (template == null || template.Id != nonEditablePlayerTemplate.Id)
 						template = nonEditablePlayerTemplate.Clone();
@@ -741,11 +763,17 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				players.RemoveChild(players.Children[idx]);
 
 			tabCompletion.Names = orderManager.LobbyInfo.Clients.Select(c => c.Name).Distinct().ToList();
+
+			if (!skirmishMode)
+				DiscordService.UpdatePlayers(numberOfPlayers, slots);
 		}
 
 		void OnGameStart()
 		{
 			Ui.CloseWindow();
+
+			DiscordService.UpdateStatus(DiscordState.PlayingMultiplayer);
+
 			onStart();
 		}
 	}

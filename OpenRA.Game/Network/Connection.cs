@@ -28,6 +28,8 @@ namespace OpenRA.Network
 
 	public interface IConnection : IDisposable
 	{
+		string Host { get; }
+		int Port { get; }
 		int LocalClientId { get; }
 		ConnectionState ConnectionState { get; }
 		void Send(int frame, List<byte[]> orders);
@@ -43,6 +45,12 @@ namespace OpenRA.Network
 			public int FromClient;
 			public byte[] Data;
 		}
+
+		protected string host = "127.0.0.1";
+		protected int port = 1234;
+
+		public string Host { get { return host; } }
+		public int Port { get { return port; } }
 
 		readonly List<ReceivedPacket> receivedPackets = new List<ReceivedPacket>();
 		public ReplayRecorder Recorder { get; private set; }
@@ -146,6 +154,8 @@ namespace OpenRA.Network
 
 		public NetworkConnection(string host, int port)
 		{
+			this.host = host;
+			this.port = port;
 			try
 			{
 				tcp = new TcpClient(host, port) { NoDelay = true };
