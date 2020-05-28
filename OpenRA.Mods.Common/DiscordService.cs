@@ -80,7 +80,7 @@ namespace OpenRA.Mods.Common
 			var server = args.Secret.Split('|');
 			Game.RunAfterTick(() =>
 			{
-				Game.RemoteDirectConnect(new ConnectionTarget(server[0], int.Parse(server[1])));
+				Game.RemoteDirectConnect(server[0], int.Parse(server[1]));
 			});
 		}
 
