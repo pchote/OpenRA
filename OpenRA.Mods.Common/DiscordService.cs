@@ -81,7 +81,7 @@ namespace OpenRA.Mods.Common
 
 			var server = args.Secret.Split('|');
 
-			Game.RemoteDirectConnect(new ConnectionTarget(server[0], int.Parse(server[1])));
+			Game.RemoteDirectConnect(server[0], int.Parse(server[1]));
 		}
 
 		void SetStatus(DiscordState state, string details = null, string secret = null)

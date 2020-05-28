@@ -25,6 +25,9 @@ namespace OpenRA.Network
 			public Pair<int, byte[]>[] Packets;
 		}
 
+		public string Host { get { return "127.0.0.1"; } }
+		public int Port { get { return 1234; } }
+
 		Queue<Chunk> chunks = new Queue<Chunk>();
 		List<byte[]> sync = new List<byte[]>();
 		int ordersFrame;
