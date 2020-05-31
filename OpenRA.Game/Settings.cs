@@ -167,7 +167,7 @@ namespace OpenRA
 		public bool DisableWindowsRenderThread = true;
 
 		[Desc("Disable the OpenGL debug message callback feature.")]
-		public bool DisableGLDebugMessageCallback = false;
+		public bool DisableGLDebugMessageCallback = true;
 
 		[Desc("Disable operating-system provided cursor rendering.")]
 		public bool DisableHardwareCursors = false;

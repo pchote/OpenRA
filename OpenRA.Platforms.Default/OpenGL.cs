@@ -501,25 +501,9 @@ namespace OpenRA.Platforms.Default
 				throw new InvalidProgramException("OpenGL Version Error: See graphics.log for details.");
 			}
 
-			// Allow users to force-disable the debug message callback feature to work around driver bugs
+			// The debug message callback is diabled by default due to a large number of issues caused by buggy drivers
 			if (Features.HasFlag(GLFeatures.DebugMessagesCallback) && Game.Settings.Graphics.DisableGLDebugMessageCallback)
 				Features ^= GLFeatures.DebugMessagesCallback;
-
-			// Force disable the debug message callback feature on Linux + AMD GPU to work around a startup freeze
-			if (Features.HasFlag(GLFeatures.DebugMessagesCallback) && Platform.CurrentPlatform == PlatformType.Linux)
-			{
-				var renderer = glGetString(GL_RENDERER);
-				if (renderer.Contains("AMD") || renderer.Contains("Radeon"))
-					Features ^= GLFeatures.DebugMessagesCallback;
-			}
-
-			// Older Intel on Windows is broken too
-			if (Features.HasFlag(GLFeatures.DebugMessagesCallback) && Platform.CurrentPlatform == PlatformType.Windows)
-			{
-				var renderer = glGetString(GL_RENDERER);
-				if (renderer.Contains("HD Graphics") && !renderer.Contains("UHD Graphics"))
-					Features ^= GLFeatures.DebugMessagesCallback;
-			}
 
 			// Setup the debug message callback handler
 			if (Features.HasFlag(GLFeatures.DebugMessagesCallback))
