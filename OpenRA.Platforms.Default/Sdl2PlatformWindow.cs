@@ -173,9 +173,15 @@ namespace OpenRA.Platforms.Default
 				// This is not necessary on macOS, which defines window sizes in effective units ("points").
 				if (Platform.CurrentPlatform == PlatformType.Windows)
 				{
-					float ddpi, hdpi, vdpi;
-					if (SDL.SDL_GetDisplayDPI(videoDisplay, out ddpi, out hdpi, out vdpi) == 0)
-						windowScale = ddpi / 96;
+					// Launch the game with OPENRA_DISPLAY_SCALE to force a specific scaling factor
+					// Otherwise fall back to Windows's DPI configuration
+					var scaleVariable = Environment.GetEnvironmentVariable("OPENRA_DISPLAY_SCALE");
+					if (scaleVariable == null || !float.TryParse(scaleVariable, NumberStyles.Float, NumberFormatInfo.InvariantInfo, out windowScale))
+					{
+						float ddpi, hdpi, vdpi;
+						if (SDL.SDL_GetDisplayDPI(videoDisplay, out ddpi, out hdpi, out vdpi) == 0)
+							windowScale = ddpi / 96;
+					}
 				}
 				else if (Platform.CurrentPlatform != PlatformType.OSX)
 				{
