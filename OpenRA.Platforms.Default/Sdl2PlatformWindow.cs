@@ -10,6 +10,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -151,9 +152,21 @@ namespace OpenRA.Platforms.Default
 				if (Platform.CurrentPlatform == PlatformType.OSX)
 					supportedProfiles = new[] { GLProfile.Modern, GLProfile.Legacy };
 				else
-					supportedProfiles = new[] { GLProfile.Modern, GLProfile.Embedded, GLProfile.Legacy }
-						.Where(CanCreateGLWindow)
-						.ToArray();
+				{
+					// Default to "Modern" (core profile) OpenGL
+					var profiles = new List<GLProfile>();
+					if (CanCreateGLWindow(GLProfile.Modern))
+						profiles.Add(GLProfile.Modern);
+
+					// Fall back to GL ES only if core profile isn't available
+					else if (CanCreateGLWindow(GLProfile.Embedded))
+						profiles.Add(GLProfile.Embedded);
+
+					if (CanCreateGLWindow(GLProfile.Legacy))
+						profiles.Add(GLProfile.Legacy);
+
+					supportedProfiles = profiles.ToArray();
+				}
 
 				if (!supportedProfiles.Any())
 					throw new InvalidOperationException("No supported OpenGL profiles were found.");
