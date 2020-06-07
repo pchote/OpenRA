@@ -529,11 +529,13 @@ namespace OpenRA.Platforms.Default
 			{
 				SDL.SDL_ClearError();
 				SDL.SDL_DestroyWindow(window);
+				SDL.SDL_ClearError();
 				return false;
 			}
 
 			SDL.SDL_GL_DeleteContext(context);
 			SDL.SDL_DestroyWindow(window);
+			SDL.SDL_ClearError();
 			return true;
 		}
 
