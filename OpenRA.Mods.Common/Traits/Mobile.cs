@@ -183,6 +183,7 @@ namespace OpenRA.Mods.Common.Traits
 		}
 		#endregion
 
+		WRot terrainOrientation;
 		WAngle oldFacing;
 		WRot orientation;
 		WPos oldPos;
@@ -211,7 +212,7 @@ namespace OpenRA.Mods.Common.Traits
 			set => orientation = orientation.WithYaw(value);
 		}
 
-		public WRot Orientation => orientation;
+		public WRot Orientation => orientation.Rotate(terrainOrientation);
 
 		public WAngle TurnSpeed => Info.TurnSpeed;
 
@@ -484,6 +485,11 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			CenterPosition = pos;
 			self.World.UpdateMaps(self, this);
+
+			var map = self.World.Map;
+			var cell = map.CellContaining(pos);
+			var ramp = map.Grid.Ramps[map.Ramp.Contains(cell) ? map.Ramp[cell] : 0];
+			terrainOrientation = ramp.Orientation;
 
 			// The first time SetCenterPosition is called is in the constructor before creation, so we need a null check here as well
 			if (notifyCenterPositionChanged == null)
