@@ -129,14 +129,16 @@ Section "Game" GAME
 
 	SetOutPath "$INSTDIR"
 	File "${SRCDIR}\*.exe"
-	File "${SRCDIR}\*.exe.config"
+	File "${SRCDIR}\*.dll.config"
 	File "${SRCDIR}\*.dll"
 	File "${SRCDIR}\*.ico"
+	File "${SRCDIR}\*.deps.json"
+	File "${SRCDIR}\*.runtimeconfig.json"
+	File "${SRCDIR}\global mix database.dat"
+	File "${SRCDIR}\IP2LOCATION-LITE-DB1.IPV6.BIN.ZIP"
 	File "${SRCDIR}\VERSION"
 	File "${SRCDIR}\AUTHORS"
 	File "${SRCDIR}\COPYING"
-	File "${SRCDIR}\global mix database.dat"
-	File "${SRCDIR}\IP2LOCATION-LITE-DB1.IPV6.BIN.ZIP"
 
 	!insertmacro MUI_STARTMENU_WRITE_BEGIN Application
 		CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
@@ -225,14 +227,17 @@ Function ${UN}Clean
 	RMDir /r $INSTDIR\glsl
 	RMDir /r $INSTDIR\lua
 	Delete $INSTDIR\*.exe
-	Delete $INSTDIR\*.exe.config
 	Delete $INSTDIR\*.dll
 	Delete $INSTDIR\*.ico
+	Delete $INSTDIR\*.dll.config
+	Delete $INSTDIR\*.deps.json
+	Delete $INSTDIR\*.runtimeconfig.json
 	Delete $INSTDIR\VERSION
 	Delete $INSTDIR\AUTHORS
 	Delete $INSTDIR\COPYING
 	Delete "$INSTDIR\global mix database.dat"
 	Delete $INSTDIR\IP2LOCATION-LITE-DB1.IPV6.BIN.ZIP
+
 	RMDir /r $INSTDIR\Support
 
 	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\OpenRA${SUFFIX}"
