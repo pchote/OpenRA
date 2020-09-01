@@ -90,6 +90,13 @@ function build_platform()
 		exit 1
 	fi
 
+	echo "Packaging zip archive ($1)"
+	cp .itch.toml "${BUILTDIR}"
+	pushd "${BUILTDIR}" > /dev/null
+	zip "OpenRA-${TAG}-${1}-winportable.zip" -r -9 * .[^.]* --quiet
+	mv "OpenRA-${TAG}-${1}-winportable.zip" "${OUTPUTDIR}"
+	popd > /dev/null
+
 	rm -rf "${BUILTDIR}"
 }
 
