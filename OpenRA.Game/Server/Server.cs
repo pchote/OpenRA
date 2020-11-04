@@ -665,12 +665,14 @@ namespace OpenRA.Server
 
 		byte[] CreateFrame(int client, int frame, byte[] data)
 		{
-			var ms = new MemoryStream(data.Length + 12);
-			ms.WriteArray(BitConverter.GetBytes(data.Length + 4));
-			ms.WriteArray(BitConverter.GetBytes(client));
-			ms.WriteArray(BitConverter.GetBytes(frame));
-			ms.WriteArray(data);
-			return ms.ToArray();
+			using (var ms = new MemoryStream(data.Length + 12))
+			{
+				ms.WriteArray(BitConverter.GetBytes(data.Length + 4));
+				ms.WriteArray(BitConverter.GetBytes(client));
+				ms.WriteArray(BitConverter.GetBytes(frame));
+				ms.WriteArray(data);
+				return ms.GetBuffer();
+			}
 		}
 
 		void DispatchOrdersToClient(Connection c, int client, int frame, byte[] data)
