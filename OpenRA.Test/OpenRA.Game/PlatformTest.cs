@@ -19,28 +19,27 @@ namespace OpenRA.Test
 	{
 		string supportDir;
 		string gameDir;
+		string engineDir;
 
 		[SetUp]
 		public void SetUp()
 		{
 			supportDir = Platform.SupportDir;
 			gameDir = Platform.GameDir;
+			engineDir = Platform.EngineDir;
 		}
 
 		[TestCase(TestName = "Returns literal paths")]
 		public void ResolvePath()
 		{
-			Assert.That(Platform.ResolvePath("^testpath"),
+			Assert.That(Platform.ResolvePath("^SupportDir|testpath"),
 				Is.EqualTo(Path.Combine(supportDir, "testpath")));
 
-			Assert.That(Platform.ResolvePath(".\\testpath"),
-				Is.EqualTo(Path.Combine(gameDir, "testpath")));
-
-			Assert.That(Platform.ResolvePath("./testpath"),
-				Is.EqualTo(Path.Combine(gameDir, "testpath")));
-
-			Assert.That(Platform.ResolvePath(Path.Combine(".", "Foo.dll")),
+			Assert.That(Platform.ResolvePath("^GameDir|Foo.dll"),
 				Is.EqualTo(Path.Combine(gameDir, "Foo.dll")));
+
+			Assert.That(Platform.ResolvePath("^EngineDir|Foo.dll"),
+				Is.EqualTo(Path.Combine(engineDir, "Foo.dll")));
 
 			Assert.That(Platform.ResolvePath("testpath"),
 				Is.EqualTo("testpath"));
