@@ -276,6 +276,10 @@ namespace OpenRA
 
 		static void Initialize(Arguments args)
 		{
+			var gameDirArg = args.GetValue("Engine.GameDir", null);
+			if (!string.IsNullOrEmpty(gameDirArg))
+				Platform.OverrideGameDir(gameDirArg);
+
 			var supportDirArg = args.GetValue("Engine.SupportDir", null);
 			if (!string.IsNullOrEmpty(supportDirArg))
 				Platform.OverrideSupportDir(supportDirArg);
@@ -324,7 +328,7 @@ namespace OpenRA
 				Settings.Game.Platform = p;
 				try
 				{
-					var rendererPath = Path.Combine(Platform.GameDir, "OpenRA.Platforms." + p + ".dll");
+					var rendererPath = Path.Combine(Platform.EngineDir, "OpenRA.Platforms." + p + ".dll");
 					var assembly = Assembly.LoadFile(rendererPath);
 
 					var platformType = assembly.GetTypes().SingleOrDefault(t => typeof(IPlatform).IsAssignableFrom(t));

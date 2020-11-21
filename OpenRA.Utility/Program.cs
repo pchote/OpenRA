@@ -40,6 +40,10 @@ namespace OpenRA
 	{
 		static void Main(string[] args)
 		{
+			var gameDir = Environment.GetEnvironmentVariable("GAME_DIR");
+			if (!string.IsNullOrEmpty(gameDir))
+				Platform.OverrideGameDir(gameDir);
+
 			Log.AddChannel("perf", null);
 			Log.AddChannel("debug", null);
 
