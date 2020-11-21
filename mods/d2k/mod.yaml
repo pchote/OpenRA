@@ -61,9 +61,9 @@ Chrome:
 	d2k|chrome.yaml
 
 Assemblies:
-	common|OpenRA.Mods.Common.dll
-	common|OpenRA.Mods.Cnc.dll
-	d2k|OpenRA.Mods.D2k.dll
+	^EngineDir|OpenRA.Mods.Common.dll
+	^EngineDir|OpenRA.Mods.Cnc.dll
+	^EngineDir|OpenRA.Mods.D2k.dll
 
 ChromeLayout:
 	common|chrome/ingame.yaml
