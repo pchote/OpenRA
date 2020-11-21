@@ -328,7 +328,7 @@ namespace OpenRA
 				Settings.Game.Platform = p;
 				try
 				{
-					var rendererPath = Path.Combine(Platform.GameDir, "OpenRA.Platforms." + p + ".dll");
+					var rendererPath = Path.Combine(Platform.EngineDir, "OpenRA.Platforms." + p + ".dll");
 					var assembly = Assembly.LoadFile(rendererPath);
 
 					var platformType = assembly.GetTypes().SingleOrDefault(t => typeof(IPlatform).IsAssignableFrom(t));
