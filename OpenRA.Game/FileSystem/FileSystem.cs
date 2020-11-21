@@ -295,7 +295,7 @@ namespace OpenRA.FileSystem
 		public static string ResolveAssemblyPath(string path, Manifest manifest, InstalledMods installedMods)
 		{
 			var explicitSplit = path.IndexOf('|');
-			if (explicitSplit > 0)
+			if (explicitSplit > 0 && !path.StartsWith("^"))
 			{
 				var parent = path.Substring(0, explicitSplit);
 				var filename = path.Substring(explicitSplit + 1);
