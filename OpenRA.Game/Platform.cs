@@ -240,6 +240,12 @@ namespace OpenRA
 			if (path.StartsWith("^GameDir|", StringComparison.Ordinal))
 				path = GameDir + path.Substring(9);
 
+			if (path == "^EngineDir")
+				return EngineDir;
+
+			if (path.StartsWith("^EngineDir|", StringComparison.Ordinal))
+				path = EngineDir + path.Substring(11);
+
 			return path;
 		}
 	}
