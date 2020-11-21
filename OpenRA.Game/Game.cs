@@ -276,6 +276,10 @@ namespace OpenRA
 
 		static void Initialize(Arguments args)
 		{
+			var gameDirArg = args.GetValue("Engine.GameDir", null);
+			if (!string.IsNullOrEmpty(gameDirArg))
+				Platform.OverrideGameDir(gameDirArg);
+
 			var supportDirArg = args.GetValue("Engine.SupportDir", null);
 			if (!string.IsNullOrEmpty(supportDirArg))
 				Platform.OverrideSupportDir(supportDirArg);

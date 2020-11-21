@@ -27,6 +27,9 @@ namespace OpenRA
 
 		static Lazy<PlatformType> currentPlatform = Exts.Lazy(GetCurrentPlatform);
 
+		static bool gameDirAccessed;
+		static string gameDir;
+
 		static bool supportDirInitialized;
 		static string systemSupportPath;
 		static string legacyUserSupportPath;
@@ -170,6 +173,43 @@ namespace OpenRA
 		}
 
 		public static string GameDir
+		{
+			get
+			{
+				// Game directory defaults to the location of the engine binaries
+				// unless OverrideGameDir is called during startup.
+				if (!gameDirAccessed && gameDir == null)
+					gameDir = EngineDir;
+
+				gameDirAccessed = true;
+				return gameDir;
+			}
+		}
+
+		/// <summary>
+		/// Specify a custom support directory that already exists on the filesystem.
+		/// Cannot be called after Platform.SupportDir / GetSupportDir have been accessed.
+		/// </summary>
+		public static void OverrideGameDir(string path)
+		{
+			if (gameDirAccessed)
+				throw new InvalidOperationException("Attempted to override game directory after it has already been accessed.");
+
+			// Note: Relative paths are interpreted as being relative to EngineDir, not the current working dir.
+			if (!Path.IsPathRooted(path))
+				path = Path.Combine(EngineDir, path);
+
+			if (!Directory.Exists(path))
+				throw new DirectoryNotFoundException(path);
+
+			if (!path.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal) &&
+			    !path.EndsWith(Path.AltDirectorySeparatorChar.ToString(), StringComparison.Ordinal))
+				path += Path.DirectorySeparatorChar;
+
+			gameDir = path;
+		}
+
+		public static string EngineDir
 		{
 			get
 			{
