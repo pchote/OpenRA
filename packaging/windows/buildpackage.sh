@@ -3,6 +3,7 @@
 command -v curl >/dev/null 2>&1 || { echo >&2 "Windows packaging requires curl."; exit 1; }
 command -v makensis >/dev/null 2>&1 || { echo >&2 "Windows packaging requires makensis."; exit 1; }
 command -v convert >/dev/null 2>&1 || { echo >&2 "Windows packaging requires ImageMagick."; exit 1; }
+command -v python3 >/dev/null 2>&1 || { echo >&2 "Windows packaging requires python 3."; exit 1; }
 
 if [ $# -ne "2" ]; then
 	echo "Usage: $(basename "$0") tag outputdir"
@@ -43,12 +44,10 @@ function makelauncher()
 	cp "${SRCDIR}/bin/${LAUNCHER_NAME}.exe" "${BUILTDIR}"
 	cp "${SRCDIR}/bin/${LAUNCHER_NAME}.exe.config" "${BUILTDIR}"
 
+	# Enable the full 4GB address space for the 32 bit game executable
+	# The server and utility do not use enough memory to need this
 	if [ "${PLATFORM}" = "win-x86" ]; then
-		# Enable the full 4GB address space for the 32 bit game executable
-		# The server and utility do not use enough memory to need this
-		csc MakeLAA.cs -warn:4 -warnaserror -out:"MakeLAA.exe"
-		mono "MakeLAA.exe" "${BUILTDIR}/${LAUNCHER_NAME}.exe"
-		rm MakeLAA.exe
+		python3 MakeLAA.py "${BUILTDIR}/${LAUNCHER_NAME}.exe"
 	fi
 }
 
