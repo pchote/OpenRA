@@ -14,12 +14,21 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using SDL2;
 
 namespace OpenRA.WindowsLauncher
 {
 	class WindowsLauncher
 	{
+		[DllImport("user32.dll")]
+		static extern bool SetForegroundWindow(IntPtr hWnd);
+
+		[DllImport("user32.dll")]
+		static extern bool AllowSetForegroundWindow(int dwProcessId);
+
 		static Process gameProcess;
 		static string modID;
 		static string displayName;
@@ -63,6 +72,9 @@ namespace OpenRA.WindowsLauncher
 			}
 			catch (Exception e)
 			{
+				// We must grant permission for the launcher process to bring the error dialog to the foreground.
+				// Finding the parent process id is unreasonably difficult on Windows, so instead pass -1 to enable for all processes.
+				AllowSetForegroundWindow(-1);
 				ExceptionHandler.HandleFatalError(e);
 				return (int)RunStatus.Error;
 			}
@@ -130,6 +142,16 @@ namespace OpenRA.WindowsLauncher
 				buttons = new[] { quit, viewFaq, viewLogs },
 				numbuttons = 3
 			};
+
+			// SDL_ShowMessageBox may create the error dialog behind other windows.
+			// We want to bring it to the foreground, but can't do it from the main thread
+			// because SDL_ShowMessageBox blocks until the user presses a button.
+			// HACK: Spawn a thread to raise it to the foreground after a short delay.
+			Task.Run(() =>
+			{
+				Thread.Sleep(1000);
+				SetForegroundWindow(Process.GetCurrentProcess().MainWindowHandle);
+			});
 
 			if (SDL.SDL_ShowMessageBox(ref dialog, out var buttonid) < 0)
 				Exit();
