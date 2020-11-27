@@ -73,12 +73,13 @@ function build_platform()
 	make install-dependencies TARGETPLATFORM="${PLATFORM}" gameinstalldir="" DESTDIR="${BUILTDIR}"
 	popd > /dev/null || exit 1
 
-	cp "${SRCDIR}/bin/OpenRA.exe.config" "${BUILTDIR}"
-
 	echo "Compiling Windows launchers (${PLATFORM})"
 	makelauncher "RedAlert" "Red Alert" "ra" ${PLATFORM}
 	makelauncher "TiberianDawn" "Tiberian Dawn" "cnc" ${PLATFORM}
 	makelauncher "Dune2000" "Dune 2000" "d2k" ${PLATFORM}
+
+	# Remove redundant generic launcher
+	rm "${BUILTDIR}/OpenRA.exe"
 
 	echo "Building Windows setup.exe ($1)"
 	makensis -V2 -DSRCDIR="${BUILTDIR}" -DTAG="${TAG}" -DSUFFIX="${SUFFIX}" ${USE_PROGRAMFILES32} OpenRA.nsi
