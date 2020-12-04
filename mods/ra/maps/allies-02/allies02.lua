@@ -241,11 +241,19 @@ WorldLoaded = function()
 
 	Trigger.AfterDelay(DateTime.Seconds(1), function() Media.PlaySpeechNotification(allies, "MissionTimerInitialised") end)
 
-	RunInitialActivities()
+	--RunInitialActivities()
 
-	Reinforcements.Reinforce(player, ConstructionVehicleReinforcements, ConstructionVehiclePath)
-	Trigger.AfterDelay(DateTime.Seconds(5), SendJeepReinforcements)
-	Trigger.AfterDelay(DateTime.Seconds(10), SendJeepReinforcements)
+	--Reinforcements.Reinforce(player, ConstructionVehicleReinforcements, ConstructionVehiclePath)
+	--Trigger.AfterDelay(DateTime.Seconds(5), SendJeepReinforcements)
+	--Trigger.AfterDelay(DateTime.Seconds(10), SendJeepReinforcements)
+	local engi = Actor.Create("e6", true, { Owner = ussr, Location = CPos.New(84, 59) })
+	local unitA = Actor.Create("e1", true, { Owner = player, Location = CPos.New(87, 49)})
+	--local unitB = Actor.Create("e1", true, { Owner = player, Location = CPos.New(87, 49)})
+	--local unitC = Actor.Create("e1", true, { Owner = player, Location = CPos.New(87, 49)})
+	engi.Move(CPos.New(84, 49))
+	unitA.AttackMove(CPos.New(87, 59))
+	--unitB.AttackMove(CPos.New(87, 59))
+	--unitC.AttackMove(CPos.New(87, 59))
 
 	Trigger.OnTimerExpired(function()
 		FinishTimer()
