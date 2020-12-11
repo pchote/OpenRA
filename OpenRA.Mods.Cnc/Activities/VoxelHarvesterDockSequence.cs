@@ -20,8 +20,8 @@ namespace OpenRA.Mods.Cnc.Activities
 		readonly WithVoxelUnloadBody body;
 		readonly WithDockingOverlay spriteOverlay;
 
-		public VoxelHarvesterDockSequence(Actor self, Actor refinery, WAngle dockAngle, bool isDragRequired, WVec dragOffset, int dragLength)
-			: base(self, refinery, dockAngle, isDragRequired, dragOffset, dragLength)
+		public VoxelHarvesterDockSequence(Actor self, Actor refinery, WAngle dockAngle, WPos dockPos)
+			: base(self, refinery, dockAngle, dockPos)
 		{
 			body = self.Trait<WithVoxelUnloadBody>();
 			spriteOverlay = refinery.TraitOrDefault<WithDockingOverlay>();

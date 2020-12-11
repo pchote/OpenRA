@@ -3,14 +3,11 @@ name: Release Packaging
 on:
   push:
     tags:
-    - 'release-*'
-    - 'playtest-*'
-    - 'devtest-*'
 
 jobs:
   linux:
     name: Linux AppImages
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Clone Repository
         uses: actions/checkout@v2
@@ -64,7 +61,7 @@ jobs:
 
   windows:
     name: Windows Installers
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Clone Repository
         uses: actions/checkout@v2
@@ -72,10 +69,7 @@ jobs:
       - name: Prepare Environment
         run: |
           echo "GIT_TAG=${GITHUB_REF#refs/tags/}" >> ${GITHUB_ENV}
-          wget https://mirrors.edge.kernel.org/ubuntu/pool/universe/n/nsis/nsis-common_3.04-1_all.deb
-          wget https://mirrors.edge.kernel.org/ubuntu/pool/universe/n/nsis/nsis_3.04-1_amd64.deb
-          sudo dpkg -i nsis-common_3.04-1_all.deb
-          sudo dpkg -i nsis_3.04-1_amd64.deb
+          sudo apt install nsis
 
       - name: Package Installers
         run: |
