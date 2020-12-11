@@ -60,16 +60,16 @@ namespace OpenRA.Mods.Common.Activities
 			proc = harv.LinkedProc;
 			var iao = proc.Trait<IAcceptResources>();
 
-			if (self.Location != proc.Location + iao.DeliveryOffset)
+			var adjacent = Util.AdjacentCells(self.World, Target.FromActor(proc));
+			if (!adjacent.Contains(self.Location))
 			{
 				foreach (var n in notifyHarvesterActions)
 					n.MovingToRefinery(self, proc);
 
-				QueueChild(movement.MoveTo(proc.Location + iao.DeliveryOffset, 0));
+				QueueChild(new MoveAdjacentTo(self, Target.FromActor(proc)));
 				return false;
 			}
 
-			QueueChild(new Wait(10));
 			iao.OnDock(self, this);
 			return true;
 		}

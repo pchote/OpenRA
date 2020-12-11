@@ -20,30 +20,25 @@ namespace OpenRA.Mods.Common.Activities
 {
 	public abstract class HarvesterDockSequence : Activity
 	{
-		protected enum DockingState { Wait, Turn, Drag, Dock, Loop, Undock, Complete }
+		protected enum DockingState { Wait, Blink, Dock, Loop, Undock, Complete }
 
 		protected readonly Actor Refinery;
 		protected readonly Harvester Harv;
 		protected readonly WAngle DockAngle;
-		protected readonly bool IsDragRequired;
-		protected readonly WVec DragOffset;
-		protected readonly int DragLength;
-		protected readonly WPos StartDrag;
-		protected readonly WPos EndDrag;
+		protected readonly WPos DockPos;
+		readonly IFacing facing;
 
 		protected DockingState dockingState;
+		WAngle? preDockFacing;
 
-		public HarvesterDockSequence(Actor self, Actor refinery, WAngle dockAngle, bool isDragRequired, WVec dragOffset, int dragLength)
+		public HarvesterDockSequence(Actor self, Actor refinery, WAngle dockAngle, WPos dockPos)
 		{
-			dockingState = DockingState.Turn;
+			dockingState = DockingState.Blink;
 			Refinery = refinery;
 			DockAngle = dockAngle;
-			IsDragRequired = isDragRequired;
-			DragOffset = dragOffset;
-			DragLength = dragLength;
+			DockPos = dockPos;
 			Harv = self.Trait<Harvester>();
-			StartDrag = self.CenterPosition;
-			EndDrag = refinery.CenterPosition + DragOffset;
+			facing = self.Trait<IFacing>();
 		}
 
 		public override bool Tick(Actor self)
@@ -53,19 +48,14 @@ namespace OpenRA.Mods.Common.Activities
 				case DockingState.Wait:
 					return false;
 
-				case DockingState.Turn:
-					dockingState = DockingState.Drag;
-					QueueChild(new Turn(self, DockAngle));
-					return false;
-
-				case DockingState.Drag:
+				case DockingState.Blink:
 					if (IsCanceling || !Refinery.IsInWorld || Refinery.IsDead)
 						return true;
 
 					dockingState = DockingState.Dock;
-					if (IsDragRequired)
-						QueueChild(new Drag(self, StartDrag, EndDrag, DragLength));
-
+					self.Trait<IPositionable>().SetVisualPosition(self, DockPos);
+					preDockFacing = facing.Facing;
+					facing.Facing = DockAngle;
 					return false;
 
 				case DockingState.Dock:
@@ -89,8 +79,9 @@ namespace OpenRA.Mods.Common.Activities
 				case DockingState.Complete:
 					Harv.LastLinkedProc = Harv.LinkedProc;
 					Harv.LinkProc(self, null);
-					if (IsDragRequired)
-						QueueChild(new Drag(self, EndDrag, StartDrag, DragLength));
+					self.Trait<IPositionable>().SetVisualPosition(self, self.World.Map.CenterOfCell(self.Location));
+					if (preDockFacing.HasValue)
+						facing.Facing = preDockFacing.Value + new WAngle(512);
 
 					return true;
 			}

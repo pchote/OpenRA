@@ -9,8 +9,13 @@
  */
 #endregion
 
+using System;
+using System.Collections.Generic;
+using OpenRA.Activities;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Mods.Common.Traits.Render;
+using OpenRA.Primitives;
+using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Activities
 {
@@ -20,8 +25,8 @@ namespace OpenRA.Mods.Common.Activities
 		readonly WithDockingAnimationInfo wda;
 		protected bool dockAnimPlayed;
 
-		public SpriteHarvesterDockSequence(Actor self, Actor refinery, WAngle dockAngle, bool isDragRequired, WVec dragOffset, int dragLength)
-			: base(self, refinery, dockAngle, isDragRequired, dragOffset, dragLength)
+		public SpriteHarvesterDockSequence(Actor self, Actor refinery, WAngle dockAngle, WPos dockOffset)
+			: base(self, refinery, dockAngle, dockOffset)
 		{
 			wsb = self.Trait<WithSpriteBody>();
 			wda = self.Info.TraitInfo<WithDockingAnimationInfo>();
