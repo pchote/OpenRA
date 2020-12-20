@@ -66,7 +66,7 @@ install_assemblies_mono() {
 	fi
 
 	# Managed Dependencies
-	for LIB in ICSharpCode.SharpZipLib.dll FuzzyLogicLibrary.dll Open.Nat.dll BeaconLib.dll DiscordRPC.dll Newtonsoft.Json.dll SDL2-CS.dll OpenAL-CS.Core.dll Eluant.dll; do
+	for LIB in ICSharpCode.SharpZipLib.dll FuzzyLogicLibrary.dll Open.Nat.dll BeaconLib.dll DiscordRPC.dll Newtonsoft.Json.dll SDL2-CS.dll OpenAL-CS.Core.dll Eluant.dll System.Net.Http.dll; do
 		install -m644 "${SRC_PATH}/bin/${LIB}" "${DEST_PATH}"
 	done
 

@@ -11,8 +11,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Net;
+using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using BeaconLib;
 using OpenRA.Network;
 using OpenRA.Server;
@@ -35,12 +36,14 @@ namespace OpenRA.Mods.Common.Server
 			{ 2, "Server name contains a blacklisted word." }
 		};
 
+		static readonly HttpClient Client = new HttpClient();
+
 		long lastPing = 0;
 		long lastChanged = 0;
 		bool isInitialPing = true;
 
 		volatile bool isBusy;
-		Queue<string> masterServerMessages = new Queue<string>();
+		readonly Queue<string> masterServerMessages = new Queue<string>();
 
 		static MasterServerPinger()
 		{
@@ -107,47 +110,45 @@ namespace OpenRA.Mods.Common.Server
 		{
 			isBusy = true;
 
-			Action a = () =>
+			Task.Run(async () =>
 			{
 				try
 				{
 					var endpoint = server.ModData.Manifest.Get<WebServices>().ServerAdvertise;
-					using (var wc = new WebClient())
+					var response = await Client.PostAsync(endpoint, new StringContent(postData));
+
+					var masterResponseText = await response.Content.ReadAsStringAsync();
+
+					if (isInitialPing)
 					{
-						wc.Proxy = null;
-						var masterResponseText = wc.UploadString(endpoint, postData);
+						Log.Write("server", "Master server: " + masterResponseText);
+						var errorCode = 0;
+						var errorMessage = string.Empty;
 
-						if (isInitialPing)
+						if (!string.IsNullOrWhiteSpace(masterResponseText))
 						{
-							Log.Write("server", "Master server: " + masterResponseText);
-							var errorCode = 0;
-							var errorMessage = string.Empty;
+							var regex = new Regex(@"^\[(?<code>-?\d+)\](?<message>.*)");
+							var match = regex.Match(masterResponseText);
+							errorMessage = match.Success && int.TryParse(match.Groups["code"].Value, out errorCode) ?
+								match.Groups["message"].Value.Trim() : "Failed to parse error message";
+						}
 
-							if (masterResponseText.Length > 0)
+						isInitialPing = false;
+						lock (masterServerMessages)
+						{
+							masterServerMessages.Enqueue("Master server communication established.");
+							if (errorCode != 0)
 							{
-								var regex = new Regex(@"^\[(?<code>-?\d+)\](?<message>.*)");
-								var match = regex.Match(masterResponseText);
-								errorMessage = match.Success && int.TryParse(match.Groups["code"].Value, out errorCode) ?
-									match.Groups["message"].Value.Trim() : "Failed to parse error message";
-							}
+								// Hardcoded error messages take precedence over the server-provided messages
+								if (!MasterServerErrors.TryGetValue(errorCode, out var message))
+									message = errorMessage;
 
-							isInitialPing = false;
-							lock (masterServerMessages)
-							{
-								masterServerMessages.Enqueue("Master server communication established.");
-								if (errorCode != 0)
-								{
-									// Hardcoded error messages take precedence over the server-provided messages
-									if (!MasterServerErrors.TryGetValue(errorCode, out var message))
-										message = errorMessage;
+								masterServerMessages.Enqueue("Warning: " + message);
 
-									masterServerMessages.Enqueue("Warning: " + message);
-
-									// Positive error codes indicate errors that prevent advertisement
-									// Negative error codes are non-fatal warnings
-									if (errorCode > 0)
-										masterServerMessages.Enqueue("Game has not been advertised online.");
-								}
+								// Positive error codes indicate errors that prevent advertisement
+								// Negative error codes are non-fatal warnings
+								if (errorCode > 0)
+									masterServerMessages.Enqueue("Game has not been advertised online.");
 							}
 						}
 					}
@@ -160,9 +161,7 @@ namespace OpenRA.Mods.Common.Server
 				}
 
 				isBusy = false;
-			};
-
-			a.BeginInvoke(null, null);
+			});
 		}
 	}
 }
