@@ -267,7 +267,7 @@ finalize_package() {
 }
 
 build_platform "standard" "build.dmg"
-build_platform "compat" "build-compat.dmg"
+#build_platform "compat" "build-compat.dmg"
 
 if [ -n "${MACOS_DEVELOPER_CERTIFICATE_BASE64}" ] && [ -n "${MACOS_DEVELOPER_CERTIFICATE_PASSWORD}" ] && [ -n "${MACOS_DEVELOPER_IDENTITY}" ]; then
 	security delete-keychain build.keychain
@@ -276,9 +276,9 @@ fi
 if [ -n "${MACOS_DEVELOPER_USERNAME}" ] && [ -n "${MACOS_DEVELOPER_PASSWORD}" ]; then
 	# Parallelize processing
 	(notarize_package "build.dmg") &
-	(notarize_package "build-compat.dmg") &
+	#(notarize_package "build-compat.dmg") &
 	wait
 fi
 
 finalize_package "build.dmg" "${OUTPUTDIR}/OpenRA-${TAG}.dmg"
-finalize_package "build-compat.dmg" "${OUTPUTDIR}/OpenRA-${TAG}-compat.dmg"
+#finalize_package "build-compat.dmg" "${OUTPUTDIR}/OpenRA-${TAG}-compat.dmg"
