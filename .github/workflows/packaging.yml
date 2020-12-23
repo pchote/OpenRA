@@ -16,7 +16,9 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Prepare Environment
-        run: echo "GIT_TAG=${GITHUB_REF#refs/tags/}" >> ${GITHUB_ENV}
+        run: |
+          echo "GIT_TAG=${GITHUB_REF#refs/tags/}" >> ${GITHUB_ENV}
+          dotnet nuget locals all --clear
 
       - name: Package AppImages
         run: |
@@ -40,7 +42,9 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Prepare Environment
-        run: echo "GIT_TAG=${GITHUB_REF#refs/tags/}" >> ${GITHUB_ENV}
+        run: |
+          echo "GIT_TAG=${GITHUB_REF#refs/tags/}" >> ${GITHUB_ENV}
+          dotnet nuget locals all --clear
 
       - name: Package Disk Images
         env:
@@ -72,6 +76,7 @@ jobs:
       - name: Prepare Environment
         run: |
           echo "GIT_TAG=${GITHUB_REF#refs/tags/}" >> ${GITHUB_ENV}
+          dotnet nuget locals all --clear
           sudo apt install nsis wine64
 
       - name: Package Installers

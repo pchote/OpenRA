@@ -16,6 +16,7 @@ jobs:
 
       - name: Check Code
         run: |
+          dotnet nuget locals all --clear
           mono --version
           make check
 
