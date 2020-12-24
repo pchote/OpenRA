@@ -106,7 +106,7 @@ build_app() {
 
 	# Sign binaries with developer certificate
 	if [ -n "${MACOS_DEVELOPER_IDENTITY}" ]; then
-		codesign -s "${MACOS_DEVELOPER_IDENTITY}" --timestamp --options runtime -f --entitlements entitlements.plist --deep "${LAUNCHER_DIR}"
+		codesign -s "${MACOS_DEVELOPER_IDENTITY}" --timestamp --options runtime -f --entitlements entitlements.plist "${LAUNCHER_DIR}"
 	fi
 }
 
