@@ -35,6 +35,13 @@ Container@LOBBY_PLAYER_BIN:
 					Text: Team
 					Align: Center
 					Font: Bold
+				Label@HANDICAP:
+					X: 491
+					Width: 75
+					Height: 25
+					Text: Handicap
+					Align: Center
+					Font: Bold
 				Label@SPAWN:
 					X: 571
 					Width: 50
@@ -140,6 +147,11 @@ Container@LOBBY_PLAYER_BIN:
 						DropDownButton@TEAM_DROPDOWN:
 							X: 435
 							Width: 50
+							Height: 25
+							Font: Regular
+						DropDownButton@HANDICAP_DROPDOWN:
+							X: 491
+							Width: 75
 							Height: 25
 							Font: Regular
 						DropDownButton@SPAWN_DROPDOWN:
@@ -252,6 +264,16 @@ Container@LOBBY_PLAYER_BIN:
 							Height: 25
 							Font: Regular
 							Visible: false
+						Label@HANDICAP:
+							X: 491
+							Width: 50
+							Height: 25
+							Align: Center
+						DropDownButton@HANDICAP_DROPDOWN:
+							X: 491
+							Width: 75
+							Height: 25
+							Font: Regular
 						Label@SPAWN:
 							X: 571
 							Width: 25
