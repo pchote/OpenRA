@@ -166,6 +166,10 @@ ServerTraits:
 	PlayerPinger
 	MasterServerPinger
 	LobbySettingsNotification
+	AddRegisteredClientTooltip
+
+QueryRegisteredClientTooltip:
+	Endpoint: http://oraladder.net/player-miniyaml/
 
 ChromeMetrics:
 	common|metrics.yaml
