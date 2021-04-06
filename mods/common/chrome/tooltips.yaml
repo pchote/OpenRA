@@ -223,6 +223,20 @@ Background@REGISTERED_PLAYER_TOOLTIP:
 							Width: PARENT_RIGHT - 14
 							Height: 23
 							Font: Bold
+		Container@SERVER_CONTAINER:
+			Width: PARENT_RIGHT
+			Visible: false
+			Children:
+				Background@SEPARATOR:
+					X: 10
+					Height: 1
+					Background: tooltip-separator
+				LabelWithHighlight@LINE:
+					X: 7
+					Y: 3
+					Width: PARENT_RIGHT - 14
+					Height: 16
+					Font: TinyBold
 		Container@BADGES_CONTAINER:
 			Width: PARENT_RIGHT
 			Visible: false
