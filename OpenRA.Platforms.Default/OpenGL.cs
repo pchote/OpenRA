@@ -15,7 +15,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
-using SDL2;
+using GLFW;
 
 namespace OpenRA.Platforms.Default
 {
@@ -490,7 +490,7 @@ namespace OpenRA.Platforms.Default
 				glGetStringiInternal = Bind<GetStringi>("glGetStringi");
 				glGetIntegerv = Bind<GetIntegerv>("glGetIntegerv");
 			}
-			catch (Exception e)
+			catch (System.Exception e)
 			{
 				throw new InvalidProgramException("Failed to initialize low-level OpenGL bindings. GPU information is not available.", e);
 			}
@@ -537,7 +537,7 @@ namespace OpenRA.Platforms.Default
 					DebugMessageHandle = DebugMessageHandler;
 					glDebugMessageCallback(DebugMessageHandle, IntPtr.Zero);
 				}
-				catch (Exception e)
+				catch (System.Exception e)
 				{
 					throw new InvalidProgramException("Failed to initialize an OpenGL debug message callback.", e);
 				}
@@ -644,7 +644,7 @@ namespace OpenRA.Platforms.Default
 					glCheckFramebufferStatus = Bind<CheckFramebufferStatus>("glCheckFramebufferStatusEXT");
 				}
 			}
-			catch (Exception e)
+			catch (System.Exception e)
 			{
 				WriteGraphicsLog("Failed to initialize OpenGL bindings.\nInner exception was: {0}".F(e));
 				throw new InvalidProgramException("Failed to initialize OpenGL. See graphics.log for details.", e);
@@ -653,7 +653,7 @@ namespace OpenRA.Platforms.Default
 
 		static T Bind<T>(string name)
 		{
-			return (T)(object)Marshal.GetDelegateForFunctionPointer(SDL.SDL_GL_GetProcAddress(name), typeof(T));
+			return (T)(object)Marshal.GetDelegateForFunctionPointer(Glfw.GetProcAddress(name), typeof(T));
 		}
 
 		public static bool DetectGLFeatures(bool preferLegacyProfile)
@@ -675,12 +675,12 @@ namespace OpenRA.Platforms.Default
 				}
 
 				// Core features are defined as the shared feature set of GL 3.2 and (GLES 3 + BGRA extension)
-				var hasBGRA = SDL.SDL_GL_ExtensionSupported("GL_EXT_texture_format_BGRA8888") == SDL.SDL_bool.SDL_TRUE;
+				var hasBGRA = Glfw.GetExtensionSupported("GL_EXT_texture_format_BGRA8888");
 				if (Version.Contains(" ES") && hasBGRA && major >= 3)
 				{
 					hasValidConfiguration = true;
 					Profile = GLProfile.Embedded;
-					if (SDL.SDL_GL_ExtensionSupported("GL_EXT_read_format_bgra") == SDL.SDL_bool.SDL_TRUE)
+					if (Glfw.GetExtensionSupported("GL_EXT_read_format_bgra"))
 						Features |= GLFeatures.ESReadFormatBGRA;
 				}
 				else if (major > 3 || (major == 3 && minor >= 2))
@@ -690,20 +690,19 @@ namespace OpenRA.Platforms.Default
 				}
 
 				// Debug callbacks were introduced in GL 4.3
-				var hasDebugMessagesCallback = SDL.SDL_GL_ExtensionSupported("GL_KHR_debug") == SDL.SDL_bool.SDL_TRUE;
-				if (hasDebugMessagesCallback)
+				if (Glfw.GetExtensionSupported("GL_KHR_debug"))
 					Features |= GLFeatures.DebugMessagesCallback;
 
 				if (preferLegacyProfile || (major == 2 && minor == 1) || (major == 3 && minor < 2))
 				{
-					if (SDL.SDL_GL_ExtensionSupported("GL_EXT_framebuffer_object") == SDL.SDL_bool.SDL_TRUE)
+					if (Glfw.GetExtensionSupported("GL_EXT_framebuffer_object"))
 					{
 						hasValidConfiguration = true;
 						Profile = GLProfile.Legacy;
 					}
 				}
 			}
-			catch (Exception) { }
+			catch (System.Exception) { }
 
 			return hasValidConfiguration;
 		}

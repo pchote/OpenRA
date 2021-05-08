@@ -12,17 +12,51 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
-using SDL2;
+using GLFW;
 
 namespace OpenRA.Platforms.Default
 {
 	class Sdl2Input
 	{
-		MouseButton lastButtonBits = MouseButton.None;
+		// MouseButton lastButtonBits = MouseButton.None;
 
-		public string GetClipboardText() { return SDL.SDL_GetClipboardText(); }
-		public bool SetClipboardText(string text) { return SDL.SDL_SetClipboardText(text) == 0; }
+		readonly Sdl2PlatformWindow device;
+		public Sdl2Input(Sdl2PlatformWindow device)
+		{
+			this.device = device;
 
+			Glfw.SetCloseCallback(device.Window, CloseCallback);
+			//Glfw.SetWindowMaximizeCallback(device.Window, WindowMaximized);
+			//Glfw.SetWindowIconifyCallback(device.Window, WindowMinimized);
+			//Glfw.SetWindowFocusCallback(device.Window, FocusCallback);
+		}
+
+		void CloseCallback(IntPtr window)
+		{
+			Game.Exit();
+		}
+
+		void FocusCallback(IntPtr window, bool focusing)
+		{
+			device.HasInputFocus = focusing;
+		}
+
+		void WindowMaximized(IntPtr window, bool maximized)
+		{
+			if (maximized)
+				device.IsSuspended = false;
+		}
+
+		void WindowMinimized(IntPtr window, bool minimized)
+		{
+			if (minimized)
+				device.IsSuspended = true;
+		}
+
+		public string GetClipboardText() { return Glfw.GetClipboardString(device.Window); }
+		public void SetClipboardText(string text) { Glfw.SetClipboardString(device.Window, text); }
+
+		/*
 		static MouseButton MakeButton(byte b)
 		{
 			return b == SDL.SDL_BUTTON_LEFT ? MouseButton.Left
@@ -61,8 +95,12 @@ namespace OpenRA.Platforms.Default
 			return new int2(x, y);
 		}
 
+		*/
+
 		public void PumpInput(Sdl2PlatformWindow device, IInputHandler inputHandler, int2? lockedMousePosition)
 		{
+			Glfw.PollEvents();
+			/*
 			var mods = MakeModifiers((int)SDL.SDL_GetModState());
 			inputHandler.ModifierKeys(mods);
 			MouseInput? pendingMotion = null;
@@ -225,6 +263,7 @@ namespace OpenRA.Platforms.Default
 				inputHandler.OnMouseInput(pendingMotion.Value);
 				pendingMotion = null;
 			}
+			*/
 		}
 	}
 }

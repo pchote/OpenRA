@@ -11,35 +11,35 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
+using GLFW;
 using OpenRA.Primitives;
-using SDL2;
 
 namespace OpenRA.Platforms.Default
 {
 	sealed class Sdl2PlatformWindow : ThreadAffine, IPlatformWindow
 	{
-		readonly IGraphicsContext context;
+		readonly IGraphicsContext context = null;
 		readonly Sdl2Input input;
 
 		public IGraphicsContext Context => context;
 
-		readonly IntPtr window;
+		readonly Window window;
 		bool disposed;
 
 		readonly object syncObject = new object();
 		Size windowSize;
 		Size surfaceSize;
 		float windowScale = 1f;
+
 		int2? lockedMousePosition;
 		float scaleModifier;
 		readonly GLProfile profile;
 		readonly GLProfile[] supportedProfiles;
 
-		internal IntPtr Window
+		internal Window Window
 		{
 			get
 			{
@@ -93,9 +93,9 @@ namespace OpenRA.Platforms.Default
 			}
 		}
 
-		public int CurrentDisplay => SDL.SDL_GetWindowDisplayIndex(window);
+		public int CurrentDisplay => Glfw.Monitors.IndexOf(Glfw.GetWindowMonitor(window));
 
-		public int DisplayCount => SDL.SDL_GetNumVideoDisplays();
+		public int DisplayCount => Glfw.Monitors.Length;
 
 		public bool HasInputFocus { get; internal set; }
 
@@ -136,6 +136,7 @@ namespace OpenRA.Platforms.Default
 				if (Platform.CurrentPlatform == PlatformType.Windows)
 					SetProcessDPIAware();
 
+				/*
 				// Decide which OpenGL profile to use.
 				// Prefer standard GL over GLES provided by the native driver
 				var testProfiles = new List<GLProfile> { GLProfile.ANGLE, GLProfile.Modern, GLProfile.Embedded };
@@ -150,17 +151,23 @@ namespace OpenRA.Platforms.Default
 					throw new InvalidOperationException("No supported OpenGL profiles were found.");
 
 				profile = supportedProfiles.Contains(requestProfile) ? requestProfile : supportedProfiles.First();
+				*/
+
+				supportedProfiles = new [] { GLProfile.Modern };
+				profile = GLProfile.Modern;
 
 				// Note: This must be called after the CanCreateGLWindow checks above,
 				// which needs to create and destroy its own SDL contexts as a workaround for specific buggy drivers
-				SDL.SDL_Init(SDL.SDL_INIT_VIDEO);
+				if (!Glfw.Init())
+					throw new InvalidOperationException("Failed to initialized GLFW.");
+
 				SetSDLAttributes(profile);
 
 				Console.WriteLine("Using SDL 2 with OpenGL ({0}) renderer", profile);
 				if (videoDisplay < 0 || videoDisplay >= DisplayCount)
 					videoDisplay = 0;
 
-				SDL.SDL_GetCurrentDisplayMode(videoDisplay, out var display);
+				var display = Glfw.Monitors[videoDisplay];
 
 				// Windows and Linux define window sizes in native pixel units.
 				// Query the display/dpi scale so we can convert our requested effective size to pixels.
@@ -171,8 +178,7 @@ namespace OpenRA.Platforms.Default
 					// Otherwise fall back to Windows's DPI configuration
 					var scaleVariable = Environment.GetEnvironmentVariable("OPENRA_DISPLAY_SCALE");
 					if (scaleVariable == null || !float.TryParse(scaleVariable, NumberStyles.Float, NumberFormatInfo.InvariantInfo, out windowScale) || windowScale <= 0)
-						if (SDL.SDL_GetDisplayDPI(videoDisplay, out var ddpi, out _, out _) == 0)
-							windowScale = ddpi / 96;
+						windowScale = display.ContentScale.X;
 				}
 				else if (Platform.CurrentPlatform == PlatformType.Linux)
 				{
@@ -180,48 +186,39 @@ namespace OpenRA.Platforms.Default
 					// Otherwise fall back to GDK_SCALE or parsing the x11 DPI configuration
 					var scaleVariable = Environment.GetEnvironmentVariable("OPENRA_DISPLAY_SCALE") ?? Environment.GetEnvironmentVariable("GDK_SCALE");
 					if (scaleVariable == null || !float.TryParse(scaleVariable, NumberStyles.Float, NumberFormatInfo.InvariantInfo, out windowScale) || windowScale <= 0)
-					{
-						// Attempt to automatically detect DPI
-						try
-						{
-							var psi = new ProcessStartInfo("/usr/bin/xrdb", "-query");
-							psi.UseShellExecute = false;
-							psi.RedirectStandardOutput = true;
-							var p = Process.Start(psi);
-							var lines = p.StandardOutput.ReadToEnd().Split('\n');
-
-							foreach (var line in lines)
-								if (line.StartsWith("Xft.dpi") && int.TryParse(line.Substring(8), out var dpi))
-									windowScale = dpi / 96f;
-						}
-						catch { }
-					}
+						windowScale = display.ContentScale.X;
 				}
 
-				Console.WriteLine("Desktop resolution: {0}x{1}", display.w, display.h);
+				Console.WriteLine("Desktop resolution: {0}x{1}", display.WorkArea.Width, display.WorkArea.Height);
 				if (requestEffectiveWindowSize.Width == 0 && requestEffectiveWindowSize.Height == 0)
 				{
 					Console.WriteLine("No custom resolution provided, using desktop resolution");
-					surfaceSize = windowSize = new Size(display.w, display.h);
+					surfaceSize = windowSize = new Size(display.WorkArea.Width, display.WorkArea.Height);
 				}
 				else
 					surfaceSize = windowSize = new Size((int)(requestEffectiveWindowSize.Width * windowScale), (int)(requestEffectiveWindowSize.Height * windowScale));
 
 				Console.WriteLine("Using resolution: {0}x{1}", windowSize.Width, windowSize.Height);
 
-				var windowFlags = SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI;
-
 				// HiDPI doesn't work properly on OSX with (legacy) fullscreen mode
 				if (Platform.CurrentPlatform == PlatformType.OSX && windowMode == WindowMode.Fullscreen)
-					SDL.SDL_SetHint(SDL.SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
+					Glfw.WindowHint(Hint.CocoaRetinaFrameBuffer, false);
 
-				window = SDL.SDL_CreateWindow("OpenRA", SDL.SDL_WINDOWPOS_CENTERED_DISPLAY(videoDisplay), SDL.SDL_WINDOWPOS_CENTERED_DISPLAY(videoDisplay),
-					windowSize.Width, windowSize.Height, windowFlags);
+				// TODO: Handle fullscreen monitors
+				Glfw.WindowHint(Hint.Visible, true);
+				window = Glfw.CreateWindow(windowSize.Width, windowSize.Height, "OpenRA", Monitor.None, Window.None);
+
+				var screenSize = Glfw.PrimaryMonitor.WorkArea;
+				var x = (screenSize.Width - windowSize.Width) / 2;
+				var y = (screenSize.Height - windowSize.Height) / 2;
+				Glfw.SetWindowPosition(window, x, y);
 
 				// Work around an issue in macOS's GL backend where the window remains permanently black
 				// (if dark mode is enabled) unless we drain the event queue before initializing GL
 				if (Platform.CurrentPlatform == PlatformType.OSX)
 				{
+					Glfw.PollEvents();
+					/*
 					while (SDL.SDL_PollEvent(out var e) != 0)
 					{
 						// We can safely ignore all mouse/keyboard events and window size changes
@@ -240,10 +237,12 @@ namespace OpenRA.Platforms.Default
 							}
 						}
 					}
+					*/
 				}
 
 				// Enable high resolution rendering for Retina displays
-				if (Platform.CurrentPlatform == PlatformType.OSX)
+				/*
+				if (false && Platform.CurrentPlatform == PlatformType.OSX)
 				{
 					// OSX defines the window size in "points", with a device-dependent number of pixels per point.
 					// The window scale is simply the ratio of GL pixels / window points.
@@ -252,7 +251,8 @@ namespace OpenRA.Platforms.Default
 					windowScale = width * 1f / windowSize.Width;
 				}
 				else
-					windowSize = new Size((int)(surfaceSize.Width / windowScale), (int)(surfaceSize.Height / windowScale));
+				*/
+				windowSize = new Size((int)(surfaceSize.Width / windowScale), (int)(surfaceSize.Height / windowScale));
 
 				Console.WriteLine("Using window scale {0:F2}", windowScale);
 
@@ -261,6 +261,7 @@ namespace OpenRA.Platforms.Default
 				else
 					ReleaseWindowMouseFocus();
 
+				/*
 				if (windowMode == WindowMode.Fullscreen)
 				{
 					SDL.SDL_SetWindowFullscreen(Window, (uint)SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN);
@@ -283,26 +284,14 @@ namespace OpenRA.Platforms.Default
 					SDL.SDL_SetWindowFullscreen(Window, (uint)SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN_DESKTOP);
 					SDL.SDL_SetHint(SDL.SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
 				}
+				*/
 			}
 
-			// Run graphics rendering on a dedicated thread.
-			// The calling thread will then have more time to process other tasks, since rendering happens in parallel.
-			// If the calling thread is the main game thread, this means it can run more logic and render ticks.
-			// This is disabled on Windows because it breaks the ability to minimize/restore the window from the taskbar for reasons that we dont understand.
-			var threadedRenderer = Platform.CurrentPlatform != PlatformType.Windows || !Game.Settings.Graphics.DisableWindowsRenderThread;
-			if (!threadedRenderer)
-			{
-				var ctx = new Sdl2GraphicsContext(this);
-				ctx.InitializeOpenGL();
-				context = ctx;
-			}
-			else
-				context = new ThreadedGraphicsContext(new Sdl2GraphicsContext(this), batchSize);
+			context = new ThreadedGraphicsContext(new Sdl2GraphicsContext(this), batchSize);
 
 			context.SetVSyncEnabled(Game.Settings.Graphics.VSync);
 
-			SDL.SDL_SetModState(SDL.SDL_Keymod.KMOD_NONE);
-			input = new Sdl2Input();
+			input = new Sdl2Input(this);
 		}
 
 		byte[] DoublePixelData(byte[] data, Size size)
@@ -326,6 +315,8 @@ namespace OpenRA.Platforms.Default
 		public IHardwareCursor CreateHardwareCursor(string name, Size size, byte[] data, int2 hotspot, bool pixelDouble)
 		{
 			VerifyThreadAffinity();
+			throw new Sdl2HardwareCursorException("not implemented");
+			/*
 			try
 			{
 				// Pixel double the cursor on non-OSX if the window scale is large enough
@@ -347,14 +338,16 @@ namespace OpenRA.Platforms.Default
 
 				return new Sdl2HardwareCursor(size, data, hotspot);
 			}
-			catch (Exception ex)
+			catch (System.Exception ex)
 			{
 				throw new Sdl2HardwareCursorException("Failed to create hardware cursor `{0}` - {1}".F(name, ex.Message), ex);
 			}
+			*/
 		}
 
 		public void SetHardwareCursor(IHardwareCursor cursor)
 		{
+			/*
 			VerifyThreadAffinity();
 			if (cursor is Sdl2HardwareCursor c)
 			{
@@ -363,19 +356,20 @@ namespace OpenRA.Platforms.Default
 			}
 			else
 				SDL.SDL_ShowCursor((int)SDL.SDL_bool.SDL_FALSE);
+			*/
 		}
 
 		public void SetRelativeMouseMode(bool mode)
 		{
 			if (mode)
 			{
-				SDL.SDL_GetMouseState(out var x, out var y);
-				lockedMousePosition = new int2(x, y);
+				Glfw.GetCursorPosition(window, out var x, out var y);
+				lockedMousePosition = new int2((int)x, (int)y);
 			}
 			else
 			{
 				if (lockedMousePosition.HasValue)
-					SDL.SDL_WarpMouseInWindow(window, lockedMousePosition.Value.X, lockedMousePosition.Value.Y);
+					Glfw.SetCursorPosition(window, lockedMousePosition.Value.X, lockedMousePosition.Value.Y);
 
 				lockedMousePosition = null;
 			}
@@ -383,6 +377,7 @@ namespace OpenRA.Platforms.Default
 
 		internal void WindowSizeChanged()
 		{
+			/*
 			// The ratio between pixels and points can change when moving between displays in OSX
 			// We need to recalculate our scale to account for the potential change in the actual rendered area
 			if (Platform.CurrentPlatform == PlatformType.OSX)
@@ -402,6 +397,7 @@ namespace OpenRA.Platforms.Default
 					OnWindowScaleChanged(oldScale, oldScale * scaleModifier, windowScale, windowScale * scaleModifier);
 				}
 			}
+			*/
 		}
 
 		public void Dispose()
@@ -413,22 +409,26 @@ namespace OpenRA.Platforms.Default
 
 			context?.Dispose();
 
-			if (Window != IntPtr.Zero)
-				SDL.SDL_DestroyWindow(Window);
-
-			SDL.SDL_Quit();
+			// TODO: handle window destruction...
+			// if (window != null)
+			// 	Glfw.DestroyWindow(window);
+			Glfw.Terminate();
 		}
 
 		public void GrabWindowMouseFocus()
 		{
+			/*
 			VerifyThreadAffinity();
 			SDL.SDL_SetWindowGrab(Window, SDL.SDL_bool.SDL_TRUE);
+			*/
 		}
 
 		public void ReleaseWindowMouseFocus()
 		{
+			/*
 			VerifyThreadAffinity();
 			SDL.SDL_SetWindowGrab(Window, SDL.SDL_bool.SDL_FALSE);
+			*/
 		}
 
 		public void PumpInput(IInputHandler inputHandler)
@@ -436,8 +436,10 @@ namespace OpenRA.Platforms.Default
 			VerifyThreadAffinity();
 			input.PumpInput(this, inputHandler, lockedMousePosition);
 
+			/*
 			if (lockedMousePosition.HasValue)
 				SDL.SDL_WarpMouseInWindow(window, lockedMousePosition.Value.X, lockedMousePosition.Value.Y);
+			*/
 		}
 
 		public string GetClipboardText()
@@ -449,79 +451,83 @@ namespace OpenRA.Platforms.Default
 		public bool SetClipboardText(string text)
 		{
 			VerifyThreadAffinity();
-			return input.SetClipboardText(text);
+			input.SetClipboardText(text);
+			return true;
 		}
 
 		static void SetSDLAttributes(GLProfile profile)
 		{
-			SDL.SDL_GL_ResetAttributes();
-			SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_DOUBLEBUFFER, 1);
-			SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_RED_SIZE, 8);
-			SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_GREEN_SIZE, 8);
-			SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_BLUE_SIZE, 8);
-			SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_ALPHA_SIZE, 0);
-
-			var useAngle = profile == GLProfile.ANGLE ? "1" : "0";
-			SDL.SDL_SetHint("SDL_OPENGL_ES_DRIVER", useAngle);
+			Glfw.DefaultWindowHints();
+			Glfw.WindowHint(Hint.Doublebuffer, true);
+			Glfw.WindowHint(Hint.Decorated, true);
+			Glfw.WindowHint(Hint.RedBits, 8);
+			Glfw.WindowHint(Hint.GreenBits, 8);
+			Glfw.WindowHint(Hint.BlueBits, 8);
+			Glfw.WindowHint(Hint.AlphaBits, 8);
+			Glfw.WindowHint(Hint.CocoaRetinaFrameBuffer, true);
 
 			switch (profile)
 			{
 				case GLProfile.Modern:
-					SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-					SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, 2);
-					SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_PROFILE_MASK, (int)SDL.SDL_GLprofile.SDL_GL_CONTEXT_PROFILE_CORE);
+					Glfw.WindowHint(Hint.ContextVersionMajor, 3);
+					Glfw.WindowHint(Hint.ContextVersionMinor, 2);
+					Glfw.WindowHint(Hint.OpenglProfile, Profile.Core);
+					Glfw.WindowHint(Hint.OpenglForwardCompatible, true);
+					Glfw.WindowHint(Hint.ClientApi, ClientApi.OpenGL);
 					break;
 				case GLProfile.ANGLE:
 				case GLProfile.Embedded:
-					SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-					SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, 0);
-					SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_PROFILE_MASK, (int)SDL.SDL_GLprofile.SDL_GL_CONTEXT_PROFILE_ES);
+					Glfw.WindowHint(Hint.ContextVersionMajor, 3);
+					Glfw.WindowHint(Hint.ContextVersionMinor, 0);
+					Glfw.WindowHint(Hint.OpenglForwardCompatible, true);
+					Glfw.WindowHint(Hint.ClientApi, ClientApi.OpenGLES);
 					break;
 				case GLProfile.Legacy:
-					SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-					SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, 1);
+					Glfw.WindowHint(Hint.ContextVersionMajor, 2);
+					Glfw.WindowHint(Hint.ContextVersionMinor, 1);
+					Glfw.WindowHint(Hint.OpenglProfile, Profile.Compatibility);
+					Glfw.WindowHint(Hint.ClientApi, ClientApi.OpenGL);
 					break;
 			}
 		}
 
 		static bool CanCreateGLWindow(GLProfile profile)
 		{
+			if ((profile == GLProfile.Embedded || profile == GLProfile.ANGLE) && Platform.CurrentPlatform == PlatformType.OSX)
+				return false;
+
 			// Implementation inspired by TestIndividualGLVersion from Veldrid
 
 			// Need to create and destroy its own SDL contexts as a workaround for specific buggy drivers
-			SDL.SDL_Init(SDL.SDL_INIT_VIDEO);
-			SetSDLAttributes(profile);
+			if (!Glfw.Init())
+				return false;
 
-			var flags = SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN | SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL;
-			var window = SDL.SDL_CreateWindow("", 0, 0, 1, 1, flags);
-			if (window == IntPtr.Zero || !string.IsNullOrEmpty(SDL.SDL_GetError()))
+			try
 			{
-				SDL.SDL_ClearError();
-				SDL.SDL_Quit();
+				SetSDLAttributes(profile);
+				Glfw.WindowHint(Hint.Visible, false);
+				var window = Glfw.CreateWindow(1, 1, "", Monitor.None, GLFW.Window.None);
+				Glfw.MakeContextCurrent(window);
+
+				// Distinguish between ANGLE and native GLES
+				var success = true;
+				if (profile == GLProfile.ANGLE || profile == GLProfile.Embedded)
+					success = Glfw.GetExtensionSupported("GL_ANGLE_texture_usage") ^ (profile != GLProfile.ANGLE);
+
+				// TODO: delete context?
+				Glfw.DestroyWindow(window);
+				Glfw.Terminate();
+
+				return success;
+			}
+			catch (GLFW.Exception)
+			{
 				return false;
 			}
-
-			var context = SDL.SDL_GL_CreateContext(window);
-			if (context == IntPtr.Zero || SDL.SDL_GL_MakeCurrent(window, context) < 0)
+			catch (System.Exception)
 			{
-				SDL.SDL_ClearError();
-				SDL.SDL_DestroyWindow(window);
-				SDL.SDL_Quit();
 				return false;
 			}
-
-			// Distinguish between ANGLE and native GLES
-			var success = true;
-			if (profile == GLProfile.ANGLE || profile == GLProfile.Embedded)
-			{
-				var isAngle = SDL.SDL_GL_ExtensionSupported("GL_ANGLE_texture_usage") == SDL.SDL_bool.SDL_TRUE;
-				success = isAngle ^ (profile != GLProfile.ANGLE);
-			}
-
-			SDL.SDL_GL_DeleteContext(context);
-			SDL.SDL_DestroyWindow(window);
-			SDL.SDL_Quit();
-			return success;
 		}
 
 		public void SetScaleModifier(float scale)

@@ -12,7 +12,7 @@
 using System;
 using OpenRA.Graphics;
 using OpenRA.Primitives;
-using SDL2;
+using GLFW;
 
 namespace OpenRA.Platforms.Default
 {
@@ -20,7 +20,6 @@ namespace OpenRA.Platforms.Default
 	{
 		readonly Sdl2PlatformWindow window;
 		bool disposed;
-		IntPtr context;
 
 		public Sdl2GraphicsContext(Sdl2PlatformWindow window)
 		{
@@ -30,10 +29,9 @@ namespace OpenRA.Platforms.Default
 		internal void InitializeOpenGL()
 		{
 			SetThreadAffinity();
-
-			context = SDL.SDL_GL_CreateContext(window.Window);
-			if (context == IntPtr.Zero || SDL.SDL_GL_MakeCurrent(window.Window, context) < 0)
-				throw new InvalidOperationException("Can not create OpenGL context. (Error: {0})".F(SDL.SDL_GetError()));
+			Glfw.MakeContextCurrent(window.Window);
+			// if (context == IntPtr.Zero || SDL.SDL_GL_MakeCurrent(window.Window, context) < 0)
+			// 	throw new InvalidOperationException("Can not create OpenGL context. (Error: {0})".F(SDL.SDL_GetError()));
 
 			OpenGL.Initialize(window.GLProfile == GLProfile.Legacy);
 			OpenGL.CheckGLError();
@@ -130,7 +128,7 @@ namespace OpenRA.Platforms.Default
 		public void Present()
 		{
 			VerifyThreadAffinity();
-			SDL.SDL_GL_SwapWindow(window.Window);
+			Glfw.SwapBuffers(window.Window);
 		}
 
 		static int ModeFromPrimitiveType(PrimitiveType pt)
@@ -253,7 +251,7 @@ namespace OpenRA.Platforms.Default
 		public void SetVSyncEnabled(bool enabled)
 		{
 			VerifyThreadAffinity();
-			SDL.SDL_GL_SetSwapInterval(enabled ? 1 : 0);
+			Glfw.SwapInterval(enabled ? 1 : 0);
 		}
 
 		public void Dispose()
@@ -262,11 +260,6 @@ namespace OpenRA.Platforms.Default
 				return;
 
 			disposed = true;
-			if (context != IntPtr.Zero)
-			{
-				SDL.SDL_GL_DeleteContext(context);
-				context = IntPtr.Zero;
-			}
 		}
 
 		public string GLVersion => OpenGL.Version;

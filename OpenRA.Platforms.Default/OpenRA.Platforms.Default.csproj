@@ -4,6 +4,7 @@
     <PackageReference Include="OpenRA-Freetype6" Version="1.0.4" />
     <PackageReference Include="OpenRA-OpenAL-CS" Version="1.0.16" />
     <PackageReference Include="OpenRA-SDL2-CS" Version="1.0.28" />
+    <PackageReference Include="glfw-net" Version="3.3.1" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="OpenRA.Platforms.Default.dll.config" Condition="'$(TargetPlatform)' != 'win-x64' And '$(TargetPlatform)' != 'win-x86'">
