@@ -132,7 +132,9 @@ namespace OpenRA.Mods.Common.Traits
 				if (!smudges.ContainsKey(s.Type))
 					continue;
 
-				var seq = smudges[s.Type];
+				if (!smudges.TryGetValue(s.Type + "-" + w.Map.Tileset, out var seq))
+					seq = smudges[s.Type];
+
 				var smudge = new Smudge
 				{
 					Type = s.Type,
@@ -158,7 +160,10 @@ namespace OpenRA.Mods.Common.Traits
 			if ((!dirty.ContainsKey(loc) || dirty[loc].Sequence == null) && !tiles.ContainsKey(loc))
 			{
 				// No smudge; create a new one
-				var st = smudges.Keys.Random(Game.CosmeticRandom);
+				var st = smudges.Keys.Where(k => k.IndexOf('-') < 0).Random(Game.CosmeticRandom);
+				if (smudges.ContainsKey(st + "-" + world.Map.Tileset))
+					st = st + "-" + world.Map.Tileset;
+
 				dirty[loc] = new Smudge { Type = st, Depth = 0, Sequence = smudges[st] };
 			}
 			else

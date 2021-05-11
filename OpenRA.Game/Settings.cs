@@ -77,7 +77,7 @@ namespace OpenRA
 		public bool QueryMapRepository = true;
 
 		[Desc("Enable client-side report generation to help debug desync errors.")]
-		public bool EnableSyncReports = false;
+		public bool EnableSyncReports = true;
 
 		[Desc("Sets the timestamp format. Defaults to the ISO 8601 standard.")]
 		public string TimestampFormat = "yyyy-MM-ddTHH:mm:ss";
@@ -195,7 +195,7 @@ namespace OpenRA
 		public GLProfile GLProfile = GLProfile.Automatic;
 
 		public int BatchSize = 8192;
-		public int SheetSize = 2048;
+		public int SheetSize = 8192;
 	}
 
 	public class SoundSettings

@@ -17,7 +17,7 @@ using OpenRA.Primitives;
 
 namespace OpenRA.Mods.Cnc
 {
-	public sealed class CncLoadScreen : SheetLoadScreen
+	public class CncLoadScreen : SheetLoadScreen
 	{
 		int loadTick;
 

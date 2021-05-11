@@ -21,7 +21,7 @@ namespace OpenRA.Mods.Common.Widgets
 {
 	public class TerrainTemplatePreviewWidget : Widget
 	{
-		public Func<float> GetScale = () => 1f;
+		public Func<float> GetScale = () => 3 / 16f;
 
 		readonly ITiledTerrainRenderer terrainRenderer;
 		readonly WorldRenderer worldRenderer;

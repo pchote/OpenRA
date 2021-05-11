@@ -93,7 +93,7 @@ namespace OpenRA.Mods.Common.Traits
 		}
 	}
 
-	class Bridge : IRender, INotifyDamageStateChanged
+	class Bridge : IRender, INotifyDamageStateChanged, ITick
 	{
 		readonly BuildingInfo buildingInfo;
 		readonly Bridge[] neighbours = new Bridge[2];
@@ -204,31 +204,45 @@ namespace OpenRA.Mods.Common.Traits
 			return bridges.GetBridge(self.Location + new CVec(offset[0], offset[1]));
 		}
 
-		IRenderable[] TemplateRenderables(WorldRenderer wr, PaletteReference palette, ushort template)
+		IRenderable[] TemplateRenderables(WorldRenderer wr, PaletteReference palette, ushort template, int frame)
 		{
 			var offset = buildingInfo.CenterOffset(self.World).Y + 1024;
 
 			return footprint.Select(c => (IRenderable)(new SpriteRenderable(
-				terrainRenderer.TileSprite(new TerrainTile(template, c.Value)),
+				terrainRenderer.TileSprite(new TerrainTile(template, c.Value), frame),
 				wr.World.Map.CenterOfCell(c.Key), WVec.Zero, -offset, palette, 1f, 1f,
 				float3.Ones, TintModifiers.None, true))).ToArray();
 		}
 
 		bool initialized;
-		Dictionary<ushort, IRenderable[]> renderables;
+		Dictionary<ushort, IRenderable[]>[] renderables = new Dictionary<ushort, IRenderable[]>[8];
 		public IEnumerable<IRenderable> Render(Actor self, WorldRenderer wr)
 		{
 			if (!initialized)
 			{
 				var palette = wr.Palette(TileSet.TerrainPaletteInternalName);
-				renderables = new Dictionary<ushort, IRenderable[]>();
-				foreach (var t in info.Templates)
-					renderables.Add(t.Template, TemplateRenderables(wr, palette, t.Template));
+				for (var i = 0; i < 8; i++)
+				{
+					renderables[i] = new Dictionary<ushort, IRenderable[]>();
+					foreach (var t in info.Templates)
+						renderables[i].Add(t.Template, TemplateRenderables(wr, palette, t.Template, i));
+				}
 
 				initialized = true;
 			}
 
-			return renderables[template];
+			return renderables[frame][template];
+		}
+
+		int t, frame;
+		void ITick.Tick(Actor self)
+		{
+			t += 1;
+			if (t > 2)
+			{
+				t = 0;
+				frame = (frame + 1) % 8;
+			}
 		}
 
 		public IEnumerable<Rectangle> ScreenBounds(Actor self, WorldRenderer wr)

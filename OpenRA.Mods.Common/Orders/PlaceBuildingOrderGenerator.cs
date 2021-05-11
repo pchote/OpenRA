@@ -152,7 +152,7 @@ namespace OpenRA.Mods.Common.Orders
 			{
 				var offsetPos = Viewport.LastMousePos;
 				if (variants[variant].Preview != null)
-					offsetPos += variants[variant].Preview.TopLeftScreenOffset;
+					offsetPos += viewport.WorldToViewPx(viewport.TopLeft + variants[variant].Preview.TopLeftScreenOffset);
 
 				return viewport.ViewToWorld(offsetPos);
 			}

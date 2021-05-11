@@ -50,7 +50,9 @@ namespace OpenRA.Mods.Common.UtilityCommands
 			{
 				var max = s == sb.Current ? (int)sb.CurrentChannel + 1 : 4;
 				for (var i = 0; i < max; i++)
-					s.AsPng((TextureChannel)ChannelMasks[i], palette).Save($"{count++}.png");
+					s.AsPng((TextureChannel)ChannelMasks[i], palette).Save($"{count}.{i}.png");
+
+				count++;
 			}
 
 			sb = sequences.SpriteCache.SheetBuilders[SheetType.BGRA];

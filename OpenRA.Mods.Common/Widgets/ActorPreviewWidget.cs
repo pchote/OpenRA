@@ -22,7 +22,7 @@ namespace OpenRA.Mods.Common.Widgets
 	public class ActorPreviewWidget : Widget
 	{
 		public bool Animate = false;
-		public Func<float> GetScale = () => 1f;
+		public Func<float> GetScale = () => 3 / 16f;
 
 		readonly WorldRenderer worldRenderer;
 
