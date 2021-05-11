@@ -21,6 +21,8 @@ namespace OpenRA.Mods.Cnc.Widgets.Logic
 		[ObjectCreator.UseCtor]
 		public PreReleaseWarningPrompt(Widget widget, World world, ModData modData)
 		{
+			widget.Get<LabelWidget>("VERSION_LABEL").Text = modData.Manifest.Metadata.Version;
+
 			if (!promptAccepted && modData.Manifest.Metadata.Version != "{DEV_VERSION}")
 				widget.Get<ButtonWidget>("CONTINUE_BUTTON").OnClick = () => ShowMainMenu(world);
 			else
@@ -31,7 +33,7 @@ namespace OpenRA.Mods.Cnc.Widgets.Logic
 		{
 			promptAccepted = true;
 			Ui.ResetAll();
-			Game.LoadWidget(world, "MAINMENU", Ui.Root, new WidgetArgs());
+			Game.LoadWidget(world, "MENU_BACKGROUND", Ui.Root, new WidgetArgs());
 		}
 	}
 }

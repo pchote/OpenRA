@@ -79,7 +79,11 @@ namespace OpenRA.Graphics
 
 		public SpriteCache(IReadOnlyFileSystem fileSystem, ISpriteLoader[] loaders)
 		{
-			SheetBuilders = new Cache<SheetType, SheetBuilder>(t => new SheetBuilder(t));
+			SheetBuilders = new Cache<SheetType, SheetBuilder>(t =>
+			{
+				// HACK: Reduce empty sheet usage for the small number of remaining indexed sprites
+				return new SheetBuilder(t, t == SheetType.BGRA ? Game.Settings.Graphics.SheetSize : 1024);
+			});
 
 			this.fileSystem = fileSystem;
 			this.loaders = loaders;

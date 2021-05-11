@@ -130,15 +130,9 @@ namespace OpenRA.Mods.Common.Traits
 				return r;
 
 			if (Cloaked && IsVisible(self, self.World.RenderPlayer))
-			{
-				var palette = string.IsNullOrEmpty(Info.Palette) ? null : Info.IsPlayerPalette ? wr.Palette(Info.Palette + self.Owner.InternalName) : wr.Palette(Info.Palette);
-				if (palette == null)
-					return r;
-				else
-					return r.Select(a => !a.IsDecoration && a is IPalettedRenderable ? ((IPalettedRenderable)a).WithPalette(palette) : a);
-			}
-			else
-				return SpriteRenderable.None;
+				return r.Select(a => !a.IsDecoration && a is IModifyableRenderable ? ((IModifyableRenderable)a).WithAlpha(0.5f) : a);
+
+			return SpriteRenderable.None;
 		}
 
 		IEnumerable<Rectangle> IRenderModifier.ModifyScreenBounds(Actor self, WorldRenderer wr, IEnumerable<Rectangle> bounds)

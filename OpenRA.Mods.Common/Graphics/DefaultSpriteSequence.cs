@@ -150,6 +150,13 @@ namespace OpenRA.Mods.Common.Graphics
 
 		protected virtual string GetSpriteSrc(ModData modData, string tileSet, string sequence, string animation, string sprite, Dictionary<string, MiniYaml> d)
 		{
+			if (d.TryGetValue("Image", out var imageNode))
+			{
+				var image = imageNode.Nodes.FirstOrDefault(n => n.Key == tileSet)?.Value.Value ?? imageNode.Value;
+				if (!string.IsNullOrEmpty(image))
+					return image;
+			}
+
 			return sprite ?? sequence;
 		}
 

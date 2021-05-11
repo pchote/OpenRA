@@ -110,7 +110,7 @@ namespace OpenRA.Mods.Cnc.Traits
 				var cell = location + cellOffset;
 
 				// Some mods may define terrain-specific bibs
-				var terrain = map.GetTerrainInfo(cell).Type;
+				var terrain = self.World.Map.Tileset;
 				var testSequence = info.Sequence + "-" + terrain;
 				var sequence = anim.HasSequence(testSequence) ? testSequence : info.Sequence;
 				anim.PlayFetchIndex(sequence, () => index);

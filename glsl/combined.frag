@@ -256,36 +256,12 @@ void main()
 		#endif
 	}
 
-	// Discard any transparent fragments (both color and depth)
-	if (c.a == 0.0)
-		discard;
-
 	if (vRGBAFraction.r > 0.0 && vTexMetadata.s > 0.0)
 		c = ColorShift(c, vTexMetadata.s);
 
-	float depth = gl_FragCoord.z;
-	if (length(vDepthMask) > 0.0)
-	{
-		vec4 y = Sample(vTexSampler.t, vTexCoord.pq);
-		depth = depth + DepthTextureScale * dot(y, vDepthMask);
-	}
-
-	gl_FragDepth = depth;
-
-	if (EnableDepthPreview)
-	{
-		float intensity = 1.0 - clamp(DepthPreviewParams.x * depth - 0.5 * DepthPreviewParams.x - DepthPreviewParams.y + 0.5, 0.0, 1.0);
-
-		#if __VERSION__ == 120
-		gl_FragColor = vec4(vec3(intensity), 1.0);
-		#else
-		fragColor = vec4(vec3(intensity), 1.0);
-		#endif
-	}
-	else
 	{
 		// A negative tint alpha indicates that the tint should replace the colour instead of multiplying it
-		if (vTint.a < 0.0)
+		if (vTint.a < 0.0 && c.a > 0)
 			c = vec4(vTint.rgb, -vTint.a);
 		else
 			c *= vTint;
