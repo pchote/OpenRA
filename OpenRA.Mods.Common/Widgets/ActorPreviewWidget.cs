@@ -22,7 +22,8 @@ namespace OpenRA.Mods.Common.Widgets
 	public class ActorPreviewWidget : Widget
 	{
 		public bool Animate = false;
-		public Func<float> GetScale = () => 3 / 16f;
+		public float Scale = 1;
+		public Func<float> GetScale;
 
 		readonly WorldRenderer worldRenderer;
 
@@ -34,6 +35,7 @@ namespace OpenRA.Mods.Common.Widgets
 		public ActorPreviewWidget(WorldRenderer worldRenderer)
 		{
 			this.worldRenderer = worldRenderer;
+			GetScale = () => Scale;
 		}
 
 		protected ActorPreviewWidget(ActorPreviewWidget other)
@@ -41,6 +43,7 @@ namespace OpenRA.Mods.Common.Widgets
 		{
 			preview = other.preview;
 			worldRenderer = other.worldRenderer;
+			GetScale = other.GetScale;
 		}
 
 		public override Widget Clone() { return new ActorPreviewWidget(this); }

@@ -21,7 +21,8 @@ namespace OpenRA.Mods.Common.Widgets
 {
 	public class TerrainTemplatePreviewWidget : Widget
 	{
-		public Func<float> GetScale = () => 3 / 16f;
+		public float Scale = 1;
+		public Func<float> GetScale;
 
 		readonly ITiledTerrainRenderer terrainRenderer;
 		readonly WorldRenderer worldRenderer;
@@ -50,6 +51,8 @@ namespace OpenRA.Mods.Common.Widgets
 			terrainRenderer = world.WorldActor.TraitOrDefault<ITiledTerrainRenderer>();
 			if (terrainRenderer == null)
 				throw new YamlException("TerrainTemplatePreviewWidget requires a tile-based terrain renderer.");
+
+			GetScale = () => Scale;
 		}
 
 		protected TerrainTemplatePreviewWidget(TerrainTemplatePreviewWidget other)
