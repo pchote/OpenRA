@@ -43,7 +43,7 @@ namespace OpenRA.Graphics
 
 		public Animation(World world, string name, Func<WAngle> facingFunc, Func<bool> paused)
 		{
-			sequenceProvider = world.Map.Rules.Sequences;
+			sequenceProvider = world.Sequences;
 			Name = name.ToLowerInvariant();
 			this.facingFunc = facingFunc;
 			this.paused = paused;

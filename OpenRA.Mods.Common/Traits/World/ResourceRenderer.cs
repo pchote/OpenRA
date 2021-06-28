@@ -95,12 +95,11 @@ namespace OpenRA.Mods.Common.Traits
 
 		protected virtual void WorldLoaded(World w, WorldRenderer wr)
 		{
-			var sequences = w.Map.Rules.Sequences;
 			foreach (var kv in Info.ResourceTypes)
 			{
 				var resourceInfo = kv.Value;
 				var resourceVariants = resourceInfo.Sequences
-					.ToDictionary(v => v, v => sequences.GetSequence(resourceInfo.Image, v));
+					.ToDictionary(v => v, v => w.Sequences.GetSequence(resourceInfo.Image, v));
 				Variants.Add(kv.Key, resourceVariants);
 
 				if (spriteLayer == null)

@@ -411,7 +411,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				}
 				else
 				{
-					currentSprites = world.Map.Rules.Sequences.SpriteCache[prefix + filename];
+					currentSprites = world.Sequences.SpriteCache[prefix + filename];
 					currentFrame = 0;
 
 					if (frameSlider != null)

@@ -179,8 +179,13 @@ namespace OpenRA
 
 		bool wasLoadingGameSave;
 
+		public readonly SequenceProvider Sequences;
+
 		internal World(ModData modData, Map map, OrderManager orderManager, WorldType type)
 		{
+			Sequences = map.Rules.Sequences;
+			Sequences.Preload();
+
 			Type = type;
 			OrderManager = orderManager;
 			orderGenerator = new UnitOrderGenerator();

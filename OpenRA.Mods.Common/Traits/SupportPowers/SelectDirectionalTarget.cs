@@ -163,7 +163,7 @@ namespace OpenRA.Mods.Common.Traits
 
 			for (var i = 0; i < noOfDividingPoints; i++)
 			{
-				var sprite = world.Map.Rules.Sequences.GetSequence(cursorAnimation, arrows[i]).GetSprite(0);
+				var sprite = world.Sequences.GetSequence(cursorAnimation, arrows[i]).GetSprite(0);
 
 				var angle = i * partAngle;
 				var direction = WAngle.FromDegrees(angle);

@@ -421,8 +421,6 @@ namespace OpenRA
 				Rules = Ruleset.LoadDefaultsForTileSet(modData, Tileset);
 			}
 
-			Rules.Sequences.Preload();
-
 			Translation = new Translation(Game.Settings.Player.Language, Translations, this);
 
 			var tl = new MPos(0, 0).ToCPos(this);

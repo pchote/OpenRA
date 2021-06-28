@@ -62,7 +62,7 @@ namespace OpenRA.Mods.Common.Traits
 
 			var rsi = ai.TraitInfo<RenderSpritesInfo>();
 			palette = wr.Palette(rsi.Palette ?? rsi.PlayerPalette + ownerName);
-			preview = new Animation(wr.World, rsi.GetImage(ai, wr.World.Map.Rules.Sequences, faction));
+			preview = new Animation(wr.World, rsi.GetImage(ai, faction));
 			preview.PlayRepeating(info.Sequence);
 		}
 

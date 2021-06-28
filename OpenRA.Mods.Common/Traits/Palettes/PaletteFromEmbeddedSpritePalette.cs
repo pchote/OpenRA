@@ -58,7 +58,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		public void LoadPalettes(WorldRenderer wr)
 		{
-			var sequence = (DefaultSpriteSequence)wr.World.Map.Rules.Sequences.GetSequence(info.Image, info.Sequence);
+			var sequence = (DefaultSpriteSequence)wr.World.Sequences.GetSequence(info.Image, info.Sequence);
 			wr.AddPalette(info.Name, new ImmutablePalette(sequence.EmbeddedPalette), info.AllowModifiers);
 		}
 

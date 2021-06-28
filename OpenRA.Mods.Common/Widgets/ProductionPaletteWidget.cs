@@ -456,7 +456,7 @@ namespace OpenRA.Mods.Common.Widgets
 				var rect = new Rectangle(rb.X + x * (IconSize.X + IconMargin.X), rb.Y + y * (IconSize.Y + IconMargin.Y), IconSize.X, IconSize.Y);
 
 				var rsi = item.TraitInfo<RenderSpritesInfo>();
-				var icon = new Animation(World, rsi.GetImage(item, World.Map.Rules.Sequences, faction));
+				var icon = new Animation(World, rsi.GetImage(item, faction));
 				var bi = item.TraitInfo<BuildableInfo>();
 				icon.Play(bi.Icon);
 

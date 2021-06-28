@@ -83,11 +83,12 @@ namespace OpenRA.Mods.Cnc.Traits
 			Info = info;
 			this.self = self;
 
+			var sequences = self.World.Sequences;
 			var tileset = self.World.Map.Tileset.ToLowerInvariant();
-			if (self.World.Map.Rules.Sequences.HasSequence("overlay", $"{Info.TileValidName}-{tileset}"))
-				Tile = self.World.Map.Rules.Sequences.GetSequence("overlay", $"{Info.TileValidName}-{tileset}").GetSprite(0);
+			if (sequences.HasSequence("overlay", $"{Info.TileValidName}-{tileset}"))
+				Tile = sequences.GetSequence("overlay", $"{Info.TileValidName}-{tileset}").GetSprite(0);
 			else
-				Tile = self.World.Map.Rules.Sequences.GetSequence("overlay", Info.TileValidName).GetSprite(0);
+				Tile = sequences.GetSequence("overlay", Info.TileValidName).GetSprite(0);
 		}
 
 		IEnumerable<IOrderTargeter> IIssueOrder.Orders
@@ -222,42 +223,43 @@ namespace OpenRA.Mods.Cnc.Traits
 				this.queued = queued;
 
 				minelayer = a.Trait<Minelayer>();
+				var sequences = a.World.Sequences;
 				var tileset = a.World.Map.Tileset.ToLowerInvariant();
-				if (a.World.Map.Rules.Sequences.HasSequence("overlay", $"{minelayer.Info.TileValidName}-{tileset}"))
+				if (sequences.HasSequence("overlay", $"{minelayer.Info.TileValidName}-{tileset}"))
 				{
-					var validSequence = a.World.Map.Rules.Sequences.GetSequence("overlay", $"{minelayer.Info.TileValidName}-{tileset}");
+					var validSequence = sequences.GetSequence("overlay", $"{minelayer.Info.TileValidName}-{tileset}");
 					validTile = validSequence.GetSprite(0);
 					validAlpha = validSequence.GetAlpha(0);
 				}
 				else
 				{
-					var validSequence = a.World.Map.Rules.Sequences.GetSequence("overlay", minelayer.Info.TileValidName);
+					var validSequence = sequences.GetSequence("overlay", minelayer.Info.TileValidName);
 					validTile = validSequence.GetSprite(0);
 					validAlpha = validSequence.GetAlpha(0);
 				}
 
-				if (a.World.Map.Rules.Sequences.HasSequence("overlay", $"{minelayer.Info.TileUnknownName}-{tileset}"))
+				if (sequences.HasSequence("overlay", $"{minelayer.Info.TileUnknownName}-{tileset}"))
 				{
-					var unknownSequence = a.World.Map.Rules.Sequences.GetSequence("overlay", $"{minelayer.Info.TileUnknownName}-{tileset}");
+					var unknownSequence = sequences.GetSequence("overlay", $"{minelayer.Info.TileUnknownName}-{tileset}");
 					unknownTile = unknownSequence.GetSprite(0);
 					unknownAlpha = unknownSequence.GetAlpha(0);
 				}
 				else
 				{
-					var unknownSequence = a.World.Map.Rules.Sequences.GetSequence("overlay", minelayer.Info.TileUnknownName);
+					var unknownSequence = sequences.GetSequence("overlay", minelayer.Info.TileUnknownName);
 					unknownTile = unknownSequence.GetSprite(0);
 					unknownAlpha = unknownSequence.GetAlpha(0);
 				}
 
-				if (a.World.Map.Rules.Sequences.HasSequence("overlay", $"{minelayer.Info.TileInvalidName}-{tileset}"))
+				if (sequences.HasSequence("overlay", $"{minelayer.Info.TileInvalidName}-{tileset}"))
 				{
-					var blockedSequence = a.World.Map.Rules.Sequences.GetSequence("overlay", $"{minelayer.Info.TileInvalidName}-{tileset}");
+					var blockedSequence = sequences.GetSequence("overlay", $"{minelayer.Info.TileInvalidName}-{tileset}");
 					blockedTile = blockedSequence.GetSprite(0);
 					blockedAlpha = blockedSequence.GetAlpha(0);
 				}
 				else
 				{
-					var blockedSequence = a.World.Map.Rules.Sequences.GetSequence("overlay", minelayer.Info.TileInvalidName);
+					var blockedSequence = sequences.GetSequence("overlay", minelayer.Info.TileInvalidName);
 					blockedTile = blockedSequence.GetSprite(0);
 					blockedAlpha = blockedSequence.GetAlpha(0);
 				}

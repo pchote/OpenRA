@@ -127,7 +127,7 @@ namespace OpenRA.Mods.Common.Traits
 				footprint = power.info.Footprint.Where(c => !char.IsWhiteSpace(c)).ToArray();
 				dimensions = power.info.Dimensions;
 
-				var sequence = world.Map.Rules.Sequences.GetSequence("overlay", "target-select");
+				var sequence = world.Sequences.GetSequence("overlay", "target-select");
 				tile = sequence.GetSprite(0);
 				alpha = sequence.GetAlpha(0);
 			}
