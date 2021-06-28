@@ -28,7 +28,7 @@ namespace OpenRA
 		public readonly IReadOnlyDictionary<string, SoundInfo> Notifications;
 		public readonly IReadOnlyDictionary<string, MusicInfo> Music;
 		public readonly ITerrainInfo TerrainInfo;
-		public readonly SequenceProvider Sequences;
+		public readonly IReadOnlyDictionary<string, MiniYamlNode> Sequences;
 		public readonly IReadOnlyDictionary<string, MiniYamlNode> ModelSequences;
 
 		public Ruleset(
@@ -38,7 +38,7 @@ namespace OpenRA
 			IReadOnlyDictionary<string, SoundInfo> notifications,
 			IReadOnlyDictionary<string, MusicInfo> music,
 			ITerrainInfo terrainInfo,
-			SequenceProvider sequences,
+			IReadOnlyDictionary<string, MiniYamlNode> sequences,
 			IReadOnlyDictionary<string, MiniYamlNode> modelSequences)
 		{
 			Actors = new ActorInfoDictionary(actors);
@@ -170,9 +170,7 @@ namespace OpenRA
 		{
 			var dr = modData.DefaultRules;
 			var terrainInfo = modData.DefaultTerrainInfo[tileSet];
-			var sequences = modData.DefaultSequences[tileSet];
-
-			return new Ruleset(dr.Actors, dr.Weapons, dr.Voices, dr.Notifications, dr.Music, terrainInfo, sequences, dr.ModelSequences);
+			return new Ruleset(dr.Actors, dr.Weapons, dr.Voices, dr.Notifications, dr.Music, terrainInfo, dr.Sequences, dr.ModelSequences);
 		}
 
 		public static Ruleset Load(ModData modData, IReadOnlyFileSystem fileSystem, string tileSet,
@@ -204,9 +202,9 @@ namespace OpenRA
 				// TODO: Add support for merging custom terrain modifications
 				var terrainInfo = modData.DefaultTerrainInfo[tileSet];
 
-				// TODO: Top-level dictionary should be moved into the Ruleset instead of in its own object
-				var sequences = mapSequences == null ? modData.DefaultSequences[tileSet] :
-					new SequenceProvider(fileSystem, modData, tileSet, mapSequences);
+				var sequences = dr.Sequences;
+				if (mapSequences != null)
+					sequences = MergeOrDefault("Sequences", fileSystem, m.Sequences, mapSequences, dr.Sequences, k => k);
 
 				var modelSequences = dr.ModelSequences;
 				if (mapModelSequences != null)

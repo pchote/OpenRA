@@ -183,7 +183,7 @@ namespace OpenRA
 
 		internal World(ModData modData, Map map, OrderManager orderManager, WorldType type)
 		{
-			Sequences = map.Rules.Sequences;
+			Sequences = new SequenceProvider(map, modData, map.Tileset, map.SequenceDefinitions);
 			Sequences.Preload();
 
 			Type = type;
