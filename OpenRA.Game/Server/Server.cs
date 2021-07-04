@@ -466,6 +466,10 @@ namespace OpenRA.Server
 						LobbyInfo.Clients.Add(client);
 						newConn.Validated = true;
 
+						// Disable chat UI to stop the client sending messages that we know we will reject
+						if (!client.IsAdmin && Settings.JoinChatDelay > 0)
+							DispatchOrdersToClient(newConn, 0, 0, new Order("DisableChatEntry", null, false) { ExtraData = (uint)Settings.JoinChatDelay }.Serialize());
+
 						var clientPing = new Session.ClientPing { Index = client.Index };
 						LobbyInfo.ClientPings.Add(clientPing);
 
@@ -859,8 +863,20 @@ namespace OpenRA.Server
 						}
 
 					case "Chat":
-						DispatchOrdersToClients(conn, 0, o.Serialize());
-						break;
+						{
+							var isAdmin = GetClient(conn)?.IsAdmin ?? false;
+							var connected = conn.ConnectionTimer.ElapsedMilliseconds;
+							if (!isAdmin && connected < Settings.JoinChatDelay)
+							{
+								var remaining = (Settings.JoinChatDelay - connected + 999) / 1000;
+								SendOrderTo(conn, "Message", "Chat is disabled. Please try again in {0} seconds".F(remaining));
+							}
+							else
+								DispatchOrdersToClients(conn, 0, o.Serialize());
+
+							break;
+						}
+
 					case "Pong":
 						{
 							if (!OpenRA.Exts.TryParseInt64Invariant(o.TargetString, out var pingSent))

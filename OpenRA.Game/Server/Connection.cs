@@ -12,6 +12,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -26,6 +27,7 @@ namespace OpenRA.Server
 		public readonly int PlayerIndex;
 		public readonly string AuthToken;
 		public readonly EndPoint EndPoint;
+		public readonly Stopwatch ConnectionTimer = Stopwatch.StartNew();
 
 		public long TimeSinceLastResponse => Game.RunTime - lastReceivedTime;
 		public int MostRecentFrame { get; private set; }

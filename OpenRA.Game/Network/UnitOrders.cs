@@ -49,6 +49,21 @@ namespace OpenRA.Network
 						break;
 					}
 
+				case "DisableChatEntry":
+					{
+						// Order must originate from the server
+						if (clientId != 0)
+							break;
+
+						// Server may send MaxValue to indicate that it is disabled until further notice
+						if (order.ExtraData == uint.MaxValue)
+							orderManager.ChatDisabledUntil = uint.MaxValue;
+						else
+							orderManager.ChatDisabledUntil = Game.RunTime + order.ExtraData;
+
+						break;
+					}
+
 				case "Chat":
 					{
 						var client = orderManager.LobbyInfo.ClientWithIndex(clientId);

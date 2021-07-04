@@ -49,6 +49,7 @@ namespace OpenRA.Network
 		readonly List<TextNotification> notificationsCache = new List<TextNotification>();
 
 		public IReadOnlyList<TextNotification> NotificationsCache => notificationsCache;
+		public long ChatDisabledUntil { get; internal set; }
 
 		bool disposed;
 		bool generateSyncReport = false;
