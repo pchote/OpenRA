@@ -24,6 +24,9 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 	[ChromeLogicArgsHotkeys("OpenTeamChat", "OpenGeneralChat")]
 	public class IngameChatLogic : ChromeLogic
 	{
+		static string carryoverText = null;
+		static bool carryoverTeamChat = false;
+
 		readonly OrderManager orderManager;
 		readonly Ruleset modRules;
 
@@ -43,6 +46,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		TextNotification lastLine;
 		int repetitions;
+		bool teamChat;
 
 		[ObjectCreator.UseCtor]
 		public IngameChatLogic(Widget widget, OrderManager orderManager, World world, ModData modData, bool isMenuChat, Dictionary<string, MiniYaml> logicArgs)
@@ -56,7 +60,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			var isObserver = orderManager.LocalClient != null && orderManager.LocalClient.IsObserver;
 			var alwaysDisabled = world.IsReplay || world.LobbyInfo.NonBotClients.Count() == 1;
 			var disableTeamChat = alwaysDisabled || (world.LocalPlayer != null && !players.Any(p => p.IsAlliedWith(world.LocalPlayer)));
-			var teamChat = !disableTeamChat;
+			teamChat = !disableTeamChat;
 
 			tabCompletion.Commands = chatTraits.OfType<ChatCommands>().SelectMany(x => x.Commands.Keys).ToList();
 			tabCompletion.Names = orderManager.LobbyInfo.Clients.Select(c => c.Name).Distinct().ToList();
@@ -227,6 +231,14 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			if (logicArgs.TryGetValue("ChatLineSound", out var yaml))
 				chatLineSound = yaml.Value;
+
+			if (!string.IsNullOrEmpty(carryoverText))
+			{
+				teamChat = !disableTeamChat && carryoverTeamChat;
+				OpenChat();
+				chatText.Text = carryoverText;
+				carryoverText = null;
+			}
 		}
 
 		public void OpenChat()
@@ -322,6 +334,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		{
 			if (!disposed)
 			{
+				carryoverText = chatText.Text;
+				carryoverTeamChat = teamChat;
 				orderManager.AddTextNotification -= AddChatLineWrapper;
 				disposed = true;
 			}
