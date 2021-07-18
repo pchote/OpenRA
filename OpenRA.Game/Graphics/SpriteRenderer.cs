@@ -89,21 +89,21 @@ namespace OpenRA.Graphics
 			if (ns + needSamplers >= sheets.Length)
 			{
 				Flush();
-				sheetIndex = 0;
-				if (ss != null)
-					secondarySheetIndex = 1;
-			}
+				sheetIndex = secondarySheetIndex = 0;
+				sheets[sheetIndex] = sheet;
 
-			if (sheetIndex >= ns)
+				if (ss != null && ss.Sheet != sheet)
+				{
+					secondarySheetIndex = 1;
+					sheets[secondarySheetIndex] = ss.SecondarySheet;
+				}
+			}
+			else
 			{
 				sheets[sheetIndex] = sheet;
-				ns += 1;
-			}
 
-			if (secondarySheetIndex >= ns && ss != null)
-			{
-				sheets[secondarySheetIndex] = ss.SecondarySheet;
-				ns += 1;
+				if (ss != null && ss.Sheet != sheet)
+					sheets[secondarySheetIndex] = ss.SecondarySheet;
 			}
 
 			return new int2(sheetIndex, secondarySheetIndex);
