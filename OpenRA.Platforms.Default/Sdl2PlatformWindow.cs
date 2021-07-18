@@ -13,8 +13,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using OpenRA.FileFormats;
 using OpenRA.Primitives;
 using SDL2;
 
@@ -22,6 +24,15 @@ namespace OpenRA.Platforms.Default
 {
 	sealed class Sdl2PlatformWindow : ThreadAffine, IPlatformWindow
 	{
+		[DllImport("libX11")]
+		static extern IntPtr XInternAtom(IntPtr display, string atom_name, bool only_if_exists);
+
+		[DllImport("libX11", CharSet=CharSet.Ansi)]
+		static extern int XChangeProperty(IntPtr display, IntPtr window, IntPtr property, IntPtr type, int format, IntPtr mode, IntPtr atoms, int nelements);
+
+		[DllImport("libX11")]
+		static extern IntPtr XFlush(IntPtr display);
+
 		readonly IGraphicsContext context;
 		readonly Sdl2Input input;
 
@@ -303,6 +314,59 @@ namespace OpenRA.Platforms.Default
 
 			SDL.SDL_SetModState(SDL.SDL_Keymod.KMOD_NONE);
 			input = new Sdl2Input();
+
+			var ms = new MemoryStream();
+			var sizes = new[] { 16, 32, 48, 64, 128, 256, 512, 1024 };
+			foreach (var s in sizes)
+			{
+				var icon = new Png(File.OpenRead($"packaging/artwork/ra_{s}x{s}.png"));
+
+				if (IntPtr.Size == 8)
+				{
+					ms.WriteArray(BitConverter.GetBytes((ulong)icon.Width));
+					ms.WriteArray(BitConverter.GetBytes((ulong)icon.Height));
+				}
+				else
+				{
+					ms.WriteArray(BitConverter.GetBytes(icon.Width));
+					ms.WriteArray(BitConverter.GetBytes(icon.Height));
+				}
+
+				unsafe
+				{
+					fixed (byte* bd = &icon.Data[0])
+					{
+						var data = (int*)bd;
+						for (var i = 0; i < icon.Width * icon.Height; i++)
+						{
+							var o = (data[i] & 0xFF00FF00U) | ((data[i] & 0x00FF0000U) >> 16) | ((data[i] & 0xFFU) << 16);
+							if (IntPtr.Size == 8)
+								ms.WriteArray(BitConverter.GetBytes((ulong)o));
+							else
+								ms.WriteArray(BitConverter.GetBytes((uint)o));
+						}
+					}
+				}
+			}
+
+			var buffer = ms.ToArray();
+			var length = buffer.Length / 8;
+
+			var info = default(SDL.SDL_SysWMinfo);
+			SDL.SDL_VERSION(out info.version);
+			SDL.SDL_GetWindowWMInfo(Window, ref info);
+
+			unsafe
+			{
+				var d = info.info.x11.display;
+				var w = info.info.x11.window;
+				var property = XInternAtom(d, "_NET_WM_ICON", false);
+				var type = XInternAtom(d, "CARDINAL", false);
+				fixed (byte* ptr = &buffer[0])
+					XChangeProperty(d, w, property, type, 32, IntPtr.Zero, new IntPtr(ptr), length);
+
+				XFlush(d);
+			}
 		}
 
 		byte[] DoublePixelData(byte[] data, Size size)
