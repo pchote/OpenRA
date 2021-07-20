@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+NoDisplay=true
+Name=OpenRA - {MODNAME}
+Icon=openra-{MODID}-{TAG}-{APPIMAGEID}
+Exec={APPIMAGE} %U
+Terminal=false
+StartupWMClass=openra-{MODID}-{TAG}-{APPIMAGEID}

@@ -78,6 +78,8 @@ namespace OpenRA
 		GLProfile GLProfile { get; }
 
 		GLProfile[] SupportedGLProfiles { get; }
+
+		void SetKdeDesktopFile(string name);
 	}
 
 	public interface IGraphicsContext : IDisposable

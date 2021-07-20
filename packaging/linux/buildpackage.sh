@@ -80,6 +80,8 @@ build_appimage() {
 	chmod 0755 "${APPDIR}/usr/share/applications/openra-${MOD_ID}.desktop"
 	cp "${APPDIR}/usr/share/applications/openra-${MOD_ID}.desktop" "${APPDIR}/openra-${MOD_ID}.desktop"
 
+	sed "s/{MODID}/${MOD_ID}/g" openra.desktop.runtime.in | sed "s/{MODNAME}/${DISPLAY_NAME}/g" | sed "s/{TAG}/${TAG}/g" > "${APPDIR}/usr/lib/openra/openra.desktop.runtime.in"
+
 	mkdir -p "${APPDIR}/usr/share/mime/packages"
 	# Note that the non-discord version of the mimeinfo file is used by the Mod SDK and must be maintained in parallel with the discord version!
 	sed "s/{MODID}/${MOD_ID}/g" openra-mimeinfo.xml.discord.in | sed "s/{TAG}/${TAG}/g" | sed "s/{DISCORDAPPID}/${DISCORD_ID}/g" > "${APPDIR}/usr/share/mime/packages/openra-${MOD_ID}.xml"
@@ -120,8 +122,8 @@ build_appimage() {
 }
 
 build_appimage "ra" "Red Alert" "699222659766026240"
-build_appimage "cnc" "Tiberian Dawn" "699223250181292033"
-build_appimage "d2k" "Dune 2000" "712711732770111550"
+#build_appimage "cnc" "Tiberian Dawn" "699223250181292033"
+#build_appimage "d2k" "Dune 2000" "712711732770111550"
 
 # Clean up
 rm -rf appimagetool-x86_64.AppImage "${BUILTDIR}"

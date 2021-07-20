@@ -530,5 +530,29 @@ namespace OpenRA.Platforms.Default
 			scaleModifier = scale;
 			OnWindowScaleChanged(windowScale, windowScale * oldScaleModifier, windowScale, windowScale * scaleModifier);
 		}
+
+		[DllImport("libX11")]
+		static extern IntPtr XInternAtom(IntPtr display, string atom_name, bool only_if_exists);
+
+		[DllImport("libX11", CharSet=CharSet.Ansi)]
+		static extern int XChangeProperty(IntPtr display, IntPtr window, IntPtr property, IntPtr type, int format, IntPtr mode, string data, int elements);
+
+		[DllImport("libX11")]
+		static extern IntPtr XFlush(IntPtr display);
+
+		public void SetKdeDesktopFile(string name)
+		{
+			var info = default(SDL.SDL_SysWMinfo);
+			SDL.SDL_VERSION(out info.version);
+			SDL.SDL_GetWindowWMInfo(Window, ref info);
+
+			var d = info.info.x11.display;
+			var w = info.info.x11.window;
+			var property = XInternAtom(d, "_KDE_NET_WM_DESKTOP_FILE", false);
+			var type = XInternAtom(d, "UTF8_STRING", false);
+
+			XChangeProperty(d, w, property, type, 8, IntPtr.Zero, name, name.Length + 1);
+			XFlush(d);
+		}
 	}
 }

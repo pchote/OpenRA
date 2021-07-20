@@ -3,25 +3,65 @@ LAUNCHER=$(readlink -f "${0}")
 HERE="$(dirname "${LAUNCHER}")"
 cd "${HERE}/../lib/openra" || exit 1
 
+export SDL_VIDEO_X11_WMCLASS="openra-{MODID}-{TAG}"
+
 # APPIMAGE is an environment variable set by the runtime
 # defining the absolute path to the .AppImage file
 if [ -n "${APPIMAGE}" ]; then
 	LAUNCHER=${APPIMAGE}
 
-	# appimaged doesn't update the mime or icon caches when registering AppImages.
-	# Run update-desktop-database and gtk-update-icon-cache ourselves if we detect
-	# that the desktop file has been installed but the handler is not cached
-	if command -v update-desktop-database > /dev/null; then
-		APPIMAGEID=$(printf "file://%s" "${APPIMAGE}" | md5sum | cut -d' ' -f1)
-		LAUNCHER_NAME="appimagekit_${APPIMAGEID}-openra-{MODID}.desktop"
-		LAUNCHER_PATH="${HOME}/.local/share/applications/${LAUNCHER_NAME}"
-		MIMECACHE_PATH="${HOME}/.local/share/applications/mimeinfo.cache"
-		SCHEME="x-scheme-handler/openra-{MODID}-{TAG}"
-		if [ -f "${LAUNCHER_PATH}" ] && ! grep -qs "${SCHEME}=" "${MIMECACHE_PATH}"; then
-			update-desktop-database "${HOME}/.local/share/applications"
-			if command -v gtk-update-icon-cache > /dev/null; then
-				gtk-update-icon-cache ~/.local/share/icons/hicolor/ -t
+	APPIMAGEID=$(printf "file://%s" "${APPIMAGE}" | md5sum | cut -d' ' -f1)
+	LAUNCHER_NAME="appimagekit_${APPIMAGEID}-openra-{MODID}.desktop"
+	LAUNCHER_PATH="${HOME}/.local/share/applications/${LAUNCHER_NAME}"
+
+	if [ -f "${LAUNCHER_PATH}" ]; then
+		# appimaged doesn't update the mime or icon caches when registering AppImages.
+		# Run update-desktop-database and gtk-update-icon-cache ourselves if we detect
+		# that the desktop file has been installed but the handler is not cached.
+		if command -v update-desktop-database > /dev/null; then
+			MIMECACHE_PATH="${HOME}/.local/share/applications/mimeinfo.cache"
+			SCHEME="x-scheme-handler/openra-{MODID}-{TAG}"
+			if [ -f "${LAUNCHER_PATH}" ] && ! grep -qs "${SCHEME}=" "${MIMECACHE_PATH}"; then
+				update-desktop-database "${HOME}/.local/share/applications"
+				if command -v gtk-update-icon-cache > /dev/null; then
+					gtk-update-icon-cache ~/.local/share/icons/hicolor/ -t
+				fi
 			fi
+		fi
+	fi
+
+	# Both Gnome and KDE need to match the game window to a .desktop file for certain features to work
+	# This matching fails in certain situations unless the .desktop file name matches the window X11 WMCLASS.
+	# The current generation of AppImage integration tools violate this, which leads to various integration problems
+	# (e.g. the Gnome application name showing the WM class the first time you run, KDE showing a generic X11 icon).
+	# The matching also obviously can't work if the user does not have an AppImage integration tool installed.
+	# We work around all these issues by installing a temporary minimal .desktop file and icons that contain just enough
+	# information to polish the UI integration. These files are deleted again after we quit the game.
+	if command -v sed > /dev/null && command -v chmod > /dev/null && command -v cp > /dev/null; then
+		RUNTIME_NAME="openra-{MODID}-{TAG}-${APPIMAGEID}"
+		RUNTIME_DESKTOP_PATH="${HOME}/.local/share/applications/${RUNTIME_NAME}.desktop"
+		sed "s/{APPIMAGEID}/${APPIMAGEID}/g" openra.desktop.runtime.in | sed "s|{APPIMAGE}|${APPIMAGE}|g" > "${RUNTIME_DESKTOP_PATH}"
+		chmod 0755 "${RUNTIME_DESKTOP_PATH}"
+		export SDL_VIDEO_X11_WMCLASS="${RUNTIME_NAME}"
+
+		ICON="${HERE}/../share/icons/hicolor/scalable/apps/openra-{MODID}.png"
+		if [ -f "${ICON}" ]; then
+			cp "${ICON}" "${HOME}/.local/share/icons/hicolor/scalable/apps/${RUNTIME_NAME}.svg"
+		fi
+
+		for i in 16x16 32x32 48x48 64x64 128x128 256x256 512x512 1024x1024; do
+			ICON="${HERE}/../share/icons/hicolor/${i}/apps/openra-{MODID}.png"
+			if [ -f "${ICON}" ]; then
+				cp "${ICON}" "${HOME}/.local/share/icons/hicolor/${i}/apps/${RUNTIME_NAME}.png"
+			fi
+		done
+
+		if command -v update-desktop-database > /dev/null; then
+			update-desktop-database "${HOME}/.local/share/applications"
+		fi
+
+		if command -v gtk-update-icon-cache > /dev/null; then
+			gtk-update-icon-cache ~/.local/share/icons/hicolor/ -t
 		fi
 	fi
 fi
@@ -33,9 +73,32 @@ if [ "${1#${PROTOCOL_PREFIX}}" != "${1}" ]; then
 	JOIN_SERVER="Launch.Connect=${1#${PROTOCOL_PREFIX}}"
 fi
 
+# The KDE task switcher limits itself to the 128px icon unless we
+# set an X11 _KDE_NET_WM_DESKTOP_FILE property on the window
+KDE_DESKTOP_NAME=""
+if [ -n "${RUNTIME_NAME}" ]; then
+	KDE_DESKTOP_NAME="Engine.KDEDesktopFile=${RUNTIME_NAME}"
+fi
+
 # Run the game
-export SDL_VIDEO_X11_WMCLASS="openra-{MODID}-{TAG}"
-./OpenRA Game.Mod={MODID} Engine.LaunchPath="${LAUNCHER}" "${JOIN_SERVER}" "$@"
+./OpenRA Game.Mod={MODID} Engine.LaunchPath="${LAUNCHER}" "${JOIN_SERVER}" "${KDE_DESKTOP_NAME}" "$@"
+
+# Clean up runtime integration
+if [ -f "${RUNTIME_DESKTOP_PATH}" ]; then
+	rm "${RUNTIME_DESKTOP_PATH}"
+
+	ICON="${HOME}/.local/share/icons/hicolor/scalable/apps/${RUNTIME_NAME}.svg"
+	if [ -f "${ICON}" ]; then
+		rm "${ICON}"
+	fi
+
+	for i in 16x16 32x32 48x48 64x64 128x128 256x256 512x512 1024x1024; do
+		ICON="${HOME}/.local/share/icons/hicolor/${i}/apps/${RUNTIME_NAME}.png"
+		if [ -f "${ICON}" ]; then
+			rm "${ICON}"
+		fi
+	done
+fi
 
 # Show a crash dialog if something went wrong
 if [ $? != 0 ] && [ $? != 1 ]; then
