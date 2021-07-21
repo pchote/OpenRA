@@ -1,6 +1,6 @@
 overlay:
 	Defaults: place
-		Offset: 0, -12, 1
+		Offset: 0, -12, -12
 		ZRamp: 1
 	build-valid-snow:
 	build-valid-temperate:
@@ -10,7 +10,7 @@ overlay:
 
 editor-overlay:
 	Defaults: place
-		Offset: 0, -12, 1
+		Offset: 0, -12, -12
 		ZRamp: 1
 	copy:
 	paste:
@@ -139,6 +139,7 @@ explosion:
 	building: twlt070
 		Offset: 0, 0, 36
 	ionring: ring1
+		Offset: 0, 0, 0
 		ZRamp: 1
 		Tick: 100
 		IgnoreWorldTint: False
@@ -367,7 +368,6 @@ moveflsh:
 		Length: *
 		Tick: 30
 		ZOffset: 2047
-		Offset: 0, 0, 48
 		ZRamp: 1
 		AlphaFade: True
 
@@ -385,7 +385,7 @@ resources:
 		UseTilesetExtension: true
 		Length: 12
 		ShadowStart: 12
-		Offset: 0, -12, 1.5
+		Offset: 0, -12, -11
 		ZRamp: 1
 		IgnoreWorldTint: true
 	tib01: tib01
@@ -411,8 +411,6 @@ resources:
 	veins: veins
 		Length: *
 		ShadowStart: -1
-		# TODO: Reduce z offset again after fixing #12229
-		Offset: 0, -12, 5.5
 		IgnoreWorldTint: false
 
 veins:
@@ -434,7 +432,7 @@ shroud:
 smallscorches:
 	Defaults:
 		UseTilesetExtension: true
-		Offset: 0, -12, 1
+		Offset: 0, -12, -11
 		ZRamp: 1
 	sc1: burnt01
 	sc2: burnt02
@@ -446,7 +444,7 @@ smallscorches:
 mediumscorches:
 	Defaults:
 		UseTilesetExtension: true
-		Offset: 0, -18, 1
+		Offset: 0, -18, 17
 		ZRamp: 1
 	sc7: burnt07
 	sc8: burnt08
@@ -456,7 +454,7 @@ mediumscorches:
 largescorches:
 	Defaults:
 		UseTilesetExtension: true
-		Offset: 0, -24, 1
+		Offset: 0, -24, 23
 		ZRamp: 1
 	sc11: burnt11
 	sc12: burnt12
@@ -464,7 +462,7 @@ largescorches:
 smallcraters:
 	Defaults:
 		UseTilesetExtension: true
-		Offset: 0, -12, 1
+		Offset: 0, -12, -11
 		ZRamp: 1
 	cr1: crater01
 	cr2: crater02
@@ -476,7 +474,7 @@ smallcraters:
 mediumcraters:
 	Defaults:
 		UseTilesetExtension: true
-		Offset: 0, -12, 1
+		Offset: 0, -12, -11
 		ZRamp: 1
 	cr7: crater07
 	cr8: crater08
@@ -486,7 +484,7 @@ mediumcraters:
 largecraters:
 	Defaults:
 		UseTilesetExtension: true
-		Offset: 0, -24, 1
+		Offset: 0, -24, -23
 		ZRamp: 1
 	cr11: crater11
 	cr12: crater12
@@ -679,12 +677,12 @@ tracks16:
 tuntop01:
 	Inherits: ^tuntop
 	idle:
-		Offset: 24, -49, 36
+		Offset: 24, -49, 10
 
 tuntop02:
 	Inherits: ^tuntop
 	idle:
-		Offset: -24, -49, 36
+		Offset: -24, -49, 10
 
 tuntop03:
 	Inherits: ^tuntop

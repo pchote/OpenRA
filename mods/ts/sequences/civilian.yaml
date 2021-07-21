@@ -2,7 +2,7 @@ ammocrat:
 	idle: ammo01
 		DepthSprite: isodepth.shp
 		ShadowStart: 2
-		Offset: 0, -12, 12
+		Offset: 0, -12, 13
 
 ^abanbase:
 	Defaults:
@@ -16,41 +16,41 @@ ammocrat:
 ^aban1x1:
 	Inherits: ^abanbase
 	Defaults:
-		Offset: 0, -12, 12
+		Offset: 0, -12, 13
 
 ^aban2x2:
 	Inherits: ^abanbase
 	Defaults:
-		Offset: 0, -24, 24
+		Offset: 0, -24, 25
 
 ^aban2x5:
 	Inherits: ^abanbase
 	Defaults:
-		Offset: 36, -42, 42
+		Offset: 36, -42, 43
 		DepthSpriteOffset: 24, 0
 
 ^aban2x6:
 	Inherits: ^abanbase
 	Defaults:
-		Offset: 48, -48, 48
+		Offset: 48, -48, 49
 		DepthSpriteOffset: 36, 0
 
 ^aban3x2:
 	Inherits: ^abanbase
 	Defaults:
-		Offset: -12, -30, 30
+		Offset: -12, -30, 31
 		DepthSpriteOffset: -12, 0
 
 ^aban4x2:
 	Inherits: ^abanbase
 	Defaults:
-		Offset: -24, -36, 36
+		Offset: -24, -36, 37
 		DepthSpriteOffset: -24, 0
 
 ^aban5x3:
 	Inherits: ^abanbase
 	Defaults:
-		Offset: -24, -48, 48
+		Offset: -24, -48, 49
 		DepthSpriteOffset: -24, 0
 
 aban01:
@@ -80,7 +80,7 @@ aban08:
 aban09:
 	Inherits: ^aban2x2
 	Defaults:
-		Offset: 2, -20, 24
+		Offset: 2, -20, 21
 
 aban10:
 	Inherits: ^aban2x2
@@ -88,17 +88,17 @@ aban10:
 aban11:
 	Inherits: ^aban2x2
 	Defaults:
-		Offset: 0, -20, 24
+		Offset: 0, -20, 21
 
 aban12:
 	Inherits: ^aban2x2
 	Defaults:
-		Offset: 2, -22, 24
+		Offset: 2, -22, 21
 
 aban13:
 	Inherits: ^aban1x1
 	Defaults:
-		Offset: 0, -10, 12
+		Offset: 0, -10, 11
 
 aban14:
 	Inherits: ^aban1x1
@@ -106,7 +106,7 @@ aban14:
 aban15:
 	Inherits: ^aban1x1
 	Defaults:
-		Offset: 0, -10, 12
+		Offset: 0, -10, 11
 
 aban16:
 	Inherits: ^aban2x2
@@ -119,7 +119,7 @@ aban18:
 
 ^bboard1x1:
 	Defaults:
-		Offset: 0, -12, 6
+		Offset: 0, -12, 13
 	idle:
 		ShadowStart: 2
 	damaged-idle:
@@ -128,7 +128,7 @@ aban18:
 
 ^bboard1x2:
 	Defaults:
-		Offset: -1, -10, 6
+		Offset: -1, -10, 11
 	idle:
 		ShadowStart: 2
 	damaged-idle:
@@ -137,7 +137,7 @@ aban18:
 
 ^bboard2x1:
 	Defaults:
-		Offset: 2, -12, 6
+		Offset: 2, -12, 13
 	idle:
 		ShadowStart: 2
 	damaged-idle:
@@ -204,40 +204,40 @@ bboard16:
 ^ca1x1:
 	Inherits: ^cabase
 	Defaults:
-		Offset: 0, -12, 12
+		Offset: 0, -12, 13
 		UseTilesetCode: true
 
 ^ca1x2:
 	Inherits: ^cabase
 	Defaults:
-		Offset: 12, -18, 18
+		Offset: 12, -18, 19
 		DepthSpriteOffset: 12, 0
 		UseTilesetCode: true
 
 ^ca2x1:
 	Inherits: ^cabase
 	Defaults:
-		Offset: -12, -18, 18
+		Offset: -12, -18, 19
 		DepthSpriteOffset: -12, 0
 		UseTilesetCode: true
 
 ^ca2x3:
 	Inherits: ^cabase
 	Defaults:
-		Offset: 12, -30, 30
+		Offset: 12, -30, 31
 		DepthSpriteOffset: 12, 0
 		UseTilesetCode: true
 
 ^ca3x3:
 	Inherits: ^cabase
 	Defaults:
-		Offset: 0, -36, 36
+		Offset: 0, -36, 37
 		UseTilesetCode: true
 
 ^ca2x2:
 	Inherits: ^cabase
 	Defaults:
-		Offset: 0, -24, 24
+		Offset: 0, -24, 25
 		UseTilesetCode: true
 
 ca0001:
@@ -306,7 +306,7 @@ ca0021:
 caarmr:
 	Defaults:
 		DepthSprite: isodepth.shp
-		Offset: 0, -48, 48
+		Offset: 0, -48, 49
 	idle: ctarmr
 		ShadowStart: 3
 	damaged-idle: ctarmr
@@ -319,7 +319,7 @@ caarmr:
 caaray:
 	Defaults:
 		DepthSprite: isodepth.shp
-		Offset: 0, -24, 24
+		Offset: 0, -24, 25
 	idle: ctaray
 		ShadowStart: 3
 	damaged-idle: ctaray
@@ -355,13 +355,13 @@ cabhut:
 	idle:
 		DepthSprite: isodepth.shp
 		UseTilesetCode: true
-		Offset: 0, -12, 12
+		Offset: 0, -12, 13
 		ShadowStart: 1
 
 ^cacrsh:
 	idle:
 		UseTilesetCode: true
-		Offset: 0, -12, 12
+		Offset: 0, -12, 13
 
 cacrsh01:
 	Inherits: ^cacrsh
@@ -383,7 +383,7 @@ cahosp:
 		DepthSprite: isodepth.shp
 		DepthSpriteOffset: 15, 0
 		UseTilesetCode: true
-		Offset: 15, -36, 36
+		Offset: 15, -36, 37
 	idle:
 		ShadowStart: 3
 	damaged-idle:
@@ -397,64 +397,64 @@ capyr01:
 	idle: ctpyr01
 		DepthSprite: isodepth.shp
 		ShadowStart: 1
-		Offset: 0, -24, 24
+		Offset: 0, -24, 25
 
 capyr02:
 	idle: ctpyr02
 		DepthSprite: isodepth.shp
 		ShadowStart: 1
-		Offset: 0, -48, 48
+		Offset: 0, -48, 49
 
 capyr03:
 	idle: ctpyr03
 		DepthSprite: isodepth.shp
 		ShadowStart: 1
-		Offset: 0, -48, 48
+		Offset: 0, -48, 49
 
 ^city1x1:
 	Inherits: ^cabase
 	Defaults:
-		Offset: 0, -12, 12
+		Offset: 0, -12, 13
 
 ^city2x2:
 	Inherits: ^cabase
 	Defaults:
-		Offset: 0, -24, 24
+		Offset: 0, -24, 25
 
 ^city2x3:
 	Inherits: ^cabase
 	Defaults:
-		Offset: 12, -30, 30
+		Offset: 12, -30, 31
 		DepthSpriteOffset: 12, 0
 
 ^city3x2:
 	Inherits: ^cabase
 	Defaults:
-		Offset: -12, -30, 30
+		Offset: -12, -30, 31
 		DepthSpriteOffset: -12, 0
 
 ^city3x5:
 	Inherits: ^cabase
 	Defaults:
-		Offset: 24, -48, 48
+		Offset: 24, -48, 49
 		DepthSpriteOffset: 24, 0
 
 ^city4x2:
 	Inherits: ^cabase
 	Defaults:
-		Offset: -24, -36, 36
+		Offset: -24, -36, 37
 		DepthSpriteOffset: -24, 48
 
 ^city4x3:
 	Inherits: ^cabase
 	Defaults:
-		Offset: -12, -42, 42
+		Offset: -12, -42, 43
 		DepthSpriteOffset: -12, 0
 
 city01:
 	Inherits: ^city4x2
 	Defaults:
-		Offset: -12, -30, 36
+		Offset: -12, -30, 31
 
 city02:
 	Inherits: ^city2x3
@@ -474,7 +474,7 @@ city06:
 city07:
 	Inherits: ^city4x2
 	Defaults:
-		Offset: -12, -30, 36
+		Offset: -12, -30, 31
 
 city08:
 	Inherits: ^city2x2
@@ -503,7 +503,7 @@ city15:
 city16:
 	Inherits: ^city4x2
 	Defaults:
-		Offset: -24, -30, 36
+		Offset: -24, -30, 31
 
 city17:
 	Inherits: ^city4x3
@@ -525,7 +525,7 @@ city22:
 
 ctdam:
 	Defaults:
-		Offset: 36,-42, 42
+		Offset: 36, -42, 43
 	idle:
 	damaged-idle:
 		Start: 1
@@ -558,7 +558,7 @@ ctdam:
 ctvega:
 	Defaults:
 		DepthSprite: isodepth.shp
-		Offset: 0, -48, 48
+		Offset: 0, -48, 49
 	idle:
 		ShadowStart: 3
 	damaged-idle:
@@ -573,7 +573,7 @@ ctvega:
 		ShadowStart: 2
 		DepthSprite: isodepth.shp
 		UseTilesetCode: true
-		Offset: 0, -24, 24
+		Offset: 0, -24, 25
 
 gaoldcc1:
 	Inherits: ^gaoldcc
@@ -598,7 +598,7 @@ gakodk:
 		DepthSprite: isodepth.shp
 		DepthSpriteOffset: -24, 0
 		UseTilesetCode: true
-		Offset: -24, -36, 36
+		Offset: -24, -36, 37
 	idle:
 		ShadowStart: 3
 	damaged-idle:
@@ -650,7 +650,7 @@ gakodk:
 gaspot:
 	Defaults:
 		DepthSprite: isodepth.shp
-		Offset: 0, -12, 12
+		Offset: 0, -12, 13
 		UseTilesetCode: true
 	idle:
 		ShadowStart: 3
@@ -689,7 +689,7 @@ gaspot:
 galite:
 	Defaults:
 		DepthSprite: isodepth.shp
-		Offset: 0, -12, 12
+		Offset: 0, -12, 13
 		UseTilesetCode: true
 	idle: gtlite
 		ShadowStart: 2
@@ -722,7 +722,7 @@ namntk:
 		DepthSprite: isodepth.shp
 		DepthSpriteOffset: 24, 0
 		UseTilesetCode: true
-		Offset: 24, -24, 24
+		Offset: 24, -24, 25
 	idle:
 		ShadowStart: 3
 	damaged-idle:
@@ -742,7 +742,7 @@ namntk:
 ntpyra:
 	Defaults:
 		DepthSprite: isodepth.shp
-		Offset: 0, -42, 42
+		Offset: 0, -42, 43
 	idle:
 		ShadowStart: 3
 	damaged-idle:
@@ -762,5 +762,5 @@ ntpyra:
 ufo:
 	idle: ufo.tem
 		DepthSprite: isodepth.shp
-		Offset: -24, -60, 60
+		Offset: -24, -60, 61
 		AddExtension: false

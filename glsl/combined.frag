@@ -289,7 +289,7 @@ void main()
 
 	if (EnableDepthPreview)
 	{
-		float x = 1.0 - gl_FragDepth;
+		float x = (1.0 - gl_FragDepth) * 4.0;
 		float r = clamp(jet_r(x), 0.0, 1.0);
 		float g = clamp(jet_g(x), 0.0, 1.0);
 		float b = clamp(jet_b(x), 0.0, 1.0);

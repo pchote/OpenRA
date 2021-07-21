@@ -4,7 +4,7 @@
 		UseTilesetExtension: true
 		Start: 1
 		ZRamp: 1
-		Offset: 0, 0, 0.5
+		Offset: 0, 0, 2
 
 lobrdg_a:
 	Inherits: ^bridge

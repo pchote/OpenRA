@@ -16,6 +16,8 @@ Visibility: Lobby
 
 Categories: Conquest, Original TS Map, Playable
 
+Translations:
+
 Players:
 	PlayerReference@Neutral:
 		Name: Neutral
@@ -1743,6 +1745,57 @@ Actors:
 	Actor541: bridge1
 		Owner: Neutral
 		Location: 180,4
+	Actor542: bboard01
+		Owner: Neutral
+		Location: 65,39
+	Actor543: bboard02
+		Owner: Neutral
+		Location: 65,37
+	Actor544: bboard03
+		Owner: Neutral
+		Location: 65,35
+	Actor545: bboard04
+		Owner: Neutral
+		Location: 65,33
+	Actor546: bboard05
+		Owner: Neutral
+		Location: 65,31
+	Actor547: bboard06
+		Owner: Neutral
+		Location: 65,41
+	Actor548: bboard07
+		Owner: Neutral
+		Location: 65,28
+	Actor549: bboard08
+		Owner: Neutral
+		Location: 65,43
+	Actor550: bboard09
+		Owner: Neutral
+		Location: 55,29
+	Actor551: bboard10
+		Owner: Neutral
+		Location: 58,29
+	Actor552: bboard11
+		Owner: Neutral
+		Location: 58,23
+	Actor553: bboard12
+		Owner: Neutral
+		Location: 61,23
+	Actor554: bboard13
+		Owner: Neutral
+		Location: 55,33
+	Actor555: bboard14
+		Owner: Neutral
+		Location: 58,34
+	Actor556: bboard15
+		Owner: Neutral
+		Location: 60,32
+	Actor557: bboard16
+		Owner: Neutral
+		Location: 60,39
+	Actor558: city01
+		Owner: Neutral
+		Location: 79,31
 
 Rules:
 	World:
