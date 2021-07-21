@@ -363,6 +363,10 @@ namespace OpenRA
 				}
 			}
 
+			var kdeDesktopFile = args.GetValue("Engine.KDEDesktopFile", null);
+			if (!string.IsNullOrEmpty(kdeDesktopFile))
+				Renderer.Window.SetKdeDesktopFile(kdeDesktopFile);
+
 			Nat.Initialize();
 
 			var modSearchArg = args.GetValue("Engine.ModSearchPaths", null);
