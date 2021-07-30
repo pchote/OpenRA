@@ -677,7 +677,11 @@ namespace OpenRA.Mods.Common.Traits
 		IEnumerable<IRenderable> RenderPreview(WorldRenderer wr, TerrainTemplateInfo template, WPos origin);
 	}
 
-	public interface IResourceLayerInfo : ITraitInfoInterface { }
+	public interface IResourceLayerInfo : ITraitInfoInterface
+	{
+		bool TryGetTerrainType(string resourceType, out string terrainType);
+		bool TryGetResourceIndex(string resourceType, out byte index);
+	}
 
 	[RequireExplicitImplementation]
 	public interface IResourceLayer

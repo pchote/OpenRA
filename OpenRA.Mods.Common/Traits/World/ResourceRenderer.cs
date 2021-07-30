@@ -20,7 +20,7 @@ namespace OpenRA.Mods.Common.Traits
 {
 	[TraitLocation(SystemActors.World | SystemActors.EditorWorld)]
 	[Desc("Visualizes the state of the `ResourceLayer`.", " Attach this to the world actor.")]
-	public class ResourceRendererInfo : TraitInfo, Requires<IResourceLayerInfo>
+	public class ResourceRendererInfo : TraitInfo, Requires<IResourceLayerInfo>, IMapPreviewSignatureInfo
 	{
 		public class ResourceTypeInfo
 		{
@@ -59,6 +59,34 @@ namespace OpenRA.Mods.Common.Traits
 					ret[r.Key] = new ResourceTypeInfo(r.Value);
 
 			return ret;
+		}
+
+		void IMapPreviewSignatureInfo.PopulateMapPreviewSignatureCells(Map map, ActorInfo ai, ActorReference s, List<(MPos, Color)> destinationBuffer)
+		{
+			var resourceLayer = ai.TraitInfoOrDefault<IResourceLayerInfo>();
+			if (resourceLayer == null)
+				return;
+
+			var terrainInfo = map.Rules.TerrainInfo;
+			var colors = new Dictionary<byte, Color>();
+			foreach (var r in ResourceTypes.Keys)
+			{
+				if (!resourceLayer.TryGetResourceIndex(r, out var resourceIndex) || !resourceLayer.TryGetTerrainType(r, out var terrainType))
+					continue;
+
+				var info = terrainInfo.TerrainTypes[terrainInfo.GetTerrainIndex(terrainType)];
+				colors.Add(resourceIndex, info.Color);
+			}
+
+			for (var i = 0; i < map.MapSize.X; i++)
+			{
+				for (var j = 0; j < map.MapSize.Y; j++)
+				{
+					var cell = new MPos(i, j);
+					if (colors.TryGetValue(map.Resources[cell].Type, out var color))
+						destinationBuffer.Add((cell, color));
+				}
+			}
 		}
 
 		public override object Create(ActorInitializer init) { return new ResourceRenderer(init.Self, this); }

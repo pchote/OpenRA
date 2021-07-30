@@ -20,7 +20,7 @@ using OpenRA.Traits;
 namespace OpenRA.Mods.Cnc.Traits
 {
 	[Desc("Renders the Tiberian Sun Vein resources.", "Attach this to the world actor")]
-	public class TSVeinsRendererInfo : TraitInfo, Requires<IResourceLayerInfo>
+	public class TSVeinsRendererInfo : TraitInfo, Requires<IResourceLayerInfo>, IMapPreviewSignatureInfo
 	{
 		[FieldLoader.Require]
 		[Desc("Resource type used for veins.")]
@@ -44,6 +44,29 @@ namespace OpenRA.Mods.Cnc.Traits
 		[ActorReference]
 		[Desc("Actor types that should be treated as veins for adjacency.")]
 		public readonly HashSet<string> VeinholeActors = new HashSet<string> { };
+
+		void IMapPreviewSignatureInfo.PopulateMapPreviewSignatureCells(Map map, ActorInfo ai, ActorReference s, List<(MPos, Color)> destinationBuffer)
+		{
+			var resourceLayer = ai.TraitInfoOrDefault<IResourceLayerInfo>();
+			if (resourceLayer == null)
+				return;
+
+			if (!resourceLayer.TryGetResourceIndex(ResourceType, out var resourceIndex) || !resourceLayer.TryGetTerrainType(ResourceType, out var terrainType))
+				return;
+
+			var terrainInfo = map.Rules.TerrainInfo;
+			var info = terrainInfo.TerrainTypes[terrainInfo.GetTerrainIndex(terrainType)];
+
+			for (var i = 0; i < map.MapSize.X; i++)
+			{
+				for (var j = 0; j < map.MapSize.Y; j++)
+				{
+					var cell = new MPos(i, j);
+					if (map.Resources[cell].Type == resourceIndex)
+						destinationBuffer.Add((cell, info.Color));
+				}
+			}
+		}
 
 		public override object Create(ActorInitializer init) { return new TSVeinsRenderer(init.Self, this); }
 	}
