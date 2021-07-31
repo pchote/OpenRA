@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using OpenRA.Primitives;
+using OpenRA.Traits;
 
 namespace OpenRA.Graphics
 {
@@ -62,6 +63,8 @@ namespace OpenRA.Graphics
 
 		ProjectedCellRegion allCells;
 		bool allCellsDirty = true;
+
+		readonly Rectangle shroudBounds;
 
 		WorldViewport lastViewportDistance;
 
@@ -159,6 +162,7 @@ namespace OpenRA.Graphics
 			var grid = Game.ModData.Manifest.Get<MapGrid>();
 			viewportSizes = Game.ModData.Manifest.Get<WorldViewportSizes>();
 			graphicSettings = Game.Settings.Graphics;
+			shroudBounds = map.Rules.Actors[SystemActors.Player].TraitInfoOrDefault<ShroudInfo>().GetRenderBounds(map);
 
 			// Calculate map bounds in world-px
 			if (wr.World.Type == WorldType.Editor)
@@ -365,25 +369,26 @@ namespace OpenRA.Graphics
 			var map = worldRenderer.World.Map;
 
 			// Calculate the projected cell position at the corners of the visible area
-			var tl = (PPos)map.CellContaining(worldRenderer.ProjectedPosition(TopLeft)).ToMPos(map);
-			var br = (PPos)map.CellContaining(worldRenderer.ProjectedPosition(BottomRight)).ToMPos(map);
+			var tl = map.CellContaining(worldRenderer.ProjectedPosition(TopLeft)).ToMPos(map);
+			var br = map.CellContaining(worldRenderer.ProjectedPosition(BottomRight)).ToMPos(map);
+
+			// Clamp to the visible map bounds, if requested
+			// This may be larger than the standard map bounds used with map.Clamp etc
+			if (insideBounds)
+			{
+				tl = tl.Clamp(shroudBounds);
+				br = br.Clamp(shroudBounds);
+			}
 
 			// RectangularIsometric maps don't have straight edges, and so we need an additional
 			// cell margin to include the cells that are half visible on each edge.
 			if (map.Grid.Type == MapGridType.RectangularIsometric)
 			{
-				tl = new PPos(tl.U - 1, tl.V - 1);
-				br = new PPos(br.U + 1, br.V + 1);
+				tl = new MPos(tl.U - 1, tl.V - 1);
+				br = new MPos(br.U + 1, br.V + 1);
 			}
 
-			// Clamp to the visible map bounds, if requested
-			if (insideBounds)
-			{
-				tl = map.Clamp(tl);
-				br = map.Clamp(br);
-			}
-
-			return new ProjectedCellRegion(map, tl, br);
+			return new ProjectedCellRegion(map, (PPos)tl, (PPos)br);
 		}
 
 		public ProjectedCellRegion RenderableRegion

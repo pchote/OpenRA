@@ -48,6 +48,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		protected PPos[] ProjectedCells(Actor self)
 		{
+			// TODO: Get the expanded region from Shroud
 			return self.World.Map.ProjectedCells;
 		}
 

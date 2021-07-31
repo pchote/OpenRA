@@ -90,7 +90,7 @@ namespace OpenRA.Traits
 
 			// Consider all cells inside the map area (ignoring the current map bounds)
 			Footprint = footprint
-				.Where(m => shroud.Contains(m))
+				.Where(m => shroud.IsValid(m))
 				.ToArray();
 
 			if (Footprint.Length == 0)
@@ -102,7 +102,7 @@ namespace OpenRA.Traits
 					.F(actor.Info.Name,
 					actor.Location.ToString(),
 					footprint.Select(p => p.ToString()).JoinWith("|"),
-					footprint.Select(p => shroud.Contains(p).ToString()).JoinWith("|")));
+					footprint.Select(p => shroud.IsValid(p).ToString()).JoinWith("|")));
 
 			CenterPosition = actor.CenterPosition;
 
