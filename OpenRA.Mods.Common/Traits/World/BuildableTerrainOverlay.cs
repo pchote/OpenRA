@@ -69,22 +69,15 @@ namespace OpenRA.Mods.Common.Traits
 
 			world.Map.Tiles.CellEntryChanged += UpdateTerrainCell;
 			world.Map.CustomTerrain.CellEntryChanged += UpdateTerrainCell;
-
-			var cells = w.Map.AllCells.Where(c => w.Map.Contains(c) &&
-				!info.AllowedTerrainTypes.Contains(w.Map.GetTerrainInfo(c).Type)).ToHashSet();
-
 			palette = wr.Palette(info.Palette);
 
-			foreach (var cell in cells)
+			foreach (var cell in w.Map.AllCells)
 				UpdateTerrainCell(cell);
 		}
 
 		void UpdateTerrainCell(CPos cell)
 		{
-			if (!world.Map.Contains(cell))
-				return;
-
-			if (!info.AllowedTerrainTypes.Contains(world.Map.GetTerrainInfo(cell).Type))
+			if (!world.Map.Contains(cell) || !info.AllowedTerrainTypes.Contains(world.Map.GetTerrainInfo(cell).Type))
 				render.Update(cell, disabledSprite, palette, 1f, info.Alpha);
 		}
 
