@@ -1227,13 +1227,13 @@ namespace OpenRA
 
 		public CPos ChooseClosestMatchingEdgeCell(CPos cell, Func<CPos, bool> match)
 		{
-			return AllEdgeCells.OrderBy(c => (cell - c).Length).FirstOrDefault(c => match(c));
+			return AllEdgeCells.OrderBy(c => (cell - c).Length).FirstOrDefault(match);
 		}
 
 		List<CPos> UpdateEdgeCells()
 		{
+			List<MPos> unProjected;
 			var edgeCells = new List<CPos>();
-			var unProjected = new List<MPos>();
 			var bottom = Bounds.Bottom - 1;
 			for (var u = Bounds.Left; u < Bounds.Right; u++)
 			{
