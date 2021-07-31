@@ -56,7 +56,7 @@ namespace OpenRA.Mods.D2k.Traits
 
 		void IWorldLoaded.WorldLoaded(World w, WorldRenderer wr)
 		{
-			render = new TerrainSpriteLayer(w, wr, terrainRenderer.MissingTile, BlendMode.Alpha, wr.World.Type != WorldType.Editor);
+			render = new TerrainSpriteLayer(w, wr, terrainRenderer.MissingTile, BlendMode.Alpha);
 			paletteReference = wr.Palette(info.Palette);
 		}
 
@@ -127,7 +127,7 @@ namespace OpenRA.Mods.D2k.Traits
 
 		void IRenderOverlay.Render(WorldRenderer wr)
 		{
-			render.Draw(wr.Viewport);
+			render.Draw(wr.Viewport.RenderableRegion);
 		}
 
 		event Action<CPos> IRadarTerrainLayer.CellEntryChanged
