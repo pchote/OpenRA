@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using OpenRA.Primitives;
+using OpenRA.Traits;
 
 namespace OpenRA.Graphics
 {
@@ -62,6 +63,8 @@ namespace OpenRA.Graphics
 
 		ProjectedCellRegion allCells;
 		bool allCellsDirty = true;
+
+		readonly Rectangle shroudBounds;
 
 		WorldViewport lastViewportDistance;
 
@@ -159,6 +162,7 @@ namespace OpenRA.Graphics
 			var grid = Game.ModData.Manifest.Get<MapGrid>();
 			viewportSizes = Game.ModData.Manifest.Get<WorldViewportSizes>();
 			graphicSettings = Game.Settings.Graphics;
+			shroudBounds = map.Rules.Actors[SystemActors.Player].TraitInfoOrDefault<ShroudInfo>().GetRenderBounds(map);
 
 			// Calculate map bounds in world-px
 			if (wr.World.Type == WorldType.Editor)
@@ -377,10 +381,11 @@ namespace OpenRA.Graphics
 			}
 
 			// Clamp to the visible map bounds, if requested
+			// This may be larger than the standard map bounds used with map.Clamp etc
 			if (insideBounds)
 			{
-				tl = map.Clamp(tl);
-				br = map.Clamp(br);
+				tl = tl.Clamp(shroudBounds);
+				br = br.Clamp(shroudBounds);
 			}
 
 			return new ProjectedCellRegion(map, tl, br);

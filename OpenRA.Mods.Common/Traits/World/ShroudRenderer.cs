@@ -99,6 +99,8 @@ namespace OpenRA.Mods.Common.Traits
 		readonly Edges notVisibleEdges;
 		readonly byte variantStride;
 		readonly byte[] edgesToSpriteIndexOffset;
+		readonly Rectangle renderBounds;
+		readonly PPos[] renderCells;
 
 		readonly CellLayer<TileInfo> tileInfos;
 		readonly CellLayer<bool> cellsDirty;
@@ -133,6 +135,11 @@ namespace OpenRA.Mods.Common.Traits
 
 			cellsDirty = new CellLayer<bool>(map);
 			anyCellDirty = true;
+
+			renderBounds = map.Rules.Actors[SystemActors.Player].TraitInfoOrDefault<ShroudInfo>().GetRenderBounds(map);
+			var tl = new PPos(renderBounds.Left, renderBounds.Top);
+			var br = new PPos(renderBounds.Right - 1, renderBounds.Bottom - 1);
+			renderCells = new ProjectedCellRegion(map, tl, br).ToArray();
 
 			// Load sprite variants
 			var variantCount = info.ShroudVariants.Length;
@@ -174,6 +181,11 @@ namespace OpenRA.Mods.Common.Traits
 			world.RenderPlayerChanged += WorldOnRenderPlayerChanged;
 		}
 
+		bool InRenderBounds(PPos puv)
+		{
+			return renderBounds.Contains(puv.U, puv.V);
+		}
+
 		void IWorldLoaded.WorldLoaded(World w, WorldRenderer wr)
 		{
 			// Initialize tile cache
@@ -190,9 +202,9 @@ namespace OpenRA.Mods.Common.Traits
 			if (w.Type == WorldType.Editor)
 				visibleUnderShroud = _ => true;
 			else
-				visibleUnderShroud = puv => map.Contains(puv);
+				visibleUnderShroud = InRenderBounds;
 
-			visibleUnderFog = puv => map.Contains(puv);
+			visibleUnderFog = InRenderBounds;
 
 			var shroudBlend = shroudSprites[0].Sprite.BlendMode;
 			if (shroudSprites.Any(s => s.Sprite.BlendMode != shroudBlend))
@@ -257,8 +269,8 @@ namespace OpenRA.Mods.Common.Traits
 				}
 				else
 				{
-					visibleUnderShroud = puv => map.Contains(puv);
-					visibleUnderFog = puv => map.Contains(puv);
+					visibleUnderShroud = InRenderBounds;
+					visibleUnderFog = InRenderBounds;
 				}
 
 				shroud = newShroud;
@@ -306,7 +318,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		void IRenderShroud.RenderShroud(WorldRenderer wr)
 		{
-			UpdateShroud(map.ProjectedCells);
+			UpdateShroud(renderCells);
 			fogLayer.Draw(wr.Viewport.AllVisibleCells);
 			shroudLayer.Draw(wr.Viewport.AllVisibleCells);
 		}
@@ -318,7 +330,7 @@ namespace OpenRA.Mods.Common.Traits
 			anyCellDirty = true;
 			var cell = uv.ToCPos(map);
 			foreach (var direction in CVec.Directions)
-				if (map.Contains((PPos)(cell + direction).ToMPos(map)))
+				if (InRenderBounds((PPos)(cell + direction).ToMPos(map)))
 					cellsDirty[cell + direction] = true;
 		}
 

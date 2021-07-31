@@ -89,8 +89,9 @@ namespace OpenRA.Mods.Common.Traits
 			lightSources.Add(token, source);
 			partitionedLightSources.Add(source, bounds);
 
+			// Cells outside the map bounds may be visible, so we must update these too
 			if (CellChanged != null)
-				foreach (var c in map.FindTilesInCircle(source.Cell, (source.Range.Length + 1023) / 1024))
+				foreach (var c in map.FindTilesInCircle(source.Cell, (source.Range.Length + 1023) / 1024, true))
 					CellChanged(c.ToMPos(map));
 
 			return token;
@@ -103,8 +104,10 @@ namespace OpenRA.Mods.Common.Traits
 
 			lightSources.Remove(token);
 			partitionedLightSources.Remove(source);
+
+			// Note: Some cells outside the standard map bounds may be visible
 			if (CellChanged != null)
-				foreach (var c in map.FindTilesInCircle(source.Cell, (source.Range.Length + 1023) / 1024))
+				foreach (var c in map.FindTilesInAnnulus(source.Cell, 0, (source.Range.Length + 1023) / 1024, true))
 					CellChanged(c.ToMPos(map));
 		}
 
