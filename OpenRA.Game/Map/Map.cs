@@ -798,7 +798,8 @@ namespace OpenRA
 			}
 			else
 			{
-				// If the mod uses flat & rectangular maps, ToMPos and Contains(MPos) create unnecessary cost.
+				// If the mod uses flat & rectangular maps, CPos == MPos == PPos,
+				// so the ToMPos and Contains(MPos) create unnecessary cost.
 				// Just check if CPos is within map bounds.
 				if (Grid.MaximumTerrainHeight == 0)
 					return Bounds.Contains(cell.X, cell.Y);
@@ -809,17 +810,14 @@ namespace OpenRA
 
 		public bool Contains(MPos uv)
 		{
-			// The first check ensures that the cell is within the valid map region, avoiding
-			// potential crashes in deeper code.  All CellLayers have the same geometry, and
-			// CustomTerrain is convenient.
-			return CustomTerrain.Contains(uv) && ContainsAllProjectedCellsCovering(uv);
+			return ContainsAllProjectedCellsCovering(uv);
 		}
 
 		bool ContainsAllProjectedCellsCovering(MPos uv)
 		{
-			// PERF: Checking the bounds directly here is the same as calling Contains((PPos)uv) but saves an allocation
+			// PERF: Bypass creating an unnecessary (PPos)uv cast/allocation by passing U and V directly.
 			if (Grid.MaximumTerrainHeight == 0)
-				return Bounds.Contains(uv.U, uv.V);
+				return ProjectedContainsInner(uv.U, uv.V);
 
 			// If the cell has no valid projection, then we're off the map.
 			var projectedCells = ProjectedCellsCovering(uv);
@@ -835,7 +833,21 @@ namespace OpenRA
 
 		public bool Contains(PPos puv)
 		{
-			return Bounds.Contains(puv.U, puv.V);
+			return ProjectedContainsInner(puv.U, puv.V);
+		}
+
+		bool ProjectedContainsInner(int pu, int pv)
+		{
+			if (Grid.Type == MapGridType.RectangularIsometric)
+			{
+				// Odd indexed rows in the projected cell layer are offset by half a cell to the right,
+				// and therefore have one less cell within the projected bounds than even indexed rows.
+				// This line is equivalent to Bounds.Contains(pu, pv), but with an amended Bounds.Right
+				// check to account for this literal edge case.
+				return pu >= Bounds.Left && pu < Bounds.Right - pv % 2 && pv >= Bounds.Top && pv < Bounds.Bottom;
+			}
+
+			return Bounds.Contains(pu, pv);
 		}
 
 		public WPos CenterOfCell(CPos cell)
@@ -1059,14 +1071,20 @@ namespace OpenRA
 
 		public CPos Clamp(CPos cell)
 		{
+			if (Grid.Type == MapGridType.Rectangular && Grid.MaximumTerrainHeight == 0)
+			{
+				// PERF: If the mod uses flat & rectangular maps, CPos == MPos == PPos,
+				// so we can bypass all the projections and clamp on CPos directly.
+				return new CPos(
+					cell.X.Clamp(Bounds.Left, Bounds.Right - 1),
+					cell.Y.Clamp(Bounds.Top, Bounds.Bottom - 1));
+			}
+
 			return Clamp(cell.ToMPos(this)).ToCPos(this);
 		}
 
 		public MPos Clamp(MPos uv)
 		{
-			if (Grid.MaximumTerrainHeight == 0)
-				return (MPos)Clamp((PPos)uv);
-
 			// Already in bounds, so don't need to do anything.
 			if (ContainsAllProjectedCellsCovering(uv))
 				return uv;
@@ -1079,8 +1097,8 @@ namespace OpenRA
 			//
 			// Handling these cases properly requires abuse of our knowledge of the projection transform.
 			//
-			// The U coordinate doesn't change significantly in the projection, so clamp this
-			// straight away and ensure the point is somewhere inside the map
+			// The U coordinate doesn't change significantly in the projection, so clamp this straight away
+			// to ensure the point is somewhere inside the CellLayer (but not necessarily the playable map)
 			uv = cellProjection.Clamp(new MPos(uv.U.Clamp(Bounds.Left, Bounds.Right), uv.V));
 
 			// Project this guessed cell and take the first available cell
@@ -1124,8 +1142,18 @@ namespace OpenRA
 
 		public PPos Clamp(PPos puv)
 		{
-			var bounds = new Rectangle(Bounds.X, Bounds.Y, Bounds.Width - 1, Bounds.Height - 1);
-			return puv.Clamp(bounds);
+			if (Grid.Type == MapGridType.RectangularIsometric)
+			{
+				// Odd indexed rows in the projected cell layer are offset by half a cell to the right,
+				// and therefore have one less cell within the projected bounds than even indexed rows.
+				return new PPos(
+					puv.U.Clamp(Bounds.Left, Bounds.Right - 1 - puv.V % 2),
+					puv.V.Clamp(Bounds.Top, Bounds.Bottom - 1));
+			}
+
+			return new PPos(
+				puv.U.Clamp(Bounds.Left, Bounds.Right - 1),
+				puv.V.Clamp(Bounds.Top, Bounds.Bottom - 1));
 		}
 
 		public CPos ChooseRandomCell(MersenneTwister rand)
@@ -1156,7 +1184,10 @@ namespace OpenRA
 			if (allProjected.Any())
 			{
 				var puv = allProjected.First();
-				var horizontalBound = ((puv.U - Bounds.Left) < Bounds.Width / 2) ? Bounds.Left : Bounds.Right;
+
+				// Odd indexed rows in the projected cell layer are offset by half a cell to the right,
+				// and therefore have one less cell within the projected bounds than even indexed rows.
+				var horizontalBound = ((puv.U - Bounds.Left) < Bounds.Width / 2) ? Bounds.Left : Bounds.Right - puv.V % 2;
 				var verticalBound = ((puv.V - Bounds.Top) < Bounds.Height / 2) ? Bounds.Top : Bounds.Bottom;
 
 				var du = Math.Abs(horizontalBound - puv.U);
@@ -1221,7 +1252,9 @@ namespace OpenRA
 				if (unProjected.Any())
 					edgeCells.Add((v == bottom ? unProjected.MaxBy(x => x.V) : unProjected.MinBy(x => x.V)).ToCPos(Grid.Type));
 
-				unProjected = Unproject(new PPos(Bounds.Right - 1, v));
+				// Odd indexed rows in the projected cell layer are offset by half a cell to the right,
+				// and therefore have one less cell within the projected bounds than even indexed rows.
+				unProjected = Unproject(new PPos(Bounds.Right - 1 - v % 2, v));
 				if (unProjected.Any())
 					edgeCells.Add((v == bottom ? unProjected.MaxBy(x => x.V) : unProjected.MinBy(x => x.V)).ToCPos(Grid.Type));
 			}
