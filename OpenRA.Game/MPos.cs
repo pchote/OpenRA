@@ -79,12 +79,6 @@ namespace OpenRA
 		public static explicit operator MPos(PPos puv) { return new MPos(puv.U, puv.V); }
 		public static explicit operator PPos(MPos uv) { return new PPos(uv.U, uv.V); }
 
-		public PPos Clamp(Rectangle r)
-		{
-			return new PPos(Math.Min(r.Right, Math.Max(U, r.Left)),
-				Math.Min(r.Bottom, Math.Max(V, r.Top)));
-		}
-
 		public override int GetHashCode() { return U.GetHashCode() ^ V.GetHashCode(); }
 
 		public bool Equals(PPos other) { return other == this; }
