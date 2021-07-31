@@ -262,7 +262,7 @@ namespace OpenRA.Graphics
 				Game.Renderer.WorldSpriteRenderer.SetDepthPreviewEnabled(lastDepthPreviewEnabled);
 			}
 
-			var bounds = Viewport.GetScissorBounds(World.Type != WorldType.Editor);
+			var bounds = Viewport.GetScissorBounds();
 			Game.Renderer.EnableScissor(bounds);
 
 			if (enableDepthBuffer)

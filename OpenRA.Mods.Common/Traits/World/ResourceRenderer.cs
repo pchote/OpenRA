@@ -107,7 +107,7 @@ namespace OpenRA.Mods.Common.Traits
 				{
 					var first = resourceVariants.First().Value.GetSprite(0);
 					var emptySprite = new Sprite(first.Sheet, Rectangle.Empty, TextureChannel.Alpha);
-					spriteLayer = new TerrainSpriteLayer(w, wr, emptySprite, first.BlendMode, wr.World.Type != WorldType.Editor);
+					spriteLayer = new TerrainSpriteLayer(w, wr, emptySprite, first.BlendMode);
 				}
 
 				if (shadowLayer == null)
@@ -117,7 +117,7 @@ namespace OpenRA.Mods.Common.Traits
 					{
 						var first = firstWithShadow.GetShadow(0, WAngle.Zero);
 						var emptySprite = new Sprite(first.Sheet, Rectangle.Empty, TextureChannel.Alpha);
-						shadowLayer = new TerrainSpriteLayer(w, wr, emptySprite, first.BlendMode, wr.World.Type != WorldType.Editor);
+						shadowLayer = new TerrainSpriteLayer(w, wr, emptySprite, first.BlendMode);
 					}
 				}
 
@@ -169,8 +169,8 @@ namespace OpenRA.Mods.Common.Traits
 
 		void IRenderOverlay.Render(WorldRenderer wr)
 		{
-			shadowLayer?.Draw(wr.Viewport);
-			spriteLayer.Draw(wr.Viewport);
+			shadowLayer?.Draw(wr.Viewport.RenderableRegion);
+			spriteLayer.Draw(wr.Viewport.RenderableRegion);
 		}
 
 		void ITickRender.TickRender(WorldRenderer wr, Actor self)

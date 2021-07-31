@@ -343,10 +343,10 @@ namespace OpenRA.Graphics
 		}
 
 		// Rectangle (in viewport coords) that contains things to be drawn
-		public Rectangle GetScissorBounds(bool insideBounds)
+		public Rectangle GetScissorBounds()
 		{
 			// Visible rectangle in world coordinates (expanded to the corners of the cells)
-			var bounds = insideBounds ? VisibleCellsInsideBounds : AllVisibleCells;
+			var bounds = RenderableRegion;
 			var map = worldRenderer.World.Map;
 			var ctl = map.CenterOfCell(((MPos)bounds.TopLeft).ToCPos(map)) - new WVec(512, 512, 0);
 			var cbr = map.CenterOfCell(((MPos)bounds.BottomRight).ToCPos(map)) + new WVec(512, 512, 0);
@@ -386,10 +386,13 @@ namespace OpenRA.Graphics
 			return new ProjectedCellRegion(map, tl, br);
 		}
 
-		public ProjectedCellRegion VisibleCellsInsideBounds
+		public ProjectedCellRegion RenderableRegion
 		{
 			get
 			{
+				if (worldRenderer.World.Type != WorldType.Editor)
+					return AllVisibleCells;
+
 				if (cellsDirty)
 				{
 					cells = CalculateVisibleCells(true);

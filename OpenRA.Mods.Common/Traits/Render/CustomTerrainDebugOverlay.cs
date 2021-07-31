@@ -63,7 +63,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (!Enabled)
 				yield break;
 
-			foreach (var uv in wr.Viewport.VisibleCellsInsideBounds.CandidateMapCoords)
+			foreach (var uv in wr.Viewport.AllVisibleCells.CandidateMapCoords)
 			{
 				if (self.World.ShroudObscures(uv))
 					continue;

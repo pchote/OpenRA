@@ -123,7 +123,7 @@ namespace OpenRA.Mods.Common.Traits
 					+ "Try using different smudge types for smudges that use different blend modes.");
 
 			paletteReference = wr.Palette(Info.Palette);
-			render = new TerrainSpriteLayer(w, wr, emptySprite, blendMode, w.Type != WorldType.Editor);
+			render = new TerrainSpriteLayer(w, wr, emptySprite, blendMode);
 
 			// Add map smudges
 			foreach (var kv in Info.InitialSmudges)
@@ -216,7 +216,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		void IRenderOverlay.Render(WorldRenderer wr)
 		{
-			render.Draw(wr.Viewport);
+			render.Draw(wr.Viewport.RenderableRegion);
 		}
 
 		void INotifyActorDisposing.Disposing(Actor self)
