@@ -256,6 +256,12 @@ namespace OpenRA.Mods.Cnc.UtilityCommands
 
 		static readonly string[] CreepActors = { "DOGGIE", "VISC_SML", "VISC_LRG", "JFISH" };
 
+		// The top few map rows on the original game are visible but not part of the interactable map area.
+		// These are imported as being outside the map bounds but within the shroud visible margin,
+		// which requires some extra padding to make the PPos calculations work.
+		// The first value is added to the left, right, and bottom edges. The second value is added to the top.
+		static readonly int2 Margin = new int2(1, 3);
+
 		[Desc("FILENAME", "Convert a Tiberian Sun map to the OpenRA format.")]
 		void IUtilityCommand.Run(Utility utility, string[] args)
 		{
@@ -274,11 +280,11 @@ namespace OpenRA.Mods.Cnc.UtilityCommands
 			if (!utility.ModData.DefaultTerrainInfo.TryGetValue(tileset, out var terrainInfo))
 				throw new InvalidDataException($"Unknown tileset {tileset}");
 
-			var map = new Map(Game.ModData, terrainInfo, size.Width, size.Height)
+			var map = new Map(Game.ModData, terrainInfo, size.Width + 2 * Margin.X, size.Height + Margin.X + Margin.Y)
 			{
 				Title = basic.GetValue("Name", Path.GetFileNameWithoutExtension(filename)),
 				Author = "Westwood Studios",
-				Bounds = new Rectangle(iniBounds[0], iniBounds[1], iniBounds[2], 2 * iniBounds[3] + 2 * iniBounds[1]),
+				Bounds = new Rectangle(iniBounds[0] + Margin.X, 2 * iniBounds[1] + Margin.Y, iniBounds[2], 2 * iniBounds[3] + 2),
 				RequiresMod = utility.ModData.Manifest.Id
 			};
 
@@ -297,8 +303,10 @@ namespace OpenRA.Mods.Cnc.UtilityCommands
 			var mapPlayers = new MapPlayers(map.Rules, spawnCount);
 			map.PlayerDefinitions = mapPlayers.ToMiniYaml();
 
-			var dest = Path.GetFileNameWithoutExtension(args[1]) + ".oramap";
-			map.Save(ZipFileLoader.Create(dest));
+			var dest = Path.GetFileNameWithoutExtension(args[1]);
+			map.Save(new Folder(dest));
+			//var dest = Path.GetFileNameWithoutExtension(args[1]) + ".oramap";
+			//map.Save(ZipFileLoader.Create(dest));
 			Console.WriteLine(dest + " saved.");
 		}
 
@@ -335,6 +343,12 @@ namespace OpenRA.Mods.Cnc.UtilityCommands
 			}
 		}
 
+		static MPos ToMPos(int dx, int dy)
+		{
+			// Convert TS relative position to OpenRA MPos, accounting for map margins
+			return new MPos(Margin.X + (dx + Margin.Y % 2) / 2, Margin.Y + dy);
+		}
+
 		static void ReadTiles(Map map, IniFile file, int2 fullSize)
 		{
 			var terrainInfo = (ITemplatedTerrainInfo)Game.ModData.DefaultTerrainInfo[map.Tileset];
@@ -357,18 +371,17 @@ namespace OpenRA.Mods.Cnc.UtilityCommands
 				var z = mf.ReadUInt8();
 				/*var zero2 = */mf.ReadUInt8();
 
-				int dx = rx - ry + fullSize.X - 1;
-				int dy = rx + ry - fullSize.X - 1;
-				var mapCell = new MPos(dx / 2, dy);
-				var cell = mapCell.ToCPos(map);
+				var dx = rx - ry + fullSize.X - 1;
+				var dy = rx + ry - fullSize.X - 1;
+				var uv = ToMPos(dx, dy);
 
-				if (map.Tiles.Contains(cell))
+				if (map.Tiles.Contains(uv))
 				{
 					if (!terrainInfo.Templates.ContainsKey(tilenum))
 						tilenum = subtile = 0;
 
-					map.Tiles[cell] = new TerrainTile(tilenum, subtile);
-					map.Height[cell] = z;
+					map.Tiles[uv] = new TerrainTile(tilenum, subtile);
+					map.Height[uv] = z;
 				}
 			}
 		}
@@ -396,7 +409,7 @@ namespace OpenRA.Mods.Cnc.UtilityCommands
 					var dx = (ushort)x;
 					var dy = (ushort)(y * 2 + x % 2);
 
-					var uv = new MPos(dx / 2, dy);
+					var uv = ToMPos(dx, dy);
 					var rx = (ushort)((dx + dy) / 2 + 1);
 					var ry = (ushort)(dy - rx + fullSize.X + 1);
 
@@ -501,7 +514,7 @@ namespace OpenRA.Mods.Cnc.UtilityCommands
 				var rx = pos - ry * 1000;
 				var dx = rx - ry + fullSize.X - 1;
 				var dy = rx + ry - fullSize.X - 1;
-				var cell = new MPos(dx / 2, dy).ToCPos(map);
+				var cell = ToMPos(dx, dy).ToCPos(map);
 
 				var ar = new ActorReference((!int.TryParse(kv.Key, out var wpindex) || wpindex > 7) ? "waypoint" : "mpspawn");
 				ar.Add(new LocationInit(cell));
@@ -521,7 +534,7 @@ namespace OpenRA.Mods.Cnc.UtilityCommands
 				var rx = pos - ry * 1000;
 				var dx = rx - ry + fullSize.X - 1;
 				var dy = rx + ry - fullSize.X - 1;
-				var cell = new MPos(dx / 2, dy).ToCPos(map);
+				var cell = ToMPos(dx, dy).ToCPos(map);
 				var name = kv.Value.ToLowerInvariant();
 
 				var ar = new ActorReference(name);
@@ -558,7 +571,7 @@ namespace OpenRA.Mods.Cnc.UtilityCommands
 
 				var dx = rx - ry + fullSize.X - 1;
 				var dy = rx + ry - fullSize.X - 1;
-				var cell = new MPos(dx / 2, dy).ToCPos(map);
+				var cell = ToMPos(dx, dy).ToCPos(map);
 
 				var ar = new ActorReference(name)
 				{
