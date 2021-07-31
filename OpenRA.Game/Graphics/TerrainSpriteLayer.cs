@@ -30,17 +30,15 @@ namespace OpenRA.Graphics
 		readonly bool[] ignoreTint;
 		readonly HashSet<int> dirtyRows = new HashSet<int>();
 		readonly int rowStride;
-		readonly bool restrictToBounds;
 
 		readonly WorldRenderer worldRenderer;
 		readonly Map map;
 
 		readonly PaletteReference[] palettes;
 
-		public TerrainSpriteLayer(World world, WorldRenderer wr, Sprite emptySprite, BlendMode blendMode, bool restrictToBounds)
+		public TerrainSpriteLayer(World world, WorldRenderer wr, Sprite emptySprite, BlendMode blendMode)
 		{
 			worldRenderer = wr;
-			this.restrictToBounds = restrictToBounds;
 			this.emptySprite = emptySprite;
 			sheets = new Sheet[SpriteRenderer.SheetCount];
 			BlendMode = blendMode;
@@ -194,13 +192,10 @@ namespace OpenRA.Graphics
 			dirtyRows.Add(uv.V);
 		}
 
-		public void Draw(Viewport viewport)
+		public void Draw(ProjectedCellRegion region)
 		{
-			var cells = restrictToBounds ? viewport.VisibleCellsInsideBounds : viewport.AllVisibleCells;
-
-			// Only draw the rows that are visible.
-			var firstRow = cells.CandidateMapCoords.TopLeft.V.Clamp(0, map.MapSize.Y);
-			var lastRow = (cells.CandidateMapCoords.BottomRight.V + 1).Clamp(firstRow, map.MapSize.Y);
+			var firstRow = region.CandidateMapCoords.TopLeft.V.Clamp(0, map.MapSize.Y);
+			var lastRow = (region.CandidateMapCoords.BottomRight.V + 1).Clamp(firstRow, map.MapSize.Y);
 
 			Game.Renderer.Flush();
 

@@ -65,7 +65,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		void IWorldLoaded.WorldLoaded(World w, WorldRenderer wr)
 		{
-			render = new TerrainSpriteLayer(w, wr, disabledSprite, BlendMode.Alpha, wr.World.Type != WorldType.Editor);
+			render = new TerrainSpriteLayer(w, wr, disabledSprite, BlendMode.Alpha);
 
 			world.Map.Tiles.CellEntryChanged += UpdateTerrainCell;
 			world.Map.CustomTerrain.CellEntryChanged += UpdateTerrainCell;
@@ -84,7 +84,7 @@ namespace OpenRA.Mods.Common.Traits
 		void IRenderAboveWorld.RenderAboveWorld(Actor self, WorldRenderer wr)
 		{
 			if (Enabled)
-				render.Draw(wr.Viewport);
+				render.Draw(wr.Viewport.RenderableRegion);
 		}
 
 		void INotifyActorDisposing.Disposing(Actor self)

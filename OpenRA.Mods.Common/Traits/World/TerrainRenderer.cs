@@ -81,7 +81,7 @@ namespace OpenRA.Mods.Common.Traits
 		void IWorldLoaded.WorldLoaded(World world, WorldRenderer wr)
 		{
 			worldRenderer = wr;
-			spriteLayer = new TerrainSpriteLayer(world, wr, tileCache.MissingTile, BlendMode.Alpha, world.Type != WorldType.Editor);
+			spriteLayer = new TerrainSpriteLayer(world, wr, tileCache.MissingTile, BlendMode.Alpha);
 			foreach (var cell in map.AllCells)
 				UpdateCell(cell);
 
@@ -103,7 +103,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		void IRenderTerrain.RenderTerrain(WorldRenderer wr, Viewport viewport)
 		{
-			spriteLayer.Draw(wr.Viewport);
+			spriteLayer.Draw(wr.Viewport.RenderableRegion);
 
 			foreach (var r in wr.World.WorldActor.TraitsImplementing<IRenderOverlay>())
 				r.Render(wr);

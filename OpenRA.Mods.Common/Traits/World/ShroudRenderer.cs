@@ -205,8 +205,8 @@ namespace OpenRA.Mods.Common.Traits
 			var emptySprite = new Sprite(shroudSprites[0].Sprite.Sheet, Rectangle.Empty, TextureChannel.Alpha);
 			shroudPaletteReference = wr.Palette(info.ShroudPalette);
 			fogPaletteReference = wr.Palette(info.FogPalette);
-			shroudLayer = new TerrainSpriteLayer(w, wr, emptySprite, shroudBlend, false);
-			fogLayer = new TerrainSpriteLayer(w, wr, emptySprite, fogBlend, false);
+			shroudLayer = new TerrainSpriteLayer(w, wr, emptySprite, shroudBlend);
+			fogLayer = new TerrainSpriteLayer(w, wr, emptySprite, fogBlend);
 
 			WorldOnRenderPlayerChanged(world.RenderPlayer);
 		}
@@ -307,8 +307,8 @@ namespace OpenRA.Mods.Common.Traits
 		void IRenderShroud.RenderShroud(WorldRenderer wr)
 		{
 			UpdateShroud(map.ProjectedCells);
-			fogLayer.Draw(wr.Viewport);
-			shroudLayer.Draw(wr.Viewport);
+			fogLayer.Draw(wr.Viewport.AllVisibleCells);
+			shroudLayer.Draw(wr.Viewport.AllVisibleCells);
 		}
 
 		void UpdateShroudCell(PPos puv)
