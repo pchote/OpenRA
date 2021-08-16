@@ -76,7 +76,12 @@ namespace OpenRA.Graphics
 
 		float3 ScreenPosition(WorldRenderer wr)
 		{
-			return wr.Screen3DPxPosition(pos) + wr.ScreenPxOffset(offset) - 0.5f * scale * sprite.Size;
+			var spriteShift = 0.5f * scale * sprite.Size;
+
+			// Avoid sprites to shift by half pixels or odd sizes will cause offset mismatches
+			spriteShift = new float3((int)spriteShift.X, (int)spriteShift.Y, spriteShift.Y);
+
+			return wr.Screen3DPxPosition(pos) + wr.ScreenPxOffset(offset) - spriteShift;
 		}
 
 		public IFinalizedRenderable PrepareRender(WorldRenderer wr) { return this; }
