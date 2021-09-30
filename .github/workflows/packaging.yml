@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Prepare Environment
-        run: echo "GIT_TAG=${GITHUB_REF#refs/tags/}" >> ${GITHUB_ENV}
+        run: echo "GIT_TAG=release-20210321" >> ${GITHUB_ENV}
 
       - name: Package Source
         run: |
@@ -45,7 +45,7 @@ jobs:
           dotnet-version: '5.0.x'
 
       - name: Prepare Environment
-        run: echo "GIT_TAG=${GITHUB_REF#refs/tags/}" >> ${GITHUB_ENV}
+        run: echo "GIT_TAG=release-20210321" >> ${GITHUB_ENV}
 
       - name: Package AppImages
         run: |
@@ -74,7 +74,7 @@ jobs:
           dotnet-version: '5.0.x'
 
       - name: Prepare Environment
-        run: echo "GIT_TAG=${GITHUB_REF#refs/tags/}" >> ${GITHUB_ENV}
+        run: echo "GIT_TAG=release-20210321" >> ${GITHUB_ENV}
 
       - name: Package Disk Images
         env:
@@ -110,7 +110,7 @@ jobs:
 
       - name: Prepare Environment
         run: |
-          echo "GIT_TAG=${GITHUB_REF#refs/tags/}" >> ${GITHUB_ENV}
+          echo "GIT_TAG=release-20210321" >> ${GITHUB_ENV}
           sudo apt-get update
           sudo apt install nsis wine64
 
