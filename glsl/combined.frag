@@ -261,7 +261,7 @@ void main()
 
 	{
 		// A negative tint alpha indicates that the tint should replace the colour instead of multiplying it
-		if (vTint.a < 0.0 && c.a > 0)
+		if (vTint.a < 0.0 && c.a > 0.0)
 			c = vec4(vTint.rgb, -vTint.a);
 		else
 			c *= vTint;
