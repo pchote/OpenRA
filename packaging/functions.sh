@@ -10,7 +10,7 @@
 # Arguments:
 #   SRC_PATH: Path to the root OpenRA directory
 #   DEST_PATH: Path to the root of the install destination (will be created if necessary)
-#   TARGETPLATFORM: Platform type (win-x86, win-x64, osx-x64, linux-x64, unix-generic)
+#   TARGETPLATFORM: Platform type (win-x86, win-x64, osx-x64, osx-arm64, linux-x64, unix-generic)
 #   RUNTIME: Runtime type (net6, mono)
 #   COPY_GENERIC_LAUNCHER: If set to True the OpenRA.exe will also be copied (True, False)
 #   COPY_CNC_DLL: If set to True the OpenRA.Mods.Cnc.dll will also be copied (True, False)
@@ -81,6 +81,11 @@ install_assemblies() (
 		fi
 	else
 		dotnet publish -c Release -p:TargetPlatform="${TARGETPLATFORM}" -p:CopyGenericLauncher="${COPY_GENERIC_LAUNCHER}" -p:CopyCncDll="${COPY_CNC_DLL}" -p:CopyD2kDll="${COPY_D2K_DLL}" -r "${TARGETPLATFORM}" -o "${DEST_PATH}" --self-contained true
+
+		# HACK: These should be installed from the nuget deps!
+		if [ -d "deps/${TARGETPLATFORM}" ]; then
+			cp "deps/${TARGETPLATFORM}/"* "${DEST_PATH}"
+		fi
 	fi
 	cd "${ORIG_PWD}"
 )
