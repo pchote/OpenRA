@@ -51,7 +51,8 @@ jobs:
         run: |
           mkdir -p build/linux
           sudo apt install libfuse2
-          ./packaging/linux/buildpackage.sh "${GIT_TAG}" "${PWD}/build/linux"
+          ./packaging/linux/buildpackage.sh linux-x64 "${GIT_TAG}" "${PWD}/build/linux"
+          ./packaging/linux/buildpackage.sh linux-arm64 "${GIT_TAG}" "${PWD}/build/linux"
 
       - name: Upload Packages
         uses: svenstaro/upload-release-action@v2
