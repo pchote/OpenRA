@@ -8,8 +8,8 @@ command -v curl >/dev/null 2>&1 || command -v wget > /dev/null 2>&1 || { echo >&
 
 DEPENDENCIES_TAG="20201222"
 
-if [ $# -eq "0" ]; then
-	echo "Usage: $(basename "$0") version [outputdir]"
+if [ $# -ne "3" ]; then
+	echo "Usage: $(basename "$0") targetplatform version outputdir"
 	exit 1
 fi
 
@@ -18,10 +18,21 @@ HERE=$(dirname "$0")
 cd "${HERE}"
 . ../functions.sh
 
-TAG="$1"
-OUTPUTDIR="$2"
+TARGETPLATFORM="$1"
+TAG="$2"
+OUTPUTDIR="$3"
 SRCDIR="$(pwd)/../.."
 ARTWORK_DIR="$(pwd)/../artwork/"
+
+if [ "${TARGETPLATFORM}" != "linux-x64" ] && [ "${TARGETPLATFORM}" != "linux-arm64" ]; then
+	echo "Unknown targetplatform ${TARGETPLATFORM}."
+	exit 1
+fi
+
+ARCH="x86_64"
+if [ "${TARGETPLATFORM}" == "linux-arm64" ]; then
+	ARCH="aarch64"
+fi
 
 UPDATE_CHANNEL=""
 SUFFIX="-devel"
@@ -47,8 +58,10 @@ fi
 echo "Downloading appimagetool"
 if command -v curl >/dev/null 2>&1; then
 	curl -s -L -O https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+	curl -s -L -O https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-${ARCH}.AppImage
 else
 	wget -cq https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+	wget -cq https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-${ARCH}.AppImage
 fi
 
 chmod a+x appimagetool-x86_64.AppImage
@@ -60,14 +73,14 @@ build_appimage() {
 	DISPLAY_NAME=${2}
 	DISCORD_ID=${3}
 	APPDIR="$(pwd)/${MOD_ID}.appdir"
-	APPIMAGE="OpenRA-$(echo "${DISPLAY_NAME}" | sed 's/ /-/g')${SUFFIX}-x86_64.AppImage"
+	APPIMAGE="OpenRA-$(echo "${DISPLAY_NAME}" | sed 's/ /-/g')${SUFFIX}-${ARCH}.AppImage"
 
 	IS_D2K="False"
 	if [ "${MOD_ID}" = "d2k" ]; then
 		IS_D2K="True"
 	fi
 
-	install_assemblies "${SRCDIR}" "${APPDIR}/usr/lib/openra" "linux-x64" "net6" "True" "True" "${IS_D2K}"
+	install_assemblies "${SRCDIR}" "${APPDIR}/usr/lib/openra" "${TARGETPLATFORM}" "net6" "True" "True" "${IS_D2K}"
 	install_data "${SRCDIR}" "${APPDIR}/usr/lib/openra" "${MOD_ID}"
 	set_engine_version "${TAG}" "${APPDIR}/usr/lib/openra"
 	set_mod_version "${TAG}" "${APPDIR}/usr/lib/openra/mods/${MOD_ID}/mod.yaml" "${APPDIR}/usr/lib/openra/mods/modcontent/mod.yaml"
@@ -112,10 +125,12 @@ build_appimage() {
 
 	# Embed update metadata if (and only if) compiled on GitHub Actions
 	if [ -n "${GITHUB_REPOSITORY}" ]; then
-		ARCH=x86_64 ./appimagetool-x86_64.AppImage --no-appstream -u "zsync|https://master.openra.net/appimagecheck.zsync?mod=${MOD_ID}&channel=${UPDATE_CHANNEL}" "${APPDIR}" "${OUTPUTDIR}/${APPIMAGE}"
-		zsyncmake -u "https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/${APPIMAGE}" -o "${OUTPUTDIR}/${APPIMAGE}.zsync" "${OUTPUTDIR}/${APPIMAGE}"
+		./appimagetool-x86_64.AppImage --no-appstream -u "zsync|https://master.openra.net/appimagecheck.zsync?mod=${MOD_ID}&channel=${UPDATE_CHANNEL}" "${APPDIR}" "${OUTPUTDIR}/${APPIMAGE}" --runtime-file "runtime-${ARCH}.AppImage"
+		if [ "${ARCH}" == "x86_64" ]; then
+			zsyncmake -u "https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/${APPIMAGE}" -o "${OUTPUTDIR}/${APPIMAGE}.zsync" "${OUTPUTDIR}/${APPIMAGE}"
+		fi
 	else
-		ARCH=x86_64 ./appimagetool-x86_64.AppImage --no-appstream "${APPDIR}" "${OUTPUTDIR}/${APPIMAGE}"
+		./appimagetool-x86_64.AppImage --no-appstream "${APPDIR}" "${OUTPUTDIR}/${APPIMAGE}" --runtime-file "runtime-${ARCH}.AppImage"
 	fi
 
 	rm -rf "${APPDIR}"
