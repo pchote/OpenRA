@@ -49,6 +49,7 @@ namespace OpenRA.Platforms.Default
 
 		// Data types
 		public const int GL_UNSIGNED_BYTE = 0x1401;
+		public const int GL_UNSIGNED_INT = 0x1405;
 		public const int GL_FLOAT = 0x1406;
 
 		// Errors
@@ -393,6 +394,9 @@ namespace OpenRA.Platforms.Default
 		public delegate void DrawArrays(int mode, int first, int count);
 		public static DrawArrays glDrawArrays { get; private set; }
 
+		public delegate void DrawElements(int mode, int count, int type, IntPtr indices);
+		public static DrawElements glDrawElements { get; private set; }
+
 		public delegate void Enable(int cap);
 		public static Enable glEnable { get; private set; }
 
@@ -589,6 +593,7 @@ namespace OpenRA.Platforms.Default
 				glEnableVertexAttribArray = Bind<EnableVertexAttribArray>("glEnableVertexAttribArray");
 				glDisableVertexAttribArray = Bind<DisableVertexAttribArray>("glDisableVertexAttribArray");
 				glDrawArrays = Bind<DrawArrays>("glDrawArrays");
+				glDrawElements = Bind<DrawElements>("glDrawElements");
 				glBlendEquation = Bind<BlendEquation>("glBlendEquation");
 				glBlendEquationSeparate = Bind<BlendEquationSeparate>("glBlendEquationSeparate");
 				glBlendFunc = Bind<BlendFunc>("glBlendFunc");
