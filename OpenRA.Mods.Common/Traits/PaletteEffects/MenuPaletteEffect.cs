@@ -9,9 +9,7 @@
  */
 #endregion
 
-using System.Collections.Generic;
 using OpenRA.Graphics;
-using OpenRA.Primitives;
 using OpenRA.Traits;
 using OpenRA.Widgets;
 
@@ -33,7 +31,7 @@ namespace OpenRA.Mods.Common.Traits
 		public override object Create(ActorInitializer init) { return new MenuPaletteEffect(this); }
 	}
 
-	public class MenuPaletteEffect : IPaletteModifier, IRender, IWorldLoaded, INotifyGameLoaded
+	public class MenuPaletteEffect : RenderPostProcessPassBase, IWorldLoaded, INotifyGameLoaded
 	{
 		public enum EffectType { None, Black, Desaturated }
 		public readonly MenuPaletteEffectInfo Info;
@@ -41,11 +39,15 @@ namespace OpenRA.Mods.Common.Traits
 		EffectType from = EffectType.Black;
 		EffectType to = EffectType.Black;
 
-		float frac = 0;
+		float frac;
 		long startTime;
 		long endTime;
 
-		public MenuPaletteEffect(MenuPaletteEffectInfo info) { Info = info; }
+		public MenuPaletteEffect(MenuPaletteEffectInfo info)
+			: base("menufade", PostProcessPassType.AfterShroud)
+		{
+			Info = info;
+		}
 
 		public void Fade(EffectType type)
 		{
@@ -57,59 +59,16 @@ namespace OpenRA.Mods.Common.Traits
 			to = type;
 		}
 
-		IEnumerable<IRenderable> IRender.Render(Actor self, WorldRenderer wr)
+		protected override bool Enabled => to != EffectType.None || endTime != 0;
+		protected override void PrepareRender(WorldRenderer wr, IShader shader)
 		{
-			if (endTime == 0)
-				yield break;
-
 			frac = (endTime - Game.RunTime) * 1f / (endTime - startTime);
 			if (frac < 0)
 				frac = startTime = endTime = 0;
 
-			yield break;
-		}
-
-		IEnumerable<Rectangle> IRender.ScreenBounds(Actor self, WorldRenderer wr)
-		{
-			yield break;
-		}
-
-		static Color ColorForEffect(EffectType t, Color orig)
-		{
-			switch (t)
-			{
-				case EffectType.Black:
-					return Color.FromArgb(orig.A, Color.Black);
-				case EffectType.Desaturated:
-					var lum = (int)(255 * orig.GetBrightness());
-					return Color.FromArgb(orig.A, lum, lum, lum);
-				default:
-				case EffectType.None:
-					return orig;
-			}
-		}
-
-		public void AdjustPalette(IReadOnlyDictionary<string, MutablePalette> palettes)
-		{
-			if (to == EffectType.None && endTime == 0)
-				return;
-
-			foreach (var pal in palettes.Values)
-			{
-				for (var x = 0; x < Palette.Size; x++)
-				{
-					var orig = pal.GetColor(x);
-					var t = ColorForEffect(to, orig);
-
-					if (endTime == 0)
-						pal.SetColor(x, t);
-					else
-					{
-						var f = ColorForEffect(from, orig);
-						pal.SetColor(x, Exts.ColorLerp(frac, t, f));
-					}
-				}
-			}
+			shader.SetVec("From", (int)from);
+			shader.SetVec("To", (int)to);
+			shader.SetVec("Frac", frac);
 		}
 
 		void IWorldLoaded.WorldLoaded(World w, WorldRenderer wr)
