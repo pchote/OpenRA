@@ -9,21 +9,17 @@
  */
 #endregion
 
-using System.Collections.Generic;
+using System;
 using OpenRA.Graphics;
 using OpenRA.Primitives;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits
 {
-	using GUtil = OpenRA.Graphics.Util;
-
 	[TraitLocation(SystemActors.World | SystemActors.EditorWorld)]
 	[Desc("Used for bursted one-colored whole screen effects. Add this to the world actor.")]
 	public class FlashPaletteEffectInfo : TraitInfo
 	{
-		public readonly HashSet<string> ExcludePalettes = new() { "cursor", "chrome", "colorpicker", "fog", "shroud" };
-
 		[Desc("Measured in ticks.")]
 		public readonly int Length = 20;
 
@@ -35,16 +31,17 @@ namespace OpenRA.Mods.Common.Traits
 		public override object Create(ActorInitializer init) { return new FlashPaletteEffect(this); }
 	}
 
-	public class FlashPaletteEffect : IPaletteModifier, ITick
+	public class FlashPaletteEffect : RenderPostProcessPassBase, ITick
 	{
 		public readonly FlashPaletteEffectInfo Info;
+		int remainingFrames;
+		float frac;
 
 		public FlashPaletteEffect(FlashPaletteEffectInfo info)
+			: base("flash", PostProcessPassType.AfterWorld)
 		{
 			Info = info;
 		}
-
-		int remainingFrames;
 
 		public void Enable(int ticks)
 		{
@@ -57,27 +54,14 @@ namespace OpenRA.Mods.Common.Traits
 		void ITick.Tick(Actor self)
 		{
 			if (remainingFrames > 0)
-				remainingFrames--;
+				frac = Math.Min((float)--remainingFrames / Info.Length, 1);
 		}
 
-		public void AdjustPalette(IReadOnlyDictionary<string, MutablePalette> palettes)
+		protected override bool Enabled => remainingFrames > 0;
+		protected override void PrepareRender(WorldRenderer wr, IShader shader)
 		{
-			if (remainingFrames == 0)
-				return;
-
-			var frac = (float)remainingFrames / Info.Length;
-
-			foreach (var pal in palettes)
-			{
-				for (var x = 0; x < Palette.Size; x++)
-				{
-					var orig = pal.Value.GetColor(x);
-					var c = Info.Color;
-					var color = Color.FromArgb(orig.A, ((int)c.R).Clamp(0, 255), ((int)c.G).Clamp(0, 255), ((int)c.B).Clamp(0, 255));
-					var final = GUtil.PremultipliedColorLerp(frac, orig, GUtil.PremultiplyAlpha(Color.FromArgb(orig.A, color)));
-					pal.Value.SetColor(x, final);
-				}
-			}
+			shader.SetVec("Frac", frac);
+			shader.SetVec("Color", (float)Info.Color.B / 255, (float)Info.Color.G / 255, (float)Info.Color.R / 255);
 		}
 	}
 }
