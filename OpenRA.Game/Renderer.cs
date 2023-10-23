@@ -306,9 +306,9 @@ namespace OpenRA
 			Flush();
 			currentPaletteTexture = palette.Texture;
 
-			SpriteRenderer.SetPalette(currentPaletteTexture, palette.ColorShifts);
-			WorldSpriteRenderer.SetPalette(currentPaletteTexture, palette.ColorShifts);
-			WorldModelRenderer.SetPalette(currentPaletteTexture);
+			SpriteRenderer.SetPalette(palette);
+			WorldSpriteRenderer.SetPalette(palette);
+			WorldModelRenderer.SetPalette(palette);
 		}
 
 		public void EndFrame(IInputHandler inputHandler)
