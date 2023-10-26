@@ -101,7 +101,7 @@ namespace OpenRA.Graphics
 			vertices[nv + 3] = new Vertex(d, r.Left, r.Bottom, sl, sb, paletteTextureIndex, fAttribC, tint, alpha);
 		}
 
-		public static void FastCopyIntoChannel(Sprite dest, byte[] src, SpriteFrameType srcType)
+		public static void FastCopyIntoChannel(Sprite dest, byte[] src, SpriteFrameType srcType, bool premultiplied = false)
 		{
 			var destData = dest.Sheet.GetData();
 			var width = dest.Bounds.Width;
@@ -152,7 +152,10 @@ namespace OpenRA.Graphics
 								}
 
 								var cc = Color.FromArgb(a, r, g, b);
-								data[(y + j) * destStride + x + i] = PremultiplyAlpha(cc).ToArgb();
+								if (premultiplied)
+									data[(y + j) * destStride + x + i] = cc.ToArgb();
+								else
+									data[(y + j) * destStride + x + i] = PremultiplyAlpha(cc).ToArgb();
 							}
 						}
 					}
