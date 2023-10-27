@@ -390,6 +390,11 @@ namespace OpenRA
 			return Context.CreateVertexBuffer<T>(length);
 		}
 
+		public IShader CreateShader(IShaderBindings bindings)
+		{
+			return Context.CreateShader(bindings);
+		}
+
 		public void EnableScissor(Rectangle rect)
 		{
 			// Must remain inside the current scissor rect
