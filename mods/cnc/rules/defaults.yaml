@@ -195,6 +195,7 @@
 
 ^AcceptsCloakCrate:
 	Cloak:
+		IsPlayerPalette: true
 		InitialDelay: 15
 		CloakDelay: 90
 		CloakSound: trans1.aud

@@ -206,6 +206,7 @@ C17:
 		Condition: global-C17-stealth
 		Prerequisites: global-C17-stealth
 	Cloak:
+		IsPlayerPalette: true
 		InitialDelay: 0
 		CloakDelay: 0
 		DetectionTypes: C17
