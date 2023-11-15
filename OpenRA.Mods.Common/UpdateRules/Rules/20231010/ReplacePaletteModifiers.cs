@@ -24,7 +24,8 @@ namespace OpenRA.Mods.Common.UpdateRules.Rules
 			"GlobalLightingPaletteEffect is renamed to TintPostProcessEffect\n" +
 			"D2kFogPalette is removed\n" +
 			"PaletteFromScaledPalette is removed\n" +
-			"CloakPaletteEffect is removed";
+			"CloakPaletteEffect is removed\n" +
+			"Palette and IsPlayerPalette are removed from Cloak";
 
 		public override IEnumerable<string> UpdateActorNode(ModData modData, MiniYamlNodeBuilder actorNode)
 		{
@@ -35,6 +36,12 @@ namespace OpenRA.Mods.Common.UpdateRules.Rules
 			actorNode.RemoveNodes("D2kFogPalette");
 			actorNode.RemoveNodes("PaletteFromScaledPalette");
 			actorNode.RemoveNodes("CloakPaletteEffect");
+
+			foreach (var cloak in actorNode.ChildrenMatching("Cloak"))
+			{
+				cloak.RemoveNodes("Palette");
+				cloak.RemoveNodes("IsPlayerPalette");
+			}
 
 			yield break;
 		}

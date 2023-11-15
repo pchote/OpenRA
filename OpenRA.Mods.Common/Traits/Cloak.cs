@@ -39,6 +39,8 @@ namespace OpenRA.Mods.Common.Traits
 	// Type tag for DetectionTypes
 	public class DetectionType { }
 
+	public enum CloakStyle { None, Alpha, Color }
+
 	[Desc("This unit can cloak and uncloak in specific situations.")]
 	public class CloakInfo : PausableConditionalTraitInfo
 	{
@@ -57,10 +59,6 @@ namespace OpenRA.Mods.Common.Traits
 		public readonly string CloakSound = null;
 		public readonly string UncloakSound = null;
 
-		[PaletteReference(nameof(IsPlayerPalette))]
-		public readonly string Palette = "cloak";
-		public readonly bool IsPlayerPalette = false;
-
 		public readonly BitSet<DetectionType> DetectionTypes = new("Cloak");
 
 		[GrantedConditionReference]
@@ -69,6 +67,15 @@ namespace OpenRA.Mods.Common.Traits
 
 		[Desc("The type of cloak. Same type of cloaks won't trigger cloaking and uncloaking sound and effect.")]
 		public readonly string CloakType = null;
+
+		[Desc("Render effect to use when cloaked. Possible values are: Alpha, Color, None.")]
+		public readonly CloakStyle CloakStyle = CloakStyle.Alpha;
+
+		[Desc("The alpha level to use when cloaked when using Alpha CloakStyle.")]
+		public readonly float CloakedAlpha = 0.55f;
+
+		[Desc("The color to use when cloaked when using Color CloakStyle.")]
+		public readonly Color CloakedColor = Color.FromArgb(140, 0, 0, 0);
 
 		[Desc("Which image to use for the effect played when cloaking or uncloaking.")]
 		public readonly string EffectImage = null;
@@ -95,8 +102,11 @@ namespace OpenRA.Mods.Common.Traits
 	}
 
 	public class Cloak : PausableConditionalTrait<CloakInfo>, IRenderModifier, INotifyDamage, INotifyUnloadCargo, INotifyLoadCargo, INotifyDemolition, INotifyInfiltration,
-		INotifyAttack, ITick, IVisibilityModifier, IRadarColorModifier, INotifyCreated, INotifyDockClient, INotifySupportPower
+		INotifyAttack, ITick, IVisibilityModifier, IRadarColorModifier, INotifyDockClient, INotifySupportPower
 	{
+		readonly float3 cloakedColor;
+		readonly float cloakedColorAlpha;
+
 		[Sync]
 		int remainingTime;
 
@@ -112,6 +122,8 @@ namespace OpenRA.Mods.Common.Traits
 			: base(info)
 		{
 			remainingTime = info.InitialDelay;
+			cloakedColor = new float3(info.CloakedColor.R, info.CloakedColor.G, info.CloakedColor.B) / 255f;
+			cloakedColorAlpha = info.CloakedColor.A / 255f;
 		}
 
 		protected override void Created(Actor self)
@@ -162,15 +174,22 @@ namespace OpenRA.Mods.Common.Traits
 
 			if (Cloaked && IsVisible(self, self.World.RenderPlayer))
 			{
-				var palette = wr.Palette(Info.IsPlayerPalette ? Info.Palette + self.Owner.InternalName : Info.Palette);
+				switch (Info.CloakStyle)
+				{
+					case CloakStyle.Color:
+						return r.Select(a => !a.IsDecoration && a is IModifyableRenderable mr ?
+							mr.WithTint(cloakedColor, mr.TintModifiers | TintModifiers.ReplaceColor).WithAlpha(cloakedColorAlpha) :
+							a);
 
-				if (palette == null)
-					return r;
-				else
-					return r.Select(a => !a.IsDecoration && a is IPalettedRenderable pr ? pr.WithPalette(palette) : a);
+					case CloakStyle.Alpha:
+						return r.Select(a => !a.IsDecoration && a is IModifyableRenderable mr ? mr.WithAlpha(Info.CloakedAlpha) : a);
+
+					default:
+						return r;
+				}
 			}
-			else
-				return SpriteRenderable.None;
+
+			return SpriteRenderable.None;
 		}
 
 		IEnumerable<Rectangle> IRenderModifier.ModifyScreenBounds(Actor self, WorldRenderer wr, IEnumerable<Rectangle> bounds)
