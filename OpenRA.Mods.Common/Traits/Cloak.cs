@@ -50,6 +50,9 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Measured in game ticks.")]
 		public readonly int CloakDelay = 30;
 
+		[Desc("Measured in game ticks.")]
+		public readonly int CloakTransition = 5;
+
 		[Desc("Events leading to the actor getting uncloaked. Possible values are: Attack, Move, Unload, Infiltrate, Demolish, Dock, Damage, Heal, SelfHeal and SupportPower.",
 			"'Dock' is triggered when docking to a refinery or resupplying.",
 			"'SupportPower' is triggered when using a support power.")]
@@ -106,6 +109,7 @@ namespace OpenRA.Mods.Common.Traits
 	{
 		readonly float3 cloakedColor;
 		readonly float cloakedColorAlpha;
+		float transition;
 
 		[Sync]
 		int remainingTime;
@@ -149,7 +153,15 @@ namespace OpenRA.Mods.Common.Traits
 
 		public void Uncloak() { Uncloak(Info.CloakDelay); }
 
-		public void Uncloak(int time) { remainingTime = Math.Max(remainingTime, time); }
+		public void Uncloak(int time)
+		{
+			remainingTime = Math.Max(remainingTime, time);
+
+			// Bump slightly above zero so we render the transition frame instead of uncloaked
+			// between now and when Tick() updates transition.
+			if (transition <= 0)
+				transition = float.Epsilon;
+		}
 
 		void INotifyAttack.Attacking(Actor self, in Target target, Armament a, Barrel barrel) { if (Info.UncloakOn.HasFlag(UncloakType.Attack)) Uncloak(); }
 
@@ -169,24 +181,39 @@ namespace OpenRA.Mods.Common.Traits
 
 		IEnumerable<IRenderable> IRenderModifier.ModifyRender(Actor self, WorldRenderer wr, IEnumerable<IRenderable> r)
 		{
+			if (transition > 0 && transition < 1 && Info.CloakStyle != CloakStyle.None)
+			{
+				if (Info.CloakStyle == CloakStyle.Color && IsVisibleWhenCloaked(self, self.World.RenderPlayer))
+					return r.Select(a => !a.IsDecoration && a is IModifyableRenderable mr ?
+						mr.WithTint(cloakedColor, mr.TintModifiers | TintModifiers.ReplaceColor).WithAlpha(cloakedColorAlpha) :
+						a).Concat(r.Where(a => !a.IsDecoration && a is IModifyableRenderable)
+						           .Select(r => ((IModifyableRenderable)r)
+						           .WithAlpha(((IModifyableRenderable)r).Alpha * transition)));
+
+				if (Info.CloakStyle == CloakStyle.Color)
+					return r.Select(a => !a.IsDecoration && a is IModifyableRenderable mr ? mr.WithAlpha(transition) : a);
+
+				if (Info.CloakStyle == CloakStyle.Alpha)
+				{
+					var toAlpha = IsVisibleWhenCloaked(self, self.World.RenderPlayer) ? Info.CloakedAlpha : 0;
+					return r.Select(a => a is IModifyableRenderable mr ? mr.WithAlpha(mr.Alpha * float2.Lerp(toAlpha, 1, transition)) : a);
+				}
+			}
+
 			if (remainingTime > 0 || IsTraitDisabled || IsTraitPaused)
 				return r;
 
 			if (Cloaked && IsVisible(self, self.World.RenderPlayer))
 			{
-				switch (Info.CloakStyle)
-				{
-					case CloakStyle.Color:
-						return r.Select(a => !a.IsDecoration && a is IModifyableRenderable mr ?
-							mr.WithTint(cloakedColor, mr.TintModifiers | TintModifiers.ReplaceColor).WithAlpha(cloakedColorAlpha) :
-							a);
+				if (Info.CloakStyle == CloakStyle.Color)
+					return r.Select(a => !a.IsDecoration && a is IModifyableRenderable mr ?
+						mr.WithTint(cloakedColor, mr.TintModifiers | TintModifiers.ReplaceColor).WithAlpha(cloakedColorAlpha) :
+						a);
 
-					case CloakStyle.Alpha:
-						return r.Select(a => !a.IsDecoration && a is IModifyableRenderable mr ? mr.WithAlpha(Info.CloakedAlpha) : a);
+				if (Info.CloakStyle == CloakStyle.Alpha)
+					return r.Select(a => a is IModifyableRenderable mr ? mr.WithAlpha(Info.CloakedAlpha) : a);
 
-					default:
-						return r;
-				}
+				return r;
 			}
 
 			return SpriteRenderable.None;
@@ -264,6 +291,13 @@ namespace OpenRA.Mods.Common.Traits
 				}
 			}
 
+			if (remainingTime == 0)
+				transition = 0;
+			else if (remainingTime < Info.CloakTransition)
+				transition = Math.Max(float.Epsilon, transition - transition / remainingTime);
+			else if (transition < 1)
+				transition = Math.Min(1, transition + 1f / Info.CloakTransition);
+
 			wasCloaked = isCloaked;
 			firstTick = false;
 		}
@@ -275,14 +309,19 @@ namespace OpenRA.Mods.Common.Traits
 
 		protected override void TraitDisabled(Actor self) { Uncloak(); }
 
-		public bool IsVisible(Actor self, Player viewer)
+		public bool IsVisibleWhenCloaked(Actor self, Player viewer)
 		{
-			if (!Cloaked || self.Owner.IsAlliedWith(viewer))
+			if (self.Owner.IsAlliedWith(viewer))
 				return true;
 
 			return self.World.ActorsWithTrait<DetectCloaked>().Any(a => a.Actor.IsInWorld
-				&& a.Actor.Owner.IsAlliedWith(viewer) && Info.DetectionTypes.Overlaps(a.Trait.Info.DetectionTypes)
-				&& (self.CenterPosition - a.Actor.CenterPosition).LengthSquared <= a.Trait.Range.LengthSquared);
+	            && a.Actor.Owner.IsAlliedWith(viewer) && Info.DetectionTypes.Overlaps(a.Trait.Info.DetectionTypes)
+	            && (self.CenterPosition - a.Actor.CenterPosition).LengthSquared <= a.Trait.Range.LengthSquared);
+		}
+
+		public bool IsVisible(Actor self, Player viewer)
+		{
+			return !Cloaked || IsVisibleWhenCloaked(self, viewer);
 		}
 
 		Color IRadarColorModifier.RadarColorOverride(Actor self, Color color)
