@@ -92,7 +92,7 @@ PlaceCharges = function()
 				ChargePlaced[generatorID] = true
 				Actor.Create("flare", true, { Owner = Greece, Location = Generators[generatorID].Location + CVec.New(0,-1) })
 				Media.PlaySpeechNotification(Greece, "ExplosiveChargePlaced")
-				Media.DisplayMessage(UserInterface.Translate("explosive-charge-placed"), UserInterface.Translate("engineer"))
+				Media.DisplayMessage(UserInterface.GetFluentMessage("explosive-charge-placed"), UserInterface.GetFluentMessage("engineer"))
 			end
 		end)
 	end
@@ -104,7 +104,7 @@ FlameTowerTriggers = function()
 			if actor.Type == "e6" then
 				Trigger.RemoveProximityTrigger(id)
 				if not FlameTowers[flameID].IsDead then
-					Media.DisplayMessage(UserInterface.Translate("flame-turret-deactivated"), UserInterface.Translate("console"))
+					Media.DisplayMessage(UserInterface.GetFluentMessage("flame-turret-deactivated"), UserInterface.GetFluentMessage("console"))
 					FlameTowers[flameID].Kill()
 					Media.PlaySoundNotification(Greece, "AngryBleep")
 				end
@@ -123,7 +123,7 @@ FlameTowerTriggers = function()
 		if actor.Type == "e6" then
 			Trigger.RemoveProximityTrigger(id)
 
-			Media.DisplayMessage(UserInterface.Translate("flame-turret-deactivated"), UserInterface.Translate("console"))
+			Media.DisplayMessage(UserInterface.GetFluentMessage("flame-turret-deactivated"), UserInterface.GetFluentMessage("console"))
 			Utils.Do(DualTowerActors, function(actor)
 				if not actor.IsDead then
 					actor.Kill()
@@ -150,7 +150,7 @@ CameraTriggers = function()
 			heavyCamTriggered = true
 
 			local heavyCam = Actor.Create("camera", true, { Owner = Greece, Location = HeavyTankCam.Location })
-			Media.DisplayMessage(UserInterface.Translate("old-flametowers"), UserInterface.Translate("engineer"))
+			Media.DisplayMessage(UserInterface.GetFluentMessage("old-flametowers"), UserInterface.GetFluentMessage("engineer"))
 			Utils.Do(TankRifles, IdleHunt)
 			Trigger.AfterDelay(DateTime.Minutes(1), function()
 				heavyCam.Destroy()
@@ -203,7 +203,7 @@ CameraTriggers = function()
 
 			local doomCam = Actor.Create("camera", true, { Owner = Greece, Location = DoomRoomCam.Location })
 			Media.PlaySoundNotification(Greece, "AlertBleep")
-			Media.DisplayMessage(UserInterface.Translate("be-sneaky"), UserInterface.Translate("soldier"))
+			Media.DisplayMessage(UserInterface.GetFluentMessage("be-sneaky"), UserInterface.GetFluentMessage("soldier"))
 			Trigger.AfterDelay(DateTime.Minutes(1), function()
 				doomCam.Destroy()
 			end)

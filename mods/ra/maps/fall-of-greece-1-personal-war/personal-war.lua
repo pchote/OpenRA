@@ -79,7 +79,7 @@ MissionStart = function()
 						end)
 					end)
 					Trigger.AfterDelay(DateTime.Seconds(6), function()
-						Media.DisplayMessage(UserInterface.Translate("civilians-manual-targeting"), UserInterface.Translate("tanya"))
+						Media.DisplayMessage(UserInterface.GetFluentMessage("civilians-manual-targeting"), UserInterface.GetFluentMessage("tanya"))
 					end)
 				end
 			end)
@@ -184,7 +184,7 @@ FootprintTriggers = function()
 			foot5Triggered = true
 
 			Media.PlaySoundNotification(Allies, "AlertBleep")
-			Media.DisplayMessage(UserInterface.Translate("soviet-aircraft-armor-moving-in"), UserInterface.Translate("headquarters"))
+			Media.DisplayMessage(UserInterface.GetFluentMessage("soviet-aircraft-armor-moving-in"), UserInterface.GetFluentMessage("headquarters"))
 			Utils.Do(Trigger5Team, function(actor)
 				if not actor.IsDead then
 					actor.AttackMove(TacticalNuke1.Location)
@@ -205,7 +205,7 @@ FootprintTriggers = function()
 
 			Trigger.AfterDelay(DateTime.Seconds(20), function()
 				Media.PlaySoundNotification(Allies, "AlertBuzzer")
-				Media.DisplayMessage(UserInterface.Translate("extraction-point-compromised-evacuate-base"), UserInterface.Translate("headquarters"))
+				Media.DisplayMessage(UserInterface.GetFluentMessage("extraction-point-compromised-evacuate-base"), UserInterface.GetFluentMessage("headquarters"))
 				local defenders = Reinforcements.Reinforce(England, TentTeam, { Tent.Location, TentMove.Location }, 0)
 				Utils.Do(defenders, IdleHunt)
 				if Difficulty == "hard" then
@@ -230,7 +230,7 @@ FootprintTriggers = function()
 			end)
 
 			Trigger.AfterDelay(DateTime.Seconds(50), function()
-				Media.DisplayMessage(UserInterface.Translate("new-extraction-point-northwest"), UserInterface.Translate("headquarters"))
+				Media.DisplayMessage(UserInterface.GetFluentMessage("new-extraction-point-northwest"), UserInterface.GetFluentMessage("headquarters"))
 			end)
 		end
 	end)
@@ -362,7 +362,7 @@ FootprintTriggers = function()
 			foot12Triggered = true
 
 			Media.PlaySoundNotification(Allies, "AlertBleep")
-			Media.DisplayMessage(UserInterface.Translate("stalin-will-pay"), UserInterface.Translate("stavros"))
+			Media.DisplayMessage(UserInterface.GetFluentMessage("stalin-will-pay"), UserInterface.GetFluentMessage("stavros"))
 		end
 	end)
 end
