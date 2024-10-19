@@ -53,10 +53,10 @@ OrdosEntryPath = { OrdosWaypoint.Location, OrdosRally.Location }
 
 Messages =
 {
-	UserInterface.Translate("build-concrete"),
-	UserInterface.Translate("build-windtrap"),
-	UserInterface.Translate("build-refinery"),
-	UserInterface.Translate("build-silo")
+	UserInterface.GetFluentMessage("build-concrete"),
+	UserInterface.GetFluentMessage("build-windtrap"),
+	UserInterface.GetFluentMessage("build-refinery"),
+	UserInterface.GetFluentMessage("build-silo")
 }
 
 CachedResources = -1
@@ -87,7 +87,7 @@ Tick = function()
 	end
 
 	if Ordos.Resources ~= CachedResources then
-		local harvestedResources = UserInterface.Translate("harvested-resources",
+		local harvestedResources = UserInterface.GetFluentMessage("harvested-resources",
 			{ ["harvested"] = Ordos.Resources, ["goal"] = SpiceToHarvest })
 		UserInterface.SetMissionText(harvestedResources)
 		CachedResources = Ordos.Resources
@@ -102,14 +102,14 @@ WorldLoaded = function()
 
 	InitObjectives(Ordos)
 	KillOrdos = AddPrimaryObjective(Harkonnen, "")
-	local harvestSpice = UserInterface.Translate("harvest-spice", { ["spice"] = SpiceToHarvest })
+	local harvestSpice = UserInterface.GetFluentMessage("harvest-spice", { ["spice"] = SpiceToHarvest })
 	GatherSpice = AddPrimaryObjective(Ordos, harvestSpice)
 	KillHarkonnen = AddSecondaryObjective(Ordos, "eliminate-harkonnen-units-reinforcements")
 
 	local checkResourceCapacity = function()
 		Trigger.AfterDelay(0, function()
 			if Ordos.ResourceCapacity < SpiceToHarvest then
-				Media.DisplayMessage(UserInterface.Translate("not-enough-silos"), Mentat)
+				Media.DisplayMessage(UserInterface.GetFluentMessage("not-enough-silos"), Mentat)
 				Trigger.AfterDelay(DateTime.Seconds(3), function()
 					Harkonnen.MarkCompletedObjective(KillAtreides)
 				end)
