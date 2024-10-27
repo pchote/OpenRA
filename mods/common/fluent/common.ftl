@@ -551,7 +551,7 @@ label-audio-unmuted = Audio unmuted.
 label-loading-player-profile = Loading player profile...
 label-loading-player-profile-failed = Failed to load player profile.
 
-## ProductionTooltipLogic
+## ProductionTooltipLogic, EncyclopediaLogic
 label-requires = Requires { $prerequisites }.
 
 ## ReplayBrowserLogic
