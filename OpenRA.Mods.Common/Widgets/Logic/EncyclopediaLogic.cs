@@ -11,6 +11,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using OpenRA.FileFormats;
 using OpenRA.Graphics;
@@ -23,6 +24,9 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 {
 	public class EncyclopediaLogic : ChromeLogic
 	{
+		[FluentReference("prerequisites")]
+		const string Requires = "label-requires";
+
 		readonly World world;
 		readonly ModData modData;
 		readonly Dictionary<ActorInfo, EncyclopediaInfo> info = new();
@@ -40,6 +44,12 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly SpriteWidget portraitWidget;
 		readonly Sprite portraitSprite;
 		readonly Png defaultPortrait;
+
+		readonly Widget productionContainer;
+		readonly LabelWidget productionCost;
+		readonly LabelWidget productionTime;
+		readonly Widget productionPowerIcon;
+		readonly LabelWidget productionPower;
 
 		ActorInfo selectedActor;
 		ScrollItemWidget firstItem;
@@ -78,6 +88,12 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			}
 
 			actorList.RemoveChildren();
+
+			productionContainer = descriptionPanel.GetOrNull("ACTOR_PRODUCTION");
+			productionCost = productionContainer?.Get<LabelWidget>("COST");
+			productionTime = productionContainer?.Get<LabelWidget>("TIME");
+			productionPowerIcon = productionContainer?.Get("POWER_ICON");
+			productionPower = productionContainer?.Get<LabelWidget>("POWER");
 
 			foreach (var actor in modData.DefaultRules.Actors.Values)
 			{
@@ -184,20 +200,49 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			if (titleLabel != null)
 				titleLabel.Text = ActorName(modData.DefaultRules, actor.Name);
 
-			var text = "";
-			var buildable = actor.TraitInfoOrDefault<BuildableInfo>();
-			if (buildable != null)
+			var bi = actor.TraitInfoOrDefault<BuildableInfo>();
+
+			if (productionContainer != null && bi != null && !selectedInfo.HideBuildable)
 			{
-				var prerequisites = buildable.Prerequisites
+				productionContainer.Visible = true;
+				var cost = actor.TraitInfoOrDefault<ValuedInfo>()?.Cost ?? 0;
+
+				var time = BuildTime(selectedActor, selectedInfo.BuildableQueue);
+				productionTime.Text = WidgetUtils.FormatTime(time, world.Timestep);
+
+				var costText = cost.ToString(NumberFormatInfo.CurrentInfo);
+				productionCost.Text = costText;
+
+				var power = actor.TraitInfos<PowerInfo>().Where(i => i.EnabledByDefault).Sum(i => i.Amount);
+				if (power != 0)
+				{
+					productionPowerIcon.Visible = true;
+					productionPower.Visible = true;
+					productionPower.Text = power.ToString(NumberFormatInfo.CurrentInfo);
+				}
+				else
+				{
+					productionPowerIcon.Visible = false;
+					productionPower.Visible = false;
+				}
+			}
+			else if (productionContainer != null)
+				productionContainer.Visible = false;
+
+			var text = "";
+			if (bi != null)
+			{
+				var prereqs = bi.Prerequisites
 					.Select(a => ActorName(modData.DefaultRules, a))
 					.Where(s => !s.StartsWith('~') && !s.StartsWith('!'))
 					.ToList();
-				if (prerequisites.Count != 0)
-					text += $"Requires {prerequisites.JoinWith(", ")}\n\n";
+
+				if (prereqs.Count != 0)
+					text += FluentProvider.GetMessage(Requires, "prerequisites", prereqs.JoinWith(", ")) + "\n\n";
 			}
 
 			if (selectedInfo != null && !string.IsNullOrEmpty(selectedInfo.Description))
-				text += WidgetUtils.WrapText(FluentProvider.GetMessage(selectedInfo.Description) + "\n\n", descriptionLabel.Bounds.Width, descriptionFont);
+				text += WidgetUtils.WrapText(FluentProvider.GetMessage(selectedInfo.Description), descriptionLabel.Bounds.Width, descriptionFont);
 
 			var height = descriptionFont.Measure(text).Y;
 			descriptionLabel.GetText = () => text;
@@ -217,6 +262,43 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			}
 
 			return name;
+		}
+
+		int BuildTime(ActorInfo info, string queue)
+		{
+			var bi = info.TraitInfoOrDefault<BuildableInfo>();
+
+			if (bi == null)
+				return 0;
+
+			var time = bi.BuildDuration;
+			if (time == -1)
+			{
+				var valued = info.TraitInfoOrDefault<ValuedInfo>();
+				if (valued == null)
+					return 0;
+				else
+					time = valued.Cost;
+			}
+
+			int pbi;
+			if (queue != null)
+			{
+				var pqueue = modData.DefaultRules.Actors.Values.SelectMany(a => a.TraitInfos<ProductionQueueInfo>()
+					.Where(x => x.Type == queue)).FirstOrDefault();
+
+				pbi = pqueue?.BuildDurationModifier ?? 100;
+			}
+			else
+			{
+				var pqueue = modData.DefaultRules.Actors.Values.SelectMany(a => a.TraitInfos<ProductionQueueInfo>()
+					.Where(x => bi.Queue.Contains(x.Type))).FirstOrDefault();
+
+				pbi = pqueue?.BuildDurationModifier ?? 100;
+			}
+
+			time = time * bi.BuildDurationModifier * pbi / 10000;
+			return time;
 		}
 	}
 }
