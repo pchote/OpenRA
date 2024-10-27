@@ -12,6 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenRA.FileFormats;
 using OpenRA.Graphics;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Mods.Common.Traits.Render;
@@ -36,6 +37,10 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly ScrollItemWidget template;
 		readonly ActorPreviewWidget previewWidget;
 
+		readonly SpriteWidget portraitWidget;
+		readonly Sprite portraitSprite;
+		readonly Png defaultPortrait;
+
 		ActorInfo selectedActor;
 		ScrollItemWidget firstItem;
 
@@ -59,6 +64,18 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			titleLabel = descriptionPanel.GetOrNull<LabelWidget>("ACTOR_TITLE");
 			descriptionLabel = descriptionPanel.Get<LabelWidget>("ACTOR_DESCRIPTION");
 			descriptionFont = Game.Renderer.Fonts[descriptionLabel.Font];
+
+			portraitWidget = widget.GetOrNull<SpriteWidget>("ACTOR_PORTRAIT");
+			if (portraitWidget != null)
+			{
+				defaultPortrait = new Png(modData.DefaultFileSystem.Open("encyclopedia/default.png"));
+				var spriteBounds = new Rectangle(0, 0, defaultPortrait.Width, defaultPortrait.Height);
+				var sheet = new Sheet(SheetType.BGRA, spriteBounds.Size.NextPowerOf2());
+				sheet.CreateBuffer();
+				sheet.GetTexture().ScaleFilter = TextureScaleFilter.Linear;
+				portraitSprite = new Sprite(sheet, spriteBounds, TextureChannel.RGBA);
+				portraitWidget.GetSprite = () => portraitSprite;
+			}
 
 			actorList.RemoveChildren();
 
@@ -141,6 +158,28 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			previewWidget.SetPreview(actor, typeDictionary);
 			previewWidget.GetScale = () => selectedInfo.Scale;
+
+			if (portraitWidget != null)
+			{
+				// PERF: Load individual portrait images directly, bypassing ChromeProvider,
+				// to avoid stalls when loading a single large sheet.
+				// Portrait images are required to all be the same size as the "default.png" image.
+				var portrait = defaultPortrait;
+				if (modData.DefaultFileSystem.TryOpen($"encyclopedia/{actor.Name}.png", out var s))
+				{
+					var p = new Png(s);
+					if (p.Width == defaultPortrait.Width && p.Height == defaultPortrait.Height)
+						portrait = p;
+					else
+					{
+						Log.Write("debug", $"Failed to parse load portrait image for {actor.Name}.");
+						Log.Write("debug", $"Expected size {defaultPortrait.Width}, {defaultPortrait.Height}, but found {p.Width}, {p.Height}.");
+					}
+				}
+
+				OpenRA.Graphics.Util.FastCopyIntoSprite(portraitSprite, portrait);
+				portraitSprite.Sheet.CommitBufferedData();
+			}
 
 			if (titleLabel != null)
 				titleLabel.Text = ActorName(modData.DefaultRules, actor.Name);
