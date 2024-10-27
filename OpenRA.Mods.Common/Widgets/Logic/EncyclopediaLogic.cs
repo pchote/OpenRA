@@ -27,6 +27,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly Dictionary<ActorInfo, EncyclopediaInfo> info = new();
 
 		readonly ScrollPanelWidget descriptionPanel;
+		readonly LabelWidget titleLabel;
 		readonly LabelWidget descriptionLabel;
 		readonly SpriteFont descriptionFont;
 
@@ -55,7 +56,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			previewWidget.IsVisible = () => selectedActor != null;
 
 			descriptionPanel = widget.Get<ScrollPanelWidget>("ACTOR_DESCRIPTION_PANEL");
-
+			titleLabel = descriptionPanel.GetOrNull<LabelWidget>("ACTOR_TITLE");
 			descriptionLabel = descriptionPanel.Get<LabelWidget>("ACTOR_DESCRIPTION");
 			descriptionFont = Game.Renderer.Fonts[descriptionLabel.Font];
 
@@ -141,8 +142,10 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			previewWidget.SetPreview(actor, typeDictionary);
 			previewWidget.GetScale = () => selectedInfo.Scale;
 
-			var text = "";
+			if (titleLabel != null)
+				titleLabel.Text = ActorName(modData.DefaultRules, actor.Name);
 
+			var text = "";
 			var buildable = actor.TraitInfoOrDefault<BuildableInfo>();
 			if (buildable != null)
 			{
