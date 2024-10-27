@@ -24,6 +24,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 	{
 		readonly World world;
 		readonly ModData modData;
+		readonly Dictionary<ActorInfo, EncyclopediaInfo> info = new();
 
 		readonly ScrollPanelWidget descriptionPanel;
 		readonly LabelWidget descriptionLabel;
@@ -60,28 +61,6 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			actorList.RemoveChildren();
 
-			var actorEncyclopediaPair = GetFilteredActorEncyclopediaPairs();
-			var categories = actorEncyclopediaPair.Select(a => a.Value.Category).Distinct().
-				OrderBy(string.IsNullOrWhiteSpace).ThenBy(s => s);
-			foreach (var category in categories)
-			{
-				CreateActorGroup(category, actorEncyclopediaPair
-					.Where(a => a.Value.Category == category)
-					.OrderBy(a => a.Value.Order)
-					.Select(a => a.Key));
-			}
-
-			widget.Get<ButtonWidget>("BACK_BUTTON").OnClick = () =>
-			{
-				Game.Disconnect();
-				Ui.CloseWindow();
-				onExit();
-			};
-		}
-
-		IReadOnlyCollection<KeyValuePair<ActorInfo, EncyclopediaInfo>> GetFilteredActorEncyclopediaPairs()
-		{
-			var actors = new List<KeyValuePair<ActorInfo, EncyclopediaInfo>>();
 			foreach (var actor in modData.DefaultRules.Actors.Values)
 			{
 				if (actor.TraitInfos<IRenderActorPreviewSpritesInfo>().Count == 0)
@@ -95,10 +74,26 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				if (encyclopedia == null)
 					continue;
 
-				actors.Add(new KeyValuePair<ActorInfo, EncyclopediaInfo>(actor, encyclopedia));
+				info.Add(actor, encyclopedia);
 			}
 
-			return actors;
+			var categories = info.Select(a => a.Value.Category).Distinct().
+				OrderBy(string.IsNullOrWhiteSpace).ThenBy(s => s);
+
+			foreach (var category in categories)
+			{
+				CreateActorGroup(category, info
+					.Where(a => a.Value.Category == category)
+					.OrderBy(a => a.Value.Order)
+					.Select(a => a.Key));
+			}
+
+			widget.Get<ButtonWidget>("BACK_BUTTON").OnClick = () =>
+			{
+				Game.Disconnect();
+				Ui.CloseWindow();
+				onExit();
+			};
 		}
 
 		void CreateActorGroup(string title, IEnumerable<ActorInfo> actors)
@@ -130,6 +125,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		void SelectActor(ActorInfo actor)
 		{
+			var selectedInfo = info[actor];
 			selectedActor = actor;
 
 			var typeDictionary = new TypeDictionary()
@@ -143,6 +139,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					typeDictionary.Add(inits);
 
 			previewWidget.SetPreview(actor, typeDictionary);
+			previewWidget.GetScale = () => selectedInfo.Scale;
 
 			var text = "";
 
@@ -157,9 +154,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					text += $"Requires {prerequisites.JoinWith(", ")}\n\n";
 			}
 
-			var info = actor.TraitInfoOrDefault<EncyclopediaInfo>();
-			if (info != null && !string.IsNullOrEmpty(info.Description))
-				text += WidgetUtils.WrapText(FluentProvider.GetMessage(info.Description) + "\n\n", descriptionLabel.Bounds.Width, descriptionFont);
+			if (selectedInfo != null && !string.IsNullOrEmpty(selectedInfo.Description))
+				text += WidgetUtils.WrapText(FluentProvider.GetMessage(selectedInfo.Description) + "\n\n", descriptionLabel.Bounds.Width, descriptionFont);
 
 			var height = descriptionFont.Measure(text).Y;
 			descriptionLabel.GetText = () => text;
