@@ -17,7 +17,7 @@ uniform sampler2D ColorShifts;
 uniform bool EnableDepthPreview;
 uniform vec2 DepthPreviewParams;
 uniform float DepthTextureScale;
-uniform float AntialiasPixelsPerTexel;
+uniform bool EnablePixelArtScaling;
 
 in vec4 vTexCoord;
 flat in float vTexPalette;
@@ -158,24 +158,26 @@ void main()
 	bool isColor = vChannelType == 0u;
 
 	vec4 c;
-	if (AntialiasPixelsPerTexel > 0.0)
+	if (EnablePixelArtScaling)
 	{
 		vec2 textureSize = vec2(Size(vChannelSampler));
-		vec2 offset = fract(coords.st * textureSize);
+		vec2 vUv = coords.st * textureSize;
+		vec2 offset = fract(vUv);
+		vec2 pixelsPerTexel = vec2(1.0 / dFdx(vUv.x), 1.0 / dFdy(vUv.y));
 
 		// Offset the sampling point to simulate bilinear intepolation in window coordinates instead of texture coordinates
 		// https://csantosbh.wordpress.com/2014/01/25/manual-texture-filtering-for-pixelated-games-in-webgl/
 		// https://csantosbh.wordpress.com/2014/02/05/automatically-detecting-the-texture-filter-threshold-for-pixelated-magnifications/
 		// ik is defined as 1/k from the articles, set to 1/0.7 because it looks good
 		float ik = 1.43;
-		vec2 interp = clamp(offset * ik * AntialiasPixelsPerTexel, 0.0, .5) + clamp((offset - 1.0) * ik * AntialiasPixelsPerTexel + .5, 0.0, .5);
+		vec2 interp = clamp(offset * ik * pixelsPerTexel, 0.0, .5) + clamp((offset - 1.0) * ik * pixelsPerTexel + .5, 0.0, .5);
 		coords = (floor(coords.st * textureSize) + interp) / textureSize;
 
 		if (isPaletted)
 			c = SamplePalettedBilinear(vChannelSampler, coords, textureSize);
 	}
 
-	if (!(AntialiasPixelsPerTexel > 0.0 && isPaletted))
+	if (!(EnablePixelArtScaling && isPaletted))
 	{
 		vec4 x = Sample(vChannelSampler, coords);
 		vec2 p = vec2(dot(x, vChannelMask), vTexPalette);

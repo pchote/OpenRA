@@ -294,10 +294,10 @@ namespace OpenRA
 					(int)(-screenSprite.Bounds.Height / scale) / worldSprite.Size.Y,
 					1f);
 
-				SpriteRenderer.SetAntialiasingPixelsPerTexel(Window.SurfaceSize.Height * 1f / worldSprite.Bounds.Height);
+				SpriteRenderer.EnablePixelArtScaling(true);
 				RgbaSpriteRenderer.DrawSprite(worldSprite, float3.Zero, bufferScale);
 				Flush();
-				SpriteRenderer.SetAntialiasingPixelsPerTexel(0);
+				SpriteRenderer.EnablePixelArtScaling(false);
 			}
 			else
 			{
@@ -499,7 +499,7 @@ namespace OpenRA
 				throw new InvalidOperationException($"EndFrame called with renderType = {renderType}, expected RenderType.UI.");
 
 			Flush();
-			SpriteRenderer.SetAntialiasingPixelsPerTexel(Window.EffectiveWindowScale);
+			SpriteRenderer.EnablePixelArtScaling(true);
 		}
 
 		public void DisableAntialiasingFilter()
@@ -508,7 +508,7 @@ namespace OpenRA
 				throw new InvalidOperationException($"EndFrame called with renderType = {renderType}, expected RenderType.UI.");
 
 			Flush();
-			SpriteRenderer.SetAntialiasingPixelsPerTexel(0);
+			SpriteRenderer.EnablePixelArtScaling(false);
 		}
 
 		public void GrabWindowMouseFocus()

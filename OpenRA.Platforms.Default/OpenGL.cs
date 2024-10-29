@@ -674,9 +674,10 @@ namespace OpenRA.Platforms.Default
 						break;
 				}
 
-				// Core features are defined as the shared feature set of GL 3.2 and (GLES 3 + BGRA extension)
+				// Core features are defined as the shared feature set of GL 3.2 and (GLES 3 + derivatives, BGRA extensions)
 				var hasBGRA = SDL.SDL_GL_ExtensionSupported("GL_EXT_texture_format_BGRA8888") == SDL.SDL_bool.SDL_TRUE;
-				if (Version.Contains(" ES") && hasBGRA && major >= 3)
+				var hasDerivatives = SDL.SDL_GL_ExtensionSupported("GL_OES_standard_derivatives") == SDL.SDL_bool.SDL_TRUE;
+				if (Version.Contains(" ES") && hasBGRA && hasDerivatives && major >= 3)
 				{
 					hasValidConfiguration = true;
 					Profile = GLProfile.Embedded;

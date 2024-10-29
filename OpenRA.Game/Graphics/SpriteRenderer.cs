@@ -253,9 +253,9 @@ namespace OpenRA.Graphics
 			shader.SetVec("DepthPreviewParams", contrast, offset);
 		}
 
-		public void SetAntialiasingPixelsPerTexel(float pxPerTx)
+		public void EnablePixelArtScaling(bool enabled)
 		{
-			shader.SetVec("AntialiasPixelsPerTexel", pxPerTx);
+			shader.SetBool("EnablePixelArtScaling", enabled);
 		}
 	}
 }
