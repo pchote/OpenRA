@@ -26,7 +26,9 @@ TRAN:
 	Encyclopedia:
 		Description: actor-tran.encyclopedia
 		Order: 230
-		Category: Units
+		Scale: 3
+		Category: Aircraft
+		PreviewOwner: GDI
 	WithIdleOverlay@ROTOR1AIR:
 		Offset: 597,0,85
 		Sequence: rotor
@@ -92,7 +94,9 @@ HELI:
 	Encyclopedia:
 		Description: actor-heli.encyclopedia
 		Order: 240
-		Category: Units
+		Scale: 3
+		Category: Aircraft
+		PreviewOwner: NodUnits
 	AttackMove:
 		Voice: Attack
 	AutoTarget:
@@ -164,7 +168,9 @@ ORCA:
 	Encyclopedia:
 		Description: actor-orca.encyclopedia
 		Order: 250
-		Category: Units
+		Scale: 3
+		Category: Aircraft
+		PreviewOwner: GDI
 	AttackMove:
 		Voice: Attack
 	AutoTarget:

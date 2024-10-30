@@ -19,7 +19,9 @@ MCV:
 	Encyclopedia:
 		Description: actor-mcv.encyclopedia
 		Order: 80
-		Category: Units
+		Category: Vehicles
+		Scale: 3
+		PreviewOwner: GDI
 	Repairable:
 		HpPerStep: 1819
 	Armor:
@@ -77,7 +79,9 @@ HARV:
 	Encyclopedia:
 		Description: actor-harv.encyclopedia
 		Order: 90
-		Category: Units
+		Category: Vehicles
+		Scale: 3
+		PreviewOwner: GDI
 	Repairable:
 		HpPerStep: 2584
 	Armor:
@@ -134,7 +138,9 @@ APC:
 	Encyclopedia:
 		Description: actor-apc.encyclopedia
 		Order: 100
-		Category: Units
+		Category: Vehicles
+		Scale: 3
+		PreviewOwner: GDI
 	Repairable:
 		HpPerStep: 1440
 	Armor:
@@ -226,7 +232,9 @@ ARTY:
 	Encyclopedia:
 		Description: actor-arty.encyclopedia
 		Order: 110
-		Category: Units
+		Category: Vehicles
+		Scale: 3
+		PreviewOwner: NodUnits
 	AttackFrontal:
 		TargetFrozenActors: True
 		ForceFireIgnoresActors: True
@@ -279,7 +287,9 @@ FTNK:
 	Encyclopedia:
 		Description: actor-ftnk.encyclopedia
 		Order: 120
-		Category: Units
+		Category: Vehicles
+		Scale: 3
+		PreviewOwner: NodUnits
 	AttackFrontal:
 		Voice: Attack
 		FacingTolerance: 0
@@ -331,7 +341,9 @@ BGGY:
 	Encyclopedia:
 		Description: actor-bggy.encyclopedia
 		Order: 130
-		Category: Units
+		Category: Vehicles
+		Scale: 3
+		PreviewOwner: NodUnits
 	AttackMove:
 		Voice: Attack
 	AttackTurreted:
@@ -378,7 +390,9 @@ BIKE:
 	Encyclopedia:
 		Description: actor-bike.encyclopedia
 		Order: 140
-		Category: Units
+		Category: Vehicles
+		Scale: 3
+		PreviewOwner: NodUnits
 	AttackFrontal:
 		Voice: Attack
 		FacingTolerance: 0
@@ -426,7 +440,9 @@ JEEP:
 	Encyclopedia:
 		Description: actor-jeep.encyclopedia
 		Order: 150
-		Category: Units
+		Category: Vehicles
+		Scale: 3
+		PreviewOwner: GDI
 	AttackMove:
 		Voice: Attack
 	AttackTurreted:
@@ -476,7 +492,9 @@ LTNK:
 	Encyclopedia:
 		Description: actor-ltnk.encyclopedia
 		Order: 160
-		Category: Units
+		Category: Vehicles
+		Scale: 3
+		PreviewOwner: NodUnits
 	AttackMove:
 		Voice: Attack
 	AttackTurreted:
@@ -525,7 +543,9 @@ MTNK:
 	Encyclopedia:
 		Description: actor-mtnk.encyclopedia
 		Order: 170
-		Category: Units
+		Category: Vehicles
+		Scale: 3
+		PreviewOwner: GDI
 	AttackMove:
 		Voice: Attack
 	AttackTurreted:
@@ -589,7 +609,9 @@ HTNK:
 	Encyclopedia:
 		Description: actor-htnk.encyclopedia
 		Order: 180
-		Category: Units
+		Category: Vehicles
+		Scale: 3
+		PreviewOwner: GDI
 	AttackMove:
 		Voice: Attack
 	AttackTurreted:
@@ -650,7 +672,9 @@ MSAM:
 	Encyclopedia:
 		Description: actor-msam.encyclopedia
 		Order: 190
-		Category: Units
+		Category: Vehicles
+		Scale: 3
+		PreviewOwner: GDI
 	AttackFrontal:
 		TargetFrozenActors: True
 		ForceFireIgnoresActors: True
@@ -706,7 +730,9 @@ MLRS:
 	Encyclopedia:
 		Description: actor-mlrs.encyclopedia
 		Order: 200
-		Category: Units
+		Category: Vehicles
+		Scale: 3
+		PreviewOwner: NodUnits
 	AmmoPool:
 		Ammo: 2
 		AmmoCondition: ammo
@@ -780,7 +806,9 @@ STNK:
 	Encyclopedia:
 		Description: actor-stnk.encyclopedia
 		Order: 210
-		Category: Units
+		Category: Vehicles
+		Scale: 3
+		PreviewOwner: NodUnits
 	AttackFrontal:
 		Voice: Attack
 		FacingTolerance: 0
@@ -842,7 +870,9 @@ TRUCK:
 	Encyclopedia:
 		Description: actor-truck.encyclopedia
 		Order: 220
-		Category: Units
+		Category: Vehicles
+		Scale: 3
+		PreviewOwner: GDI
 	DeliversCash:
 		Payload: 1000
 		PlayerExperience: 10

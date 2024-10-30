@@ -25,7 +25,9 @@ E1:
 	Encyclopedia:
 		Description: actor-e1.encyclopedia
 		Order: 0
-		Category: Units
+		Scale: 3
+		Category: Infantry
+		PreviewOwner: NodUnits
 	AttackFrontal:
 		Voice: Attack
 		FacingTolerance: 0
@@ -63,7 +65,9 @@ E2:
 		FireDelay: 15
 	Encyclopedia:
 		Description: actor-e2.encyclopedia
-		Category: Units
+		Scale: 3
+		Category: Infantry
+		PreviewOwner: NodUnits
 	AttackFrontal:
 		Voice: Attack
 		FacingTolerance: 0
@@ -107,7 +111,9 @@ E3:
 	Encyclopedia:
 		Description: actor-e3.encyclopedia
 		Order: 20
-		Category: Units
+		Scale: 3
+		Category: Infantry
+		PreviewOwner: NodUnits
 	AttackFrontal:
 		Voice: Attack
 		FacingTolerance: 0
@@ -148,7 +154,9 @@ E4:
 	Encyclopedia:
 		Description: actor-e4.encyclopedia
 		Order: 30
-		Category: Units
+		Scale: 3
+		Category: Infantry
+		PreviewOwner: NodUnits
 	AttackFrontal:
 		Voice: Attack
 		FacingTolerance: 0
@@ -191,7 +199,9 @@ E5:
 	Encyclopedia:
 		Description: actor-e5.encyclopedia
 		Order: 40
-		Category: Units
+		Scale: 3
+		Category: Infantry
+		PreviewOwner: NodUnits
 	AttackFrontal:
 		Voice: Attack
 		FacingTolerance: 0
@@ -225,7 +235,9 @@ E6:
 	Encyclopedia:
 		Description: actor-e6.encyclopedia
 		Order: 50
-		Category: Units
+		Scale: 3
+		Category: Infantry
+		PreviewOwner: NodUnits
 	Passenger:
 		CustomPipType: yellow
 	InstantlyRepairs:
@@ -278,7 +290,9 @@ RMBO:
 	Encyclopedia:
 		Description: actor-rmbo.encyclopedia
 		Order: 60
-		Category: Units
+		Scale: 3
+		Category: Infantry
+		PreviewOwner: GDI
 	WithInfantryBody:
 		DefaultAttackSequence: shoot
 		IdleSequences: idle1,idle2,idle3
@@ -306,7 +320,10 @@ PVICE:
 	Encyclopedia:
 		Description: actor-pvice.encyclopedia
 		Order: 70
-		Category: Units
+		Scale: 3
+		Category: Civilian
+		HideBuildable: true
+		PreviewOwner: NodUnits
 
 STEG:
 	Inherits: ^DINO
