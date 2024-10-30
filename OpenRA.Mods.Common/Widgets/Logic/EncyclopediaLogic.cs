@@ -162,9 +162,13 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			var selectedInfo = info[actor];
 			selectedActor = actor;
 
+			Player previewOwner = null;
+			if (!string.IsNullOrEmpty(selectedInfo.PreviewOwner))
+				previewOwner = world.Players.FirstOrDefault(p => p.InternalName == selectedInfo.PreviewOwner);
+
 			var typeDictionary = new TypeDictionary()
 			{
-				new OwnerInit(world.WorldActor.Owner),
+				new OwnerInit(previewOwner ?? world.WorldActor.Owner),
 				new FactionInit(world.WorldActor.Owner.PlayerReference.Faction)
 			};
 
