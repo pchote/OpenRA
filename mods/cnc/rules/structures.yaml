@@ -15,6 +15,8 @@ FACT:
 		Description: actor-fact.encyclopedia
 		Category: Buildings
 		Order: 0
+		Scale: 2
+		PreviewOwner: GDI
 	Health:
 		HP: 210000
 	Armor:
@@ -180,6 +182,8 @@ NUKE:
 		Description: actor-nuke.encyclopedia
 		Category: Buildings
 		Order: 40
+		Scale: 2
+		PreviewOwner: GDI
 	Health:
 		HP: 55000
 	RevealsShroud:
@@ -215,6 +219,8 @@ NUK2:
 		Description: actor-nuk2.encyclopedia
 		Category: Buildings
 		Order: 190
+		Scale: 2
+		PreviewOwner: GDI
 	Health:
 		HP: 70000
 	RevealsShroud:
@@ -252,6 +258,8 @@ PROC:
 		Description: actor-proc.encyclopedia
 		Category: Buildings
 		Order: 80
+		Scale: 2
+		PreviewOwner: GDI
 	Health:
 		HP: 100000
 	RevealsShroud:
@@ -303,6 +311,8 @@ SILO:
 		Description: actor-silo.encyclopedia
 		Category: Buildings
 		Order: 90
+		Scale: 2
+		PreviewOwner: GDI
 	-GivesBuildableArea:
 	Health:
 		HP: 50000
@@ -352,6 +362,8 @@ PYLE:
 		Description: actor-pyle.encyclopedia
 		Category: Buildings
 		Order: 50
+		Scale: 2
+		PreviewOwner: GDI
 	Health:
 		HP: 60000
 	RevealsShroud:
@@ -417,6 +429,8 @@ HAND:
 		Description: actor-hand.encyclopedia
 		Category: Buildings
 		Order: 60
+		Scale: 2
+		PreviewOwner: Nod
 	Health:
 		HP: 60000
 	RevealsShroud:
@@ -485,6 +499,8 @@ AFLD:
 		Description: actor-afld.encyclopedia
 		Category: Buildings
 		Order: 110
+		Scale: 1.5
+		PreviewOwner: Nod
 	Health:
 		HP: 110000
 	RevealsShroud:
@@ -554,6 +570,8 @@ WEAP:
 		Description: actor-weap.encyclopedia
 		Category: Buildings
 		Order: 100
+		Scale: 2
+		PreviewOwner: GDI
 	Health:
 		HP: 110000
 	RevealsShroud:
@@ -619,6 +637,8 @@ HPAD:
 		Description: actor-hpad.encyclopedia
 		Category: Buildings
 		Order: 120
+		Scale: 2
+		PreviewOwner: GDI
 	Health:
 		HP: 60000
 	RevealsShroud:
@@ -709,6 +729,8 @@ HQ:
 		Description: actor-hq.encyclopedia
 		Category: Buildings
 		Order: 130
+		Scale: 2
+		PreviewOwner: GDI
 	Health:
 		HP: 80000
 	RevealsShroud:
@@ -775,6 +797,8 @@ FIX:
 		Description: actor-fix.encyclopedia
 		Category: Buildings
 		Order: 180
+		Scale: 2
+		PreviewOwner: GDI
 	Selectable:
 		Bounds: 2730, 1450, 0, 128
 		DecorationBounds: 3072, 2048
@@ -827,6 +851,8 @@ EYE:
 		Description: actor-eye.encyclopedia
 		Category: Buildings
 		Order: 200
+		Scale: 2
+		PreviewOwner: GDI
 	Selectable:
 		Bounds: 2048, 1706, 0, 384
 		DecorationBounds: 2048, 2261, 0, -170
@@ -897,6 +923,8 @@ TMPL:
 		Description: actor-tmpl.encyclopedia
 		Category: Buildings
 		Order: 210
+		Scale: 2
+		PreviewOwner: Nod
 	Health:
 		HP: 210000
 	RevealsShroud:
@@ -967,6 +995,8 @@ GUN:
 		Description: actor-gun.encyclopedia
 		Category: Buildings
 		Order: 160
+		Scale: 2
+		PreviewOwner: Nod
 	Health:
 		HP: 41000
 	Armor:
@@ -1028,6 +1058,8 @@ SAM:
 		Description: actor-sam.encyclopedia
 		Category: Buildings
 		Order: 161
+		Scale: 2
+		PreviewOwner: Nod
 	Health:
 		HP: 40000
 	Armor:
@@ -1078,6 +1110,8 @@ OBLI:
 		Description: actor-obli.encyclopedia
 		Category: Buildings
 		Order: 220
+		Scale: 2
+		PreviewOwner: Nod
 	Health:
 		HP: 75000
 	Armor:
@@ -1127,6 +1161,8 @@ GTWR:
 		Description: actor-gtwr.encyclopedia
 		Category: Buildings
 		Order: 150
+		Scale: 2
+		PreviewOwner: GDI
 	Health:
 		HP: 40000
 	Armor:
@@ -1172,6 +1208,8 @@ ATWR:
 		Description: actor-atwr.encyclopedia
 		Category: Buildings
 		Order: 170
+		Scale: 2
+		PreviewOwner: GDI
 	Health:
 		HP: 55000
 	Armor:
@@ -1222,6 +1260,8 @@ SBAG:
 		Description: actor-sbag.encyclopedia
 		Category: Buildings
 		Order: 10
+		Scale: 2
+		PreviewOwner: GDI
 	Armor:
 		Type: Light
 	LineBuild:
@@ -1248,6 +1288,8 @@ CYCL:
 		Description: actor-cycl.encyclopedia
 		Category: Buildings
 		Order: 20
+		Scale: 2
+		PreviewOwner: GDI
 	Armor:
 		Type: Light
 	LineBuild:
@@ -1275,6 +1317,8 @@ BRIK:
 		Description: actor-brik.encyclopedia
 		Category: Buildings
 		Order: 30
+		Scale: 2
+		PreviewOwner: GDI
 	Health:
 		HP: 20000
 	Armor:

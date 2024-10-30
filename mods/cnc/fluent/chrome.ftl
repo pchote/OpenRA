@@ -108,7 +108,7 @@ button-select-categories-buttons-none = None
 label-tool-marker-tiles = Marker Tiles
 
 ## encyclopedia.yaml, mainmenu.yaml
-label-encyclopedia-title = Database
+label-encyclopedia-title = EVA Database
 
 ## gamesave-browser.yaml
 label-gamesave-browser-panel-load-title = Load game
