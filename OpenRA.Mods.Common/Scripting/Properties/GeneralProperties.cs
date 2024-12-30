@@ -110,12 +110,6 @@ namespace OpenRA.Mods.Common.Scripting
 			tooltips = self.TraitsImplementing<Tooltip>().ToArray();
 		}
 
-		[Desc("The actor position in cell coordinates.")]
-		public CPos Location => Self.Location;
-
-		[Desc("The actor position in world coordinates.")]
-		public WPos CenterPosition => Self.CenterPosition;
-
 		[Desc("The direction that the actor is facing.")]
 		public WAngle Facing
 		{
@@ -212,5 +206,18 @@ namespace OpenRA.Mods.Common.Scripting
 		{
 			return IsTaggable && scriptTags.HasTag(tag);
 		}
+	}
+
+	[ScriptPropertyGroup("General")]
+	public class LocationProperties : ScriptActorProperties, Requires<IOccupySpaceInfo>
+	{
+		public LocationProperties(ScriptContext context, Actor self)
+			: base(context, self) { }
+
+		[Desc("The actor position in cell coordinates.")]
+		public CPos Location => Self.Location;
+
+		[Desc("The actor position in world coordinates.")]
+		public WPos CenterPosition => Self.CenterPosition;
 	}
 }
