@@ -96,7 +96,6 @@ namespace OpenRA.Mods.Common.Scripting
 	[ScriptPropertyGroup("General")]
 	public class GeneralProperties : ScriptActorProperties
 	{
-		readonly IFacing facing;
 		readonly AutoTarget autotarget;
 		readonly ScriptTags scriptTags;
 		readonly Tooltip[] tooltips;
@@ -104,22 +103,9 @@ namespace OpenRA.Mods.Common.Scripting
 		public GeneralProperties(ScriptContext context, Actor self)
 			: base(context, self)
 		{
-			facing = self.TraitOrDefault<IFacing>();
 			autotarget = self.TraitOrDefault<AutoTarget>();
 			scriptTags = self.TraitOrDefault<ScriptTags>();
 			tooltips = self.TraitsImplementing<Tooltip>().ToArray();
-		}
-
-		[Desc("The direction that the actor is facing.")]
-		public WAngle Facing
-		{
-			get
-			{
-				if (facing == null)
-					throw new LuaException($"Actor '{Self}' doesn't define a facing");
-
-				return facing.Facing;
-			}
 		}
 
 		[ScriptActorPropertyActivity]
@@ -219,5 +205,20 @@ namespace OpenRA.Mods.Common.Scripting
 
 		[Desc("The actor position in world coordinates.")]
 		public WPos CenterPosition => Self.CenterPosition;
+	}
+
+	[ScriptPropertyGroup("General")]
+	public class FacingProperties : ScriptActorProperties, Requires<IFacingInfo>
+	{
+		readonly IFacing facing;
+
+		public FacingProperties(ScriptContext context, Actor self)
+			: base(context, self)
+		{
+			facing = self.Trait<IFacing>();
+		}
+
+		[Desc("The direction that the actor is facing.")]
+		public WAngle Facing => facing.Facing;
 	}
 }
