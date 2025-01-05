@@ -50,6 +50,7 @@ namespace OpenRA.Mods.Common.UtilityCommands
 		static string GenerateJson(string version, IEnumerable<Type> sequenceTypes)
 		{
 			var relatedEnumTypes = new HashSet<Type>();
+			var pdbReaderCache = Utilities.CreatePdbReaderCache();
 
 			var sequenceTypesInfo = sequenceTypes
 				.Where(x => !x.ContainsGenericParameters && !x.IsAbstract)
@@ -58,6 +59,7 @@ namespace OpenRA.Mods.Common.UtilityCommands
 					type.Namespace,
 					type.Name,
 					Description = string.Join(" ", Utility.GetCustomAttributes<DescAttribute>(type, false).SelectMany(d => d.Lines)),
+					Filename = Utilities.GetSourceFilenameFromPdb(type, pdbReaderCache),
 					InheritedTypes = type.BaseTypes()
 						.Select(y => y.Name)
 						.Where(y => y != type.Name && y != "Object"),
