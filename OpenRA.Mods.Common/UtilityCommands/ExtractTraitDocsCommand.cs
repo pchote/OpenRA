@@ -48,6 +48,7 @@ namespace OpenRA.Mods.Common.UtilityCommands
 		static string GenerateJson(string version, IEnumerable<Type> traitTypes, ObjectCreator objectCreator)
 		{
 			var relatedEnumTypes = new HashSet<Type>();
+			var pdbReaderCache = Utilities.CreatePdbReaderCache();
 
 			var traitTypesInfo = traitTypes
 				.Where(x => !x.ContainsGenericParameters && !x.IsAbstract)
@@ -56,6 +57,7 @@ namespace OpenRA.Mods.Common.UtilityCommands
 					type.Namespace,
 					Name = type.Name.EndsWith("Info", StringComparison.Ordinal) ? type.Name[..^4] : type.Name,
 					Description = string.Join(" ", Utility.GetCustomAttributes<DescAttribute>(type, false).SelectMany(d => d.Lines)),
+					Filename = Utilities.GetSourceFilenameFromPdb(type, pdbReaderCache),
 					RequiresTraits = RequiredTraitTypes(type)
 						.Select(y => y.Name),
 					InheritedTypes = type.BaseTypes()
