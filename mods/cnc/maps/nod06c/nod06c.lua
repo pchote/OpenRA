@@ -62,7 +62,7 @@ WorldLoaded = function()
 	InitObjectives(Nod)
 
 	NodObjective1 = AddPrimaryObjective(Nod, "steal-nuclear-detonator")
-	InfiltrateObjective = AddSecondaryObjective(Nod, "infiltrate-barracks-factory-conyard")
+	CaptureObjective = AddSecondaryObjective(Nod, "capture-barracks-factory-conyard")
 
 	InsertNodUnits()
 
@@ -111,18 +111,18 @@ WorldLoaded = function()
 	Trigger.AfterDelay(ProductionDelay, ProdTriggerFunction)
 
 	Trigger.OnAnyKilled(BuildingsToCapture, function()
-		if not Nod.IsObjectiveCompleted(InfiltrateObjective) then
-			Nod.MarkFailedObjective(InfiltrateObjective)
+		if not Nod.IsObjectiveCompleted(CaptureObjective) then
+			Nod.MarkFailedObjective(CaptureObjective)
 		end
 	end)
 
+	local captured = 0
 	Utils.Do(BuildingsToCapture, function(building)
-		local captured = 0
 		Trigger.OnCapture(building, function()
 			captured = captured + 1
 
 			if captured == 3 then
-				Nod.MarkCompletedObjective(InfiltrateObjective)
+				Nod.MarkCompletedObjective(CaptureObjective)
 			end
 		end)
 	end)
