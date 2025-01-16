@@ -65,7 +65,7 @@ SendHarkonnen = function(path)
 end
 
 Hunt = function(house)
-	Trigger.OnAllKilledOrCaptured(Base[house.Name], function()
+	Trigger.OnAllKilledOrCaptured(Base[house.InternalName], function()
 		Utils.Do(house.GetGroundAttackers(), IdleHunt)
 	end)
 end
