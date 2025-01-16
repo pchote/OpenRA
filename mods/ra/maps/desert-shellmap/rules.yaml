@@ -10,6 +10,7 @@ Player:
 
 World:
 	-CrateSpawner:
+	-AutoSave:
 	-SpawnStartingUnits:
 	-MapStartingLocations:
 	MusicPlaylist:

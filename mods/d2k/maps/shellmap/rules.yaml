@@ -7,6 +7,7 @@ Player:
 
 World:
 	-CrateSpawner:
+	-AutoSave:
 	-SpawnStartingUnits:
 	-MapStartingLocations:
 	ActorSpawnManager:

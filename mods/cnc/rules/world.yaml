@@ -154,6 +154,7 @@ World:
 	DevCommands:
 	DebugVisualizationCommands:
 	PathFinderOverlay:
+	AutoSave:
 	HierarchicalPathFinderOverlay:
 	PlayerCommands:
 	HelpCommand:

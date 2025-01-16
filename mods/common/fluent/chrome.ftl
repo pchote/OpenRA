@@ -473,6 +473,11 @@ label-audio-device-container = Audio Device:
 label-video-volume-container = Video Volume:
 label-restart-required-container-audio-desc = Device changes will be applied after the game is restarted
 
+## settings-gameplay.yaml
+label-game-play-section-header = Auto-save
+auto-save-interval-label = Auto-save frequency:
+auto-save-nr-label = Auto-save limit:
+
 ## settings-display.yaml
 label-target-lines-dropdown-container = Target Lines:
 label-status-bar-dropdown-container-bars = Status Bars:

@@ -46,6 +46,7 @@ Rules:
 		-SpawnStartingUnits:
 		-MapStartingLocations:
 		-CrateSpawner:
+		-AutoSave:
 		MusicPlaylist:
 			BackgroundMusic: map1
 			AllowMuteBackgroundMusic: true

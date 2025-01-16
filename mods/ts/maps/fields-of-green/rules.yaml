@@ -9,6 +9,7 @@ World:
 	-CrateSpawner:
 	-StartGameNotification:
 	-SpawnStartingUnits:
+	-AutoSave:
 	-MapStartingLocations:
 	LuaScript:
 		Scripts: fields-of-green.lua

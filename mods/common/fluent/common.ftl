@@ -408,6 +408,22 @@ label-original-notice = The default is "{ $key }"
 label-duplicate-notice = This is already used for "{ $key }" in the { $context } context
 hotkey-context-any = Any
 
+## GameplaySettingsLogic
+auto-save-interval =
+    .disabled = Disabled
+    .options =
+        { $seconds ->
+            [one] 1 second
+           *[other] { $seconds } seconds
+        }
+    .minute-options =
+        { $minutes ->
+            [one] 1 minute
+           *[other] { $minutes } minutes
+        }
+
+auto-save-max-file-number = { $saves } saves
+
 ## InputSettingsLogic
 options-mouse-scroll-type =
     .disabled = Disabled

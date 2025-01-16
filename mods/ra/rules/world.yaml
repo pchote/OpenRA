@@ -276,6 +276,7 @@ World:
 	LoadWidgetAtGameStart:
 	ScriptTriggers:
 	CellTriggerOverlay:
+	AutoSave:
 	TimeLimitManager:
 		TimeLimitDisplayOrder: 2
 		TimeLimitWarnings:

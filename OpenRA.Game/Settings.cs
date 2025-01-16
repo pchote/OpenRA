@@ -251,6 +251,14 @@ namespace OpenRA
 		public Color[] CustomColors = Array.Empty<Color>();
 	}
 
+	public class SinglePlayerGameSettings
+	{
+		[Desc("Sets the Auto-save frequency, in seconds")]
+		public int AutoSaveInterval = 0;
+		[Desc("Sets the AutoSave number of max files to bes saved on the file-system")]
+		public int AutoSaveMaxFileCount = 10;
+	}
+
 	public class GameSettings
 	{
 		public string Platform = "Default";
@@ -308,8 +316,8 @@ namespace OpenRA
 		public readonly GraphicSettings Graphics = new();
 		public readonly ServerSettings Server = new();
 		public readonly DebugSettings Debug = new();
+		public readonly SinglePlayerGameSettings SinglePlayerSettings = new();
 		internal Dictionary<string, Hotkey> Keys = new();
-
 		public readonly Dictionary<string, object> Sections;
 
 		// A direct clone of the file loaded from disk.
@@ -328,6 +336,7 @@ namespace OpenRA
 				{ "Graphics", Graphics },
 				{ "Server", Server },
 				{ "Debug", Debug },
+				{ "SinglePlayerSettings", SinglePlayerSettings },
 			};
 
 			// Override fieldloader to ignore invalid entries
