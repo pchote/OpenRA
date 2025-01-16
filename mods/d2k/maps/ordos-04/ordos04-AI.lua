@@ -31,9 +31,9 @@ SmugglerTankType = { "combat_tank_o" }
 
 InitAIUnits = function(house)
 	LastHarvesterEaten[house] = true
-	IdlingUnits[house] = Reinforcements.Reinforce(house, InitialReinforcements[house.Name], InitialReinforcementsPaths[house.Name])
+	IdlingUnits[house] = Reinforcements.Reinforce(house, InitialReinforcements[house.InternalName], InitialReinforcementsPaths[house.InternalName])
 
-	DefendAndRepairBase(house, Base[house.Name], 0.75, AttackGroupSize[Difficulty])
+	DefendAndRepairBase(house, Base[house.InternalName], 0.75, AttackGroupSize[Difficulty])
 end
 
 ActivateAI = function()
