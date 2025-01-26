@@ -82,6 +82,9 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		[FluentReference]
 		const string OrderMapsBySize = "options-order-maps.size";
 
+		// Placeholder for random map tab
+		const MapClassification MapClassificationGenerate = (MapClassification)8;
+
 		readonly string allMaps;
 
 		readonly Widget widget;
@@ -139,6 +142,10 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			SetupOrderByDropdown();
 
+			var filterContainer = widget.GetOrNull("FILTER_ORDER_CONTROLS");
+			if (filterContainer != null)
+				filterContainer.IsVisible = () => currentTab != MapClassificationGenerate;
+
 			var mapFilterInput = widget.GetOrNull<TextFieldWidget>("MAPFILTER_INPUT");
 			if (mapFilterInput != null)
 			{
@@ -173,6 +180,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					scrollpanels[currentTab].ScrollToItem(uid, smooth: true);
 				};
 				randomMapButton.IsDisabled = () => visibleMaps == null || visibleMaps.Length == 0;
+				randomMapButton.IsVisible = () => currentTab != MapClassificationGenerate;
 			}
 
 			var deleteMapButton = widget.Get<ButtonWidget>("DELETE_MAP_BUTTON");
@@ -223,6 +231,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			SetupMapTab(MapClassification.User, filter, "USER_MAPS_TAB_BUTTON", "USER_MAPS_TAB");
 			SetupMapTab(MapClassification.System, filter, "SYSTEM_MAPS_TAB_BUTTON", "SYSTEM_MAPS_TAB");
 			SetupMapTab(MapClassification.Remote, filter, "REMOTE_MAPS_TAB_BUTTON", "REMOTE_MAPS_TAB");
+			SetupGenerateMapTab(MapClassificationGenerate, "GENERATE_MAP_TAB_BUTTON", "GENERATE_MAP_TAB");
 
 			// System and user map tabs are hidden when the server forces a restricted pool
 			if (remoteMapPool != null)
@@ -248,7 +257,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		void SwitchTab(MapClassification tab)
 		{
 			currentTab = tab;
-			EnumerateMaps(tab);
+			if (tab != MapClassificationGenerate)
+				EnumerateMaps(tab);
 		}
 
 		void RefreshMaps(MapClassification tab, MapVisibility filter)
@@ -316,6 +326,17 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			tabButton.OnClick = () => SwitchTab(tab);
 
 			RefreshMaps(tab, filter);
+		}
+
+		void SetupGenerateMapTab(MapClassification tab, string tabButtonName, string tabContainerName)
+		{
+			var tabContainer = widget.Get<ContainerWidget>(tabContainerName);
+			tabContainer.IsVisible = () => currentTab == tab;
+
+			var tabButton = widget.Get<ButtonWidget>(tabButtonName);
+			tabButton.IsHighlighted = () => currentTab == tab;
+
+			tabButton.OnClick = () => SwitchTab(tab);
 		}
 
 		void SetupGameModeDropdown(MapClassification tab, DropDownButtonWidget gameModeDropdown)

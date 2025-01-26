@@ -518,6 +518,7 @@ button-settings-title = Settings
 label-mapchooser-panel-title = Select Map
 button-bg-system-maps-tab = Official Maps
 button-bg-remote-maps-tab = Server Maps
+button-bg-generate-map-tab = Generate Map
 button-bg-user-maps-tab = Custom Maps
 label-filter-order-controls-desc = Filter:
 label-filter-order-controls-desc-joiner = in

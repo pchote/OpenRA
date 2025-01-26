@@ -36,6 +36,12 @@ Container@MAPCHOOSER_PANEL:
 					Height: 31
 					Width: 135
 					Text: button-bg-user-maps-tab
+				Button@GENERATE_MAP_TAB_BUTTON:
+					X: 155
+					Y: 15
+					Height: 31
+					Width: 135
+					Text: button-bg-generate-map-tab
 				Container@MAP_TAB_PANES:
 					Width: PARENT_WIDTH - 30
 					Height: PARENT_HEIGHT - 90
@@ -66,6 +72,13 @@ Container@MAPCHOOSER_PANEL:
 									Width: PARENT_WIDTH
 									Height: PARENT_HEIGHT
 									ItemSpacing: 1
+						Container@GENERATE_MAP_TAB:
+							Width: PARENT_WIDTH
+							Height: PARENT_HEIGHT
+							Children:
+								ScrollPanel@GENERATE_PANEL:
+									Width: PARENT_WIDTH
+									Height: PARENT_HEIGHT + 30
 				ScrollItem@MAP_TEMPLATE:
 					Width: 210
 					Height: 262
