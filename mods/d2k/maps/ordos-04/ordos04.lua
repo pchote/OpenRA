@@ -112,8 +112,6 @@ WorldLoaded = function()
 	CaptureOutpost = AddPrimaryObjective(Ordos, "capture-smuggler-outpost")
 	KillHarkonnen = AddSecondaryObjective(Ordos, "destroy-harkonnen")
 
-	SOutpost.GrantCondition("modified")
-
 	Camera.Position = OConyard.CenterPosition
 	HarkonnenAttackLocation = OConyard.Location
 
@@ -138,6 +136,7 @@ WorldLoaded = function()
 			Ordos.MarkCompletedObjective(CaptureOutpost)
 			Smuggler.MarkFailedObjective(DefendOutpost)
 		end)
+		SOutpost.GrantCondition("modified")
 	end)
 	Trigger.OnDamaged(SOutpost, function(_, attacker)
 		if SOutpost.Owner ~= Smuggler or attacker.IsDead or attacker.Owner ~= Ordos then
