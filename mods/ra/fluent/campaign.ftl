@@ -45,7 +45,7 @@ actor-5tnk-husk-name = Husk (Super Tank)
 actor-gas-name = Gas
 
 ## sarin-gas-2-down-under
-actor-offiser-name = Officer
+actor-officer-name = Officer
 
 ## sarin-gas-3-controlled-burn
 actor-sarin-processing-plant-name = Sarin Processing Plant

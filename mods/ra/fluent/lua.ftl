@@ -80,6 +80,14 @@ capture-radar-dome = Capture the Radar Dome.
 ## soviet-04ab, soviet-05
 defeat-allied-forces = Defeat the Allied forces.
 
+## allies-08a
+evacuate-scientists-from-west-island = Evacuate all scientists from the island to
+    the west.
+
+## allies-08b
+evacuate-scientists-from-east-island = Evacuate all scientists from the island to
+    the east.
+
 ## allies-08ab
 experiment-successful = The experiment is a success!
 chronosphere-experiment-completes-in = Chronosphere experiment completes in { $time }
@@ -87,8 +95,6 @@ defend-chronosphere-tech-center = Defend the Chronosphere and Technology Center
     at all costs.
 chronosphere-needs-power = The Chronosphere must have power when the
     timer runs out.
-evacuate-scientists-from-island = Evacuate all scientists from the island to
-    the west.
 
 ## allies09a
 extract-kosygin = Extract Kosygin and
