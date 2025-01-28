@@ -42,6 +42,7 @@ outpost:
 	Tooltip@Modified:
 		Name: actor-outpost-modified-name
 		RequiresCondition: modified
+		ShowOwnerRow: false
 
 quad:
 	Buildable:
