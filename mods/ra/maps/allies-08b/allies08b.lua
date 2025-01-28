@@ -125,7 +125,7 @@ WorldLoaded = function()
 	InitObjectives(Greece)
 	DefendChronosphere = AddPrimaryObjective(Greece, "defend-chronosphere-tech-center")
 	KeepBasePowered = AddPrimaryObjective(Greece, "chronosphere-needs-power")
-	EvacuateScientists = AddSecondaryObjective(Greece, "evacuate-scientists-from-island")
+	EvacuateScientists = AddSecondaryObjective(Greece, "evacuate-scientists-from-east-island")
 	BeatAllies = AddPrimaryObjective(USSR, "")
 
 	Trigger.AfterDelay(DateTime.Minutes(1), function()

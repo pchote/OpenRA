@@ -43,7 +43,7 @@ eliminate-ordos-units-reinforcements = Eliminate all Ordos forces and reinforcem
 destroy-harkonnen = Destroy the Harkonnen.
 
 ## atreides-04
-fremen-leader = Fremen Leader.
+fremen-leader = Fremen Leader
 sietch-integrity = Sietch structural integrity: { $integrity }%
 protect-fremen-sietch = Protect the Fremen Sietch.
 keep-sietch-intact = Keep the Sietch { $integrity }% intact!
