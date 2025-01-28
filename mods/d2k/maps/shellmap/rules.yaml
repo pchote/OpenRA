@@ -26,6 +26,10 @@ World:
 	DamageMultiplier@UNKILLABLE:
 		Modifier: 0
 
+^Vehicle:
+	WithDecoration@CARRYALL:
+		RequiresSelection: true
+
 wall:
 	DamageMultiplier@UNKILLABLE:
 		Modifier: 0
