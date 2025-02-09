@@ -9,6 +9,8 @@
 
 Difficulty = Map.LobbyOptionOrDefault("difficulty", "normal")
 
+--- Prepare basic messages for a player's win, loss, or objective updates.
+---@param player player
 InitObjectives = function(player)
 	Trigger.OnObjectiveCompleted(player, function(p, id)
 		Media.DisplayMessage(p.GetObjectiveDescription(id), UserInterface.GetFluentMessage("objective-completed"))
@@ -29,6 +31,12 @@ InitObjectives = function(player)
 	end)
 end
 
+--- Send reinforcements carried by a naval landing craft.
+---@param player player Owner of the landing craft and its passengers.
+---@param units string[] Unit types to spawn and unload.
+---@param transportStart cpos Cell at which the craft spawns and removes itself.
+---@param transportUnload cpos Cell at which passengers unload.
+---@param rallypoint? cpos Cell to which unloaded passengers will move.
 ReinforceWithLandingCraft = function(player, units, transportStart, transportUnload, rallypoint)
 	local transport = Actor.Create("lst", true, { Owner = player, Facing = Angle.North, Location = transportStart })
 	local subcell = 1
@@ -61,6 +69,10 @@ ReinforceWithLandingCraft = function(player, units, transportStart, transportUnl
 	transport.Destroy()
 end
 
+--- Schedule repairs for this building once it takes enough damage.
+---@param owner player Owner of the building.
+---@param actor actor Building to be repaired.
+---@param modifier number The repair threshold. Below this health percentage, repairs are started. 1 is full health, while 0.5 is half.
 RepairBuilding = function(owner, actor, modifier)
 	Trigger.OnDamaged(actor, function(building)
 		if building.Owner == owner and building.Health < building.MaxHealth * modifier then
@@ -69,6 +81,9 @@ RepairBuilding = function(owner, actor, modifier)
 	end)
 end
 
+--- Schedule repairs for a player's starting buildings.
+---@param owner player Owner of the buildings.
+---@param modifier number The repair threshold. Below this health percentage, repairs are started. 1 is full health, while 0.5 is half.
 RepairNamedActors = function(owner, modifier)
 	Utils.Do(Map.NamedActors, function(actor)
 		if actor.Owner == owner and actor.HasProperty("StartBuildingRepairs") then
@@ -77,6 +92,12 @@ RepairNamedActors = function(owner, modifier)
 	end)
 end
 
+--- Schedule production tasks for a factory or other unit producer.
+---@param player player Owner of the factory.
+---@param factory actor The factory itself.
+---@param delay? fun():integer Function that returns a delay until production repeats. If this is absent, production will not repeat.
+---@param toBuild fun():string[] Function that returns a list of unit types to be produced.
+---@param after? fun(actors: actor[]) Function called by each group of built units after their production is finished. Only alive actors are included.
 ProduceUnits = function(player, factory, delay, toBuild, after)
 	if factory.IsDead or factory.Owner ~= player then
 		return
@@ -93,6 +114,10 @@ ProduceUnits = function(player, factory, delay, toBuild, after)
 	end)
 end
 
+--- Check if a player currently owns one of each building type in a list.
+---@param player player
+---@param buildingTypes string[]
+---@return boolean
 CheckForBase = function(player, buildingTypes)
 	local count = 0
 
@@ -105,6 +130,10 @@ CheckForBase = function(player, buildingTypes)
 	return count == #buildingTypes
 end
 
+--- Schedule production of a unit's replacement after its death.
+---@param unit { [1]: actor }
+---@param player player
+---@param factory actor
 RebuildUnit = function(unit, player, factory)
 	Trigger.OnKilled(unit[1], function()
 		ProduceUnits(player, factory, nil, function() return { unit[1].Type } end, function(actors)
@@ -113,13 +142,16 @@ RebuildUnit = function(unit, player, factory)
 	end)
 end
 
-MoveAndHunt = function(actors, path)
+--- Order a group to attack-move toward each waypoint in a list, then hunt.
+---@param actors actor[]
+---@param waypoints actor[]
+MoveAndHunt = function(actors, waypoints)
 	Utils.Do(actors, function(actor)
 		if not actor or actor.IsDead then
 			return
 		end
 
-		Utils.Do(path, function(point)
+		Utils.Do(waypoints, function(point)
 			actor.AttackMove(point.Location)
 		end)
 
@@ -127,19 +159,25 @@ MoveAndHunt = function(actors, path)
 	end)
 end
 
-MoveAndIdle = function(actors, path)
+--- Order a group to move toward each waypoint in a list.
+---@param actors any
+---@param waypoints actor[]
+MoveAndIdle = function(actors, waypoints)
 	Utils.Do(actors, function(actor)
 		if not actor or actor.IsDead then
 			return
 		end
 
-		Utils.Do(path, function(point)
+		Utils.Do(waypoints, function(point)
 			actor.Move(point.Location, 0)
 		end)
 	end)
 end
 
 Searches = 0
+--- Get the position of a hostile, mobile actor that is distant from anti-air sites.
+---@param player player Player to be targeted.
+---@return wpos|nil target The chosen airstrike position, if any.
 GetAirstrikeTarget = function(player)
 	local list = player.GetGroundAttackers()
 
