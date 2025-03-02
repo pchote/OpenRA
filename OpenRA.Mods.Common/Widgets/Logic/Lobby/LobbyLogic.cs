@@ -239,6 +239,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					{
 						// Don't select the same map again, and handle map becoming unavailable
 						var status = modData.MapCache[uid].Status;
+						Console.WriteLine($"Selected {uid}; {status}");
 						if (uid == map.Uid || (status != MapStatus.Available && status != MapStatus.DownloadAvailable))
 							return;
 

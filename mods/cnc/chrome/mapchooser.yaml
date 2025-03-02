@@ -76,9 +76,70 @@ Container@MAPCHOOSER_PANEL:
 							Width: PARENT_WIDTH
 							Height: PARENT_HEIGHT
 							Children:
-								ScrollPanel@GENERATE_PANEL:
+								Container@GENERATE_PANEL:
 									Width: PARENT_WIDTH
 									Height: PARENT_HEIGHT + 30
+									Children:
+										Background@MAP_BG:
+											X: PARENT_WIDTH - WIDTH
+											Width: 330
+											Height: 330
+											Background: panel-gray
+											Children:
+												MapPreview@PREVIEW:
+													X: 1
+													Y: 1
+													Width: PARENT_WIDTH - 2
+													Height: PARENT_HEIGHT - 2
+													IgnoreMouseOver: true
+													IgnoreMouseInput: true
+										Button@BUTTON_GENERATE:
+											X: 700
+											Y: 520
+											Width: 140
+											Height: 35
+											Text: button-bg-generate
+										ScrollPanel@SETTINGS_PANEL:
+											TopBottomSpacing: 5
+											Width: 525
+											Height: PARENT_HEIGHT
+											Children:
+												Container@CHECKBOX_TEMPLATE:
+													Width: 250
+													Height: 30
+													Children:
+														Checkbox@CHECKBOX:
+															X: 10
+															Width: PARENT_WIDTH - 20
+															Height: 25
+												Container@TEXT_TEMPLATE:
+													Width: 250
+													Height: 50
+													Children:
+														LabelForInput@LABEL:
+															X: 10
+															Width: PARENT_WIDTH - 20
+															Height: 20
+															For: INPUT
+														TextField@INPUT:
+															X: 10
+															Y: 20
+															Width: PARENT_WIDTH - 20
+															Height: 25
+												Container@DROPDOWN_TEMPLATE:
+													Width: 250
+													Height: 50
+													Children:
+														LabelForInput@LABEL:
+															X: 10
+															Width: PARENT_WIDTH - 20
+															Height: 20
+															For: DROPDOWN
+														DropDownButton@DROPDOWN:
+															X: 10
+															Y: 20
+															Width: PARENT_WIDTH - 20
+															Height: 25
 				ScrollItem@MAP_TEMPLATE:
 					Width: 210
 					Height: 262

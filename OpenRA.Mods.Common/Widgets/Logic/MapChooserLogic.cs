@@ -11,8 +11,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using OpenRA.FileSystem;
+using OpenRA.Mods.Common.FileSystem;
+using OpenRA.Mods.Common.MapGenerator;
+using OpenRA.Mods.Common.Traits;
 using OpenRA.Primitives;
+using OpenRA.Traits;
 using OpenRA.Widgets;
 
 namespace OpenRA.Mods.Common.Widgets.Logic
@@ -82,9 +89,6 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		[FluentReference]
 		const string OrderMapsBySize = "options-order-maps.size";
 
-		// Placeholder for random map tab
-		const MapClassification MapClassificationGenerate = (MapClassification)8;
-
 		readonly string allMaps;
 
 		readonly Widget widget;
@@ -144,7 +148,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			var filterContainer = widget.GetOrNull("FILTER_ORDER_CONTROLS");
 			if (filterContainer != null)
-				filterContainer.IsVisible = () => currentTab != MapClassificationGenerate;
+				filterContainer.IsVisible = () => currentTab != MapClassification.Generated;
 
 			var mapFilterInput = widget.GetOrNull<TextFieldWidget>("MAPFILTER_INPUT");
 			if (mapFilterInput != null)
@@ -180,7 +184,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					scrollpanels[currentTab].ScrollToItem(uid, smooth: true);
 				};
 				randomMapButton.IsDisabled = () => visibleMaps == null || visibleMaps.Length == 0;
-				randomMapButton.IsVisible = () => currentTab != MapClassificationGenerate;
+				randomMapButton.IsVisible = () => currentTab != MapClassification.Generated;
 			}
 
 			var deleteMapButton = widget.Get<ButtonWidget>("DELETE_MAP_BUTTON");
@@ -231,7 +235,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			SetupMapTab(MapClassification.User, filter, "USER_MAPS_TAB_BUTTON", "USER_MAPS_TAB");
 			SetupMapTab(MapClassification.System, filter, "SYSTEM_MAPS_TAB_BUTTON", "SYSTEM_MAPS_TAB");
 			SetupMapTab(MapClassification.Remote, filter, "REMOTE_MAPS_TAB_BUTTON", "REMOTE_MAPS_TAB");
-			SetupGenerateMapTab(MapClassificationGenerate, "GENERATE_MAP_TAB_BUTTON", "GENERATE_MAP_TAB");
+			SetupGenerateMapTab(MapClassification.Generated, "GENERATE_MAP_TAB_BUTTON", "GENERATE_MAP_TAB");
 
 			// System and user map tabs are hidden when the server forces a restricted pool
 			if (remoteMapPool != null)
@@ -257,7 +261,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		void SwitchTab(MapClassification tab)
 		{
 			currentTab = tab;
-			if (tab != MapClassificationGenerate)
+			if (tab != MapClassification.Generated)
 				EnumerateMaps(tab);
 		}
 
@@ -337,6 +341,160 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			tabButton.IsHighlighted = () => currentTab == tab;
 
 			tabButton.OnClick = () => SwitchTab(tab);
+
+
+			var preview = tabContainer.Get<MapPreviewWidget>("PREVIEW");
+			preview.Preview = () => modData.MapCache[selectedUid];
+
+			var generator = modData.DefaultRules.Actors[SystemActors.EditorWorld].TraitInfos<IMapGeneratorInfo>().First();
+			var settings = generator.GetSettings(modData.DefaultTerrainInfo["DESERT"]);
+			var choices = settings.DefaultChoices();
+
+			var mapDirectory = modData.MapCache.MapLocations.Keys.Last() as Folder;
+			Console.WriteLine("Dir is " + mapDirectory.Name);
+
+			var settingsPanel = widget.Get<ScrollPanelWidget>("SETTINGS_PANEL");
+			var checkboxSettingTemplate = settingsPanel.Get<Widget>("CHECKBOX_TEMPLATE");
+			var textSettingTemplate = settingsPanel.Get<Widget>("TEXT_TEMPLATE");
+			var dropDownSettingTemplate = settingsPanel.Get<Widget>("DROPDOWN_TEMPLATE");
+			settingsPanel.RemoveChildren();
+			settingsPanel.Layout = new GridLayout(settingsPanel);
+
+			var tilesetDropdownWidget = dropDownSettingTemplate.Clone();
+			var tilesetDropdownLabel = tilesetDropdownWidget.Get<LabelWidget>("LABEL");
+			tilesetDropdownLabel.GetText = () => "Tileset";
+			var tilesetDropdownDropdown = tilesetDropdownWidget.Get<DropDownButtonWidget>("DROPDOWN");
+			tilesetDropdownDropdown.GetText = () => "Desert";
+			settingsPanel.AddChild(tilesetDropdownWidget);
+
+			var sizeDropdownWidget = dropDownSettingTemplate.Clone();
+			var sizeDropdownLabel = sizeDropdownWidget.Get<LabelWidget>("LABEL");
+			sizeDropdownLabel.GetText = () => "Map Size";
+			var sizeDropdownDropdown = sizeDropdownWidget.Get<DropDownButtonWidget>("DROPDOWN");
+			sizeDropdownDropdown.GetText = () => "64 x 64 " + FluentProvider.GetMessage(MapSizeMedium);
+			settingsPanel.AddChild(sizeDropdownWidget);
+
+			foreach (var option in settings.Options)
+			{
+				Widget settingWidget;
+				if (option.Id == "Seed")
+					continue;
+
+				switch (option.Ui)
+				{
+					case MapGeneratorSettings.UiType.Hidden:
+						continue;
+
+					case MapGeneratorSettings.UiType.DropDown:
+					{
+						settingWidget = dropDownSettingTemplate.Clone();
+						var label = settingWidget.Get<LabelWidget>("LABEL");
+						label.GetText = () => option.Label;
+						var dropDown = settingWidget.Get<DropDownButtonWidget>("DROPDOWN");
+						dropDown.GetText = () => choices[option].Label;
+						dropDown.OnMouseDown = _ =>
+						{
+							ScrollItemWidget SetupItem(MapGeneratorSettings.Choice choice, ScrollItemWidget template)
+							{
+								bool IsSelected() => choice == choices[option];
+								void OnClick() => choices[option] = choice;
+								var item = ScrollItemWidget.Setup(template, IsSelected, OnClick);
+								item.Get<LabelWidget>("LABEL").GetText = () => choice.Label;
+								item.GetTooltipText =
+									choice.Description != null
+										? () => choice.Description
+										: null;
+
+								return item;
+							}
+
+							dropDown.ShowDropDown("LABEL_DROPDOWN_WITH_TOOLTIP_TEMPLATE", option.Choices.Count * 30, option.Choices, SetupItem);
+						};
+						break;
+					}
+
+					case MapGeneratorSettings.UiType.Checkbox:
+					{
+						if (option.Choices.Count != 2)
+							throw new InvalidOperationException("Checkbox option that does not have two choices");
+						settingWidget = checkboxSettingTemplate.Clone();
+						var checkbox = settingWidget.Get<CheckboxWidget>("CHECKBOX");
+						checkbox.GetText = () => option.Label;
+						checkbox.IsChecked = () => choices[option] == option.Choices[1];
+						checkbox.OnClick = () =>
+							choices[option] =
+								choices[option] == option.Choices[1]
+									? option.Choices[0]
+									: option.Choices[1];
+						break;
+					}
+
+					case MapGeneratorSettings.UiType.Integer:
+					case MapGeneratorSettings.UiType.Float:
+					case MapGeneratorSettings.UiType.String:
+					{
+						if (option.Choices.Count != 1)
+							throw new InvalidOperationException("Text option that does not have one choice");
+						settingWidget = textSettingTemplate.Clone();
+						var label = settingWidget.Get<LabelWidget>("LABEL");
+						label.GetText = () => option.Label;
+						var input = settingWidget.Get<TextFieldWidget>("INPUT");
+						input.Text = choices[option].Id;
+						input.OnTextEdited = () =>
+						{
+							var choice = choices[option].NewValue(input.Text);
+							choices[option] = choice;
+							var valid = option.ValidateChoice(choice);
+							input.IsValid = () => valid;
+						};
+
+						input.OnEscKey = _ => { input.YieldKeyboardFocus(); return true; };
+						input.OnEnterKey = _ => { input.YieldKeyboardFocus(); return true; };
+						break;
+					}
+
+					default:
+						throw new NotSupportedException("Unsupported MapGeneratorSettings.UiType");
+				}
+
+				settingWidget.IsVisible = () => true;
+				settingsPanel.AddChild(settingWidget);
+			}
+
+			var generateButton = tabContainer.Get<ButtonWidget>("BUTTON_GENERATE");
+			generateButton.OnClick = () =>
+			{
+				Task.Run(() =>
+				{
+					try
+					{
+						var size = new Size(64, 64);
+						var map = new Map(modData, modData.DefaultTerrainInfo.Values.First(), size.Width, size.Height);
+						map.RequiresMod = modData.Manifest.Id;
+
+						var tl = new PPos(1, 1);
+						var br = new PPos(size.Width - 1, size.Height - 1);
+						map.SetBounds(tl, br);
+
+						foreach (var option in choices.Keys)
+						{
+							if (option.Random)
+								choices[option] = option.RandomChoice();
+						}
+
+						var my = settings.Compile(choices);
+						generator.Generate(map, my);
+						map.Save(new MemoryPackage());
+						modData.MapCache[map.Uid].UpdateFromMap(map.Package, null, MapClassification.Generated, modData.Manifest.MapCompatibility, map.Grid.Type, null);
+						selectedUid = map.Uid;
+					}
+					catch (Exception e)
+					{
+						Console.WriteLine(e);
+						throw;
+					}
+				});
+			};
 		}
 
 		void SetupGameModeDropdown(MapClassification tab, DropDownButtonWidget gameModeDropdown)

@@ -35,7 +35,8 @@ namespace OpenRA
 		Unknown = 0,
 		System = 1,
 		User = 2,
-		Remote = 4
+		Remote = 4,
+		Generated = 8
 	}
 
 	[SuppressMessage("StyleCop.CSharp.NamingRules",
@@ -462,7 +463,7 @@ namespace OpenRA
 				using (var dataStream = p.GetStream("map.png"))
 					newData.Preview = new Png(dataStream);
 
-			newData.ModifiedDate = File.GetLastWriteTime(p.Name);
+			newData.ModifiedDate = (p.Name != null) ? File.GetLastWriteTime(p.Name) : DateTime.Now;
 
 			// Assign the new data atomically
 			innerData = newData;
