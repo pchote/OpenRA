@@ -89,9 +89,9 @@ namespace OpenRA.Mods.Common.MapGenerator
 			}
 
 			/// <summary>Check whether this choice is permitted for this map.</summary>
-			public bool Allowed(Map map)
+			public bool Allowed(ITerrainInfo terrainInfo)
 			{
-				if (Tileset != null && !Tileset.Contains(map.Tileset))
+				if (Tileset != null && !Tileset.Contains(terrainInfo.Id))
 					return false;
 
 				return true;
@@ -144,7 +144,7 @@ namespace OpenRA.Mods.Common.MapGenerator
 			/// <summary>Settings layering priority. Higher overrides lower.</summary>
 			public readonly int Priority = 0;
 
-			public Option(string id, MiniYaml my, Map map)
+			public Option(string id, MiniYaml my, ITerrainInfo terrainInfo)
 			{
 				Id = id;
 				FieldLoader.Load(this, my);
@@ -214,7 +214,7 @@ namespace OpenRA.Mods.Common.MapGenerator
 								if (split.Length >= 2)
 									choiceId = split[1];
 								var choice = new Choice(choiceId, node.Value);
-								if (choice.Allowed(map))
+								if (choice.Allowed(terrainInfo))
 									choices.Add(choice);
 							}
 						}
@@ -334,7 +334,7 @@ namespace OpenRA.Mods.Common.MapGenerator
 		/// <summary>
 		/// Parse settings from a MiniYaml definition. Returns null if the map isn't compatible.
 		/// </summary>
-		public static MapGeneratorSettings LoadSettings(MiniYaml my, Map map)
+		public static MapGeneratorSettings LoadSettings(MiniYaml my, ITerrainInfo terrainInfo)
 		{
 			var options = new List<Option>();
 
@@ -346,7 +346,7 @@ namespace OpenRA.Mods.Common.MapGenerator
 					string id = null;
 					if (split.Length >= 2)
 						id = split[1];
-					var option = new Option(id, node.Value, map);
+					var option = new Option(id, node.Value, terrainInfo);
 					if (option.Choices.Count == 0)
 						return null;
 					options.Add(option);

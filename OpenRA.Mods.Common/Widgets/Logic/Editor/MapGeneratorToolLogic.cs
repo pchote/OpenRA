@@ -64,11 +64,13 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			generatorsToSettingsChoices = new Dictionary<IMapGeneratorInfo, Dictionary<MapGeneratorSettings.Option, MapGeneratorSettings.Choice>>();
 
 			var mapGenerators = new List<IMapGeneratorInfo>();
+			var terrainInfo = modData.DefaultTerrainInfo[world.Map.Tileset];
 			foreach (var generator in world.Map.Rules.Actors[SystemActors.EditorWorld].TraitInfos<IMapGeneratorInfo>())
 			{
-				var settings = generator.GetSettings(world.Map);
+				var settings = generator.GetSettings(terrainInfo);
 				if (settings == null)
 					continue;
+
 				var choices = settings.DefaultChoices();
 				mapGenerators.Add(generator);
 				generatorsToSettingsChoices.Add(generator, choices);

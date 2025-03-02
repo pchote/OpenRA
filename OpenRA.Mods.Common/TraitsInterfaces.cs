@@ -975,10 +975,10 @@ namespace OpenRA.Mods.Common.Traits
 		string Name { get; }
 
 		/// <summary>
-		/// Get the generator settings available for this map.
-		/// Returns null if not compatible with the given map.
+		/// Get the generator settings available for this tileset.
+		/// Returns null if not compatible with the given tileset.
 		/// </summary>
-		MapGeneratorSettings GetSettings(Map map);
+		MapGeneratorSettings GetSettings(ITerrainInfo terrainInfo);
 
 		/// <summary>
 		/// Generate or manipulate a supplied map in-place.

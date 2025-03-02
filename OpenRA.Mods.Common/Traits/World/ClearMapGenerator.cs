@@ -54,9 +54,9 @@ namespace OpenRA.Mods.Common.Traits
 			return MapGeneratorSettings.DumpFluent(my.NodeWithKey("Settings").Value);
 		}
 
-		public MapGeneratorSettings GetSettings(Map map)
+		public MapGeneratorSettings GetSettings(ITerrainInfo terrainInfo)
 		{
-			return MapGeneratorSettings.LoadSettings(Settings, map);
+			return MapGeneratorSettings.LoadSettings(Settings, terrainInfo);
 		}
 
 		public void Generate(Map map, MiniYaml settings)

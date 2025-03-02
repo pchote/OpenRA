@@ -269,7 +269,7 @@ namespace OpenRA.Mods.Common.UtilityCommands
 					var br = new PPos(size[0], size[1] + maxTerrainHeight);
 					map.SetBounds(tl, br);
 
-					var settings = generator.GetSettings(map);
+					var settings = generator.GetSettings(tileset);
 					var choices = settings.DefaultChoices();
 					foreach (var option in choices.Keys)
 						if (iterationChoices.TryGetValue(option.Id, out var choice))
