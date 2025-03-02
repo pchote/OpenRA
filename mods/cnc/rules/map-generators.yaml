@@ -1,7 +1,7 @@
 ^MapGenerators:
-	RaMapGenerator@ra:
-		Type: ra
-		Name: map-generator-ra
+	ExperimentalMapGenerator@experimental:
+		Type: experimental
+		Name: map-generator-experimental
 		Settings:
 			Option@hidden_defaults:
 				Choice@hidden_defaults:

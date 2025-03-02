@@ -51,7 +51,7 @@ faction-nod =
      and the alien substance Tiberium. They use stealth technology
      and guerilla tactics to defeat those who oppose them.
 
-map-generator-ra = RA Experimental (CnC)
+map-generator-experimental = Experimental
 map-generator-clear = Clear
 
 ## defaults.yaml

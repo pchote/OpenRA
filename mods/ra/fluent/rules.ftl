@@ -34,7 +34,7 @@ options-starting-units =
 
 resource-minerals = Valuable Minerals
 
-map-generator-ra = RA Experimental
+map-generator-experimental = Experimental
 map-generator-clear = Clear
 
 ## Faction

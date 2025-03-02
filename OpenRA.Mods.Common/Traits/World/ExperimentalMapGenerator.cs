@@ -23,7 +23,7 @@ using static OpenRA.Mods.Common.Traits.ResourceLayerInfo;
 namespace OpenRA.Mods.Common.Traits
 {
 	[TraitLocation(SystemActors.EditorWorld)]
-	public sealed class RaMapGeneratorInfo : TraitInfo<RaMapGenerator>, IMapGeneratorInfo
+	public sealed class ExperimentalMapGeneratorInfo : TraitInfo<ExperimentalMapGenerator>, IMapGeneratorInfo
 	{
 		[FieldLoader.Require]
 		public readonly string Type = null;
@@ -1802,5 +1802,5 @@ namespace OpenRA.Mods.Common.Traits
 		}
 	}
 
-	public class RaMapGenerator { /* we're only interested in the Info */ }
+	public class ExperimentalMapGenerator { /* we're only interested in the Info */ }
 }
