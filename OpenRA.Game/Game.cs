@@ -181,7 +181,16 @@ namespace OpenRA
 
 		public static event Action BeforeGameStart = () => { };
 		public static event Action AfterGameStart = () => { };
-		internal static void StartGame(string mapUID, WorldType type)
+		internal static void StartGame(string uid, WorldType type)
+		{
+			var preview = ModData.MapCache[uid];
+			if (preview.Status != MapStatus.Available)
+				throw new InvalidDataException($"Invalid map uid: {uid}");
+
+			StartGame(preview.ToMap(), type);
+		}
+
+		internal static void StartGame(Map map, WorldType type)
 		{
 			// Dispose of the old world before creating a new one.
 			worldRenderer?.Dispose();
@@ -190,7 +199,10 @@ namespace OpenRA
 			BeforeGameStart();
 
 			using (new PerfTimer("NewWorld"))
-				OrderManager.World = new World(mapUID, ModData, OrderManager, type);
+			{
+				ModData.PrepareMap(map);
+				OrderManager.World = new World(map, ModData, OrderManager, type);
+			}
 
 			OrderManager.World.GameOver += FinishBenchmark;
 
@@ -507,10 +519,16 @@ namespace OpenRA
 			ModData.LoadScreen.StartGame(args);
 		}
 
-		public static void LoadEditor(string mapUid)
+		public static void LoadEditor(string uid)
 		{
 			JoinLocal();
-			StartGame(mapUid, WorldType.Editor);
+			StartGame(uid, WorldType.Editor);
+		}
+
+		public static void LoadEditor(Map map)
+		{
+			JoinLocal();
+			StartGame(map, WorldType.Editor);
 		}
 
 		public static void LoadShellMap()

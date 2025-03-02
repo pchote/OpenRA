@@ -12,7 +12,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using OpenRA.FileSystem;
 using OpenRA.Graphics;
@@ -141,15 +140,11 @@ namespace OpenRA
 
 		public IEnumerable<string> Languages { get; }
 
-		public Map PrepareMap(string uid)
+		public void PrepareMap(Map map)
 		{
 			LoadScreen?.Display();
 
-			if (MapCache[uid].Status != MapStatus.Available)
-				throw new InvalidDataException($"Invalid map uid: {uid}");
-
 			// Reinitialize all our assets
-			var map = MapCache[uid].ToMap();
 			InitializeLoaders(map);
 			map.Sequences.LoadSprites();
 
@@ -157,8 +152,6 @@ namespace OpenRA
 			using (new Support.PerfTimer("Map.Music"))
 				foreach (var entry in map.Rules.Music)
 					entry.Value.Load(map);
-
-			return map;
 		}
 
 		public List<MiniYamlNode>[] GetRulesYaml()
