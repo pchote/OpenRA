@@ -973,10 +973,7 @@ namespace OpenRA.Mods.Common.Traits
 	{
 		string Type { get; }
 		string Name { get; }
-	}
 
-	public interface IMapGenerator
-	{
 		/// <summary>
 		/// Get the generator settings available for this map.
 		/// Returns null if not compatible with the given map.
@@ -993,7 +990,5 @@ namespace OpenRA.Mods.Common.Traits
 		/// Thrown if the map could not be generated with the requested configuration. Map should be discarded.
 		/// </exception>
 		void Generate(Map map, MiniYaml settings);
-
-		IMapGeneratorInfo Info { get; }
 	}
 }

@@ -22,8 +22,8 @@ using static OpenRA.Mods.Common.Traits.ResourceLayerInfo;
 
 namespace OpenRA.Mods.Common.Traits
 {
-	[TraitLocation(SystemActors.World | SystemActors.EditorWorld)]
-	public sealed class RaMapGeneratorInfo : TraitInfo, IMapGeneratorInfo
+	[TraitLocation(SystemActors.EditorWorld)]
+	public sealed class RaMapGeneratorInfo : TraitInfo<RaMapGenerator>, IMapGeneratorInfo
 	{
 		[FieldLoader.Require]
 		public readonly string Type = null;
@@ -43,8 +43,6 @@ namespace OpenRA.Mods.Common.Traits
 		string IMapGeneratorInfo.Type => Type;
 		string IMapGeneratorInfo.Name => Name;
 
-		public override object Create(ActorInitializer init) { return new RaMapGenerator(this); }
-
 		static MiniYaml SettingsLoader(MiniYaml my)
 		{
 			return my.NodeWithKey("Settings").Value;
@@ -54,10 +52,7 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			return MapGeneratorSettings.DumpFluent(my.NodeWithKey("Settings").Value);
 		}
-	}
 
-	public sealed class RaMapGenerator : IMapGenerator
-	{
 		const int FractionMax = 1000;
 		const int EntityBonusMax = 1000000;
 
@@ -486,18 +481,9 @@ namespace OpenRA.Mods.Common.Traits
 			}
 		}
 
-		readonly RaMapGeneratorInfo info;
-
-		IMapGeneratorInfo IMapGenerator.Info => info;
-
-		public RaMapGenerator(RaMapGeneratorInfo info)
-		{
-			this.info = info;
-		}
-
 		public MapGeneratorSettings GetSettings(Map map)
 		{
-			return MapGeneratorSettings.LoadSettings(info.Settings, map);
+			return MapGeneratorSettings.LoadSettings(Settings, map);
 		}
 
 		public void Generate(Map map, MiniYaml settings)
@@ -1815,4 +1801,6 @@ namespace OpenRA.Mods.Common.Traits
 			return amplitude;
 		}
 	}
+
+	public class RaMapGenerator { /* we're only interested in the Info */ }
 }
