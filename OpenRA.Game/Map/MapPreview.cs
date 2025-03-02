@@ -198,19 +198,23 @@ namespace OpenRA
 		static readonly CPos[] NoSpawns = Array.Empty<CPos>();
 		readonly MapCache cache;
 		readonly ModData modData;
+		IReadOnlyPackage package;
 
 		public readonly string Uid;
-		public string PackageName { get; private set; }
-		IReadOnlyPackage package;
-		public IReadOnlyPackage Package
-		{
-			get
-			{
-				package ??= parentPackage.OpenPackage(PackageName, modData.ModFiles);
-				return package;
-			}
 
-			private set => package = value;
+		public string Path { get; private set; }
+
+		void LoadPackage()
+		{
+			if (package == null && parentPackage != null)
+				package = parentPackage.OpenPackage(Path, modData.ModFiles);
+		}
+
+		public Map ToMap()
+		{
+			LoadPackage();
+			using (new PerfTimer("Map"))
+				return new Map(modData, package);
 		}
 
 		IReadOnlyPackage parentPackage;
@@ -317,9 +321,28 @@ namespace OpenRA
 			};
 		}
 
-		public void UpdateFromMap(IReadOnlyPackage p, IReadOnlyPackage parent, MapClassification classification,
-			string[] mapCompatibility, MapGridType gridType, IEnumerable<List<MiniYamlNode>> modDataRules)
+		/// <summary>
+		/// Updates internal state from a map without taking ownership of its package.
+		/// A new copy of the map package will be opened lazily when needed.
+		/// </summary>
+		public void UpdateFromMapWithoutOwningPackage(IReadOnlyPackage p, IReadOnlyPackage parent, MapClassification classification,
+			MapGridType? gridType = null, IEnumerable<List<MiniYamlNode>> modDataRules = null)
 		{
+			UpdateFromMap(p, classification, gridType, modDataRules);
+			parentPackage = parent;
+			package = null;
+		}
+
+		/// <summary>
+		/// Updates internal state from a map and takes ownership of its package.
+		/// The package remains in memory and must not be disposed.
+		/// </summary>
+		public void UpdateFromMap(IReadOnlyPackage p, MapClassification classification,
+			MapGridType? gridType = null, IEnumerable<List<MiniYamlNode>> modDataRules = null)
+		{
+			Path = p.Name;
+			package = p;
+
 			Dictionary<string, MiniYaml> yaml;
 			using (var yamlStream = p.GetStream("map.yaml"))
 			{
@@ -329,12 +352,9 @@ namespace OpenRA
 				yaml = new MiniYaml(null, MiniYaml.FromStream(yamlStream, $"{p.Name}:map.yaml", stringPool: cache.StringPool)).ToDictionary();
 			}
 
-			PackageName = p.Name;
-			parentPackage = parent;
-
 			var newData = innerData.Clone();
-			newData.GridType = gridType;
 			newData.Class = classification;
+			newData.GridType = gridType ?? modData.Manifest.Get<MapGrid>().Type;
 
 			if (yaml.TryGetValue("MapFormat", out var temp))
 			{
@@ -368,7 +388,7 @@ namespace OpenRA
 			if (yaml.TryGetValue("MapFormat", out temp))
 				newData.MapFormat = FieldLoader.GetValue<int>("MapFormat", temp.Value);
 
-			newData.Status = mapCompatibility == null || mapCompatibility.Contains(requiresMod) ?
+			newData.Status = modData.Manifest.MapCompatibility.Contains(requiresMod) ?
 				MapStatus.Available : MapStatus.Unavailable;
 
 			try
@@ -420,7 +440,7 @@ namespace OpenRA
 			innerData = newData;
 		}
 
-		public void UpdateRemoteSearch(MapStatus status, MiniYaml yaml, string[] mapCompatibility, Action<MapPreview> parseMetadata = null)
+		public void UpdateRemoteSearch(MapStatus status, MiniYaml yaml, Action<MapPreview> parseMetadata = null)
 		{
 			var newData = innerData.Clone();
 			newData.Status = status;
@@ -478,7 +498,7 @@ namespace OpenRA
 					// Map is for a different mod: update its information so it can be displayed
 					// in the cross-mod server browser UI, but mark it as unavailable so it can't
 					// be selected in a server for the current mod.
-					if (!mapCompatibility.Contains(r.game_mod))
+					if (!modData.Manifest.MapCompatibility.Contains(r.game_mod))
 						newData.Status = MapStatus.Unavailable;
 				}
 				catch (Exception e)
@@ -553,12 +573,12 @@ namespace OpenRA
 					mapInstallPackage.Update(mapFilename, fileStream.ToArray());
 					Log.Write("debug", $"Downloaded map to '{mapFilename}'");
 
-					var package = mapInstallPackage.OpenPackage(mapFilename, modData.ModFiles);
-					if (package == null)
+					var p = mapInstallPackage.OpenPackage(mapFilename, modData.ModFiles);
+					if (p == null)
 						innerData.Status = MapStatus.DownloadError;
 					else
 					{
-						UpdateFromMap(package, mapInstallPackage, MapClassification.User, null, GridType, null);
+						UpdateFromMapWithoutOwningPackage(p, mapInstallPackage, MapClassification.User, GridType);
 						Game.RunAfterTick(onSuccess);
 					}
 				}
@@ -578,11 +598,6 @@ namespace OpenRA
 
 		public void Dispose()
 		{
-			DisposePackage();
-		}
-
-		public void DisposePackage()
-		{
 			if (package != null)
 			{
 				package.Dispose();
@@ -593,14 +608,15 @@ namespace OpenRA
 		public void Delete()
 		{
 			Invalidate();
-			(parentPackage as IReadWritePackage)?.Delete(Package.Name);
+			(parentPackage as IReadWritePackage)?.Delete(Path);
 		}
 
 		Stream IReadOnlyFileSystem.Open(string filename)
 		{
 			// Explicit package paths never refer to a map
-			if (!filename.Contains('|') && Package.Contains(filename))
-				return Package.GetStream(filename);
+			LoadPackage();
+			if (!filename.Contains('|') && package.Contains(filename))
+				return package.GetStream(filename);
 
 			return modData.DefaultFileSystem.Open(filename);
 		}
@@ -616,7 +632,8 @@ namespace OpenRA
 			// Explicit package paths never refer to a map
 			if (!filename.Contains('|'))
 			{
-				s = Package.GetStream(filename);
+				LoadPackage();
+				s = package.GetStream(filename);
 				if (s != null)
 					return true;
 			}
@@ -627,7 +644,8 @@ namespace OpenRA
 		bool IReadOnlyFileSystem.Exists(string filename)
 		{
 			// Explicit package paths never refer to a map
-			if (!filename.Contains('|') && Package.Contains(filename))
+			LoadPackage();
+			if (!filename.Contains('|') && package.Contains(filename))
 				return true;
 
 			return modData.DefaultFileSystem.Exists(filename);
