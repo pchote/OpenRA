@@ -317,54 +317,6 @@ namespace OpenRA
 			};
 		}
 
-		// For linting purposes only!
-		public MapPreview(Map map, ModData modData)
-		{
-			this.modData = modData;
-			cache = modData.MapCache;
-
-			Uid = map.Uid;
-			PackageName = map.Package.Name;
-
-			var mapPlayers = new MapPlayers(map.PlayerDefinitions);
-			var spawns = new List<CPos>();
-			foreach (var kv in map.ActorDefinitions.Where(d => d.Value.Value == "mpspawn"))
-			{
-				var s = new ActorReference(kv.Value.Value, kv.Value.ToDictionary());
-				spawns.Add(s.Get<LocationInit>().Value);
-			}
-
-			innerData = new InnerData
-			{
-				MapFormat = map.MapFormat,
-				Title = map.Title,
-				Categories = map.Categories,
-				Author = map.Author,
-				TileSet = map.Tileset,
-				Players = mapPlayers,
-				PlayerCount = mapPlayers.Players.Count(x => x.Value.Playable),
-				SpawnPoints = spawns.ToArray(),
-				GridType = map.Grid.Type,
-				Bounds = map.Bounds,
-				Preview = null,
-				Status = MapStatus.Available,
-				Class = MapClassification.Unknown,
-				Visibility = map.Visibility,
-			};
-
-			innerData.SetCustomRules(modData, this, new Dictionary<string, MiniYaml>()
-			{
-				{ "Rules", map.RuleDefinitions },
-				{ "FluentMessages", map.FluentMessageDefinitions },
-				{ "Weapons", map.WeaponDefinitions },
-				{ "Voices", map.VoiceDefinitions },
-				{ "Music", map.MusicDefinitions },
-				{ "Notifications", map.NotificationDefinitions },
-				{ "Sequences", map.SequenceDefinitions },
-				{ "ModelSequences", map.ModelSequenceDefinitions }
-			}, null);
-		}
-
 		public void UpdateFromMap(IReadOnlyPackage p, IReadOnlyPackage parent, MapClassification classification,
 			string[] mapCompatibility, MapGridType gridType, IEnumerable<List<MiniYamlNode>> modDataRules)
 		{
