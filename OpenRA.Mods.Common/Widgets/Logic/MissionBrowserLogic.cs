@@ -166,7 +166,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 						.Select(p => new
 						{
 							Preview = p,
-							Index = missionMapPaths.IndexOf(Path.GetFileName(p.PackageName))
+							Index = missionMapPaths.IndexOf(Path.GetFileName(p.Path))
 						})
 						.Where(x => x.Index != -1)
 						.OrderBy(x => x.Index)

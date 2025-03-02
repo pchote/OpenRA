@@ -148,11 +148,8 @@ namespace OpenRA
 			if (MapCache[uid].Status != MapStatus.Available)
 				throw new InvalidDataException($"Invalid map uid: {uid}");
 
-			Map map;
-			using (new Support.PerfTimer("Map"))
-				map = new Map(this, MapCache[uid].Package);
-
 			// Reinitialize all our assets
+			var map = MapCache[uid].ToMap();
 			InitializeLoaders(map);
 			map.Sequences.LoadSprites();
 
