@@ -519,8 +519,9 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				return;
 
 			var actionManager = world.WorldActor.Trait<EditorActionManager>();
-			AddButton("PLAY_MAP", "Play Map")
-				.OnClick = () =>
+			var button = AddButton("PLAY_MAP", "Play Map");
+			button.IsDisabled = () => leaving || string.IsNullOrEmpty(world.Map.Package.Name);
+			button.OnClick = () =>
 				{
 					hideMenu = true;
 					var uid = modData.MapCache.GetUpdatedMap(world.Map.Uid);
@@ -618,8 +619,13 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		void ExitEditor(EditorActionManager actionManager, Action onSuccess)
 		{
-			var map = modData.MapCache.GetUpdatedMap(world.Map.Uid);
-			var deletedOrUnavailable = map == null || modData.MapCache[map].Status != MapStatus.Available;
+			var deletedOrUnavailable = false;
+			if (!string.IsNullOrEmpty(world.Map.Package.Name))
+			{
+				var map = modData.MapCache.GetUpdatedMap(world.Map.Uid);
+				deletedOrUnavailable = map == null || modData.MapCache[map].Status != MapStatus.Available;
+			}
+
 			if (actionManager.HasUnsavedItems() || deletedOrUnavailable)
 			{
 				hideMenu = true;

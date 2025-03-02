@@ -145,7 +145,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					}
 				}
 
-				if (map.Package != null)
+				if (!string.IsNullOrEmpty(map.Package?.Name))
 				{
 					selectedDirectory = writableDirectories.FirstOrDefault(k => k.Folder.Contains(map.Package.Name));
 					selectedDirectory ??= writableDirectories.FirstOrDefault(k => Directory.GetDirectories(k.Folder.Name).Any(f => f.Contains(map.Package.Name)));
