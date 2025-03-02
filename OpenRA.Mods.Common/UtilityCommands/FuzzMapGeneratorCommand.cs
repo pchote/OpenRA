@@ -16,7 +16,6 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using OpenRA.Mods.Common.Traits;
-using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.UtilityCommands
 {
@@ -205,13 +204,11 @@ namespace OpenRA.Mods.Common.UtilityCommands
 				.Select(variable => config.Choices[variable].Length)
 				.ToImmutableArray();
 
-			var generatorInfo =
+			var generator =
 				modData.DefaultRules.Actors[SystemActors.EditorWorld].TraitInfos<IMapGeneratorInfo>()
 					.FirstOrDefault(info => info.Type == config.MapGeneratorType);
-			if (generatorInfo == null)
+			if (generator == null)
 				throw new ArgumentException($"No map generator with type `{config.MapGeneratorType}`");
-
-			var generator = (generatorInfo as TraitInfo).Create(null) as IMapGenerator;
 
 			long maxSerial = 1;
 			long tests = 0;

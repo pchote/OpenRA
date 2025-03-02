@@ -40,10 +40,10 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly ModData modData;
 
 		// nullable
-		IMapGenerator selectedGenerator;
+		IMapGeneratorInfo selectedGenerator;
 
-		readonly Dictionary<IMapGenerator, MapGeneratorSettings> generatorsToSettings;
-		readonly Dictionary<IMapGenerator, Dictionary<MapGeneratorSettings.Option, MapGeneratorSettings.Choice>> generatorsToSettingsChoices;
+		readonly Dictionary<IMapGeneratorInfo, MapGeneratorSettings> generatorsToSettings;
+		readonly Dictionary<IMapGeneratorInfo, Dictionary<MapGeneratorSettings.Option, MapGeneratorSettings.Choice>> generatorsToSettingsChoices;
 
 		readonly ScrollPanelWidget settingsPanel;
 		readonly Widget checkboxSettingTemplate;
@@ -60,11 +60,11 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			this.modData = modData;
 
 			selectedGenerator = null;
-			generatorsToSettings = new Dictionary<IMapGenerator, MapGeneratorSettings>();
-			generatorsToSettingsChoices = new Dictionary<IMapGenerator, Dictionary<MapGeneratorSettings.Option, MapGeneratorSettings.Choice>>();
+			generatorsToSettings = new Dictionary<IMapGeneratorInfo, MapGeneratorSettings>();
+			generatorsToSettingsChoices = new Dictionary<IMapGeneratorInfo, Dictionary<MapGeneratorSettings.Option, MapGeneratorSettings.Choice>>();
 
-			var mapGenerators = new List<IMapGenerator>();
-			foreach (var generator in world.WorldActor.TraitsImplementing<IMapGenerator>())
+			var mapGenerators = new List<IMapGeneratorInfo>();
+			foreach (var generator in world.Map.Rules.Actors[SystemActors.EditorWorld].TraitInfos<IMapGeneratorInfo>())
 			{
 				var settings = generator.GetSettings(world.Map);
 				if (settings == null)
@@ -91,18 +91,18 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			};
 
 			var generatorDropDown = widget.Get<DropDownButtonWidget>("GENERATOR");
-			ChangeGenerator(mapGenerators.FirstOrDefault((IMapGenerator)null));
+			ChangeGenerator(mapGenerators.FirstOrDefault());
 			if (selectedGenerator != null)
 			{
-				generatorDropDown.GetText = () => FluentProvider.GetMessage(selectedGenerator.Info.Name);
+				generatorDropDown.GetText = () => FluentProvider.GetMessage(selectedGenerator.Name);
 				generatorDropDown.OnMouseDown = _ =>
 				{
-					ScrollItemWidget SetupItem(IMapGenerator g, ScrollItemWidget template)
+					ScrollItemWidget SetupItem(IMapGeneratorInfo g, ScrollItemWidget template)
 					{
-						bool IsSelected() => g.Info.Type == selectedGenerator.Info.Type;
-						void OnClick() => ChangeGenerator(mapGenerators.First(generator => generator.Info.Type == g.Info.Type));
+						bool IsSelected() => g.Type == selectedGenerator.Type;
+						void OnClick() => ChangeGenerator(mapGenerators.First(generator => generator.Type == g.Type));
 						var item = ScrollItemWidget.Setup(template, IsSelected, OnClick);
-						item.Get<LabelWidget>("LABEL").GetText = () => FluentProvider.GetMessage(g.Info.Name);
+						item.Get<LabelWidget>("LABEL").GetText = () => FluentProvider.GetMessage(g.Name);
 						return item;
 					}
 
@@ -147,7 +147,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		}
 
 		// newGenerator may be null.
-		void ChangeGenerator(IMapGenerator newGenerator)
+		void ChangeGenerator(IMapGeneratorInfo newGenerator)
 		{
 			selectedGenerator = newGenerator;
 
@@ -307,7 +307,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			// Run main generator logic. May throw.
 			var generateStopwatch = Stopwatch.StartNew();
-			Log.Write("debug", $"Running '{selectedGenerator.Info.Type}' map generator with settings:\n{MiniYamlExts.WriteToString(settings.Nodes)}\n\n");
+			Log.Write("debug", $"Running '{selectedGenerator.Type}' map generator with settings:\n{MiniYamlExts.WriteToString(settings.Nodes)}\n\n");
 			selectedGenerator.Generate(generatedMap, settings);
 			Log.Write("debug", $"Generator finished, taking {generateStopwatch.ElapsedMilliseconds}ms");
 
@@ -354,7 +354,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				false);
 
 			var description = FluentProvider.GetMessage(StrGenerated,
-				"name", FluentProvider.GetMessage(selectedGenerator.Info.Name));
+				"name", FluentProvider.GetMessage(selectedGenerator.Name));
 			var action = new RandomMapEditorAction(editorBlit, description);
 			editorActionManager.Add(action);
 		}

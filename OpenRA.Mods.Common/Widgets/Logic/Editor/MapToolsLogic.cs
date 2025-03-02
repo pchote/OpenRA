@@ -10,7 +10,6 @@
 #endregion
 
 using System.Collections.Generic;
-using System.Linq;
 using OpenRA.Graphics;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Widgets;
@@ -48,7 +47,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			var markerToolPanel = widget.Get("MARKER_TOOL_PANEL");
 			toolPanels.Add(MapTool.MarkerTiles, markerToolPanel);
-			if (world.WorldActor.TraitsImplementing<IMapGenerator>().Any())
+			if (world.Map.Rules.Actors[SystemActors.EditorWorld].HasTraitInfo<IMapGeneratorInfo>())
 			{
 				var mapGeneratorToolPanel = widget.GetOrNull("MAP_GENERATOR_TOOL_PANEL");
 				if (mapGeneratorToolPanel != null)

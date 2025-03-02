@@ -19,9 +19,9 @@ using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits
 {
-	[TraitLocation(SystemActors.World | SystemActors.EditorWorld)]
+	[TraitLocation(SystemActors.EditorWorld)]
 	[Desc("A map generator that clears a map.")]
-	public sealed class ClearMapGeneratorInfo : TraitInfo, IMapGeneratorInfo
+	public sealed class ClearMapGeneratorInfo : TraitInfo<ClearMapGenerator>, IMapGeneratorInfo
 	{
 		[FieldLoader.Require]
 		[Desc("Human-readable name this generator uses.")]
@@ -44,8 +44,6 @@ namespace OpenRA.Mods.Common.Traits
 
 		string IMapGeneratorInfo.Name => Name;
 
-		public override object Create(ActorInitializer init) { return new ClearMapGenerator(this); }
-
 		static MiniYaml SettingsLoader(MiniYaml my)
 		{
 			return my.NodeWithKey("Settings").Value;
@@ -55,22 +53,10 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			return MapGeneratorSettings.DumpFluent(my.NodeWithKey("Settings").Value);
 		}
-	}
-
-	public sealed class ClearMapGenerator : IMapGenerator
-	{
-		readonly ClearMapGeneratorInfo info;
-
-		IMapGeneratorInfo IMapGenerator.Info => info;
-
-		public ClearMapGenerator(ClearMapGeneratorInfo info)
-		{
-			this.info = info;
-		}
 
 		public MapGeneratorSettings GetSettings(Map map)
 		{
-			return MapGeneratorSettings.LoadSettings(info.Settings, map);
+			return MapGeneratorSettings.LoadSettings(Settings, map);
 		}
 
 		public void Generate(Map map, MiniYaml settings)
@@ -112,4 +98,6 @@ namespace OpenRA.Mods.Common.Traits
 			map.ActorDefinitions = ImmutableArray<MiniYamlNode>.Empty;
 		}
 	}
+
+	public class ClearMapGenerator { /* we're only interested in the Info */ }
 }
