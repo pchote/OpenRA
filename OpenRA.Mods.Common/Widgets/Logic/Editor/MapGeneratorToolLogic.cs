@@ -17,6 +17,7 @@ using OpenRA.Graphics;
 using OpenRA.Mods.Common.EditorBrushes;
 using OpenRA.Mods.Common.MapGenerator;
 using OpenRA.Mods.Common.Traits;
+using OpenRA.Primitives;
 using OpenRA.Widgets;
 
 namespace OpenRA.Mods.Common.Widgets.Logic
@@ -96,7 +97,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			ChangeGenerator(mapGenerators.FirstOrDefault());
 			if (selectedGenerator != null)
 			{
-				generatorDropDown.GetText = () => FluentProvider.GetMessage(selectedGenerator.Name);
+				var label = new CachedTransform<IMapGeneratorInfo, string>(g => FluentProvider.GetMessage(g.Name));
+				generatorDropDown.GetText = () => label.Update(selectedGenerator);
 				generatorDropDown.OnMouseDown = _ =>
 				{
 					ScrollItemWidget SetupItem(IMapGeneratorInfo g, ScrollItemWidget template)
@@ -104,7 +106,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 						bool IsSelected() => g.Type == selectedGenerator.Type;
 						void OnClick() => ChangeGenerator(mapGenerators.First(generator => generator.Type == g.Type));
 						var item = ScrollItemWidget.Setup(template, IsSelected, OnClick);
-						item.Get<LabelWidget>("LABEL").GetText = () => FluentProvider.GetMessage(g.Name);
+						var label = FluentProvider.GetMessage(g.Name);
+						item.Get<LabelWidget>("LABEL").GetText = () => label;
 						return item;
 					}
 
