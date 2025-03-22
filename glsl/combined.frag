@@ -73,26 +73,26 @@ vec4 linear2srgb(vec4 c)
 	return c.a * vec4(linear2srgb(c.r / c.a), linear2srgb(c.g / c.a), linear2srgb(c.b / c.a), 1.0f);
 }
 
-ivec2 Size(uint samplerIndex)
+vec2 Size(uint samplerIndex)
 {
 	switch (samplerIndex)
 	{
 		case 7u:
-			return textureSize(Texture7, 0);
+			return vec2(textureSize(Texture7, 0));
 		case 6u:
-			return textureSize(Texture6, 0);
+			return vec2(textureSize(Texture6, 0));
 		case 5u:
-			return textureSize(Texture5, 0);
+			return vec2(textureSize(Texture5, 0));
 		case 4u:
-			return textureSize(Texture4, 0);
+			return vec2(textureSize(Texture4, 0));
 		case 3u:
-			return textureSize(Texture3, 0);
+			return vec2(textureSize(Texture3, 0));
 		case 2u:
-			return textureSize(Texture2, 0);
+			return vec2(textureSize(Texture2, 0));
 		case 1u:
-			return textureSize(Texture1, 0);
+			return vec2(textureSize(Texture1, 0));
 		default:
-			return textureSize(Texture0, 0);
+			return vec2(textureSize(Texture0, 0));
 	}
 }
 
@@ -160,7 +160,7 @@ void main()
 	vec4 c;
 	if (EnablePixelArtScaling)
 	{
-		vec2 textureSize = vec2(Size(vChannelSampler));
+		vec2 textureSize = Size(vChannelSampler);
 		vec2 vUv = coords.st * textureSize;
 		vec2 offset = fract(vUv);
 		vec2 pixelsPerTexel = vec2(1.0 / dFdx(vUv.x), 1.0 / dFdy(vUv.y));
