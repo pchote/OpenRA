@@ -54,6 +54,7 @@ Rules:
 	# Used for rendering the EVA Database previews
 	^Palettes:
 		-PlayerColorPalette:
+		-PlayerColorShift:
 		IndexedPlayerPalette:
 			BasePalette: terrain
 			RemapIndex: 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191
@@ -61,3 +62,9 @@ Rules:
 				GDI: 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191
 				Nod: 127, 126, 125, 124, 122, 46, 120, 47, 125, 124, 123, 122, 42, 121, 120, 120
 				NodUnits: 161, 200, 201, 202, 204, 205, 206, 12, 201, 202, 203, 204, 205, 115, 198, 114
+		FixedPlayerColorShift:
+			BasePalette: player
+			PlayerIndex:
+				GDI: 0.777, -0.196, 1, 0.29, 0.37
+				Nod: 0.667, 0.185, 1, 0.2892156, 0.37
+				NodUnits: 0.306, -0.655, 1, 0.29, 0.37
