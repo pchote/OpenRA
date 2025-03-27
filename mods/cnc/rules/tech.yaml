@@ -29,6 +29,8 @@ V19:
 	UpdatesDerrickCount:
 	GrantConditionOnCombatantOwner:
 		Condition: enabled
+	RenderSprites:
+		PlayerPalette: derrick
 
 V19.Husk:
 	Inherits: ^CivBuildingHusk
@@ -43,6 +45,8 @@ V19.Husk:
 		Dimensions: 1,1
 	Tooltip:
 		Name: actor-v19-husk-name
+	RenderSprites:
+		PlayerPalette: derrick
 
 HOSP:
 	Inherits: ^TechBuilding
