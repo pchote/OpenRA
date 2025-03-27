@@ -739,21 +739,33 @@ resources:
 
 shroud:
 	Defaults:
+		Filename: shadow.shp
 		Length: 12
-	typea:
-		Filename: shadow.shp
-	typeb:
-		Filename: shadow.shp
+	shroud-typea:
+	shroud-typeb:
 		Start: 12
-	typec:
-		Filename: shadow.shp
+	shroud-typec:
 		Start: 24
-	typed:
-		Filename: shadow.shp
+	shroud-typed:
 		Start: 36
-	full:
+	shroud-full:
 		Filename: fullshroud.shp
 		Length: 1
+	fog-typea:
+		Alpha: 0.5
+	fog-typeb: shadow
+		Alpha: 0.5
+		Start: 12
+	fog-typec: shadow
+		Alpha: 0.5
+		Start: 24
+	fog-typed: shadow
+		Alpha: 0.5
+		Start: 36
+	fog-full:
+		Filename: fullshroud.shp
+		Length: 1
+		Alpha: 0.5
 
 # Note: The order of smudges and craters determines
 # the index that is mapped to them in maps
