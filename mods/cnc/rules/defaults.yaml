@@ -366,6 +366,8 @@
 			FireDeath: 5
 			TiberiumDeath: 6
 		CrushedSequence: die-crushed
+		CrushedSequencePalette: player
+		CrushedPaletteIsPlayerPalette: true
 	AttackMove:
 	Passenger:
 		CargoType: Infantry
