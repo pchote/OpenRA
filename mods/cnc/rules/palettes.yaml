@@ -86,9 +86,6 @@
 		A: 64
 	ShroudPalette@shroud:
 		Name: shroud
-	ShroudPalette@fog:
-		Name: fog
-		Fog: true
 	FixedColorPalette@BlueTiberium:
 		Base: terrain
 		Name: bluetiberium
