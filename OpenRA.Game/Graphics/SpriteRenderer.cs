@@ -241,7 +241,6 @@ namespace OpenRA.Graphics
 			//   extend beyond the top of bottom edges of the screen may be pushed outside [-1, 1] and
 			//   culled by the GPU. We avoid this by forcing everything into the z = 0 plane.
 			var depth = depthMargin != 0f ? 2f / (downscale * (sheetSize.Height + depthMargin)) : 0;
-			shader.SetVec("DepthTextureScale", 128 * depth);
 			shader.SetVec("Scroll", scroll.X, scroll.Y, depthMargin != 0f ? scroll.Y : 0);
 			shader.SetVec("p1", width, height, -depth);
 			shader.SetVec("p2", -1, -1, depthMargin != 0f ? 1 : 0);
@@ -249,13 +248,10 @@ namespace OpenRA.Graphics
 
 		public void SetDepthPreview(bool enabled, float contrast, float offset)
 		{
-			shader.SetBool("EnableDepthPreview", enabled);
-			shader.SetVec("DepthPreviewParams", contrast, offset);
 		}
 
 		public void EnablePixelArtScaling(bool enabled)
 		{
-			shader.SetBool("EnablePixelArtScaling", enabled);
 		}
 	}
 }

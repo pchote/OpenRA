@@ -73,29 +73,6 @@ vec4 linear2srgb(vec4 c)
 	return c.a * vec4(linear2srgb(c.r / c.a), linear2srgb(c.g / c.a), linear2srgb(c.b / c.a), 1.0f);
 }
 
-vec2 Size(uint samplerIndex)
-{
-	switch (samplerIndex)
-	{
-		case 7u:
-			return vec2(textureSize(Texture7, 0));
-		case 6u:
-			return vec2(textureSize(Texture6, 0));
-		case 5u:
-			return vec2(textureSize(Texture5, 0));
-		case 4u:
-			return vec2(textureSize(Texture4, 0));
-		case 3u:
-			return vec2(textureSize(Texture3, 0));
-		case 2u:
-			return vec2(textureSize(Texture2, 0));
-		case 1u:
-			return vec2(textureSize(Texture1, 0));
-		default:
-			return vec2(textureSize(Texture0, 0));
-	}
-}
-
 vec4 Sample(uint samplerIndex, vec2 pos)
 {
 	switch (samplerIndex)
@@ -119,26 +96,6 @@ vec4 Sample(uint samplerIndex, vec2 pos)
 	}
 }
 
-vec4 SamplePalettedBilinear(uint samplerIndex, vec2 coords, vec2 textureSize)
-{
-	vec2 texPos = (coords * textureSize) - vec2(0.5);
-	vec2 interp = fract(texPos);
-	vec2 tl = (floor(texPos) + vec2(0.5)) / textureSize;
-	vec2 px = 1.0 / textureSize;
-
-	vec4 x1 = Sample(samplerIndex, tl);
-	vec4 x2 = Sample(samplerIndex, tl + vec2(px.x, 0.));
-	vec4 x3 = Sample(samplerIndex, tl + vec2(0., px.y));
-	vec4 x4 = Sample(samplerIndex, tl + px);
-
-	vec4 c1 = texture(Palette, vec2(dot(x1, vChannelMask), vTexPalette));
-	vec4 c2 = texture(Palette, vec2(dot(x2, vChannelMask), vTexPalette));
-	vec4 c3 = texture(Palette, vec2(dot(x3, vChannelMask), vTexPalette));
-	vec4 c4 = texture(Palette, vec2(dot(x4, vChannelMask), vTexPalette));
-
-	return mix(mix(c1, c2, interp.x), mix(c3, c4, interp.x), interp.y);
-}
-
 vec4 ColorShift(vec4 c, float p)
 {
 	vec4 range = texture(ColorShifts, vec2(0.25, p));
@@ -153,71 +110,27 @@ vec4 ColorShift(vec4 c, float p)
 
 void main()
 {
-	vec2 coords = vTexCoord.st;
 	bool isPaletted = (vChannelType & 0x01u) != 0u;
 	bool isColor = vChannelType == 0u;
 
 	vec4 c;
-	if (EnablePixelArtScaling)
-	{
-		vec2 textureSize = Size(vChannelSampler);
-		vec2 vUv = coords.st * textureSize;
-		vec2 offset = fract(vUv);
-		vec2 pixelsPerTexel = vec2(1.0 / dFdx(vUv.x), 1.0 / dFdy(vUv.y));
-
-		// Offset the sampling point to simulate bilinear intepolation in window coordinates instead of texture coordinates
-		// https://csantosbh.wordpress.com/2014/01/25/manual-texture-filtering-for-pixelated-games-in-webgl/
-		// https://csantosbh.wordpress.com/2014/02/05/automatically-detecting-the-texture-filter-threshold-for-pixelated-magnifications/
-		// ik is defined as 1/k from the articles, set to 1/0.7 because it looks good
-		float ik = 1.43;
-		vec2 interp = clamp(offset * ik * pixelsPerTexel, 0.0, .5) + clamp((offset - 1.0) * ik * pixelsPerTexel + .5, 0.0, .5);
-		coords = (floor(coords.st * textureSize) + interp) / textureSize;
-
-		if (isPaletted)
-			c = SamplePalettedBilinear(vChannelSampler, coords, textureSize);
-	}
-
-	if (!(EnablePixelArtScaling && isPaletted))
-	{
-		vec4 x = Sample(vChannelSampler, coords);
-		vec2 p = vec2(dot(x, vChannelMask), vTexPalette);
-		if (isPaletted)
-			c = texture(Palette, p);
-		else if (isColor)
-			c = vTexCoord;
-		else
-			c = x;
-	}
-
-	// Discard any transparent fragments (both color and depth)
-	if (c.a == 0.0)
-		discard;
+	vec4 x = Sample(vChannelSampler, vTexCoord.st);
+	vec2 p = vec2(dot(x, vChannelMask), vTexPalette);
+	if (isPaletted)
+		c = texture(Palette, p);
+	else if (isColor)
+		c = vTexCoord;
+	else
+		c = x;
 
 	if (!isPaletted && vTexPalette > 0.0)
 		c = ColorShift(c, vTexPalette);
 
-	float depth = gl_FragCoord.z;
-	if (length(vDepthMask) > 0.0)
-	{
-		vec4 y = Sample(vDepthSampler, vTexCoord.pq);
-		depth = depth + DepthTextureScale * dot(y, vDepthMask);
-	}
-
-	gl_FragDepth = depth;
-
-	if (EnableDepthPreview)
-	{
-		float intensity = 1.0 - clamp(DepthPreviewParams.x * depth - 0.5 * DepthPreviewParams.x - DepthPreviewParams.y + 0.5, 0.0, 1.0);
-		fragColor = vec4(vec3(intensity), 1.0);
-	}
+	// A negative tint alpha indicates that the tint should replace the colour instead of multiplying it
+	if (vTint.a < 0.0 && c.a > 0.0)
+		c = vec4(vTint.rgb, -vTint.a);
 	else
-	{
-		// A negative tint alpha indicates that the tint should replace the colour instead of multiplying it
-		if (vTint.a < 0.0)
-			c = vec4(vTint.rgb, -vTint.a);
-		else
-			c *= vTint;
+		c *= vTint;
 
-		fragColor = c;
-	}
+	fragColor = c;
 }
