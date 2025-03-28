@@ -10,7 +10,6 @@ Sound:
 		Falloff: 0, 0, 100, 0
 		Range: 0, 0c512, 4c0, 6c0
 		MinDistance: 5c0
-		Color: 00FFFFC8
 	Warhead@1Dam: SpreadDamage
 		Falloff: 100, 0
 		Spread: 1c756
