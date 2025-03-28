@@ -14,9 +14,9 @@ using System.Linq;
 using OpenRA.GameRules;
 using OpenRA.Graphics;
 using OpenRA.Mods.Common;
-using OpenRA.Mods.Common.Graphics;
 using OpenRA.Mods.Common.Traits;
-using OpenRA.Primitives;
+using OpenRA.Mods.D2k.Graphics;
+using OpenRA.Mods.D2k.Traits;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.D2k.Projectiles
@@ -29,9 +29,6 @@ namespace OpenRA.Mods.D2k.Projectiles
 
 		[Desc("The number of ticks between the blast causing warhead impacts in its area of effect.")]
 		public readonly int DamageInterval = 1;
-
-		[Desc("Equivalent to sequence ZOffset. Controls Z sorting.")]
-		public readonly int ZOffset = 0;
 
 		[Desc("The minimum distance the blast travels.")]
 		public readonly WDist MinDistance = WDist.Zero;
@@ -57,9 +54,6 @@ namespace OpenRA.Mods.D2k.Projectiles
 		[Desc("Can this projectile be blocked when hitting actors with an nameof(BlocksProjectiles) trait.")]
 		public readonly bool Blockable = false;
 
-		[Desc("Color of the blast.")]
-		public readonly Color Color = Color.SkyBlue;
-
 		public IProjectile Create(ProjectileArgs args)
 		{
 			return new SonicBlast(this, args);
@@ -72,6 +66,7 @@ namespace OpenRA.Mods.D2k.Projectiles
 		readonly ProjectileArgs args;
 
 		readonly WDist speed;
+		readonly SonicBlastRenderer renderer;
 
 		[Sync]
 		WPos pos, lastPos;
@@ -85,6 +80,8 @@ namespace OpenRA.Mods.D2k.Projectiles
 			this.info = info;
 			this.args = args;
 			var world = args.SourceActor.World;
+			renderer = world.WorldActor.Trait<SonicBlastRenderer>();
+
 			if (info.Speed.Length > 1)
 				speed = new WDist(world.SharedRandom.Next(info.Speed[0].Length, info.Speed[1].Length));
 			else
@@ -151,10 +148,7 @@ namespace OpenRA.Mods.D2k.Projectiles
 		public IEnumerable<IRenderable> Render(WorldRenderer wr)
 		{
 			if (!wr.World.FogObscures(pos))
-			{
-				var blastRender = new BeamRenderable(pos, info.ZOffset, lastPos - pos, BeamRenderableShape.Cylindrical, info.Width, info.Color);
-				return new[] { (IRenderable)blastRender };
-			}
+				return new[] { (IRenderable)new SonicBlastRenderable(renderer, pos) };
 
 			return SpriteRenderable.None;
 		}
