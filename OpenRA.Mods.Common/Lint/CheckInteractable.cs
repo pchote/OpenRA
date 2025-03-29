@@ -10,6 +10,7 @@
 #endregion
 
 using System;
+using System.Linq;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Primitives;
 using OpenRA.Server;
@@ -31,7 +32,8 @@ namespace OpenRA.Mods.Common.Lint
 		static void Run(Action<string> emitError, Ruleset rules, ModData modData)
 		{
 			// As the map has not been created we need to get MapGrid info directly from manifest.
-			var grid = modData.Manifest.Get<MapGrid>();
+			var tileSize = modData.DefaultTerrainInfo.Values.First().TileSize;
+			var tileScale = modData.Manifest.Get<MapGrid>().TileScale;
 			foreach (var actorInfo in rules.Actors)
 			{
 				// Catch TypeDictionary errors.
@@ -41,10 +43,10 @@ namespace OpenRA.Mods.Common.Lint
 					if (interactable == null)
 						continue;
 
-					if (HasInvalidBounds(interactable.Bounds, grid.TileSize, grid.TileScale))
+					if (HasInvalidBounds(interactable.Bounds, tileSize, tileScale))
 						emitError($"{actorInfo.Key}.{interactable.GetType().Name}.{nameof(interactable.Bounds)} are empty or negative.");
 
-					if (HasInvalidBounds(interactable.DecorationBounds, grid.TileSize, grid.TileScale))
+					if (HasInvalidBounds(interactable.DecorationBounds, tileSize, tileScale))
 						emitError($"{actorInfo.Key}.{interactable.GetType().Name}.{nameof(interactable.DecorationBounds)} are empty or negative.");
 				}
 				catch (InvalidOperationException e)

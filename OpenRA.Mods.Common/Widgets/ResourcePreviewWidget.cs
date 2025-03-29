@@ -52,7 +52,7 @@ namespace OpenRA.Mods.Common.Widgets
 			this.worldRenderer = worldRenderer;
 			viewportSizes = modData.Manifest.Get<WorldViewportSizes>();
 			resourceRenderers = world.WorldActor.TraitsImplementing<IResourceRenderer>().ToArray();
-			tileSize = world.Map.Grid.TileSize;
+			tileSize = world.Map.Rules.TerrainInfo.TileSize;
 			IdealPreviewSize = new Size(
 				(int)(viewportSizes.DefaultScale * tileSize.Width),
 				(int)(viewportSizes.DefaultScale * tileSize.Height));

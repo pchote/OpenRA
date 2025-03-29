@@ -230,7 +230,6 @@ Missions:
 	cnc|missions.yaml
 
 MapGrid:
-	TileSize: 24,24
 	Type: Rectangular
 
 DefaultOrderGenerator: UnitOrderGenerator

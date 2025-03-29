@@ -50,7 +50,7 @@ namespace OpenRA.Graphics
 		internal WorldRenderer(ModData modData, World world)
 		{
 			World = world;
-			TileSize = World.Map.Grid.TileSize;
+			TileSize = World.Map.Rules.TerrainInfo.TileSize;
 			TileScale = World.Map.Grid.TileScale;
 			Viewport = new Viewport(this, world.Map);
 

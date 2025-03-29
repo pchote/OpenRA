@@ -155,16 +155,9 @@ namespace OpenRA
 			};
 		}
 
-		public void InitializeDepthBuffer(MapGrid mapGrid)
+		public void SetDepthMargin(float depthMargin)
 		{
-			// The depth buffer needs to be initialized with enough range to cover:
-			//  - the height of the screen
-			//  - the z-offset of tiles from MaxTerrainHeight below the bottom of the screen (pushed into view)
-			//  - additional z-offset from actors on top of MaxTerrainHeight terrain
-			//  - a small margin so that tiles rendered partially above the top edge of the screen aren't pushed behind the clip plane
-			// We need an offset of mapGrid.MaximumTerrainHeight * mapGrid.TileSize.Height / 2 to cover the terrain height
-			// and choose to use mapGrid.MaximumTerrainHeight * mapGrid.TileSize.Height / 4 for each of the actor and top-edge cases
-			depthMargin = mapGrid == null || !mapGrid.EnableDepthBuffer ? 0 : mapGrid.TileSize.Height * mapGrid.MaximumTerrainHeight;
+			this.depthMargin = depthMargin;
 		}
 
 		void BeginFrame()

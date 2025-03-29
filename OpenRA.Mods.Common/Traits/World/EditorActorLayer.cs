@@ -81,10 +81,10 @@ namespace OpenRA.Mods.Common.Traits
 			cellOffset = new int2(world.Map.AllCells.Min(c => c.X), world.Map.AllCells.Min((c) => c.Y));
 			var cellOffsetMax = new int2(world.Map.AllCells.Max(c => c.X), world.Map.AllCells.Max((c) => c.Y));
 			var mapCellSize = cellOffsetMax - cellOffset;
+			var ts = world.Map.Rules.TerrainInfo.TileSize;
 			cellMap = new SpatiallyPartitioned<EditorActorPreview>(
-				mapCellSize.X, mapCellSize.Y, Exts.IntegerDivisionRoundingAwayFromZero(Info.BinSize, world.Map.Grid.TileSize.Width));
+				mapCellSize.X, mapCellSize.Y, Exts.IntegerDivisionRoundingAwayFromZero(Info.BinSize, ts.Width));
 
-			var ts = world.Map.Grid.TileSize;
 			var width = world.Map.MapSize.X * ts.Width;
 			var height = world.Map.MapSize.Y * ts.Height;
 			screenMap = new SpatiallyPartitioned<EditorActorPreview>(width, height, Info.BinSize);
