@@ -610,84 +610,72 @@ resources:
 			WINTER: ti1.win
 			SNOW: ti1.sno
 			TEMPERAT: ti1.tem
-			JUNGLE: ti1.jun
 	ti2:
 		TilesetFilenames:
 			DESERT: ti2.des
 			WINTER: ti2.win
 			SNOW: ti2.sno
 			TEMPERAT: ti2.tem
-			JUNGLE: ti2.jun
 	ti3:
 		TilesetFilenames:
 			DESERT: ti3.des
 			WINTER: ti3.win
 			SNOW: ti3.sno
 			TEMPERAT: ti3.tem
-			JUNGLE: ti3.jun
 	ti4:
 		TilesetFilenames:
 			DESERT: ti4.des
 			WINTER: ti4.win
 			SNOW: ti4.sno
 			TEMPERAT: ti4.tem
-			JUNGLE: ti4.jun
 	ti5:
 		TilesetFilenames:
 			DESERT: ti5.des
 			WINTER: ti5.win
 			SNOW: ti5.sno
 			TEMPERAT: ti5.tem
-			JUNGLE: ti5.jun
 	ti6:
 		TilesetFilenames:
 			DESERT: ti6.des
 			WINTER: ti6.win
 			SNOW: ti6.sno
 			TEMPERAT: ti6.tem
-			JUNGLE: ti6.jun
 	ti7:
 		TilesetFilenames:
 			DESERT: ti7.des
 			WINTER: ti7.win
 			SNOW: ti7.sno
 			TEMPERAT: ti7.tem
-			JUNGLE: ti7.jun
 	ti8:
 		TilesetFilenames:
 			DESERT: ti8.des
 			WINTER: ti8.win
 			SNOW: ti8.sno
 			TEMPERAT: ti8.tem
-			JUNGLE: ti8.jun
 	ti9:
 		TilesetFilenames:
 			DESERT: ti9.des
 			WINTER: ti9.win
 			SNOW: ti9.sno
 			TEMPERAT: ti9.tem
-			JUNGLE: ti9.jun
 	ti10:
 		TilesetFilenames:
 			DESERT: ti10.des
 			WINTER: ti10.win
 			SNOW: ti10.sno
 			TEMPERAT: ti10.tem
-			JUNGLE: ti10.jun
 	ti11:
 		TilesetFilenames:
 			DESERT: ti11.des
 			WINTER: ti11.win
 			SNOW: ti11.sno
 			TEMPERAT: ti11.tem
-			JUNGLE: ti11.jun
 	ti12:
 		TilesetFilenames:
 			DESERT: ti12.des
 			WINTER: ti12.win
 			SNOW: ti12.sno
 			TEMPERAT: ti12.tem
-			JUNGLE: ti12.jun
 	bti1:
 		Filename: rtib1.tem
 		TilesetFilenames:
@@ -778,42 +766,36 @@ scorches:
 			WINTER: sc1.win
 			SNOW: sc1.sno
 			TEMPERAT: sc1.tem
-			JUNGLE: sc1.jun
 	sc2:
 		TilesetFilenames:
 			DESERT: sc2.des
 			WINTER: sc2.win
 			SNOW: sc2.sno
 			TEMPERAT: sc2.tem
-			JUNGLE: sc2.jun
 	sc3:
 		TilesetFilenames:
 			DESERT: sc3.des
 			WINTER: sc3.win
 			SNOW: sc3.sno
 			TEMPERAT: sc3.tem
-			JUNGLE: sc3.jun
 	sc4:
 		TilesetFilenames:
 			DESERT: sc4.des
 			WINTER: sc4.win
 			SNOW: sc4.sno
 			TEMPERAT: sc4.tem
-			JUNGLE: sc4.jun
 	sc5:
 		TilesetFilenames:
 			DESERT: sc5.des
 			WINTER: sc5.win
 			SNOW: sc5.sno
 			TEMPERAT: sc5.tem
-			JUNGLE: sc5.jun
 	sc6:
 		TilesetFilenames:
 			DESERT: sc6.des
 			WINTER: sc6.win
 			SNOW: sc6.sno
 			TEMPERAT: sc6.tem
-			JUNGLE: sc6.jun
 
 craters:
 	Defaults:
@@ -824,42 +806,36 @@ craters:
 			WINTER: cr1.win
 			SNOW: cr1.sno
 			TEMPERAT: cr1.tem
-			JUNGLE: cr1.jun
 	cr2:
 		TilesetFilenames:
 			DESERT: cr2.des
 			WINTER: cr2.win
 			SNOW: cr2.sno
 			TEMPERAT: cr2.tem
-			JUNGLE: cr2.jun
 	cr3:
 		TilesetFilenames:
 			DESERT: cr3.des
 			WINTER: cr3.win
 			SNOW: cr3.sno
 			TEMPERAT: cr3.tem
-			JUNGLE: cr3.jun
 	cr4:
 		TilesetFilenames:
 			DESERT: cr4.des
 			WINTER: cr4.win
 			SNOW: cr4.sno
 			TEMPERAT: cr4.tem
-			JUNGLE: cr4.jun
 	cr5:
 		TilesetFilenames:
 			DESERT: cr5.des
 			WINTER: cr5.win
 			SNOW: cr5.sno
 			TEMPERAT: cr5.tem
-			JUNGLE: cr5.jun
 	cr6:
 		TilesetFilenames:
 			DESERT: cr6.des
 			WINTER: cr6.win
 			SNOW: cr6.sno
 			TEMPERAT: cr6.tem
-			JUNGLE: cr6.jun
 
 smokland:
 	Defaults:

@@ -4,7 +4,6 @@ split2:
 		TilesetFilenames:
 			WINTER: split2.win
 			SNOW: split2.sno
-			JUNGLE: split2.jun
 		Offset: 11, -15
 	make:
 		Length: 30
@@ -22,7 +21,6 @@ split3:
 			WINTER: split3.win
 			SNOW: split3.sno
 			TEMPERAT: split3.tem
-			JUNGLE: split3.jun
 		Offset: 7, -13
 	make:
 		Length: 30
@@ -67,7 +65,6 @@ tc04:
 		TilesetFilenames:
 			WINTER: tc04.win
 			SNOW: tc04.sno
-			JUNGLE: tc04.jun
 	idle:
 
 tc04.husk:
@@ -76,7 +73,6 @@ tc04.husk:
 		TilesetFilenames:
 			WINTER: tc04.win
 			SNOW: tc04.sno
-			JUNGLE: tc04.jun
 	idle:
 		Start: 1
 
@@ -86,7 +82,6 @@ tc05:
 		TilesetFilenames:
 			WINTER: tc05.win
 			SNOW: tc05.sno
-			JUNGLE: tc05.jun
 	idle:
 
 tc05.husk:
@@ -95,7 +90,6 @@ tc05.husk:
 		TilesetFilenames:
 			WINTER: tc05.win
 			SNOW: tc05.sno
-			JUNGLE: tc05.jun
 	idle:
 		Start: 1
 
@@ -105,7 +99,6 @@ tc03:
 		TilesetFilenames:
 			WINTER: tc03.win
 			SNOW: tc03.sno
-			JUNGLE: tc03.jun
 	idle:
 
 tc03.husk:
@@ -114,7 +107,6 @@ tc03.husk:
 		TilesetFilenames:
 			WINTER: tc03.win
 			SNOW: tc03.sno
-			JUNGLE: tc03.jun
 	idle:
 		Start: 1
 
@@ -124,7 +116,6 @@ tc02:
 		TilesetFilenames:
 			WINTER: tc02.win
 			SNOW: tc02.sno
-			JUNGLE: tc02.jun
 	idle:
 
 tc02.husk:
@@ -133,7 +124,6 @@ tc02.husk:
 		TilesetFilenames:
 			WINTER: tc02.win
 			SNOW: tc02.sno
-			JUNGLE: tc02.jun
 	idle:
 		Start: 1
 
@@ -143,7 +133,6 @@ tc01:
 		TilesetFilenames:
 			WINTER: tc01.win
 			SNOW: tc01.sno
-			JUNGLE: tc01.jun
 	idle:
 
 tc01.husk:
@@ -152,7 +141,6 @@ tc01.husk:
 		TilesetFilenames:
 			WINTER: tc01.win
 			SNOW: tc01.sno
-			JUNGLE: tc01.jun
 	idle:
 		Start: 1
 
@@ -171,7 +159,6 @@ t17:
 		TilesetFilenames:
 			WINTER: t17.win
 			SNOW: t17.sno
-			JUNGLE: t17.jun
 	idle:
 
 t17.husk:
@@ -180,7 +167,6 @@ t17.husk:
 		TilesetFilenames:
 			WINTER: t17.win
 			SNOW: t17.sno
-			JUNGLE: t17.jun
 	idle:
 		Start: 1
 
@@ -190,7 +176,6 @@ t16:
 		TilesetFilenames:
 			WINTER: t16.win
 			SNOW: t16.sno
-			JUNGLE: t16.jun
 	idle:
 
 t16.husk:
@@ -199,7 +184,6 @@ t16.husk:
 		TilesetFilenames:
 			WINTER: t16.win
 			SNOW: t16.sno
-			JUNGLE: t16.jun
 	idle:
 		Start: 1
 
@@ -209,7 +193,6 @@ t15:
 		TilesetFilenames:
 			WINTER: t15.win
 			SNOW: t15.sno
-			JUNGLE: t15.jun
 	idle:
 
 t15.husk:
@@ -218,7 +201,6 @@ t15.husk:
 		TilesetFilenames:
 			WINTER: t15.win
 			SNOW: t15.sno
-			JUNGLE: t15.jun
 	idle:
 		Start: 1
 
@@ -228,7 +210,6 @@ t14:
 		TilesetFilenames:
 			WINTER: t14.win
 			SNOW: t14.sno
-			JUNGLE: t14.jun
 	idle:
 
 t14.husk:
@@ -237,7 +218,6 @@ t14.husk:
 		TilesetFilenames:
 			WINTER: t14.win
 			SNOW: t14.sno
-			JUNGLE: t14.jun
 	idle:
 		Start: 1
 
@@ -247,7 +227,6 @@ t13:
 		TilesetFilenames:
 			WINTER: t13.win
 			SNOW: t13.sno
-			JUNGLE: t13.jun
 	idle:
 
 t13.husk:
@@ -256,7 +235,6 @@ t13.husk:
 		TilesetFilenames:
 			WINTER: t13.win
 			SNOW: t13.sno
-			JUNGLE: t13.jun
 	idle:
 		Start: 1
 
@@ -266,7 +244,6 @@ t12:
 		TilesetFilenames:
 			WINTER: t12.win
 			SNOW: t12.sno
-			JUNGLE: t12.jun
 	idle:
 
 t12.husk:
@@ -275,7 +252,6 @@ t12.husk:
 		TilesetFilenames:
 			WINTER: t12.win
 			SNOW: t12.sno
-			JUNGLE: t12.jun
 	idle:
 		Start: 1
 
@@ -285,7 +261,6 @@ t11:
 		TilesetFilenames:
 			WINTER: t11.win
 			SNOW: t11.sno
-			JUNGLE: t11.jun
 	idle:
 
 t11.husk:
@@ -294,7 +269,6 @@ t11.husk:
 		TilesetFilenames:
 			WINTER: t11.win
 			SNOW: t11.sno
-			JUNGLE: t11.jun
 	idle:
 		Start: 1
 
@@ -304,7 +278,6 @@ t10:
 		TilesetFilenames:
 			WINTER: t10.win
 			SNOW: t10.sno
-			JUNGLE: t10.jun
 	idle:
 
 t10.husk:
@@ -313,7 +286,6 @@ t10.husk:
 		TilesetFilenames:
 			WINTER: t10.win
 			SNOW: t10.sno
-			JUNGLE: t10.jun
 	idle:
 		Start: 1
 
@@ -333,7 +305,6 @@ t08:
 			WINTER: t08.win
 			SNOW: t08.sno
 			TEMPERAT: t08.tem
-			JUNGLE: t08.jun
 	idle:
 
 t08.husk:
@@ -343,7 +314,6 @@ t08.husk:
 			WINTER: t08.win
 			SNOW: t08.sno
 			TEMPERAT: t08.tem
-			JUNGLE: t08.jun
 	idle:
 		Start: 1
 
@@ -353,7 +323,6 @@ t07:
 		TilesetFilenames:
 			WINTER: t07.win
 			SNOW: t07.sno
-			JUNGLE: t07.jun
 	idle:
 
 t07.husk:
@@ -362,7 +331,6 @@ t07.husk:
 		TilesetFilenames:
 			WINTER: t07.win
 			SNOW: t07.sno
-			JUNGLE: t07.jun
 	idle:
 		Start: 1
 
@@ -372,7 +340,6 @@ t06:
 		TilesetFilenames:
 			WINTER: t06.win
 			SNOW: t06.sno
-			JUNGLE: t06.jun
 	idle:
 
 t06.husk:
@@ -381,7 +348,6 @@ t06.husk:
 		TilesetFilenames:
 			WINTER: t06.win
 			SNOW: t06.sno
-			JUNGLE: t06.jun
 	idle:
 		Start: 1
 
@@ -391,7 +357,6 @@ t05:
 		TilesetFilenames:
 			WINTER: t05.win
 			SNOW: t05.sno
-			JUNGLE: t05.jun
 	idle:
 
 t05.husk:
@@ -400,7 +365,6 @@ t05.husk:
 		TilesetFilenames:
 			WINTER: t05.win
 			SNOW: t05.sno
-			JUNGLE: t05.jun
 	idle:
 		Start: 1
 
@@ -419,7 +383,6 @@ t03:
 		TilesetFilenames:
 			WINTER: t03.win
 			SNOW: t03.sno
-			JUNGLE: t03.jun
 	idle:
 
 t03.husk:
@@ -428,7 +391,6 @@ t03.husk:
 		TilesetFilenames:
 			WINTER: t03.win
 			SNOW: t03.sno
-			JUNGLE: t03.jun
 	idle:
 		Start: 1
 
@@ -438,7 +400,6 @@ t02:
 		TilesetFilenames:
 			WINTER: t02.win
 			SNOW: t02.sno
-			JUNGLE: t02.jun
 	idle:
 
 t02.husk:
@@ -447,7 +408,6 @@ t02.husk:
 		TilesetFilenames:
 			WINTER: t02.win
 			SNOW: t02.sno
-			JUNGLE: t02.jun
 	idle:
 		Start: 1
 
@@ -457,7 +417,6 @@ t01:
 		TilesetFilenames:
 			WINTER: t01.win
 			SNOW: t01.sno
-			JUNGLE: t01.jun
 	idle:
 
 t01.husk:
@@ -466,7 +425,6 @@ t01.husk:
 		TilesetFilenames:
 			WINTER: t01.win
 			SNOW: t01.sno
-			JUNGLE: t01.jun
 	idle:
 		Start: 1
 
@@ -476,7 +434,6 @@ v01:
 		TilesetFilenames:
 			WINTER: v01.win
 			SNOW: v01.sno
-			JUNGLE: v01.jun
 	idle:
 	damaged-idle:
 		Start: 1
@@ -487,7 +444,6 @@ v01.husk:
 		TilesetFilenames:
 			WINTER: v01.win
 			SNOW: v01.sno
-			JUNGLE: v01.jun
 		Start: 2
 
 v02:
@@ -496,7 +452,6 @@ v02:
 		TilesetFilenames:
 			WINTER: v02.win
 			SNOW: v02.sno
-			JUNGLE: v02.jun
 	idle:
 	damaged-idle:
 		Start: 1
@@ -507,7 +462,6 @@ v02.husk:
 		TilesetFilenames:
 			WINTER: v02.win
 			SNOW: v02.sno
-			JUNGLE: v02.jun
 		Start: 2
 
 v03:
@@ -516,7 +470,6 @@ v03:
 		TilesetFilenames:
 			WINTER: v03.win
 			SNOW: v03.sno
-			JUNGLE: v03.jun
 	idle:
 	damaged-idle:
 		Start: 1
@@ -527,7 +480,6 @@ v03.husk:
 		TilesetFilenames:
 			WINTER: v03.win
 			SNOW: v03.sno
-			JUNGLE: v03.jun
 		Start: 2
 
 v04:
@@ -536,7 +488,6 @@ v04:
 		TilesetFilenames:
 			WINTER: v04.win
 			SNOW: v04.sno
-			JUNGLE: v04.jun
 	idle:
 	damaged-idle:
 		Start: 1
@@ -547,7 +498,6 @@ v04.husk:
 		TilesetFilenames:
 			WINTER: v04.win
 			SNOW: v04.sno
-			JUNGLE: v04.jun
 		Start: 2
 
 v05:
@@ -556,7 +506,6 @@ v05:
 		TilesetFilenames:
 			WINTER: v05.win
 			SNOW: v05.sno
-			JUNGLE: v05.jun
 	idle:
 	damaged-idle:
 		Start: 1
@@ -567,7 +516,6 @@ v05.husk:
 		TilesetFilenames:
 			WINTER: v05.win
 			SNOW: v05.sno
-			JUNGLE: v05.jun
 		Start: 2
 
 v06:
@@ -576,7 +524,6 @@ v06:
 		TilesetFilenames:
 			WINTER: v06.win
 			SNOW: v06.sno
-			JUNGLE: v06.jun
 	idle:
 	damaged-idle:
 		Start: 1
@@ -587,7 +534,6 @@ v06.husk:
 		TilesetFilenames:
 			WINTER: v06.win
 			SNOW: v06.sno
-			JUNGLE: v06.jun
 		Start: 2
 
 v07:
@@ -596,7 +542,6 @@ v07:
 		TilesetFilenames:
 			WINTER: v07.win
 			SNOW: v07.sno
-			JUNGLE: v07.jun
 	idle:
 	damaged-idle:
 		Start: 2
@@ -607,7 +552,6 @@ v07.husk:
 		TilesetFilenames:
 			WINTER: v07.win
 			SNOW: v07.sno
-			JUNGLE: v07.jun
 		Start: 2
 
 v08:
@@ -616,7 +560,6 @@ v08:
 		TilesetFilenames:
 			WINTER: v08.win
 			SNOW: v08.sno
-			JUNGLE: v08.jun
 	idle:
 	damaged-idle:
 		Start: 1
@@ -627,7 +570,6 @@ v08.husk:
 		TilesetFilenames:
 			WINTER: v08.win
 			SNOW: v08.sno
-			JUNGLE: v08.jun
 		Start: 2
 
 v09:
@@ -636,7 +578,6 @@ v09:
 		TilesetFilenames:
 			WINTER: v09.win
 			SNOW: v09.sno
-			JUNGLE: v09.jun
 	idle:
 	damaged-idle:
 		Start: 1
@@ -647,7 +588,6 @@ v09.husk:
 		TilesetFilenames:
 			WINTER: v09.win
 			SNOW: v09.sno
-			JUNGLE: v09.jun
 		Start: 2
 
 v10:
@@ -656,7 +596,6 @@ v10:
 		TilesetFilenames:
 			WINTER: v10.win
 			SNOW: v10.sno
-			JUNGLE: v10.jun
 	idle:
 	damaged-idle:
 		Start: 1
@@ -667,7 +606,6 @@ v10.husk:
 		TilesetFilenames:
 			WINTER: v10.win
 			SNOW: v10.sno
-			JUNGLE: v10.jun
 		Start: 2
 
 v11:
@@ -676,7 +614,6 @@ v11:
 		TilesetFilenames:
 			WINTER: v11.win
 			SNOW: v11.sno
-			JUNGLE: v11.jun
 	idle:
 	damaged-idle:
 		Start: 1
@@ -687,7 +624,6 @@ v11.husk:
 		TilesetFilenames:
 			WINTER: v11.win
 			SNOW: v11.sno
-			JUNGLE: v11.jun
 		Start: 2
 
 v12:
@@ -696,7 +632,6 @@ v12:
 		TilesetFilenames:
 			WINTER: v12.win
 			SNOW: v12.sno
-			JUNGLE: v12.jun
 	idle:
 		ZOffset: -2c512
 	damaged-idle:
@@ -709,7 +644,6 @@ v12.husk:
 		TilesetFilenames:
 			WINTER: v12.win
 			SNOW: v12.sno
-			JUNGLE: v12.jun
 		Start: 2
 		ZOffset: -2c512
 
@@ -719,7 +653,6 @@ v13:
 		TilesetFilenames:
 			WINTER: v13.win
 			SNOW: v13.sno
-			JUNGLE: v13.jun
 	idle:
 		ZOffset: -2c512
 	damaged-idle:
@@ -732,7 +665,6 @@ v13.husk:
 		TilesetFilenames:
 			WINTER: v13.win
 			SNOW: v13.sno
-			JUNGLE: v13.jun
 		Start: 2
 		ZOffset: -2c512
 
@@ -742,7 +674,6 @@ v14:
 		TilesetFilenames:
 			WINTER: v14.win
 			SNOW: v14.sno
-			JUNGLE: v14.jun
 	idle:
 		ZOffset: -2c512
 	damaged-idle:
@@ -755,7 +686,6 @@ v14.husk:
 		TilesetFilenames:
 			WINTER: v14.win
 			SNOW: v14.sno
-			JUNGLE: v14.jun
 		Start: 2
 		ZOffset: -2c512
 
@@ -765,7 +695,6 @@ v15:
 		TilesetFilenames:
 			WINTER: v15.win
 			SNOW: v15.sno
-			JUNGLE: v15.jun
 	idle:
 		ZOffset: -2c512
 	damaged-idle:
@@ -778,7 +707,6 @@ v15.husk:
 		TilesetFilenames:
 			WINTER: v15.win
 			SNOW: v15.sno
-			JUNGLE: v15.jun
 		Start: 2
 		ZOffset: -2c512
 
@@ -788,7 +716,6 @@ v16:
 		TilesetFilenames:
 			WINTER: v16.win
 			SNOW: v16.sno
-			JUNGLE: v16.jun
 	idle:
 		ZOffset: -2c512
 	damaged-idle:
@@ -801,7 +728,6 @@ v16.husk:
 		TilesetFilenames:
 			WINTER: v16.win
 			SNOW: v16.sno
-			JUNGLE: v16.jun
 		Start: 2
 		ZOffset: -2c512
 
@@ -811,7 +737,6 @@ v17:
 		TilesetFilenames:
 			WINTER: v17.win
 			SNOW: v17.sno
-			JUNGLE: v17.jun
 	idle:
 		ZOffset: -2c512
 	damaged-idle:
@@ -824,7 +749,6 @@ v17.husk:
 		TilesetFilenames:
 			WINTER: v17.win
 			SNOW: v17.sno
-			JUNGLE: v17.jun
 		Start: 2
 		ZOffset: -2c512
 
@@ -834,7 +758,6 @@ v18:
 		TilesetFilenames:
 			WINTER: v18.win
 			SNOW: v18.sno
-			JUNGLE: v18.jun
 	idle:
 		ZOffset: -2c512
 	damaged-idle:
@@ -847,7 +770,6 @@ v18.husk:
 		TilesetFilenames:
 			WINTER: v18.win
 			SNOW: v18.sno
-			JUNGLE: v18.jun
 		Start: 2
 		ZOffset: -2c512
 

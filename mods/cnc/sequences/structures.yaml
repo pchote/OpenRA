@@ -29,7 +29,6 @@ fact:
 			WINTER: bib2.win
 			SNOW: bib2.sno
 			TEMPERAT: bib2.tem
-			JUNGLE: bib2.jun
 		Length: *
 	icon:
 		Filename: facticnh.shp
@@ -57,7 +56,6 @@ nuke:
 			WINTER: bib3.win
 			SNOW: bib3.sno
 			TEMPERAT: bib3.tem
-			JUNGLE: bib3.jun
 		Length: *
 	icon:
 		Filename: nukeicnh.tem
@@ -98,7 +96,6 @@ proc:
 			WINTER: bib2.win
 			SNOW: bib2.sno
 			TEMPERAT: bib2.tem
-			JUNGLE: bib2.jun
 		Length: *
 	icon:
 		Filename: procicnh.tem
@@ -156,7 +153,6 @@ hand:
 			WINTER: bib3.win
 			SNOW: bib3.sno
 			TEMPERAT: bib3.tem
-			JUNGLE: bib3.jun
 		Length: *
 		Offset: 0,0
 	icon:
@@ -188,7 +184,6 @@ pyle:
 			WINTER: bib3.win
 			SNOW: bib3.sno
 			TEMPERAT: bib3.tem
-			JUNGLE: bib3.jun
 		Length: *
 	icon:
 		Filename: pyleicnh.tem
@@ -227,7 +222,6 @@ weap:
 			WINTER: bib2.win
 			SNOW: bib2.sno
 			TEMPERAT: bib2.tem
-			JUNGLE: bib2.jun
 		Length: *
 		Offset: 0,0
 	icon:
@@ -276,7 +270,6 @@ afld:
 			WINTER: bib1.win
 			SNOW: bib1.sno
 			TEMPERAT: bib1.tem
-			JUNGLE: bib1.jun
 		Length: *
 	icon:
 		Filename: afldicnh.tem
@@ -304,7 +297,6 @@ hq:
 			WINTER: bib3.win
 			SNOW: bib3.sno
 			TEMPERAT: bib3.tem
-			JUNGLE: bib3.jun
 		Length: *
 	icon:
 		Filename: hqicnh.tem
@@ -332,7 +324,6 @@ nuk2:
 			WINTER: bib3.win
 			SNOW: bib3.sno
 			TEMPERAT: bib3.tem
-			JUNGLE: bib3.jun
 		Length: *
 	icon:
 		Filename: nuk2icnh.tem
@@ -421,7 +412,6 @@ eye:
 			WINTER: bib3.win
 			SNOW: bib3.sno
 			TEMPERAT: bib3.tem
-			JUNGLE: bib3.jun
 		Length: *
 	icon:
 		Filename: eyeicnh.tem
@@ -456,7 +446,6 @@ tmpl:
 			WINTER: bib2.win
 			SNOW: bib2.sno
 			TEMPERAT: bib2.tem
-			JUNGLE: bib2.jun
 		Length: *
 		Offset: 0,0
 	icon:
