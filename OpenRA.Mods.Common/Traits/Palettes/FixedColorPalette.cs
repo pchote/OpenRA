@@ -10,6 +10,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using OpenRA.Graphics;
 using OpenRA.Primitives;
@@ -41,7 +42,7 @@ namespace OpenRA.Mods.Common.Traits
 		public override object Create(ActorInitializer init) { return new FixedColorPalette(this); }
 	}
 
-	public class FixedColorPalette : ILoadsPalettes
+	public class FixedColorPalette : ILoadsPalettes, IProvidesAssetBrowserPalettes
 	{
 		readonly FixedColorPaletteInfo info;
 
@@ -55,5 +56,7 @@ namespace OpenRA.Mods.Common.Traits
 			var remap = new PlayerColorRemap(info.RemapIndex.Length == 0 ? Enumerable.Range(0, 256).ToArray() : info.RemapIndex, info.Color);
 			wr.AddPalette(info.Name, new ImmutablePalette(wr.Palette(info.Base).Palette, remap), info.AllowModifiers);
 		}
+
+		public IEnumerable<string> PaletteNames { get { yield return info.Name; } }
 	}
 }
