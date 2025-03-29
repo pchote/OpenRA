@@ -15,7 +15,6 @@ using System.IO;
 using System.Linq;
 using OpenRA.Effects;
 using OpenRA.GameRules;
-using OpenRA.Graphics;
 using OpenRA.Mods.Common.Terrain;
 using OpenRA.Primitives;
 using OpenRA.Traits;
@@ -93,12 +92,10 @@ namespace OpenRA.Mods.Common.Traits
 		}
 	}
 
-	public class Bridge : IRender, INotifyDamageStateChanged, IRadarSignature
+	public class Bridge : INotifyDamageStateChanged
 	{
-		readonly BuildingInfo buildingInfo;
 		readonly Bridge[] neighbours = new Bridge[2];
 		readonly LegacyBridgeHut[] huts = new LegacyBridgeHut[2]; // Huts before this / first & after this / last
-		readonly ITiledTerrainRenderer terrainRenderer;
 		readonly ITemplatedTerrainInfo terrainInfo;
 		readonly Health health;
 		readonly Actor self;
@@ -108,7 +105,6 @@ namespace OpenRA.Mods.Common.Traits
 		readonly Lazy<bool> isDangling;
 		ushort template;
 		Dictionary<CPos, byte> footprint;
-		(CPos Cell, Color Color)[] radarSignature;
 
 		public LegacyBridgeHut Hut { get; private set; }
 		public bool IsDangling => isDangling.Value;
@@ -121,9 +117,7 @@ namespace OpenRA.Mods.Common.Traits
 			this.info = info;
 			type = self.Info.Name;
 			isDangling = new Lazy<bool>(() => huts[0] == huts[1] && (neighbours[0] == null || neighbours[1] == null));
-			buildingInfo = self.Info.TraitInfo<BuildingInfo>();
 
-			terrainRenderer = self.World.WorldActor.Trait<ITiledTerrainRenderer>();
 			terrainInfo = self.World.Map.Rules.TerrainInfo as ITemplatedTerrainInfo;
 			if (terrainInfo == null)
 				throw new InvalidDataException("Bridge requires a template-based tileset.");
@@ -148,23 +142,14 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			this.template = template;
 			this.footprint = footprint;
-			radarSignature = new (CPos Cell, Color Color)[footprint.Keys.Count];
 
 			// Set the initial state
-			var i = 0;
 			foreach (var c in footprint.Keys)
 			{
-				var tileInfo = GetTerrainInfo(c);
-				self.World.Map.CustomTerrain[c] = tileInfo.TerrainType;
-				radarSignature[i++] = (c, tileInfo.GetColor(self.World.LocalRandom));
+				var dx = c - self.Location;
+				var index = dx.X + terrainInfo.Templates[template].Size.X * dx.Y;
+				self.World.Map.Tiles[c] = new TerrainTile(template, (byte)index);
 			}
-		}
-
-		TerrainTileInfo GetTerrainInfo(CPos cell)
-		{
-			var dx = cell - self.Location;
-			var index = dx.X + terrainInfo.Templates[template].Size.X * dx.Y;
-			return terrainInfo.GetTerrainInfo(new TerrainTile(template, (byte)index));
 		}
 
 		public void LinkNeighbouringBridges(LegacyBridgeLayer bridges)
@@ -209,52 +194,6 @@ namespace OpenRA.Mods.Common.Traits
 				return null;
 
 			return bridges.GetBridge(self.Location + new CVec(offset[0], offset[1]));
-		}
-
-		IRenderable[] TemplateRenderables(WorldRenderer wr, PaletteReference palette, ushort template)
-		{
-			var offset = buildingInfo.CenterOffset(self.World).Y + 1024;
-
-			return footprint.Select(c => (IRenderable)new SpriteRenderable(
-				terrainRenderer.TileSprite(new TerrainTile(template, c.Value)),
-				wr.World.Map.CenterOfCell(c.Key), WVec.Zero, -offset, palette, 1f, 1f,
-				float3.Ones, TintModifiers.None, true)).ToArray();
-		}
-
-		bool initialized;
-		Dictionary<ushort, IRenderable[]> renderables;
-		public IEnumerable<IRenderable> Render(Actor self, WorldRenderer wr)
-		{
-			if (!initialized)
-			{
-				var palette = wr.Palette(TileSet.TerrainPaletteInternalName);
-				renderables = [];
-				foreach (var t in info.Templates)
-					renderables.Add(t.Template, TemplateRenderables(wr, palette, t.Template));
-
-				initialized = true;
-			}
-
-			return renderables[template];
-		}
-
-		public IEnumerable<Rectangle> ScreenBounds(Actor self, WorldRenderer wr)
-		{
-			foreach (var kv in footprint)
-			{
-				var xy = wr.ScreenPxPosition(wr.World.Map.CenterOfCell(kv.Key));
-				var size = terrainRenderer.TileSprite(new TerrainTile(template, kv.Value)).Bounds.Size;
-
-				// Add an extra pixel padding to avoid issues with odd-sized sprites
-				var halfWidth = size.Width / 2 + 1;
-				var halfHeight = size.Height / 2 + 1;
-
-				yield return Rectangle.FromLTRB(
-					xy.X - halfWidth,
-					xy.Y - halfHeight,
-					xy.X + halfWidth,
-					xy.Y + halfHeight);
-			}
 		}
 
 		void KillUnitsOnBridge()
@@ -315,12 +254,11 @@ namespace OpenRA.Mods.Common.Traits
 				return;
 
 			// Update map
-			var i = 0;
 			foreach (var c in footprint.Keys)
 			{
-				var tileInfo = GetTerrainInfo(c);
-				self.World.Map.CustomTerrain[c] = tileInfo.TerrainType;
-				radarSignature[i++] = (c, tileInfo.GetColor(self.World.LocalRandom));
+				var dx = c - self.Location;
+				var index = dx.X + terrainInfo.Templates[template].Size.X * dx.Y;
+				self.World.Map.Tiles[c] = new TerrainTile(template, (byte)index);
 			}
 
 			if (LongBridgeSegmentIsDead() && !killedUnits)
@@ -407,11 +345,6 @@ namespace OpenRA.Mods.Common.Traits
 				self.World.AddFrameEndTask(w => w.Add(new DelayedAction(delay, () =>
 					neighbours[direction].Demolish(saboteur, direction, damageTypes))));
 			}
-		}
-
-		void IRadarSignature.PopulateRadarSignatureCells(Actor self, List<(CPos Cell, Color Color)> destinationBuffer)
-		{
-			destinationBuffer.AddRange(radarSignature);
 		}
 	}
 }
