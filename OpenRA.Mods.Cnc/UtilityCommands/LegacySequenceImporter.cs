@@ -13,6 +13,7 @@ using System;
 using System.IO;
 using System.Linq;
 using OpenRA.Mods.Common.FileFormats;
+using OpenRA.Primitives;
 
 namespace OpenRA.Mods.Cnc.UtilityCommands
 {
@@ -26,16 +27,14 @@ namespace OpenRA.Mods.Cnc.UtilityCommands
 		string IUtilityCommand.Name => "--sequence-import";
 
 		IniFile file;
-		MapGrid grid;
+		Size tileSize;
 
 		[Desc("FILENAME", "Convert ART.INI to the OpenRA sequence definition format.")]
 		void IUtilityCommand.Run(Utility utility, string[] args)
 		{
 			// HACK: The engine code assumes that Game.modData is set.
 			Game.ModData = utility.ModData;
-
-			grid = Game.ModData.Manifest.Get<MapGrid>();
-
+			tileSize = Game.ModData.DefaultTerrainInfo.Values.First().TileSize;
 			file = new IniFile(File.Open(args[1], FileMode.Open));
 
 			foreach (var section in file.Sections)
@@ -65,8 +64,8 @@ namespace OpenRA.Mods.Cnc.UtilityCommands
 					var x = Exts.ParseInt32Invariant(size[0]);
 					var y = Exts.ParseInt32Invariant(size[1]);
 
-					var xOffset = (x - y) * grid.TileSize.Width / 4;
-					var yOffset = (x + y) * grid.TileSize.Height / 4;
+					var xOffset = (x - y) * tileSize.Width / 4;
+					var yOffset = (x + y) * tileSize.Height / 4;
 					Console.WriteLine("\t\tOffset: {0},{1}", -xOffset, -yOffset);
 				}
 			}

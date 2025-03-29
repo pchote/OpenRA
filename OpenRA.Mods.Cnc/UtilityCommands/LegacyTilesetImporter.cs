@@ -36,7 +36,7 @@ namespace OpenRA.Mods.Cnc.UtilityCommands
 
 			var file = new IniFile(File.Open(args[1], FileMode.Open));
 			var extension = args[2];
-			var tileSize = utility.ModData.Manifest.Get<MapGrid>().TileSize;
+			var tileSize = utility.ModData.DefaultTerrainInfo.Values.First().TileSize;
 
 			var templateIndex = 0;
 

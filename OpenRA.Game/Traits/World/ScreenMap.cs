@@ -63,7 +63,7 @@ namespace OpenRA.Traits
 
 		public ScreenMap(World world, ScreenMapInfo info)
 		{
-			var size = world.Map.Grid.TileSize;
+			var size = world.Map.Rules.TerrainInfo.TileSize;
 			var width = world.Map.MapSize.X * size.Width;
 			var height = world.Map.MapSize.Y * size.Height;
 

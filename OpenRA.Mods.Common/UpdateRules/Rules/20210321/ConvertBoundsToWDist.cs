@@ -10,6 +10,7 @@
 #endregion
 
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenRA.Mods.Common.UpdateRules.Rules
 {
@@ -27,7 +28,7 @@ namespace OpenRA.Mods.Common.UpdateRules.Rules
 		public override IEnumerable<string> UpdateActorNode(ModData modData, MiniYamlNodeBuilder actorNode)
 		{
 			var grid = modData.Manifest.Get<MapGrid>();
-			var tileSize = grid.TileSize;
+			var tileSize = modData.DefaultTerrainInfo.Values.First().TileSize;
 			var tileScale = grid.TileScale;
 
 			foreach (var trait in traits)
