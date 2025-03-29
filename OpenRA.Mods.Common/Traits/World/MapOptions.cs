@@ -143,7 +143,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (info.ViewportHeight.HasValue)
 			{
 				// WPos to world pixels
-				var height = info.ViewportHeight.Value.Length * w.Map.Grid.TileSize.Height / w.Map.Grid.TileScale;
+				var height = info.ViewportHeight.Value.Length * w.Map.Rules.TerrainInfo.TileSize.Height / w.Map.Grid.TileScale;
 				wr.Viewport.OverrideDefaultHeight(height);
 			}
 		}

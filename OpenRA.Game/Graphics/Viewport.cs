@@ -146,7 +146,7 @@ namespace OpenRA.Graphics
 		public Viewport(WorldRenderer wr, Map map)
 		{
 			worldRenderer = wr;
-			var grid = Game.ModData.Manifest.Get<MapGrid>();
+			tileSize = map.Rules.TerrainInfo.TileSize;
 			viewportSizes = Game.ModData.Manifest.Get<WorldViewportSizes>();
 			graphicSettings = Game.Settings.Graphics;
 			defaultScale = viewportSizes.DefaultScale;
@@ -155,8 +155,8 @@ namespace OpenRA.Graphics
 			if (wr.World.Type == WorldType.Editor)
 			{
 				// The full map is visible in the editor
-				var width = map.MapSize.X * grid.TileSize.Width;
-				var height = map.MapSize.Y * grid.TileSize.Height;
+				var width = map.MapSize.X * tileSize.Width;
+				var height = map.MapSize.Y * tileSize.Height;
 				if (wr.World.Map.Grid.Type == MapGridType.RectangularIsometric)
 					height /= 2;
 
@@ -170,8 +170,6 @@ namespace OpenRA.Graphics
 				mapBounds = Rectangle.FromLTRB(tl.X, tl.Y, br.X, br.Y);
 				CenterLocation = (tl + br) / 2;
 			}
-
-			tileSize = grid.TileSize;
 
 			UpdateViewportZooms();
 		}

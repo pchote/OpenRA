@@ -12,7 +12,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using OpenRA.Primitives;
 using OpenRA.Traits;
 
 namespace OpenRA
@@ -106,7 +105,6 @@ namespace OpenRA
 	public class MapGrid : IGlobalModData
 	{
 		public readonly MapGridType Type = MapGridType.Rectangular;
-		public readonly Size TileSize = new(24, 24);
 		public readonly byte MaximumTerrainHeight = 0;
 		public readonly SubCell DefaultSubCell = (SubCell)byte.MaxValue;
 
