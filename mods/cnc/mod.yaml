@@ -33,7 +33,6 @@ FileSystem: ContentInstallerFileSystem
 		# Below are mod-provided (system) packages that need to be loaded after the content packages so they can override content assets.
 		cnc|bits/snow.mix
 		cnc|bits
-		cnc|bits/jungle
 		cnc|bits/desert
 		cnc|bits/ss
 	ContentInstallerMod: cnc-content
@@ -77,7 +76,6 @@ TileSets:
 	cnc|tilesets/winter.yaml
 	cnc|tilesets/snow.yaml
 	cnc|tilesets/temperat.yaml
-	cnc|tilesets/jungle.yaml
 
 Weapons:
 	cnc|weapons/explosions.yaml
@@ -249,7 +247,7 @@ TerrainFormat: DefaultTerrain
 SpriteSequenceFormat: ClassicTilesetSpecificSpriteSequence
 
 AssetBrowser:
-	SpriteExtensions: .shp, .tem, .win, .sno, .des, .jun
+	SpriteExtensions: .shp, .tem, .win, .sno, .des
 	AudioExtensions: .aud, .wav, .v00, .v01, .v02, .v03, .var
 	VideoExtensions: .vqa, .wsa
 
