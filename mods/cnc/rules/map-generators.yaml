@@ -73,7 +73,7 @@
 						CivilianBuildingsObstacles: CivilianBuildings
 			Option@hidden_tileset_overrides:
 				Choice@common:
-					Tileset: DESERT,JUNGLE,SNOW,TEMPERAT
+					Tileset: DESERT,SNOW,TEMPERAT
 					Settings:
 						LandTile: 255
 						WaterTile: 1
@@ -415,11 +415,11 @@
 				Label: label-clear-map-generator-option-tile
 				Choice@CommonClear:
 					Label: label-clear-map-generator-choice-tile-clear
-					Tileset: DESERT,JUNGLE,SNOW,TEMPERAT,WINTER
+					Tileset: DESERT,SNOW,TEMPERAT,WINTER
 					Settings:
 						Tile: 255
 				Choice@CommonWater:
 					Label: label-clear-map-generator-choice-tile-water
-					Tileset: DESERT,JUNGLE,SNOW,TEMPERAT,WINTER
+					Tileset: DESERT,SNOW,TEMPERAT,WINTER
 					Settings:
 						Tile: 1
