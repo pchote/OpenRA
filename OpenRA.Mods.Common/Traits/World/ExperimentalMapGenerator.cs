@@ -666,6 +666,7 @@ namespace OpenRA.Mods.Common.Traits
 						beachPermittedTemplates);
 					beachPath
 						.ExtendEdge(4)
+						.SetAutoEndDeviation()
 						.OptimizeLoop();
 					tiledBeaches[i] =
 						beachPath.Tile(beachTilingRandom)
@@ -732,6 +733,7 @@ namespace OpenRA.Mods.Common.Traits
 							nonLoopedCliffPermittedTemplates);
 					cliffPath
 						.ExtendEdge(4)
+						.SetAutoEndDeviation()
 						.OptimizeLoop();
 					if (cliffPath.Tile(cliffTilingRandom) == null)
 						throw new MapGenerationException("Could not fit tiles for exterior circle cliffs");
@@ -812,6 +814,7 @@ namespace OpenRA.Mods.Common.Traits
 								nonLoopedCliffPermittedTemplates);
 						cliffPath
 							.ExtendEdge(4)
+							.SetAutoEndDeviation()
 							.OptimizeLoop();
 						if (cliffPath.Tile(cliffTilingRandom) == null)
 							throw new MapGenerationException("Could not fit tiles for cliffs");
@@ -1176,6 +1179,7 @@ namespace OpenRA.Mods.Common.Traits
 						.ExtendEdge(2 * roadTotalShrink + RoadMinimumShrinkLength)
 						.Shrink(roadTotalShrink, RoadMinimumShrinkLength)
 						.InertiallyExtend(RoadStraightenGrow, RoadInertialRange)
+						.SetAutoEndDeviation()
 						.OptimizeLoop()
 						.RetainIfValid();
 
