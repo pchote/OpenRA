@@ -62,11 +62,6 @@ namespace OpenRA.Mods.Common.Traits
 
 		sealed class Parameters
 		{
-			[FieldLoader.Ignore]
-			public readonly Map Map;
-			[FieldLoader.Ignore]
-			public readonly ITemplatedTerrainInfo TemplatedTerrainInfo;
-
 			[FieldLoader.Require]
 			public readonly int Seed = default;
 			[FieldLoader.Require]
@@ -229,16 +224,11 @@ namespace OpenRA.Mods.Common.Traits
 			[FieldLoader.Ignore]
 			public readonly IReadOnlyList<string> RoadSegmentTypes;
 
-			[FieldLoader.Ignore]
-			public readonly int SymmetryCount;
-			[FieldLoader.Ignore]
-			public readonly int TotalPlayers;
-
 			public Parameters(Map map, MiniYaml my)
 			{
 				FieldLoader.Load(this, my);
-				Map = map;
-				TemplatedTerrainInfo = Map.Rules.TerrainInfo as ITemplatedTerrainInfo;
+
+				var terrainInfo = (ITemplatedTerrainInfo)map.Rules.TerrainInfo;
 				ForestObstacles = MultiBrush.LoadCollection(map, my.NodeWithKey("ForestObstacles").Value.Value);
 				UnplayableObstacles = MultiBrush.LoadCollection(map, my.NodeWithKey("UnplayableObstacles").Value.Value);
 				CivilianBuildingsObstacles = MultiBrush.LoadCollection(map, my.NodeWithKey("CivilianBuildingsObstacles").Value.Value);
@@ -262,7 +252,7 @@ namespace OpenRA.Mods.Common.Traits
 				AllowedTerrainResourceCombos = ResourceTypes
 					.Values
 					.SelectMany(resourceTypeInfo => resourceTypeInfo.AllowedTerrainTypes
-						.Select(terrainName => (resourceTypeInfo, TemplatedTerrainInfo.GetTerrainIndex(terrainName))))
+						.Select(terrainName => (resourceTypeInfo, terrainInfo.GetTerrainIndex(terrainName))))
 					.ToImmutableHashSet();
 				try
 				{
@@ -290,7 +280,7 @@ namespace OpenRA.Mods.Common.Traits
 				{
 					return my.NodeWithKey(key).Value.Value
 						.Split(',', StringSplitOptions.RemoveEmptyEntries)
-						.Select(TemplatedTerrainInfo.GetTerrainIndex)
+						.Select(terrainInfo.GetTerrainIndex)
 						.ToImmutableHashSet();
 				}
 
@@ -317,10 +307,7 @@ namespace OpenRA.Mods.Common.Traits
 				CliffSegmentTypes = ParseSegmentTypes("CliffSegmentTypes");
 				RoadSegmentTypes = ParseSegmentTypes("RoadSegmentTypes");
 
-				SymmetryCount = Symmetry.RotateAndMirrorProjectionCount(Rotations, Mirror);
-				TotalPlayers = Players * SymmetryCount;
-
-				Validate();
+				Validate(terrainInfo);
 			}
 
 			static object MirrorLoader(MiniYaml my)
@@ -353,7 +340,7 @@ namespace OpenRA.Mods.Common.Traits
 					});
 			}
 
-			public void Validate()
+			public void Validate(ITemplatedTerrainInfo terrainInfo)
 			{
 				if (Rotations < 1)
 					throw new MapGenerationException("Rotations must be >= 1");
@@ -463,12 +450,13 @@ namespace OpenRA.Mods.Common.Traits
 					if (!ResourceSpawnSeeds.ContainsKey(kv.Key))
 						throw new MapGenerationException($"ResourceSpawnSeeds does not contain possible resource spawn `{kv.Key}`");
 
-				if (!(TemplatedTerrainInfo.Templates.TryGetValue(LandTile, out var landTemplate) && landTemplate.Contains(0)))
+				if (!(terrainInfo.Templates.TryGetValue(LandTile, out var landTemplate) && landTemplate.Contains(0)))
 					throw new MapGenerationException("LandTile is not valid");
-				if (!(TemplatedTerrainInfo.Templates.TryGetValue(LandTile, out var waterTemplate) && waterTemplate.Contains(0)))
+				if (!(terrainInfo.Templates.TryGetValue(LandTile, out var waterTemplate) && waterTemplate.Contains(0)))
 					throw new MapGenerationException("WaterTile is not valid");
 
-				if (TotalPlayers > 32)
+				var symmetryCount = Symmetry.RotateAndMirrorProjectionCount(Rotations, Mirror);
+				if (Players * symmetryCount > 32)
 					throw new MapGenerationException("Total number of players must not exceed 32");
 			}
 
@@ -512,14 +500,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (externalCircleRadius <= 0)
 				throw new MapGenerationException("map is too small for circular shaping");
 
-			var trivialMirror =
-				size.X == size.Y ||
-				param.Mirror == Symmetry.Mirror.None ||
-				param.Mirror == Symmetry.Mirror.LeftMatchesRight ||
-				param.Mirror == Symmetry.Mirror.TopMatchesBottom;
-
-			var tileset = param.TemplatedTerrainInfo;
-
+			var tileset = (ITemplatedTerrainInfo)map.Rules.TerrainInfo;
 			var beachPermittedTemplates =
 				TilingPath.PermittedSegments.FromType(tileset, param.BeachSegmentTypes);
 			var beachTiles = beachPermittedTemplates.PossibleTiles().ToImmutableHashSet();
@@ -1016,7 +997,8 @@ namespace OpenRA.Mods.Common.Traits
 				if (largest == null)
 					throw new MapGenerationException("could not find a playable region");
 
-				var minimumPlayableSpace = (int)(param.TotalPlayers * Math.PI * param.SpawnBuildSize * param.SpawnBuildSize);
+				var totalPlayers = param.Players * Symmetry.RotateAndMirrorProjectionCount(param.Rotations, param.Mirror);
+				var minimumPlayableSpace = (int)(totalPlayers * Math.PI * param.SpawnBuildSize * param.SpawnBuildSize);
 				if (largest.PlayableArea < minimumPlayableSpace)
 					throw new MapGenerationException("playable space is too small");
 
@@ -1261,10 +1243,12 @@ namespace OpenRA.Mods.Common.Traits
 				}
 
 				var zoneableArea = zoneable.Count(v => v);
+				var symmetryCount = Symmetry.RotateAndMirrorProjectionCount(param.Rotations, param.Mirror);
+				var totalPlayers = param.Players * symmetryCount;
 				var entityMultiplier =
 					(long)zoneableArea * param.AreaEntityBonus +
-					(long)param.TotalPlayers * param.PlayerCountEntityBonus;
-				var perSymmetryEntityMultiplier = entityMultiplier / param.SymmetryCount;
+					(long)totalPlayers * param.PlayerCountEntityBonus;
+				var perSymmetryEntityMultiplier = entityMultiplier / symmetryCount;
 
 				// Spawn generation
 				for (var iteration = 0; iteration < param.Players; iteration++)
