@@ -3,7 +3,7 @@
 		Type: experimental
 		Name: map-generator-experimental
 		Settings:
-			Option@hidden_defaults:
+			MultiChoiceOption@hidden_defaults:
 				Choice@hidden_defaults:
 					Settings:
 						TerrainFeatureSize: 20480
@@ -70,7 +70,7 @@
 						ForestObstacles: Trees
 						UnplayableObstacles: Obstructions
 						CivilianBuildingsObstacles: CivilianBuildings
-			Option@hidden_tileset_overrides:
+			MultiChoiceOption@hidden_tileset_overrides:
 				Choice@desert:
 					Tileset: DESERT
 					Settings:
@@ -86,12 +86,11 @@
 					Settings:
 						LandTile: 255
 						WaterTile: 1
-			Option@Seed:
+			IntegerOption@Seed:
 				Label: label-ra-map-generator-option-seed
-				Random: True
+				Parameter: Seed
 				Default: 0
-				Integer: Seed
-			Option@TerrainType:
+			MultiChoiceOption@TerrainType:
 				Label: label-ra-map-generator-option-terrain-type
 				Priority: 2
 				Default: Gardens
@@ -193,13 +192,13 @@
 						Forests: 0
 						SpawnBuildSize: 6
 						MinimumSpawnRadius: 4
-			Option@Rotations:
+			MultiIntegerChoiceOption@Rotations:
 				Label: label-ra-map-generator-option-rotations
-				SimpleChoice: Rotations
-					Values: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
+				Parameter: Rotations
+				Choices: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
 				Default: 2
 				Priority: 1
-			Option@Mirror:
+			MultiChoiceOption@Mirror:
 				Label: label-ra-map-generator-option-mirror
 				Default: None
 				Priority: 1
@@ -223,7 +222,7 @@
 					Label: label-ra-map-generator-choice-mirror-top-right-matches-bottom-left
 					Settings:
 						Mirror: TopRightMatchesBottomLeft
-			Option@Shape:
+			MultiChoiceOption@Shape:
 				Label: label-ra-map-generator-option-shape
 				Default: Square
 				Priority: 1
@@ -239,13 +238,13 @@
 					Label: label-ra-map-generator-choice-shape-circle-water
 					Settings:
 						ExternalCircularBias: -1
-			Option@Players:
+			MultiIntegerChoiceOption@Players:
 				Label: label-ra-map-generator-option-players
-				SimpleChoice: Players
-					Values: 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
+				Parameter: Players
+				Choices: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
 				Default: 1
 				Priority: 1
-			Option@Resources:
+			MultiChoiceOption@Resources:
 				Label: label-ra-map-generator-option-resources
 				Default: Medium
 				Choice@None:
@@ -303,7 +302,7 @@
 						ResourceSpawnWeights:
 						MaximumExpansionResourceSpawns: 0
 						MaximumResourceSpawnsPerExpansion: 1
-			Option@Buildings:
+			MultiChoiceOption@Buildings:
 				Label: label-ra-map-generator-option-buildings
 				Default: Standard
 				Choice@None:
@@ -346,7 +345,7 @@
 						MaximumBuildings: 10
 						BuildingWeights:
 							oilb: 1
-			Option@Density:
+			MultiChoiceOption@Density:
 				Label: label-ra-map-generator-option-density
 				Default: Players
 				Priority: 1
@@ -385,17 +384,17 @@
 					Settings:
 						AreaEntityBonus: 800
 						PlayerCountEntityBonus: 0
-			Option@DenyWalledArea:
+			BooleanOption@DenyWalledArea:
 				Label: label-ra-map-generator-option-deny-walled-areas
-				Checkbox: DenyWalledAreas
+				Parameter: DenyWalledAreas
 				Default: True
 				Priority: 1
-			Option@Roads:
+			BooleanOption@Roads:
 				Label: label-ra-map-generator-option-roads
-				Checkbox: Roads
+				Parameter: Roads
 				Default: True
 				Priority: 1
-			Option@CivilianDensity:
+			MultiChoiceOption@CivilianDensity:
 				Label: label-ra-map-generator-option-civilian-density
 				Default: Default
 				Priority: 3
@@ -430,7 +429,7 @@
 		Type: clear
 		Name: map-generator-clear
 		Settings:
-			Option@Tile:
+			MultiChoiceOption@Tile:
 				Label: label-clear-map-generator-option-tile
 				Choice@DesertClear:
 					Label: label-clear-map-generator-choice-tile-clear

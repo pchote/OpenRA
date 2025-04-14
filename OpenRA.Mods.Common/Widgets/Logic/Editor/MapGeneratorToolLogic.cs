@@ -27,24 +27,18 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		[FluentReference("name")]
 		const string StrGenerated = "notification-map-generator-generated";
 		[FluentReference]
-		const string StrBadOption = "notification-map-generator-bad-option";
-		[FluentReference]
 		const string StrFailed = "notification-map-generator-failed";
 		[FluentReference]
 		const string StrFailedCancel = "label-map-generator-failed-cancel";
 
 		readonly EditorActionManager editorActionManager;
-		readonly ButtonWidget generateButtonWidget;
-		readonly ButtonWidget generateRandomButtonWidget;
 		readonly World world;
 		readonly WorldRenderer worldRenderer;
 		readonly ModData modData;
 
 		// nullable
 		IMapGeneratorInfo selectedGenerator;
-
-		readonly Dictionary<IMapGeneratorInfo, MapGeneratorSettings> generatorsToSettings;
-		readonly Dictionary<IMapGeneratorInfo, Dictionary<MapGeneratorSettings.Option, MapGeneratorSettings.Choice>> generatorsToSettingsChoices;
+		IMapGeneratorSettings selectedSettings;
 
 		readonly ScrollPanelWidget settingsPanel;
 		readonly Widget checkboxSettingTemplate;
@@ -60,42 +54,25 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			this.worldRenderer = worldRenderer;
 			this.modData = modData;
 
-			selectedGenerator = null;
-			generatorsToSettings = [];
-			generatorsToSettingsChoices = [];
-
-			var mapGenerators = new List<IMapGeneratorInfo>();
-			var terrainInfo = modData.DefaultTerrainInfo[world.Map.Tileset];
-			foreach (var generator in world.Map.Rules.Actors[SystemActors.EditorWorld].TraitInfos<IMapGeneratorInfo>())
-			{
-				var settings = generator.GetSettings(terrainInfo);
-				if (settings == null)
-					continue;
-
-				var choices = settings.DefaultChoices();
-				mapGenerators.Add(generator);
-				generatorsToSettingsChoices.Add(generator, choices);
-				generatorsToSettings.Add(generator, settings);
-			}
-
-			generateButtonWidget = widget.Get<ButtonWidget>("GENERATE_BUTTON");
-			generateRandomButtonWidget = widget.Get<ButtonWidget>("GENERATE_RANDOM_BUTTON");
-
 			settingsPanel = widget.Get<ScrollPanelWidget>("SETTINGS_PANEL");
 			checkboxSettingTemplate = settingsPanel.Get<Widget>("CHECKBOX_TEMPLATE");
 			textSettingTemplate = settingsPanel.Get<Widget>("TEXT_TEMPLATE");
 			dropDownSettingTemplate = settingsPanel.Get<Widget>("DROPDOWN_TEMPLATE");
 
+			var generateButtonWidget = widget.Get<ButtonWidget>("GENERATE_BUTTON");
 			generateButtonWidget.OnClick = GenerateMap;
+
+			var generateRandomButtonWidget = widget.Get<ButtonWidget>("GENERATE_RANDOM_BUTTON");
 			generateRandomButtonWidget.OnClick = () =>
 			{
-				Randomize();
+				selectedSettings?.Randomize(world.LocalRandom);
+				UpdateSettingsUi();
 				GenerateMap();
 			};
 
 			var generatorDropDown = widget.Get<DropDownButtonWidget>("GENERATOR");
-			ChangeGenerator(mapGenerators.FirstOrDefault());
-			if (selectedGenerator != null)
+			var mapGenerators = world.Map.Rules.Actors[SystemActors.EditorWorld].TraitInfos<IMapGeneratorInfo>();
+			if (mapGenerators.Count > 0)
 			{
 				var label = new CachedTransform<IMapGeneratorInfo, string>(g => FluentProvider.GetMessage(g.Name));
 				generatorDropDown.GetText = () => label.Update(selectedGenerator);
@@ -104,7 +81,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					ScrollItemWidget SetupItem(IMapGeneratorInfo g, ScrollItemWidget template)
 					{
 						bool IsSelected() => g.Type == selectedGenerator.Type;
-						void OnClick() => ChangeGenerator(mapGenerators.First(generator => generator.Type == g.Type));
+						void OnClick() => ChangeGenerator(g);
 						var item = ScrollItemWidget.Setup(template, IsSelected, OnClick);
 						var label = FluentProvider.GetMessage(g.Name);
 						item.Get<LabelWidget>("LABEL").GetText = () => label;
@@ -120,6 +97,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				generateRandomButtonWidget.IsDisabled = () => true;
 				generatorDropDown.IsDisabled = () => true;
 			}
+
+			ChangeGenerator(mapGenerators.FirstOrDefault());
 		}
 
 		sealed class RandomMapEditorAction : IEditorAction
@@ -155,6 +134,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		void ChangeGenerator(IMapGeneratorInfo newGenerator)
 		{
 			selectedGenerator = newGenerator;
+			selectedSettings = newGenerator?.GetSettings();
 
 			UpdateSettingsUi();
 		}
@@ -166,88 +146,118 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			if (selectedGenerator == null)
 				return;
 
-			var settings = generatorsToSettings[selectedGenerator];
-			var choices = generatorsToSettingsChoices[selectedGenerator];
-			foreach (var option in settings.Options)
+			foreach (var o in selectedSettings.Options)
 			{
-				Widget settingWidget;
-
-				switch (option.Ui)
+				Widget settingWidget = null;
+				switch (o)
 				{
-					case MapGeneratorSettings.UiType.Hidden:
-						continue;
+					case MapGeneratorBooleanOption bo:
+					{
+						settingWidget = checkboxSettingTemplate.Clone();
+						var checkboxWidget = settingWidget.Get<CheckboxWidget>("CHECKBOX");
+						var label = FluentProvider.GetMessage(bo.Label);
+						checkboxWidget.GetText = () => label;
+						checkboxWidget.IsChecked = () => bo.Value;
+						checkboxWidget.OnClick = () => bo.Value ^= true;
+						break;
+					}
 
-					case MapGeneratorSettings.UiType.DropDown:
+					case MapGeneratorIntegerOption io:
+					{
+						settingWidget = textSettingTemplate.Clone();
+						var labelWidget = settingWidget.Get<LabelWidget>("LABEL");
+						var label = FluentProvider.GetMessage(io.Label);
+						labelWidget.GetText = () => label;
+						var textFieldWidget = settingWidget.Get<TextFieldWidget>("INPUT");
+						textFieldWidget.Type = TextFieldType.Integer;
+						textFieldWidget.Text = FieldSaver.FormatValue(io.Value);
+						textFieldWidget.OnTextEdited = () =>
+						{
+							var valid = int.TryParse(textFieldWidget.Text, out io.Value);
+							textFieldWidget.IsValid = () => valid;
+						};
+
+						textFieldWidget.OnEscKey = _ => { textFieldWidget.YieldKeyboardFocus(); return true; };
+						textFieldWidget.OnEnterKey = _ => { textFieldWidget.YieldKeyboardFocus(); return true; };
+						break;
+					}
+
+					case MapGeneratorMultiIntegerChoiceOption mio:
 					{
 						settingWidget = dropDownSettingTemplate.Clone();
-						var label = settingWidget.Get<LabelWidget>("LABEL");
-						label.GetText = () => option.Label;
-						var dropDown = settingWidget.Get<DropDownButtonWidget>("DROPDOWN");
-						dropDown.GetText = () => choices[option].Label;
-						dropDown.OnMouseDown = _ =>
-						{
-							ScrollItemWidget SetupItem(MapGeneratorSettings.Choice choice, ScrollItemWidget template)
-							{
-								bool IsSelected() => choice == choices[option];
-								void OnClick() => choices[option] = choice;
-								var item = ScrollItemWidget.Setup(template, IsSelected, OnClick);
-								item.Get<LabelWidget>("LABEL").GetText = () => choice.Label;
-								item.GetTooltipText =
-									choice.Description != null
-										? () => choice.Description
-										: null;
+						var labelWidget = settingWidget.Get<LabelWidget>("LABEL");
+						var label = FluentProvider.GetMessage(mio.Label);
+						labelWidget.GetText = () => label;
 
+						var labelCache = new CachedTransform<int, string>(v => FieldSaver.FormatValue(v));
+						var dropDownWidget = settingWidget.Get<DropDownButtonWidget>("DROPDOWN");
+						dropDownWidget.GetText = () => labelCache.Update(mio.Value);
+						dropDownWidget.OnMouseDown = _ =>
+						{
+							ScrollItemWidget SetupItem(int choice, ScrollItemWidget template)
+							{
+								bool IsSelected() => choice == mio.Value;
+								void OnClick() => mio.Value = choice;
+								var item = ScrollItemWidget.Setup(template, IsSelected, OnClick);
+
+								var itemLabel = FieldSaver.FormatValue(choice);
+								item.Get<LabelWidget>("LABEL").GetText = () => itemLabel;
+								item.GetTooltipText = null;
 								return item;
 							}
 
-							dropDown.ShowDropDown("LABEL_DROPDOWN_WITH_TOOLTIP_TEMPLATE", option.Choices.Count * 30, option.Choices, SetupItem);
+							dropDownWidget.ShowDropDown("LABEL_DROPDOWN_WITH_TOOLTIP_TEMPLATE", mio.Choices.Length * 30, mio.Choices, SetupItem);
 						};
 						break;
 					}
 
-					case MapGeneratorSettings.UiType.Checkbox:
+					case MapGeneratorMultiChoiceOption mo:
 					{
-						if (option.Choices.Count != 2)
-							throw new InvalidOperationException("Checkbox option that does not have two choices");
-						settingWidget = checkboxSettingTemplate.Clone();
-						var checkbox = settingWidget.Get<CheckboxWidget>("CHECKBOX");
-						checkbox.GetText = () => option.Label;
-						checkbox.IsChecked = () => choices[option] == option.Choices[1];
-						checkbox.OnClick = () =>
-							choices[option] =
-								choices[option] == option.Choices[1]
-									? option.Choices[0]
-									: option.Choices[1];
-						break;
-					}
+						var validChoices = mo.ValidChoices(world.Map.Rules.TerrainInfo);
+						if (!validChoices.Contains(mo.Value))
+							mo.Value = mo.Default?.FirstOrDefault(validChoices.Contains) ?? validChoices.FirstOrDefault();
 
-					case MapGeneratorSettings.UiType.Integer:
-					case MapGeneratorSettings.UiType.Float:
-					case MapGeneratorSettings.UiType.String:
-					{
-						if (option.Choices.Count != 1)
-							throw new InvalidOperationException("Text option that does not have one choice");
-						settingWidget = textSettingTemplate.Clone();
-						var label = settingWidget.Get<LabelWidget>("LABEL");
-						label.GetText = () => option.Label;
-						var input = settingWidget.Get<TextFieldWidget>("INPUT");
-						input.Text = choices[option].Id;
-						input.OnTextEdited = () =>
+						if (mo.Label != null && validChoices.Count > 0)
 						{
-							var choice = choices[option].NewValue(input.Text);
-							choices[option] = choice;
-							var valid = option.ValidateChoice(choice);
-							input.IsValid = () => valid;
-						};
+							settingWidget = dropDownSettingTemplate.Clone();
+							var labelWidget = settingWidget.Get<LabelWidget>("LABEL");
+							var label = FluentProvider.GetMessage(mo.Label);
+							labelWidget.GetText = () => label;
 
-						input.OnEscKey = _ => { input.YieldKeyboardFocus(); return true; };
-						input.OnEnterKey = _ => { input.YieldKeyboardFocus(); return true; };
+							var labelCache = new CachedTransform<string, string>(v => FluentProvider.GetMessage(mo.Choices[v].Label + ".label"));
+							var dropDownWidget = settingWidget.Get<DropDownButtonWidget>("DROPDOWN");
+							dropDownWidget.GetText = () => labelCache.Update(mo.Value);
+							dropDownWidget.OnMouseDown = _ =>
+							{
+								ScrollItemWidget SetupItem(string choice, ScrollItemWidget template)
+								{
+									bool IsSelected() => choice == mo.Value;
+									void OnClick() => mo.Value = choice;
+									var item = ScrollItemWidget.Setup(template, IsSelected, OnClick);
+
+									var itemLabel = FluentProvider.GetMessage(mo.Choices[choice].Label + ".label");
+									item.Get<LabelWidget>("LABEL").GetText = () => itemLabel;
+									if (FluentProvider.TryGetMessage(mo.Choices[choice].Label + ".description", out var desc))
+										item.GetTooltipText = () => desc;
+									else
+										item.GetTooltipText = null;
+
+									return item;
+								}
+
+								dropDownWidget.ShowDropDown("LABEL_DROPDOWN_WITH_TOOLTIP_TEMPLATE", validChoices.Count * 30, validChoices, SetupItem);
+							};
+						}
+
 						break;
 					}
 
 					default:
-						throw new NotSupportedException("Unsupported MapGeneratorSettings.UiType");
+						throw new NotImplementedException($"Unhandled MapGeneratorOption type {o.GetType().Name}");
 				}
+
+				if (settingWidget == null)
+					continue;
 
 				settingWidget.IsVisible = () => true;
 				settingsPanel.AddChild(settingWidget);
@@ -266,18 +276,6 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				cancelText: StrFailedCancel);
 		}
 
-		void Randomize()
-		{
-			var choices = generatorsToSettingsChoices[selectedGenerator];
-			foreach (var option in choices.Keys)
-			{
-				if (option.Random)
-					choices[option] = option.RandomChoice();
-			}
-
-			UpdateSettingsUi();
-		}
-
 		void GenerateMap()
 		{
 			try
@@ -293,22 +291,12 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		void GenerateMapMayThrow()
 		{
 			var map = world.Map;
-			var tileset = modData.DefaultTerrainInfo[map.Tileset];
-			var generatedMap = new Map(modData, tileset, map.MapSize.X, map.MapSize.Y);
+			var terrainInfo = map.Rules.TerrainInfo;
+			var generatedMap = new Map(modData, terrainInfo, map.MapSize.X, map.MapSize.Y);
 			var bounds = map.Bounds;
 			generatedMap.SetBounds(new PPos(bounds.Left, bounds.Top), new PPos(bounds.Right - 1, bounds.Bottom - 1));
-			var choices = generatorsToSettingsChoices[selectedGenerator];
 
-			foreach (var optionChoice in choices)
-			{
-				var option = optionChoice.Key;
-				var choice = optionChoice.Value;
-				if (!option.ValidateChoice(choice))
-					throw new MapGenerationException(
-						FluentProvider.GetMessage(StrBadOption, "option", option.Label));
-			}
-
-			var settings = generatorsToSettings[selectedGenerator].Compile(choices);
+			var settings = selectedSettings.Compile(terrainInfo);
 
 			// Run main generator logic. May throw.
 			var generateStopwatch = Stopwatch.StartNew();
