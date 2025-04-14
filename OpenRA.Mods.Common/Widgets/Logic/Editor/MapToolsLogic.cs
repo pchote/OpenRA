@@ -10,7 +10,7 @@
 #endregion
 
 using System.Collections.Generic;
-using OpenRA.Graphics;
+using System.Linq;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Widgets;
 
@@ -18,77 +18,53 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 {
 	public class MapToolsLogic : ChromeLogic
 	{
-		[FluentReference]
-		const string MarkerTiles = "label-tool-marker-tiles";
-		[FluentReference]
-		const string MapGenerator = "label-tool-map-generator";
-
-		enum MapTool
-		{
-			MarkerTiles,
-			MapGenerator
-		}
-
-		readonly DropDownButtonWidget toolsDropdown;
-		readonly Dictionary<MapTool, string> toolNames = new()
-		{
-			{ MapTool.MarkerTiles, MarkerTiles },
-			{ MapTool.MapGenerator, MapGenerator }
-		};
-
-		readonly Dictionary<MapTool, Widget> toolPanels = [];
-
-		MapTool selectedTool = MapTool.MarkerTiles;
+		readonly List<Widget> toolPanels = [];
+		readonly Dictionary<Widget, string> toolLabels = [];
+		Widget selectedPanel;
 
 		[ObjectCreator.UseCtor]
-		public MapToolsLogic(Widget widget, World world, ModData modData, WorldRenderer worldRenderer, Dictionary<string, MiniYaml> logicArgs)
+		public MapToolsLogic(Widget widget, World world)
 		{
-			toolsDropdown = widget.Get<DropDownButtonWidget>("TOOLS_DROPDOWN");
-
-			var markerToolPanel = widget.Get("MARKER_TOOL_PANEL");
-			toolPanels.Add(MapTool.MarkerTiles, markerToolPanel);
-			if (world.Map.Rules.Actors[SystemActors.EditorWorld].HasTraitInfo<IMapGeneratorInfo>())
+			var toolDropdownWidget = widget.Get<DropDownButtonWidget>("TOOLS_DROPDOWN");
+			var tools = world.Map.Rules.Actors[SystemActors.EditorWorld].TraitInfos<IEditorToolInfo>();
+			foreach (var tool in tools)
 			{
-				var mapGeneratorToolPanel = widget.GetOrNull("MAP_GENERATOR_TOOL_PANEL");
-				if (mapGeneratorToolPanel != null)
-					toolPanels.Add(MapTool.MapGenerator, mapGeneratorToolPanel);
+				var panel = Game.LoadWidget(world, tool.PanelWidget, widget, new WidgetArgs() { { "tool", tool } });
+				toolPanels.Add(panel);
+				toolLabels.Add(panel, FluentProvider.GetMessage(tool.Label));
 			}
 
-			toolsDropdown.OnMouseDown = _ => ShowToolsDropDown(toolsDropdown);
-			toolsDropdown.GetText = () => FluentProvider.GetMessage(toolNames[selectedTool]);
-			if (toolPanels.Count <= 1)
-				toolsDropdown.Disabled = true;
+			SelectTool(toolPanels.FirstOrDefault());
+			toolDropdownWidget.OnMouseDown = _ => ShowToolsDropDown(toolDropdownWidget);
+			toolDropdownWidget.GetText = () => toolLabels[selectedPanel];
+			if (toolPanels.Count == 1)
+				toolDropdownWidget.Disabled = true;
 		}
 
 		void ShowToolsDropDown(DropDownButtonWidget dropdown)
 		{
-			ScrollItemWidget SetupItem(MapTool tool, ScrollItemWidget itemTemplate)
+			ScrollItemWidget SetupItem(Widget panel, ScrollItemWidget itemTemplate)
 			{
 				var item = ScrollItemWidget.Setup(itemTemplate,
-					() => selectedTool == tool,
-					() => SelectTool(tool));
+					() => selectedPanel == panel,
+					() => SelectTool(panel));
 
-				item.Get<LabelWidget>("LABEL").GetText = () => FluentProvider.GetMessage(toolNames[tool]);
+				item.Get<LabelWidget>("LABEL").GetText = () => toolLabels[panel];
 
 				return item;
 			}
 
-			var options = new[] { MapTool.MarkerTiles, MapTool.MapGenerator };
-			dropdown.ShowDropDown("LABEL_DROPDOWN_TEMPLATE", 150, options, SetupItem);
+			dropdown.ShowDropDown("LABEL_DROPDOWN_TEMPLATE", 150, toolPanels, SetupItem);
 		}
 
-		void SelectTool(MapTool tool)
+		void SelectTool(Widget panel)
 		{
-			if (tool != selectedTool)
-			{
-				var currentToolPanel = toolPanels[selectedTool];
-				currentToolPanel.Visible = false;
-			}
+			if (panel != selectedPanel && selectedPanel != null)
+				selectedPanel.Visible = false;
 
-			selectedTool = tool;
-
-			var toolPanel = toolPanels[selectedTool];
-			toolPanel.Visible = true;
+			selectedPanel = panel;
+			if (panel != null)
+				selectedPanel.Visible = true;
 		}
 	}
 }

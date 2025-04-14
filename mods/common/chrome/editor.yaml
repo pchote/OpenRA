@@ -408,220 +408,6 @@ Container@EDITOR_WORLD_ROOT:
 					Width: PARENT_WIDTH - 70
 					Height: 25
 					Font: Bold
-				Background@MARKER_TOOL_PANEL:
-					X: 10
-					Y: 35
-					Width: PARENT_WIDTH - 20
-					Height: WINDOW_HEIGHT - 490
-					Background: scrollpanel-bg
-					Logic: MapMarkerTilesLogic
-					Children:
-						ScrollPanel@TILE_COLOR_PANEL:
-							X: 6
-							Y: 6
-							Width: PARENT_WIDTH - 19
-							Height: 31
-							TopBottomSpacing: 1
-							ItemSpacing: 1
-							ScrollBar: Hidden
-							ScrollbarWidth: 0
-							ContentHeight: 31
-							Children:
-								ScrollItem@TILE_COLOR_TEMPLATE:
-									Visible: false
-									Height: 29
-									Width: 29
-									IgnoreChildMouseOver: true
-									Children:
-										ColorBlock@TILE_PREVIEW:
-											X: 2
-											Y: 2
-											Width: 26
-											Height: 26
-								ScrollItem@TILE_ICON_TEMPLATE:
-									Visible: false
-									Height: 29
-									Width: 29
-									IgnoreChildMouseOver: true
-									Children:
-										Image@TILE_ERASE:
-											X: 6
-											Y: 6
-											Width: 26
-											Height: 26
-											ImageCollection: editor
-											ImageName: erase
-						Button@CLEAR_CURRENT_BUTTON:
-							X: 6
-							Y: 42
-							Width: 100
-							Height: 25
-							Text: button-marker-tiles-clear-current
-							Font: Bold
-						Button@CLEAR_ALL_BUTTON:
-							X: 111
-							Y: 42
-							Width: 75
-							Height: 25
-							Text: button-marker-tiles-clear-all
-							Font: Bold
-						Label@ALPHA_LABEL:
-							X: 6
-							Y: 72
-							Width: 265
-							Height: 25
-							Align: Left
-							Text: label-marker-alpha
-						Slider@ALPHA_SLIDER:
-							X: 130
-							Y: 72
-							Width: 128
-							Height: 25
-						Label@ALPHA_VALUE:
-							X: 260
-							Y: 72
-							Width: 30
-							Height: 25
-							Align: Left
-						Label@MODE_LABEL:
-							X: 6
-							Y: 102
-							Width: 260
-							Height: 25
-							Align: Left
-							Text: label-marker-mirror-mode
-						DropDownButton@MODE_DROPDOWN:
-							X: 129
-							Y: 102
-							Width: 157
-							Height: 25
-						Label@NUM_SIDES_LABEL:
-							X: 6
-							Y: 132
-							Width: 256
-							Height: 25
-							Align: Left
-							Text: label-marker-layer-num-sides
-						Slider@ROTATE_NUM_SIDES_SLIDER:
-							X: 130
-							Y: 132
-							Width: 128
-							Height: 25
-							Visible: false
-						Label@ROTATE_NUM_SIDES_VALUE:
-							X: 260
-							Y: 132
-							Width: 30
-							Height: 25
-							Align: Left
-							Visible: false
-						DropDownButton@FLIP_NUM_SIDES_DROPDOWN:
-							X: 129
-							Y: 132
-							Width: 157
-							Height: 25
-						Label@AXIS_ANGLE_LABEL:
-							X: 6
-							Y: 162
-							Width: 256
-							Height: 25
-							Align: Left
-							Text: label-marker-axis-angle
-							Visible: false
-						Slider@AXIS_ANGLE_SLIDER:
-							X: 130
-							Y: 162
-							Width: 128
-							Height: 25
-							Visible: false
-						Label@AXIS_ANGLE_VALUE:
-							X: 260
-							Y: 162
-							Width: 30
-							Height: 25
-							Align: Left
-							Visible: false
-				ScrollPanel@MAP_GENERATOR_TOOL_PANEL:
-					X: 9
-					Y: 35
-					Width: 290
-					Height: WINDOW_HEIGHT - 490
-					Visible: false
-					ScrollBar: Hidden
-					ScrollbarWidth: 0
-					Logic: MapGeneratorToolLogic
-					Children:
-						LabelForInput@GENERATOR_LABEL:
-							Y: 5
-							Width: 65
-							Height: 25
-							Align: Right
-							Font: TinyBold
-							Text: label-map-generator-generator
-							For: GENERATOR
-						DropDownButton@GENERATOR:
-							X: 70
-							Y: 5
-							Width: PARENT_WIDTH - 75
-							Height: 25
-							Font: Bold
-						Button@GENERATE_BUTTON:
-							X: 5
-							Y: 45
-							Width: 95
-							Height: 25
-							Text: button-map-generator-generate
-							Font: Bold
-						Button@GENERATE_RANDOM_BUTTON:
-							X: 105
-							Y: 45
-							Width: 180
-							Height: 25
-							Text: button-map-generator-generate-random
-							Font: Bold
-						ScrollPanel@SETTINGS_PANEL:
-							X: 0
-							Y: 85
-							Width: PARENT_WIDTH
-							Height: PARENT_HEIGHT - 85
-							Children:
-								Container@CHECKBOX_TEMPLATE:
-									X: 5
-									Width: PARENT_WIDTH - 35
-									Height: 30
-									Children:
-										Checkbox@CHECKBOX:
-											Width: PARENT_WIDTH
-											Height: 25
-								Container@TEXT_TEMPLATE:
-									X: 5
-									Width: PARENT_WIDTH - 35
-									Height: 50
-									Children:
-										LabelForInput@LABEL:
-											Y: 0
-											Width: PARENT_WIDTH
-											Height: 20
-											For: INPUT
-										TextField@INPUT:
-											Y: 20
-											Width: PARENT_WIDTH
-											Height: 25
-								Container@DROPDOWN_TEMPLATE:
-									X: 5
-									Width: PARENT_WIDTH - 35
-									Height: 50
-									Children:
-										LabelForInput@LABEL:
-											Y: 0
-											Width: PARENT_WIDTH
-											Height: 20
-											For: DROPDOWN
-										DropDownButton@DROPDOWN:
-											Y: 20
-											Width: PARENT_WIDTH
-											Height: 25
-											PanelRoot: EDITOR_WORLD_ROOT
 		Container@HISTORY_WIDGETS:
 			X: WINDOW_WIDTH - 320
 			Y: 354
@@ -1062,3 +848,205 @@ ScrollPanel@OVERLAY_PANEL:
 			Width: PARENT_WIDTH - 29
 			Height: 20
 			Visible: false
+
+Background@MARKER_TOOL_PANEL:
+	X: 10
+	Y: 35
+	Width: PARENT_WIDTH - 20
+	Height: WINDOW_HEIGHT - 490
+	Background: scrollpanel-bg
+	Logic: MapMarkerTilesLogic
+	Children:
+		ScrollPanel@TILE_COLOR_PANEL:
+			X: 6
+			Y: 6
+			Width: PARENT_WIDTH - 19
+			Height: 31
+			TopBottomSpacing: 1
+			ItemSpacing: 1
+			ScrollBar: Hidden
+			ScrollbarWidth: 0
+			ContentHeight: 31
+			Children:
+				ScrollItem@TILE_COLOR_TEMPLATE:
+					Visible: false
+					Height: 29
+					Width: 29
+					IgnoreChildMouseOver: true
+					Children:
+						ColorBlock@TILE_PREVIEW:
+							X: 2
+							Y: 2
+							Width: 26
+							Height: 26
+				ScrollItem@TILE_ICON_TEMPLATE:
+					Visible: false
+					Height: 29
+					Width: 29
+					IgnoreChildMouseOver: true
+					Children:
+						Image@TILE_ERASE:
+							X: 6
+							Y: 6
+							Width: 26
+							Height: 26
+							ImageCollection: editor
+							ImageName: erase
+		Button@CLEAR_CURRENT_BUTTON:
+			X: 6
+			Y: 42
+			Width: 100
+			Height: 25
+			Text: button-marker-tiles-clear-current
+			Font: Bold
+		Button@CLEAR_ALL_BUTTON:
+			X: 111
+			Y: 42
+			Width: 75
+			Height: 25
+			Text: button-marker-tiles-clear-all
+			Font: Bold
+		Label@ALPHA_LABEL:
+			X: 6
+			Y: 72
+			Width: 265
+			Height: 25
+			Align: Left
+			Text: label-marker-alpha
+		Slider@ALPHA_SLIDER:
+			X: 130
+			Y: 72
+			Width: 128
+			Height: 25
+		Label@ALPHA_VALUE:
+			X: 260
+			Y: 72
+			Width: 30
+			Height: 25
+			Align: Left
+		Label@MODE_LABEL:
+			X: 6
+			Y: 102
+			Width: 260
+			Height: 25
+			Align: Left
+			Text: label-marker-mirror-mode
+		DropDownButton@MODE_DROPDOWN:
+			X: 129
+			Y: 102
+			Width: 157
+			Height: 25
+		Label@NUM_SIDES_LABEL:
+			X: 6
+			Y: 132
+			Width: 256
+			Height: 25
+			Align: Left
+			Text: label-marker-layer-num-sides
+		Slider@ROTATE_NUM_SIDES_SLIDER:
+			X: 130
+			Y: 132
+			Width: 128
+			Height: 25
+			Visible: false
+		Label@ROTATE_NUM_SIDES_VALUE:
+			X: 260
+			Y: 132
+			Width: 30
+			Height: 25
+			Align: Left
+			Visible: false
+		DropDownButton@FLIP_NUM_SIDES_DROPDOWN:
+			X: 129
+			Y: 132
+			Width: 157
+			Height: 25
+		Label@AXIS_ANGLE_LABEL:
+			X: 6
+			Y: 162
+			Width: 256
+			Height: 25
+			Align: Left
+			Text: label-marker-axis-angle
+			Visible: false
+		Slider@AXIS_ANGLE_SLIDER:
+			X: 130
+			Y: 162
+			Width: 128
+			Height: 25
+			Visible: false
+		Label@AXIS_ANGLE_VALUE:
+			X: 260
+			Y: 162
+			Width: 30
+			Height: 25
+			Align: Left
+			Visible: false
+
+ScrollPanel@MAP_GENERATOR_TOOL_PANEL:
+	X: 9
+	Y: 35
+	Width: 290
+	Height: WINDOW_HEIGHT - 490
+	Visible: false
+	ScrollBar: Hidden
+	ScrollbarWidth: 0
+	Logic: MapGeneratorToolLogic
+	Children:
+		Button@GENERATE_BUTTON:
+			X: 5
+			Y: 5
+			Width: 95
+			Height: 25
+			Text: button-map-generator-generate
+			Font: Bold
+		Button@GENERATE_RANDOM_BUTTON:
+			X: 105
+			Y: 5
+			Width: 180
+			Height: 25
+			Text: button-map-generator-generate-random
+			Font: Bold
+		ScrollPanel@SETTINGS_PANEL:
+			X: 0
+			Y: 35
+			Width: PARENT_WIDTH
+			Height: PARENT_HEIGHT - 35
+			Children:
+				Container@CHECKBOX_TEMPLATE:
+					X: 5
+					Width: PARENT_WIDTH - 35
+					Height: 30
+					Children:
+						Checkbox@CHECKBOX:
+							Width: PARENT_WIDTH
+							Height: 25
+				Container@TEXT_TEMPLATE:
+					X: 5
+					Width: PARENT_WIDTH - 35
+					Height: 50
+					Children:
+						LabelForInput@LABEL:
+							Y: 0
+							Width: PARENT_WIDTH
+							Height: 20
+							For: INPUT
+						TextField@INPUT:
+							Y: 20
+							Width: PARENT_WIDTH
+							Height: 25
+				Container@DROPDOWN_TEMPLATE:
+					X: 5
+					Width: PARENT_WIDTH - 35
+					Height: 50
+					Children:
+						LabelForInput@LABEL:
+							Y: 0
+							Width: PARENT_WIDTH
+							Height: 20
+							For: DROPDOWN
+						DropDownButton@DROPDOWN:
+							Y: 20
+							Width: PARENT_WIDTH
+							Height: 25
+							PanelRoot: EDITOR_WORLD_ROOT

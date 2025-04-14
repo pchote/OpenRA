@@ -34,8 +34,8 @@ options-starting-units =
 
 resource-minerals = Valuable Minerals
 
-map-generator-experimental = Experimental
-map-generator-clear = Clear
+map-generator-experimental = Experimental RMG
+map-generator-clear = Clear Terrain
 
 ## Faction
 faction-allies =

@@ -21,21 +21,24 @@ namespace OpenRA.Mods.Common.Traits
 {
 	[TraitLocation(SystemActors.EditorWorld)]
 	[Desc("A map generator that clears a map.")]
-	public sealed class ClearMapGeneratorInfo : TraitInfo<ClearMapGenerator>, IMapGeneratorInfo
+	public sealed class ClearMapGeneratorInfo : TraitInfo<ClearMapGenerator>, IMapGeneratorInfo, IEditorToolInfo
 	{
 		[FieldLoader.Require]
 		[Desc("Human-readable name this generator uses.")]
 		[FluentReference]
 		public readonly string Name = null;
 
+		[FieldLoader.Require]
+		[Desc("Internal id for this map generator.")]
+		public readonly string Type = null;
+
+		[Desc("The widget tree to open when the tool is selected.")]
+		public readonly string PanelWidget = "MAP_GENERATOR_TOOL_PANEL";
+
 		// This is purely of interest to the linter.
 		[FieldLoader.LoadUsing(nameof(FluentReferencesLoader))]
 		[FluentReference]
 		public readonly List<string> FluentReferences = null;
-
-		[FieldLoader.Require]
-		[Desc("Internal id for this map generator.")]
-		public readonly string Type = null;
 
 		[FieldLoader.LoadUsing(nameof(SettingsLoader))]
 		public readonly MiniYaml Settings;
@@ -98,6 +101,9 @@ namespace OpenRA.Mods.Common.Traits
 			map.PlayerDefinitions = new MapPlayers(map.Rules, 0).ToMiniYaml();
 			map.ActorDefinitions = [];
 		}
+
+		string IEditorToolInfo.Label => Name;
+		string IEditorToolInfo.PanelWidget => PanelWidget;
 	}
 
 	public class ClearMapGenerator { /* we're only interested in the Info */ }
