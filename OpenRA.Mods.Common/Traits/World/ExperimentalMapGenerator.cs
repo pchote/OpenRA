@@ -23,7 +23,7 @@ using static OpenRA.Mods.Common.Traits.ResourceLayerInfo;
 namespace OpenRA.Mods.Common.Traits
 {
 	[TraitLocation(SystemActors.EditorWorld)]
-	public sealed class ExperimentalMapGeneratorInfo : TraitInfo<ExperimentalMapGenerator>, IMapGeneratorInfo
+	public sealed class ExperimentalMapGeneratorInfo : TraitInfo<ExperimentalMapGenerator>, IMapGeneratorInfo, IEditorToolInfo
 	{
 		[FieldLoader.Require]
 		public readonly string Type = null;
@@ -31,6 +31,9 @@ namespace OpenRA.Mods.Common.Traits
 		[FieldLoader.Require]
 		[FluentReference]
 		public readonly string Name = null;
+
+		[Desc("The widget tree to open when the tool is selected.")]
+		public readonly string PanelWidget = "MAP_GENERATOR_TOOL_PANEL";
 
 		// This is purely of interest to the linter.
 		[FieldLoader.LoadUsing(nameof(FluentReferencesLoader))]
@@ -1821,6 +1824,9 @@ namespace OpenRA.Mods.Common.Traits
 				amplitude = Exts.ISqrt(amplitude);
 			return amplitude;
 		}
+
+		string IEditorToolInfo.Label => Name;
+		string IEditorToolInfo.PanelWidget => PanelWidget;
 	}
 
 	public class ExperimentalMapGenerator { /* we're only interested in the Info */ }

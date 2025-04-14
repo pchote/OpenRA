@@ -281,7 +281,6 @@ World:
 
 EditorWorld:
 	Inherits: ^BaseWorld
-	Inherits@MapGenerators: ^MapGenerators
 	EditorActorLayer:
 	EditorCursorLayer:
 	EditorResourceLayer:
@@ -302,3 +301,4 @@ EditorWorld:
 	BuildableTerrainOverlay:
 		AllowedTerrainTypes: Clear, Road
 	MarkerLayerOverlay:
+	Inherits@MapGenerators: ^MapGenerators

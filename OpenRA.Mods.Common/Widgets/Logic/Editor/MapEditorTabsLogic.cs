@@ -9,6 +9,7 @@
  */
 #endregion
 
+using OpenRA.Mods.Common.Traits;
 using OpenRA.Widgets;
 
 namespace OpenRA.Mods.Common.Widgets.Logic
@@ -17,6 +18,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 	{
 		enum MenuType { Select, Tiles, Layers, Actors, Tools, History }
 
+		readonly World world;
 		readonly Widget panelContainer;
 		readonly Widget tabContainer;
 		readonly EditorViewportControllerWidget editor;
@@ -25,8 +27,9 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		MenuType lastSelectedTab = MenuType.Tiles;
 
 		[ObjectCreator.UseCtor]
-		public MapEditorTabsLogic(Widget widget)
+		public MapEditorTabsLogic(Widget widget, World world)
 		{
+			this.world = world;
 			panelContainer = widget.Parent;
 			tabContainer = widget.Get("MAP_EDITOR_TAB_CONTAINER");
 
@@ -66,6 +69,12 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			// Selection tab is special, it can only be selected if a selection exists.
 			if (tabType == MenuType.Select)
 				tab.IsDisabled = () => !editor.DefaultBrush.Selection.HasSelection;
+
+			if (tabType == MenuType.Tools)
+			{
+				var toolsAvailable = world.Map.Rules.Actors[SystemActors.EditorWorld].HasTraitInfo<IEditorToolInfo>();
+				tab.IsDisabled = () => !toolsAvailable;
+			}
 
 			var container = panelContainer.Get<ContainerWidget>(tabId);
 			container.IsVisible = () => menuType == tabType;

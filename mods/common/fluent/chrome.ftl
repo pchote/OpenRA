@@ -72,7 +72,6 @@ label-marker-layer-num-sides = Number of Sides
 label-marker-alpha = Tile Alpha
 label-marker-mirror-mode = Mirror Mode
 label-marker-axis-angle = Axis Angle
-label-map-generator-generator = Generator
 button-map-generator-generate = Generate
 button-map-generator-generate-random = Generate Random
 
@@ -116,7 +115,6 @@ button-select-categories-buttons-all = All
 button-select-categories-buttons-none = None
 
 label-tool-marker-tiles = Marker Tiles
-label-tool-map-generator = Map Generator
 
 ## gamesave-browser.yaml
 label-gamesave-browser-panel-load-title = Load game

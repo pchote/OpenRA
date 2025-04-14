@@ -22,8 +22,15 @@ using Color = OpenRA.Primitives.Color;
 namespace OpenRA.Mods.Common.Traits
 {
 	[TraitLocation(SystemActors.EditorWorld)]
-	public class MarkerLayerOverlayInfo : TraitInfo
+	public class MarkerLayerOverlayInfo : TraitInfo, IEditorToolInfo
 	{
+		[FluentReference]
+		[Desc("The label to show in the tools menu.")]
+		public readonly string Label = "label-tool-marker-tiles";
+
+		[Desc("The widget tree to open when the tool is selected.")]
+		public readonly string PanelWidget = "MARKER_TOOL_PANEL";
+
 		[Desc("A list of colors to be used for drawing.")]
 		public readonly Color[] Colors =
 		[
@@ -47,6 +54,9 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			return new MarkerLayerOverlay(init.Self, this);
 		}
+
+		string IEditorToolInfo.Label => Label;
+		string IEditorToolInfo.PanelWidget => PanelWidget;
 	}
 
 	public class MarkerLayerOverlay : IRenderAnnotations, INotifyActorDisposing, IWorldLoaded
