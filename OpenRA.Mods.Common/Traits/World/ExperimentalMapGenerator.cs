@@ -50,7 +50,8 @@ namespace OpenRA.Mods.Common.Traits
 
 		static List<string> FluentReferencesLoader(MiniYaml my)
 		{
-			return MapGeneratorSettings.DumpFluent(my.NodeWithKey("Settings").Value);
+			return new MapGeneratorSettings(my.NodeWithKey("Settings").Value)
+				.Options.SelectMany(o => o.GetFluentReferences()).ToList();
 		}
 
 		const int FractionMax = 1000;
@@ -481,9 +482,9 @@ namespace OpenRA.Mods.Common.Traits
 			}
 		}
 
-		public MapGeneratorSettings GetSettings(ITerrainInfo terrainInfo)
+		public IMapGeneratorSettings GetSettings()
 		{
-			return MapGeneratorSettings.LoadSettings(Settings, terrainInfo);
+			return new MapGeneratorSettings(Settings);
 		}
 
 		public void Generate(Map map, MiniYaml settings)

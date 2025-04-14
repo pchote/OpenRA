@@ -11,6 +11,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using OpenRA.Mods.Common.MapGenerator;
 using OpenRA.Mods.Common.Terrain;
 using OpenRA.Support;
@@ -50,12 +51,13 @@ namespace OpenRA.Mods.Common.Traits
 
 		static List<string> FluentReferencesLoader(MiniYaml my)
 		{
-			return MapGeneratorSettings.DumpFluent(my.NodeWithKey("Settings").Value);
+			return new MapGeneratorSettings(my.NodeWithKey("Settings").Value)
+				.Options.SelectMany(o => o.GetFluentReferences()).ToList();
 		}
 
-		public MapGeneratorSettings GetSettings(ITerrainInfo terrainInfo)
+		public IMapGeneratorSettings GetSettings()
 		{
-			return MapGeneratorSettings.LoadSettings(Settings, terrainInfo);
+			return new MapGeneratorSettings(Settings);
 		}
 
 		public void Generate(Map map, MiniYaml settings)

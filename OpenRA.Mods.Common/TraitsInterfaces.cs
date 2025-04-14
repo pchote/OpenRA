@@ -969,16 +969,23 @@ namespace OpenRA.Mods.Common.Traits
 			: base(message, inner) { }
 	}
 
+	public interface IMapGeneratorSettings
+	{
+		/// <summary>Returns the options that allow users to customise the result.</summary>
+		List<MapGeneratorOption> Options { get; }
+
+		void Randomize(MersenneTwister random);
+
+		/// <summary>Merge all choices into a complete settings MiniYaml.</summary>
+		MiniYaml Compile(ITerrainInfo terrainInfo);
+	}
+
 	public interface IMapGeneratorInfo : ITraitInfoInterface
 	{
 		string Type { get; }
 		string Name { get; }
 
-		/// <summary>
-		/// Get the generator settings available for this tileset.
-		/// Returns null if not compatible with the given tileset.
-		/// </summary>
-		MapGeneratorSettings GetSettings(ITerrainInfo terrainInfo);
+		IMapGeneratorSettings GetSettings();
 
 		/// <summary>
 		/// Generate or manipulate a supplied map in-place.
