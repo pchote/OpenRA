@@ -9,6 +9,7 @@
  */
 #endregion
 
+using System.Collections.Generic;
 using OpenRA.Primitives;
 
 namespace OpenRA
@@ -38,6 +39,20 @@ namespace OpenRA
 		static MiniYaml LoadSettings(MiniYaml yaml)
 		{
 			return yaml.NodeWithKey("Settings").Value;
+		}
+
+		public string Serialize()
+		{
+			return new List<MiniYamlNode>()
+			{
+				new("Uid", Uid),
+				new("Generator", Generator),
+				new("Tileset", Tileset),
+				new("Size", FieldSaver.FormatValue(Size)),
+				new("Settings", Settings),
+				new("Title", Title),
+				new("Author", Author)
+			}.WriteToString();
 		}
 	}
 }

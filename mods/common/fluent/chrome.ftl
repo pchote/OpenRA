@@ -193,6 +193,7 @@ button-force-start-dialog-start = Start
 label-map-incompatible-status-a = This map is not compatible
 label-map-incompatible-status-b = with this version of OpenRA
 label-map-validating-status = Validating...
+label-map-generating-status = Generating...
 button-map-download-available-install = Install Map
 button-map-preview-update = Update Map
 button-map-update-download-available-install = Install Map
