@@ -111,17 +111,16 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			Widget SetupAuthorAndMapType(Widget parent)
 			{
 				var typeLabel = parent.Get<LabelWidget>("MAP_TYPE");
-				var typeCache = new CachedTransform<MapPreview, string>(
-					m => m.Categories.FirstOrDefault() ?? "");
+				var typeCache = new CachedTransform<string[], string>(c => c.FirstOrDefault() ?? "");
 
-				typeLabel.GetText = () => typeCache.Update(getMap().Map);
+				typeLabel.GetText = () => typeCache.Update(getMap().Map.Categories);
 
 				var authorLabel = parent.Get<LabelWidget>("MAP_AUTHOR");
 				var font = Game.Renderer.Fonts[authorLabel.Font];
-				var truncateCache = new CachedTransform<MapPreview, string>(
-					m => WidgetUtils.TruncateText(authorCache.Update(m.Author), authorLabel.Bounds.Width, font));
+				var truncateCache = new CachedTransform<string, string>(author =>
+					WidgetUtils.TruncateText(authorCache.Update(author), authorLabel.Bounds.Width, font));
 
-				authorLabel.GetText = () => truncateCache.Update(getMap().Map);
+				authorLabel.GetText = () => truncateCache.Update(getMap().Map.Author);
 
 				return parent;
 			}
