@@ -12,6 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenRA.FileSystem;
 using OpenRA.Network;
 using OpenRA.Primitives;
 
@@ -27,6 +28,7 @@ namespace OpenRA
 
 		public string MapUid;
 		public string MapTitle;
+		public string MapData;
 		public int FinalGameTick;
 
 		/// <summary>Game start timestamp (when the recoding started).</summary>
@@ -40,7 +42,22 @@ namespace OpenRA
 
 		public IList<Player> Players { get; }
 		public HashSet<int> DisabledSpawnPoints = [];
-		public MapPreview MapPreview => Game.ModData.MapCache[MapUid];
+
+		public MapPreview MapPreview
+		{
+			get
+			{
+				var preview = Game.ModData.MapCache[MapUid];
+				if (preview.Status != MapStatus.Available && MapData != null)
+				{
+					var package = ZipFileLoader.ReadWriteZipFile.FromBase64String(MapData);
+					preview.UpdateFromMap(package, MapClassification.Generated);
+				}
+
+				return preview;
+			}
+		}
+
 		public IEnumerable<Player> HumanPlayers { get { return Players.Where(p => p.IsHuman); } }
 		public bool IsSinglePlayer => HumanPlayers.Count() == 1;
 

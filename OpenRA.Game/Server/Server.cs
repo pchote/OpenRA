@@ -23,6 +23,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using OpenRA;
 using OpenRA.FileFormats;
+using OpenRA.FileSystem;
 using OpenRA.Network;
 using OpenRA.Primitives;
 using OpenRA.Support;
@@ -126,6 +127,7 @@ namespace OpenRA.Server
 		public ServerSettings Settings;
 		public ModData ModData;
 		public List<string> TempBans = [];
+		public string GeneratedMapData;
 
 		// Managed by LobbyCommands
 		public MapPreview Map;
@@ -575,6 +577,10 @@ namespace OpenRA.Server
 
 						foreach (var t in serverTraits.WithInterface<IClientJoined>())
 							t.ClientJoined(this, newConn);
+
+						var p = ModData.MapCache[LobbyInfo.GlobalSettings.Map];
+						if (p.Class == MapClassification.Generated && !string.IsNullOrEmpty(GeneratedMapData))
+							SendOrderTo(newConn, "GenerateMap", GeneratedMapData);
 
 						SyncLobbyInfo();
 
@@ -1070,6 +1076,14 @@ namespace OpenRA.Server
 							filename);
 
 						GameSave = new GameSave(savePath);
+
+						var preview = Game.ModData.MapCache[GameSave.GlobalSettings.Map];
+						if (preview.Status != MapStatus.Available && GameSave.MapData != null)
+						{
+							var package = ZipFileLoader.ReadWriteZipFile.FromBase64String(GameSave.MapData);
+							preview.UpdateFromMap(package, MapClassification.Generated);
+						}
+
 						LobbyInfo.GlobalSettings = GameSave.GlobalSettings;
 						LobbyInfo.Slots = GameSave.Slots;
 
@@ -1115,6 +1129,31 @@ namespace OpenRA.Server
 
 						SyncLobbyInfo();
 						SyncLobbyClients();
+
+						break;
+					}
+
+					case "GenerateMap":
+					{
+						if (!GetClient(conn).IsAdmin || State >= ServerState.GameStarted)
+							break;
+
+						try
+						{
+							var yaml = new MiniYaml(o.OrderString, MiniYaml.FromString(o.TargetString, o.OrderString));
+							var args = FieldLoader.Load<MapGenerationArgs>(yaml);
+							var preview = ModData.MapCache[args.Uid];
+							if (preview.Status != MapStatus.Available)
+								ModData.MapCache.GenerateMap(args);
+
+							GeneratedMapData = o.TargetString;
+							DispatchServerOrdersToClients(Order.FromTargetString("GenerateMap", o.TargetString, true));
+						}
+						catch (Exception e)
+						{
+							Console.WriteLine(e);
+							throw;
+						}
 
 						break;
 					}
@@ -1331,6 +1370,9 @@ namespace OpenRA.Server
 					MapTitle = Map.Title,
 					StartTimeUtc = DateTime.UtcNow,
 				};
+
+				if (Map.Class == MapClassification.Generated)
+					gameInfo.MapData = Map.ToBase64String();
 
 				// Replay metadata should only include the playable players
 				foreach (var p in worldPlayers)
