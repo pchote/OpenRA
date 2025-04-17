@@ -239,6 +239,10 @@ namespace OpenRA
 				MapTitle = Map.Title
 			};
 
+			var preview = modData.MapCache[Map.Uid];
+			if (preview.Class == MapClassification.Generated)
+				gameInfo.MapData = preview.ToBase64String();
+
 			RulesContainTemporaryBlocker = Map.Rules.Actors.Any(a => a.Value.HasTraitInfo<ITemporaryBlockerInfo>());
 			gameSettings = Game.Settings.Game;
 		}

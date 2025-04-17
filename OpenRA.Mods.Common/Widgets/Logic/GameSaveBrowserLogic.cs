@@ -337,7 +337,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			// Parse the save to find the map UID
 			var save = new GameSave(selectedSave);
 			var map = modData.MapCache[save.GlobalSettings.Map];
-			if (map.Status != MapStatus.Available)
+			if (map.Status != MapStatus.Available && save.MapData == null)
 				return;
 
 			Ui.CloseWindow();

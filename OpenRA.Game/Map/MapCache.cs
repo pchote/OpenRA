@@ -20,6 +20,7 @@ using OpenRA.FileSystem;
 using OpenRA.Graphics;
 using OpenRA.Primitives;
 using OpenRA.Support;
+using OpenRA.Traits;
 
 namespace OpenRA
 {
@@ -222,6 +223,45 @@ namespace OpenRA
 				foreach (var map in mapDirPackage.Contents)
 					if (mapDirPackage.OpenPackage(map, modData.ModFiles) is IReadWritePackage mapPackage)
 						yield return mapPackage;
+		}
+
+		public void GenerateMap(MapGenerationArgs args)
+		{
+			var p = previews[args.Uid];
+			if (p.Class == MapClassification.Generated)
+				return;
+
+			p.UpdateFromGenerationArgs(args);
+
+			Task.Run(() =>
+			{
+				try
+				{
+					var generator = modData.DefaultRules.Actors[SystemActors.EditorWorld]
+						.TraitInfos<IMapGeneratorInfo>()
+						.FirstOrDefault(info => info.Type == args.Generator);
+
+					if (generator == null)
+						throw new Exception($"Unknown map generator type {args.Generator}");
+
+					var map = generator.Generate(modData, args);
+
+					// Uid is generated when the map is saved
+					map.Save(new ZipFileLoader.ReadWriteZipFile());
+
+					if (map.Uid != args.Uid)
+						throw new InvalidOperationException("Map generation UID mismatch");
+
+					Game.RunAfterTick(() => p.UpdateFromMap(map.Package, MapClassification.Generated));
+				}
+				catch (Exception e)
+				{
+					Log.Write("debug", "Map generation failed with error:");
+					Log.Write("debug", e);
+
+					p.UpdateFromGenerationArgs(null);
+				}
+			});
 		}
 
 		public void QueryRemoteMapDetails(string repositoryUrl, IEnumerable<string> uids,

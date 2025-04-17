@@ -26,7 +26,7 @@ using OpenRA.Support;
 
 namespace OpenRA
 {
-	public enum MapStatus { Available, Unavailable, Searching, DownloadAvailable, Downloading, DownloadError }
+	public enum MapStatus { Available, Unavailable, Searching, DownloadAvailable, Downloading, DownloadError, Generating }
 
 	// Used for grouping maps in the UI
 	[Flags]
@@ -35,7 +35,8 @@ namespace OpenRA
 		Unknown = 0,
 		System = 1,
 		User = 2,
-		Remote = 4
+		Remote = 4,
+		Generated = 8
 	}
 
 	[SuppressMessage("StyleCop.CSharp.NamingRules",
@@ -216,6 +217,19 @@ namespace OpenRA
 			LoadPackage();
 			using (new PerfTimer("Map"))
 				return new Map(modData, package);
+		}
+
+		public string ToBase64String()
+		{
+			LoadPackage();
+			if (package is not ZipFileLoader.ReadWriteZipFile p)
+			{
+				var map = new Map(modData, package);
+				p = new ZipFileLoader.ReadWriteZipFile();
+				map.Save(p);
+			}
+
+			return p.ToBase64String();
 		}
 
 		IReadOnlyPackage parentPackage;
@@ -450,11 +464,28 @@ namespace OpenRA
 				using (var dataStream = p.GetStream("map.png"))
 					newData.Preview = new Png(dataStream);
 
-			newData.ModifiedDate = File.GetLastWriteTime(p.Name);
+			newData.ModifiedDate = p.Name != null ? File.GetLastWriteTime(p.Name) : DateTime.Now;
 
 			// Assign the new data atomically
 			// Local maps have higher precedence than remote/generated maps,
 			// so should always replace their metadata
+			lock (syncRoot)
+				innerData = newData;
+		}
+
+		public void UpdateFromGenerationArgs(MapGenerationArgs args)
+		{
+			var newData = innerData.Clone();
+			newData.Class = MapClassification.Generated;
+			if (args != null)
+			{
+				newData.Status = MapStatus.Generating;
+				newData.Title = args.Title;
+				newData.Author = args.Author;
+			}
+			else
+				newData.Status = MapStatus.Unavailable;
+
 			lock (syncRoot)
 				innerData = newData;
 		}
