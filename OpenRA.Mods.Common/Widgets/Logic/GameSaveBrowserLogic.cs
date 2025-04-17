@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using OpenRA.FileSystem;
 using OpenRA.Network;
 using OpenRA.Widgets;
 
@@ -336,7 +337,15 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			// Parse the save to find the map UID
 			var save = new GameSave(selectedSave);
-			var map = modData.MapCache[save.GlobalSettings.Map];
+
+			var map = Game.ModData.MapCache[save.GlobalSettings.Map];
+			if (map.Status != MapStatus.Available && save.MapData != null)
+			{
+				// Add to the MapCache so the server will accept the map
+				var package = ZipFileLoader.ReadWriteZipFile.FromBase64String(save.MapData);
+				map.UpdateFromMap(package, MapClassification.Generated);
+			}
+
 			if (map.Status != MapStatus.Available)
 				return;
 

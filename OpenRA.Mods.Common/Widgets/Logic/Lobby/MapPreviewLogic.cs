@@ -48,6 +48,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			Playable,
 			Incompatible,
 			Validating,
+			Generating,
 			DownloadAvailable,
 			Searching,
 			Downloading,
@@ -199,6 +200,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				[previewLarge, widget.Get("MAP_INCOMPATIBLE")];
 			previewWidgets[PreviewStatus.Validating] =
 				[previewSmall, widget.Get("MAP_VALIDATING")];
+			previewWidgets[PreviewStatus.Generating] =
+				[previewSmall, widget.Get("MAP_GENERATING")];
 			previewWidgets[PreviewStatus.UpdateAvailable] =
 				[previewSmall, widget.Get("MAP_UPDATE_AVAILABLE"), updateButton];
 			previewWidgets[PreviewStatus.DownloadAvailable] =
@@ -270,6 +273,9 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 						break;
 					case MapStatus.Searching:
 						status = PreviewStatus.Searching;
+						break;
+					case MapStatus.Generating:
+						status = PreviewStatus.Generating;
 						break;
 					case MapStatus.Unavailable:
 						if (mapUpdateAvailable)
