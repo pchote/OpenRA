@@ -70,6 +70,8 @@
 						ForestObstacles: Trees
 						UnplayableObstacles: Obstructions
 						CivilianBuildingsObstacles: CivilianBuildings
+						Mirror: None
+						Rotations: 1
 			MultiChoiceOption@hidden_tileset_overrides:
 				Choice@desert:
 					Tileset: DESERT
@@ -192,14 +194,14 @@
 						Forests: 0
 						SpawnBuildSize: 6
 						MinimumSpawnRadius: 4
-			MultiIntegerChoiceOption@Rotations:
-				Label: label-ra-map-generator-option-rotations
-				Parameter: Rotations
+			MultiIntegerChoiceOption@Players:
+				Label: label-ra-map-generator-option-players
+				Parameter: Players
 				Choices: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
 				Default: 2
 				Priority: 1
-			MultiChoiceOption@Mirror:
-				Label: label-ra-map-generator-option-mirror
+			MultiChoiceOption@Symmetry:
+				Label: label-ra-map-generator-option-symmetry
 				Default: None
 				Priority: 1
 				Choice@None:
@@ -207,21 +209,60 @@
 					Settings:
 						Mirror: None
 				Choice@LeftMatchesRight:
-					Label: label-ra-map-generator-choice-mirror-left-matches-right
+					Label: label-ra-map-generator-choice-symmetry-mirror-horizontal
+					Players: 2, 4, 6, 8, 10, 12, 14, 16
 					Settings:
 						Mirror: LeftMatchesRight
 				Choice@TopLeftMatchesBottomRight:
-					Label: label-ra-map-generator-choice-mirror-top-left-matches-bottom-right
+					Label: label-ra-map-generator-choice-symmetry-mirror-diagonal-tl
+					Players: 2, 4, 6, 8, 10, 12, 14, 16
 					Settings:
 						Mirror: TopLeftMatchesBottomRight
 				Choice@TopMatchesBottom:
-					Label: label-ra-map-generator-choice-mirror-top-matches-bottom
+					Label: label-ra-map-generator-choice-symmetry-mirror-vertical
+					Players: 2, 4, 6, 8, 10, 12, 14, 16
 					Settings:
 						Mirror: TopMatchesBottom
 				Choice@TopRightMatchesBottomLeft:
-					Label: label-ra-map-generator-choice-mirror-top-right-matches-bottom-left
+					Label: label-ra-map-generator-choice-symmetry-mirror-diagonal-tr
+					Players: 2, 4, 6, 8, 10, 12, 14, 16
 					Settings:
 						Mirror: TopRightMatchesBottomLeft
+				Choice@2Rotations:
+					Label: label-ra-map-generator-choice-symmetry-mirror-2-rotations
+					Players: 2, 4, 6, 8, 10, 12, 14, 16
+					Settings:
+						Rotations: 2
+				Choice@3Rotations:
+					Label: label-ra-map-generator-choice-symmetry-mirror-3-rotations
+					Players: 3, 6, 9, 12, 15
+					Settings:
+						Rotations: 3
+				Choice@4Rotations:
+					Label: label-ra-map-generator-choice-symmetry-mirror-4-rotations
+					Players: 4, 8, 12, 16
+					Settings:
+						Rotations: 4
+				Choice@5Rotations:
+					Label: label-ra-map-generator-choice-symmetry-mirror-5-rotations
+					Players: 5, 10, 15
+					Settings:
+						Rotations: 5
+				Choice@6Rotations:
+					Label: label-ra-map-generator-choice-symmetry-mirror-6-rotations
+					Players: 6, 12
+					Settings:
+						Rotations: 6
+				Choice@7Rotations:
+					Label: label-ra-map-generator-choice-symmetry-mirror-7-rotations
+					Players: 7, 14
+					Settings:
+						Rotations: 7
+				Choice@8Rotations:
+					Label: label-ra-map-generator-choice-symmetry-mirror-8-rotations
+					Players: 8, 16
+					Settings:
+						Rotations: 8
 			MultiChoiceOption@Shape:
 				Label: label-ra-map-generator-option-shape
 				Default: Square
@@ -238,12 +279,6 @@
 					Label: label-ra-map-generator-choice-shape-circle-water
 					Settings:
 						ExternalCircularBias: -1
-			MultiIntegerChoiceOption@Players:
-				Label: label-ra-map-generator-option-players
-				Parameter: Players
-				Choices: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
-				Default: 1
-				Priority: 1
 			MultiChoiceOption@Resources:
 				Label: label-ra-map-generator-option-resources
 				Default: Medium

@@ -455,9 +455,12 @@ namespace OpenRA.Mods.Common.Traits
 				if (!(terrainInfo.Templates.TryGetValue(LandTile, out var waterTemplate) && waterTemplate.Contains(0)))
 					throw new MapGenerationException("WaterTile is not valid");
 
-				var symmetryCount = Symmetry.RotateAndMirrorProjectionCount(Rotations, Mirror);
-				if (Players * symmetryCount > 32)
+				if (Players > 32)
 					throw new MapGenerationException("Total number of players must not exceed 32");
+
+				var symmetryCount = Symmetry.RotateAndMirrorProjectionCount(Rotations, Mirror);
+				if (Players % symmetryCount != 0)
+					throw new MapGenerationException($"Total number of players must be a multiple of {symmetryCount}");
 			}
 
 			public static (T[] Types, int[] Weights) SplitWeights<T>(IReadOnlyDictionary<T, int> typeWeights)
@@ -997,8 +1000,7 @@ namespace OpenRA.Mods.Common.Traits
 				if (largest == null)
 					throw new MapGenerationException("could not find a playable region");
 
-				var totalPlayers = param.Players * Symmetry.RotateAndMirrorProjectionCount(param.Rotations, param.Mirror);
-				var minimumPlayableSpace = (int)(totalPlayers * Math.PI * param.SpawnBuildSize * param.SpawnBuildSize);
+				var minimumPlayableSpace = (int)(param.Players * Math.PI * param.SpawnBuildSize * param.SpawnBuildSize);
 				if (largest.PlayableArea < minimumPlayableSpace)
 					throw new MapGenerationException("playable space is too small");
 
@@ -1244,14 +1246,14 @@ namespace OpenRA.Mods.Common.Traits
 
 				var zoneableArea = zoneable.Count(v => v);
 				var symmetryCount = Symmetry.RotateAndMirrorProjectionCount(param.Rotations, param.Mirror);
-				var totalPlayers = param.Players * symmetryCount;
 				var entityMultiplier =
 					(long)zoneableArea * param.AreaEntityBonus +
-					(long)totalPlayers * param.PlayerCountEntityBonus;
+					(long)param.Players * param.PlayerCountEntityBonus;
 				var perSymmetryEntityMultiplier = entityMultiplier / symmetryCount;
 
 				// Spawn generation
-				for (var iteration = 0; iteration < param.Players; iteration++)
+				var symmetryPlayers = param.Players / symmetryCount;
+				for (var iteration = 0; iteration < symmetryPlayers; iteration++)
 				{
 					var spawnPreference = new CellLayer<int>(map);
 					CellLayerUtils.ChebyshevRoom(spawnPreference, zoneable, false);
@@ -1774,7 +1776,7 @@ namespace OpenRA.Mods.Common.Traits
 				MultiBrush.PaintArea(map, actorPlans, replace, collection, repaintRandom);
 			}
 
-			map.PlayerDefinitions = new MapPlayers(map.Rules, 0).ToMiniYaml();
+			map.PlayerDefinitions = new MapPlayers(map.Rules, param.Players).ToMiniYaml();
 			map.ActorDefinitions = actorPlans
 				.Select((plan, i) => new MiniYamlNode($"Actor{i}", plan.Reference.Save()))
 				.ToImmutableArray();

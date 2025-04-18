@@ -110,6 +110,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			if (generator == null)
 				return;
 
+			var playerCount = settings.PlayerCount;
 			foreach (var o in settings.Options)
 			{
 				Widget settingWidget = null;
@@ -161,9 +162,14 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 							ScrollItemWidget SetupItem(int choice, ScrollItemWidget template)
 							{
 								bool IsSelected() => choice == mio.Value;
-								void OnClick() => mio.Value = choice;
-								var item = ScrollItemWidget.Setup(template, IsSelected, OnClick);
+								void OnClick()
+								{
+									mio.Value = choice;
+									if (o.Id == "Players")
+										UpdateSettingsUi();
+								}
 
+								var item = ScrollItemWidget.Setup(template, IsSelected, OnClick);
 								var itemLabel = FieldSaver.FormatValue(choice);
 								item.Get<LabelWidget>("LABEL").GetText = () => itemLabel;
 								item.GetTooltipText = null;
@@ -177,7 +183,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 					case MapGeneratorMultiChoiceOption mo:
 					{
-						var validChoices = mo.ValidChoices(world.Map.Rules.TerrainInfo);
+						var validChoices = mo.ValidChoices(world.Map.Rules.TerrainInfo, playerCount);
 						if (!validChoices.Contains(mo.Value))
 							mo.Value = mo.Default?.FirstOrDefault(validChoices.Contains) ?? validChoices.FirstOrDefault();
 

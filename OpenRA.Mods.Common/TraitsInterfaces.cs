@@ -980,6 +980,8 @@ namespace OpenRA.Mods.Common.Traits
 		/// <summary>Returns the options that allow users to customise the result.</summary>
 		List<MapGeneratorOption> Options { get; }
 
+		int PlayerCount { get; }
+
 		void Randomize(MersenneTwister random);
 
 		/// <summary>Merge all choices into a complete settings MiniYaml.</summary>
