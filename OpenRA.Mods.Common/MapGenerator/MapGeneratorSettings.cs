@@ -31,7 +31,7 @@ namespace OpenRA.Mods.Common.MapGenerator
 			FieldLoader.Load(this, yaml);
 		}
 
-		public abstract IReadOnlyCollection<MiniYamlNode> GetSettings(ITerrainInfo terrainInfo);
+		public abstract IReadOnlyCollection<MiniYamlNode> GetSettings(ITerrainInfo terrainInfo, int playerCount);
 
 		public virtual IEnumerable<string> GetFluentReferences()
 		{
@@ -53,7 +53,7 @@ namespace OpenRA.Mods.Common.MapGenerator
 			Value = Default;
 		}
 
-		public override IReadOnlyCollection<MiniYamlNode> GetSettings(ITerrainInfo terrainInfo)
+		public override IReadOnlyCollection<MiniYamlNode> GetSettings(ITerrainInfo terrainInfo, int playerCount)
 		{
 			return [new MiniYamlNode(Parameter, FieldSaver.FormatValue(Value))];
 		}
@@ -72,7 +72,7 @@ namespace OpenRA.Mods.Common.MapGenerator
 			Value = Default;
 		}
 
-		public override IReadOnlyCollection<MiniYamlNode> GetSettings(ITerrainInfo terrainInfo)
+		public override IReadOnlyCollection<MiniYamlNode> GetSettings(ITerrainInfo terrainInfo, int playerCount)
 		{
 			return [new MiniYamlNode(Parameter, FieldSaver.FormatValue(Value))];
 		}
@@ -84,6 +84,7 @@ namespace OpenRA.Mods.Common.MapGenerator
 		{
 			public readonly string Label = null;
 			public readonly string[] Tileset = null;
+			public readonly int[] Players = null;
 
 			[FieldLoader.LoadUsing(nameof(LoadSettings))]
 			[FieldLoader.Require]
@@ -117,9 +118,9 @@ namespace OpenRA.Mods.Common.MapGenerator
 		public MapGeneratorMultiChoiceOption(string id, MiniYaml yaml)
 			: base(id, yaml) { }
 
-		public override IReadOnlyCollection<MiniYamlNode> GetSettings(ITerrainInfo terrainInfo)
+		public override IReadOnlyCollection<MiniYamlNode> GetSettings(ITerrainInfo terrainInfo, int playerCount)
 		{
-			var validChoices = ValidChoices(terrainInfo);
+			var validChoices = ValidChoices(terrainInfo, playerCount);
 			if (validChoices.Contains(value))
 				return Choices[value].Settings;
 
@@ -139,10 +140,12 @@ namespace OpenRA.Mods.Common.MapGenerator
 			}
 		}
 
-		public List<string> ValidChoices(ITerrainInfo terrainInfo)
+		public List<string> ValidChoices(ITerrainInfo terrainInfo, int playerCount)
 		{
 			return Choices
-				.Where(kv => kv.Value.Tileset == null || kv.Value.Tileset.Contains(terrainInfo.Id))
+				.Where(kv =>
+					(kv.Value.Tileset?.Contains(terrainInfo.Id) ?? true) &&
+					(kv.Value.Players?.Contains(playerCount) ?? true))
 				.Select(kv => kv.Key)
 				.ToList();
 		}
@@ -195,7 +198,7 @@ namespace OpenRA.Mods.Common.MapGenerator
 			}
 		}
 
-		public override IReadOnlyCollection<MiniYamlNode> GetSettings(ITerrainInfo terrainInfo)
+		public override IReadOnlyCollection<MiniYamlNode> GetSettings(ITerrainInfo terrainInfo, int playerCount)
 		{
 			return [new MiniYamlNode(Parameter, FieldSaver.FormatValue(Value))];
 		}
@@ -230,12 +233,28 @@ namespace OpenRA.Mods.Common.MapGenerator
 				seed.Value = random.Next();
 		}
 
+		public int PlayerCount
+		{
+			get
+			{
+				var o = Options.FirstOrDefault(o => o.Id == "Players");
+				if (o is MapGeneratorIntegerOption io)
+					return io.Value;
+
+				if (o is MapGeneratorMultiIntegerChoiceOption mio)
+					return mio.Value;
+
+				return 0;
+			}
+		}
+
 		public MiniYaml Compile(ITerrainInfo terrainInfo)
 		{
 			// Apply the choices in their canonical order.
+			var playerCount = PlayerCount;
 			var layers = Options
 				.OrderBy(option => option.Priority)
-				.Select(o => o.GetSettings(terrainInfo));
+				.Select(o => o.GetSettings(terrainInfo, playerCount));
 
 			return new MiniYaml(null, MiniYaml.Merge(layers));
 		}

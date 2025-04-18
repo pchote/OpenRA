@@ -821,19 +821,31 @@ label-cnc-map-generator-choice-terrain-type-mountain-lakes =
    .label = Mountain Lakes
    .description = Lakes and many long cliffs
 
-label-cnc-map-generator-option-rotations = Rotations
-
-label-cnc-map-generator-option-mirror = Mirror
+label-cnc-map-generator-option-symmetry = Symmetry
 label-cnc-map-generator-choice-mirror-none =
    .label = None
-label-cnc-map-generator-choice-mirror-left-matches-right =
-   .label = Left vs right
-label-cnc-map-generator-choice-mirror-top-left-matches-bottom-right =
-   .label = Top left vs bottom right
-label-cnc-map-generator-choice-mirror-top-matches-bottom =
-   .label = Top vs bottom
-label-cnc-map-generator-choice-mirror-top-right-matches-bottom-left =
-   .label = Top right vs bottom left
+label-cnc-map-generator-choice-symmetry-mirror-horizontal =
+   .label = Mirror Horizontal
+label-cnc-map-generator-choice-symmetry-mirror-vertical =
+   .label = Mirror Vertical
+label-cnc-map-generator-choice-symmetry-mirror-diagonal-tl =
+   .label = Mirror Diagonal (Top-Left)
+label-cnc-map-generator-choice-symmetry-mirror-diagonal-tr =
+   .label = Mirror Diagonal (Top-Right)
+label-cnc-map-generator-choice-symmetry-mirror-2-rotations =
+   .label = 2 Rotations
+label-cnc-map-generator-choice-symmetry-mirror-3-rotations =
+   .label = 3 Rotations
+label-cnc-map-generator-choice-symmetry-mirror-4-rotations =
+   .label = 4 Rotations
+label-cnc-map-generator-choice-symmetry-mirror-5-rotations =
+   .label = 5 Rotations
+label-cnc-map-generator-choice-symmetry-mirror-6-rotations =
+   .label = 6 Rotations
+label-cnc-map-generator-choice-symmetry-mirror-7-rotations =
+   .label = 7 Rotations
+label-cnc-map-generator-choice-symmetry-mirror-8-rotations =
+   .label = 8 Rotations
 
 label-cnc-map-generator-option-shape = Bounds Shape
 label-cnc-map-generator-choice-shape-square =
@@ -846,7 +858,7 @@ label-cnc-map-generator-choice-shape-circle-water =
    .label = Circle in water
    .description = Terrain generation is constrained to a circle enclosed by water
 
-label-cnc-map-generator-option-players = Players per side
+label-cnc-map-generator-option-players = Players
 
 label-cnc-map-generator-option-resources = Resources
 label-cnc-map-generator-choice-resources-none =
