@@ -187,7 +187,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 						if (!validChoices.Contains(mo.Value))
 							mo.Value = mo.Default?.FirstOrDefault(validChoices.Contains) ?? validChoices.FirstOrDefault();
 
-						if (mo.Label != null && validChoices.Count > 0)
+						if (mo.Value != null && mo.Label != null && validChoices.Count > 0)
 						{
 							settingWidget = dropDownSettingTemplate.Clone();
 							var labelWidget = settingWidget.Get<LabelWidget>("LABEL");

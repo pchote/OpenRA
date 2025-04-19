@@ -133,7 +133,7 @@ namespace OpenRA.Mods.Common.MapGenerator
 			get => value;
 			set
 			{
-				if (!Choices.ContainsKey(value))
+				if (value != null && !Choices.ContainsKey(value))
 					throw new ArgumentException($"{value} is not in the list of valid choices");
 
 				this.value = value;
