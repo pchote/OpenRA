@@ -650,4 +650,13 @@ namespace OpenRA.Traits
 		bool CrushableBy(Actor self, Actor crusher, BitSet<CrushClass> crushClasses);
 		LongBitSet<PlayerBitMask> CrushableBy(Actor self, BitSet<CrushClass> crushClasses);
 	}
+
+	public interface IMapGeneratorInfo : ITraitInfoInterface
+	{
+		string Type { get; }
+		string Name { get; }
+		string MapTitle { get; }
+
+		Map Generate(ModData modData, MapGenerationArgs args);
+	}
 }

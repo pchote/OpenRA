@@ -21,7 +21,7 @@ namespace OpenRA.Mods.Common.Traits
 {
 	[TraitLocation(SystemActors.EditorWorld)]
 	[Desc("A map generator that clears a map.")]
-	public sealed class ClearMapGeneratorInfo : TraitInfo<ClearMapGenerator>, IMapGeneratorInfo, IEditorToolInfo
+	public sealed class ClearMapGeneratorInfo : TraitInfo<ClearMapGenerator>, IEditorMapGeneratorInfo, IEditorToolInfo
 	{
 		[FieldLoader.Require]
 		[Desc("Human-readable name this generator uses.")]
@@ -31,6 +31,10 @@ namespace OpenRA.Mods.Common.Traits
 		[FieldLoader.Require]
 		[Desc("Internal id for this map generator.")]
 		public readonly string Type = null;
+
+		[FluentReference]
+		[Desc("The title to use for generated maps.")]
+		public readonly string MapTitle = "label-random-map";
 
 		[Desc("The widget tree to open when the tool is selected.")]
 		public readonly string PanelWidget = "MAP_GENERATOR_TOOL_PANEL";
@@ -44,8 +48,8 @@ namespace OpenRA.Mods.Common.Traits
 		public readonly MiniYaml Settings;
 
 		string IMapGeneratorInfo.Type => Type;
-
 		string IMapGeneratorInfo.Name => Name;
+		string IMapGeneratorInfo.MapTitle => MapTitle;
 
 		static MiniYaml SettingsLoader(MiniYaml my)
 		{
@@ -54,26 +58,31 @@ namespace OpenRA.Mods.Common.Traits
 
 		static List<string> FluentReferencesLoader(MiniYaml my)
 		{
-			return new MapGeneratorSettings(my.NodeWithKey("Settings").Value)
+			return new MapGeneratorSettings(null, my.NodeWithKey("Settings").Value)
 				.Options.SelectMany(o => o.GetFluentReferences()).ToList();
 		}
 
 		public IMapGeneratorSettings GetSettings()
 		{
-			return new MapGeneratorSettings(Settings);
+			return new MapGeneratorSettings(this, Settings);
 		}
 
-		public void Generate(Map map, MiniYaml settings)
+		public Map Generate(ModData modData, MapGenerationArgs args)
 		{
 			var random = new MersenneTwister();
+			var terrainInfo = modData.DefaultTerrainInfo[args.Tileset];
 
-			var tileset = map.Rules.TerrainInfo;
+			var map = new Map(modData, terrainInfo, args.Size);
+			var maxTerrainHeight = map.Grid.MaximumTerrainHeight;
+			var tl = new PPos(1, 1 + maxTerrainHeight);
+			var br = new PPos(args.Size.Width - 1, args.Size.Height + maxTerrainHeight - 1);
+			map.SetBounds(tl, br);
 
-			if (!Exts.TryParseUshortInvariant(settings.NodeWithKey("Tile").Value.Value, out var tileType))
+			if (!Exts.TryParseUshortInvariant(args.Settings.NodeWithKey("Tile").Value.Value, out var tileType))
 				throw new YamlException("Illegal tile type");
 
 			var tile = new TerrainTile(tileType, 0);
-			if (!tileset.TryGetTerrainInfo(tile, out var _))
+			if (!terrainInfo.TryGetTerrainInfo(tile, out var _))
 				throw new MapGenerationException("Illegal tile type");
 
 			// If the default terrain tile is part of a PickAny template, pick
@@ -100,6 +109,8 @@ namespace OpenRA.Mods.Common.Traits
 
 			map.PlayerDefinitions = new MapPlayers(map.Rules, 0).ToMiniYaml();
 			map.ActorDefinitions = [];
+
+			return map;
 		}
 
 		string IEditorToolInfo.Label => Name;

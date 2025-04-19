@@ -14,7 +14,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using OpenRA.Mods.Common.Traits;
+using OpenRA.Primitives;
 using OpenRA.Support;
+using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.MapGenerator
 {
@@ -206,8 +208,11 @@ namespace OpenRA.Mods.Common.MapGenerator
 
 	public sealed class MapGeneratorSettings : IMapGeneratorSettings
 	{
-		public MapGeneratorSettings(MiniYaml yaml)
+		readonly IMapGeneratorInfo generatorInfo;
+
+		public MapGeneratorSettings(IMapGeneratorInfo generatorInfo, MiniYaml yaml)
 		{
+			this.generatorInfo = generatorInfo;
 			foreach (var node in yaml.Nodes)
 			{
 				var split = node.Key.Split('@');
@@ -248,7 +253,7 @@ namespace OpenRA.Mods.Common.MapGenerator
 			}
 		}
 
-		public MiniYaml Compile(ITerrainInfo terrainInfo)
+		public MapGenerationArgs Compile(ITerrainInfo terrainInfo, Size size)
 		{
 			// Apply the choices in their canonical order.
 			var playerCount = PlayerCount;
@@ -256,7 +261,15 @@ namespace OpenRA.Mods.Common.MapGenerator
 				.OrderBy(option => option.Priority)
 				.Select(o => o.GetSettings(terrainInfo, playerCount));
 
-			return new MiniYaml(null, MiniYaml.Merge(layers));
+			return new MapGenerationArgs()
+			{
+				Generator = generatorInfo.Type,
+				Tileset = terrainInfo.Id,
+				Size = size,
+				Title = FluentProvider.GetMessage(generatorInfo.MapTitle),
+				Author = FluentProvider.GetMessage(generatorInfo.Name),
+				Settings = new MiniYaml(null, MiniYaml.Merge(layers))
+			};
 		}
 	}
 }

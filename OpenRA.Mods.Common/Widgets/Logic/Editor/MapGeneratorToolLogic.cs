@@ -35,7 +35,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly World world;
 		readonly WorldRenderer worldRenderer;
 		readonly ModData modData;
-		readonly IMapGeneratorInfo generator;
+		readonly IEditorMapGeneratorInfo generator;
 		readonly IMapGeneratorSettings settings;
 
 		readonly ScrollPanelWidget settingsPanel;
@@ -45,7 +45,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		[ObjectCreator.UseCtor]
 		public MapGeneratorToolLogic(Widget widget, World world, WorldRenderer worldRenderer, ModData modData,
-			IMapGeneratorInfo tool)
+			IEditorMapGeneratorInfo tool)
 		{
 			editorActionManager = world.WorldActor.Trait<EditorActionManager>();
 
@@ -261,17 +261,14 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		void GenerateMapMayThrow()
 		{
 			var map = world.Map;
-			var terrainInfo = map.Rules.TerrainInfo;
-			var generatedMap = new Map(modData, terrainInfo, map.MapSize);
-			var bounds = map.Bounds;
-			generatedMap.SetBounds(new PPos(bounds.Left, bounds.Top), new PPos(bounds.Right - 1, bounds.Bottom - 1));
-
-			var settings = this.settings.Compile(terrainInfo);
+			var terrainInfo = modData.DefaultTerrainInfo[map.Tileset];
+			var size = new Size(map.Bounds.Width + 2, map.Bounds.Height + 2);
+			var args = settings.Compile(terrainInfo, size);
 
 			// Run main generator logic. May throw.
 			var generateStopwatch = Stopwatch.StartNew();
-			Log.Write("debug", $"Running '{generator.Type}' map generator with settings:\n{MiniYamlExts.WriteToString(settings.Nodes)}\n\n");
-			generator.Generate(generatedMap, settings);
+			Log.Write("debug", $"Running '{generator.Type}' map generator with settings:\n{MiniYamlExts.WriteToString(args.Settings.Nodes)}\n\n");
+			var generatedMap = generator.Generate(modData, args);
 			Log.Write("debug", $"Generator finished, taking {generateStopwatch.ElapsedMilliseconds}ms");
 
 			var editorActorLayer = world.WorldActor.Trait<EditorActorLayer>();
@@ -283,13 +280,12 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				kv => kv.Key);
 
 			var tiles = new Dictionary<CPos, BlitTile>();
-			foreach (var cell in generatedMap.AllCells)
+			foreach (var uv in generatedMap.AllCells.MapCoords)
 			{
-				var mpos = cell.ToMPos(map);
-				var resourceTile = generatedMap.Resources[mpos];
+				var resourceTile = generatedMap.Resources[uv];
 				resourceTypesByIndex.TryGetValue(resourceTile.Type, out var resourceType);
 				var resourceLayerContents = new ResourceLayerContents(resourceType, resourceTile.Index);
-				tiles.Add(cell, new BlitTile(generatedMap.Tiles[mpos], resourceTile, resourceLayerContents, generatedMap.Height[mpos]));
+				tiles.Add(uv.ToCPos(generatedMap), new BlitTile(generatedMap.Tiles[uv], resourceTile, resourceLayerContents, generatedMap.Height[uv]));
 			}
 
 			var previews = new Dictionary<string, EditorActorPreview>();
@@ -306,11 +302,12 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				previews.Add(kv.Key, preview);
 			}
 
+			var offset = map.CellContaining(map.ProjectedTopLeft) - generatedMap.CellContaining(generatedMap.ProjectedTopLeft);
 			var blitSource = new EditorBlitSource(generatedMap.AllCells, previews, tiles);
 			var editorBlit = new EditorBlit(
 				MapBlitFilters.All,
 				resourceLayer,
-				new CPos(0, 0),
+				new CPos(offset.X, offset.Y),
 				map,
 				blitSource,
 				editorActorLayer,

@@ -23,7 +23,7 @@ using static OpenRA.Mods.Common.Traits.ResourceLayerInfo;
 namespace OpenRA.Mods.Common.Traits
 {
 	[TraitLocation(SystemActors.EditorWorld)]
-	public sealed class ExperimentalMapGeneratorInfo : TraitInfo<ExperimentalMapGenerator>, IMapGeneratorInfo, IEditorToolInfo
+	public sealed class ExperimentalMapGeneratorInfo : TraitInfo<ExperimentalMapGenerator>, IEditorMapGeneratorInfo, IEditorToolInfo
 	{
 		[FieldLoader.Require]
 		public readonly string Type = null;
@@ -31,6 +31,10 @@ namespace OpenRA.Mods.Common.Traits
 		[FieldLoader.Require]
 		[FluentReference]
 		public readonly string Name = null;
+
+		[FluentReference]
+		[Desc("The title to use for generated maps.")]
+		public readonly string MapTitle = "label-random-map";
 
 		[Desc("The widget tree to open when the tool is selected.")]
 		public readonly string PanelWidget = "MAP_GENERATOR_TOOL_PANEL";
@@ -45,6 +49,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		string IMapGeneratorInfo.Type => Type;
 		string IMapGeneratorInfo.Name => Name;
+		string IMapGeneratorInfo.MapTitle => MapTitle;
 
 		static MiniYaml SettingsLoader(MiniYaml my)
 		{
@@ -53,7 +58,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		static List<string> FluentReferencesLoader(MiniYaml my)
 		{
-			return new MapGeneratorSettings(my.NodeWithKey("Settings").Value)
+			return new MapGeneratorSettings(null, my.NodeWithKey("Settings").Value)
 				.Options.SelectMany(o => o.GetFluentReferences()).ToList();
 		}
 
@@ -481,16 +486,27 @@ namespace OpenRA.Mods.Common.Traits
 
 		public IMapGeneratorSettings GetSettings()
 		{
-			return new MapGeneratorSettings(Settings);
+			return new MapGeneratorSettings(this, Settings);
 		}
 
-		public void Generate(Map map, MiniYaml settings)
+		public Map Generate(ModData modData, MapGenerationArgs args)
 		{
 			const int ExternalBias = 4096;
 
-			var size = map.MapSize;
+			var terrainInfo = modData.DefaultTerrainInfo[args.Tileset];
+			var size = args.Size;
+
+			var map = new Map(modData, terrainInfo, size);
+			var maxTerrainHeight = map.Grid.MaximumTerrainHeight;
+			var tl = new PPos(1, 1 + maxTerrainHeight);
+			var br = new PPos(size.Width - 1, size.Height + maxTerrainHeight - 1);
+			map.SetBounds(tl, br);
+			map.Title = args.Title;
+			map.Author = args.Author;
+			map.RequiresMod = modData.Manifest.Id;
+
 			var minSpan = Math.Min(size.Width, size.Height);
-			var mapCenter1024ths = size.ToInt2() * 512;
+			var mapCenter1024ths = new int2(size.Width * 512, size.Height * 512);
 			var wMapCenter = CellLayerUtils.Center(map.Tiles);
 			var matrixMapCenter1024ths = CellLayerUtils.CellBounds(map).Size.ToInt2() * 512;
 			var cellBounds = CellLayerUtils.CellBounds(map);
@@ -499,19 +515,18 @@ namespace OpenRA.Mods.Common.Traits
 
 			var actorPlans = new List<ActorPlan>();
 
-			var param = new Parameters(map, settings);
+			var param = new Parameters(map, args.Settings);
 
 			var externalCircleRadius = minCSpan / 2 - (param.MinimumLandSeaThickness + param.MinimumMountainThickness);
 			if (externalCircleRadius <= 0)
 				throw new MapGenerationException("map is too small for circular shaping");
 
-			var tileset = (ITemplatedTerrainInfo)map.Rules.TerrainInfo;
-			var beachPermittedTemplates =
-				TilingPath.PermittedSegments.FromType(param.SegmentedBrushes, param.BeachSegmentTypes);
-
+			var beachPermittedTemplates = TilingPath.PermittedSegments.FromType(param.SegmentedBrushes, param.BeachSegmentTypes);
 			var replaceabilityMap = new Dictionary<TerrainTile, MultiBrush.Replaceability>();
 			var playabilityMap = new Dictionary<TerrainTile, PlayableSpace.Playability>();
-			foreach (var kv in tileset.Templates)
+
+			var templatedTerrainInfo = (ITemplatedTerrainInfo)terrainInfo;
+			foreach (var kv in templatedTerrainInfo.Templates)
 			{
 				var id = kv.Key;
 				var template = kv.Value;
@@ -520,7 +535,7 @@ namespace OpenRA.Mods.Common.Traits
 					if (template[ti] == null)
 						continue;
 					var tile = new TerrainTile(id, (byte)ti);
-					var type = tileset.GetTerrainIndex(tile);
+					var type = terrainInfo.GetTerrainIndex(tile);
 
 					if (param.PlayableTerrain.Contains(type))
 						playabilityMap[tile] = PlayableSpace.Playability.Playable;
@@ -565,7 +580,6 @@ namespace OpenRA.Mods.Common.Traits
 			// random.Next(). All generators should be created unconditionally.
 			var random = new MersenneTwister(param.Seed);
 
-			var pickAnyRandom = new MersenneTwister(random.Next());
 			var waterRandom = new MersenneTwister(random.Next());
 			var beachTilingRandom = new MersenneTwister(random.Next());
 			var cliffTilingRandom = new MersenneTwister(random.Next());
@@ -585,7 +599,7 @@ namespace OpenRA.Mods.Common.Traits
 
 			TerrainTile PickTile(ushort tileType)
 			{
-				if (tileset.Templates.TryGetValue(tileType, out var template) && template.PickAny)
+				if (templatedTerrainInfo.Templates.TryGetValue(tileType, out var template) && template.PickAny)
 					return new TerrainTile(tileType, (byte)random.Next(0, template.TilesCount));
 				else
 					return new TerrainTile(tileType, 0);
@@ -939,10 +953,10 @@ namespace OpenRA.Mods.Common.Traits
 					param.Mirror,
 					(CPos[] sources, CPos destination) =>
 					{
-						var main = tileset.GetTerrainIndex(map.Tiles[destination]);
+						var main = templatedTerrainInfo.GetTerrainIndex(map.Tiles[destination]);
 						var compatible = sources
 							.Where(replace.Contains)
-							.Select(source => tileset.GetTerrainIndex(map.Tiles[source]))
+							.Select(source => templatedTerrainInfo.GetTerrainIndex(map.Tiles[source]))
 							.All(source => CheckCompatibility(main, source));
 						replace[destination] = compatible ? MultiBrush.Replaceability.None : MultiBrush.Replaceability.Actor;
 					});
@@ -1108,7 +1122,7 @@ namespace OpenRA.Mods.Common.Traits
 						- CellLayerUtils.WPosToCPos(CellLayerUtils.Center(map.Tiles), gridType);
 
 				foreach (var cpos in map.AllCells)
-					space[cpos + enlargedOffset] = param.ClearTerrain.Contains(tileset.GetTerrainIndex(map.Tiles[cpos]));
+					space[cpos + enlargedOffset] = param.ClearTerrain.Contains(templatedTerrainInfo.GetTerrainIndex(map.Tiles[cpos]));
 
 				foreach (var actorPlan in actorPlans)
 					foreach (var (cpos, _) in actorPlan.Footprint())
@@ -1291,7 +1305,7 @@ namespace OpenRA.Mods.Common.Traits
 
 				var zoneable = new CellLayer<bool>(map);
 				foreach (var mpos in map.AllCells.MapCoords)
-					zoneable[mpos] = playableArea[mpos] && param.ZoneableTerrain.Contains(tileset.GetTerrainIndex(map.Tiles[mpos]));
+					zoneable[mpos] = playableArea[mpos] && param.ZoneableTerrain.Contains(templatedTerrainInfo.GetTerrainIndex(map.Tiles[mpos]));
 
 				foreach (var actorPlan in actorPlans)
 					foreach (var cpos in actorPlan.Footprint().Keys)
@@ -1738,7 +1752,7 @@ namespace OpenRA.Mods.Common.Traits
 				{
 					var space = new CellLayer<bool>(map);
 					foreach (var mpos in map.AllCells.MapCoords)
-						space[mpos] = param.PlayableTerrain.Contains(tileset.GetTerrainIndex(map.Tiles[mpos]));
+						space[mpos] = param.PlayableTerrain.Contains(templatedTerrainInfo.GetTerrainIndex(map.Tiles[mpos]));
 
 					foreach (var actorPlan in actorPlans)
 						foreach (var (cpos, _) in actorPlan.Footprint())
@@ -1858,6 +1872,8 @@ namespace OpenRA.Mods.Common.Traits
 			map.ActorDefinitions = actorPlans
 				.Select((plan, i) => new MiniYamlNode($"Actor{i}", plan.Reference.Save()))
 				.ToImmutableArray();
+
+			return map;
 		}
 
 		static CellLayer<MultiBrush.Replaceability> IdentifyReplaceableTiles(
