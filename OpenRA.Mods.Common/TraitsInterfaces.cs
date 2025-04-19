@@ -977,33 +977,17 @@ namespace OpenRA.Mods.Common.Traits
 
 	public interface IMapGeneratorSettings
 	{
-		/// <summary>Returns the options that allow users to customise the result.</summary>
 		List<MapGeneratorOption> Options { get; }
 
 		int PlayerCount { get; }
 
 		void Randomize(MersenneTwister random);
 
-		/// <summary>Merge all choices into a complete settings MiniYaml.</summary>
-		MiniYaml Compile(ITerrainInfo terrainInfo);
+		MapGenerationArgs Compile(ITerrainInfo terrainInfo, Size size);
 	}
 
-	public interface IMapGeneratorInfo : ITraitInfoInterface
+	public interface IEditorMapGeneratorInfo : IMapGeneratorInfo
 	{
-		string Type { get; }
-		string Name { get; }
-
 		IMapGeneratorSettings GetSettings();
-
-		/// <summary>
-		/// Generate or manipulate a supplied map in-place.
-		/// </summary>
-		/// <exception cref="YamlException">
-		/// May be thrown if the map settings are invalid. Map should be discarded.
-		/// </exception>
-		/// <exception cref="MapGenerationException">
-		/// Thrown if the map could not be generated with the requested configuration. Map should be discarded.
-		/// </exception>
-		void Generate(Map map, MiniYaml settings);
 	}
 }

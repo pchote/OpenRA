@@ -781,6 +781,7 @@ bot-hal9001 =
     .name = HAL 9001
 
 ## map-generators.yaml
+label-random-map = Random Map
 label-clear-map-generator-option-tile = Tile
 label-clear-map-generator-choice-tile-clear =
    .label = Clear

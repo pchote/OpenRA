@@ -207,7 +207,7 @@ namespace OpenRA.Mods.Common.UtilityCommands
 				.ToImmutableArray();
 
 			var generator = modData.DefaultRules.Actors[SystemActors.EditorWorld]
-				.TraitInfos<IMapGeneratorInfo>()
+				.TraitInfos<IEditorMapGeneratorInfo>()
 				.FirstOrDefault(info => info.Type == config.MapGeneratorType);
 			if (generator == null)
 				throw new ArgumentException($"No map generator with type `{config.MapGeneratorType}`");
@@ -265,12 +265,6 @@ namespace OpenRA.Mods.Common.UtilityCommands
 					if (size.Length != 2)
 						throw new ArgumentException($"bad map size `{iterationChoices[Configuration.SizeVariable]}`");
 
-					var map = new Map(modData, terrainInfo, new Size(size[0], size[1]));
-					var maxTerrainHeight = map.Grid.MaximumTerrainHeight;
-					var tl = new PPos(1, 1 + maxTerrainHeight);
-					var br = new PPos(size[0], size[1] + maxTerrainHeight);
-					map.SetBounds(tl, br);
-
 					var settings = generator.GetSettings();
 					foreach (var o in settings.Options)
 					{
@@ -299,7 +293,7 @@ namespace OpenRA.Mods.Common.UtilityCommands
 						tests++;
 						try
 						{
-							generator.Generate(map, settings.Compile(terrainInfo));
+							generator.Generate(modData, settings.Compile(terrainInfo, new Size(size[0], size[1])));
 						}
 						catch (Exception e) when (e is MapGenerationException || e is YamlException)
 						{
