@@ -319,7 +319,7 @@ namespace OpenRA.Mods.Common.Pathfinder
 						false);
 				}
 
-				return new Grid(CPos.Zero, (CPos)map.MapSize, false);
+				return new Grid(CPos.Zero, new CPos(map.MapSize.Width, map.MapSize.Height), false);
 			}
 
 			mapBounds = GetCPosBounds(world.Map);

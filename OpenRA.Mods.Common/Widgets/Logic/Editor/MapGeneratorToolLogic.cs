@@ -262,7 +262,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		{
 			var map = world.Map;
 			var terrainInfo = map.Rules.TerrainInfo;
-			var generatedMap = new Map(modData, terrainInfo, map.MapSize.X, map.MapSize.Y);
+			var generatedMap = new Map(modData, terrainInfo, map.MapSize);
 			var bounds = map.Bounds;
 			generatedMap.SetBounds(new PPos(bounds.Left, bounds.Top), new PPos(bounds.Right - 1, bounds.Bottom - 1));
 

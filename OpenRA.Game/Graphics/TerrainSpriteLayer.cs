@@ -49,23 +49,23 @@ namespace OpenRA.Graphics
 			BlendMode = blendMode;
 			map = world.Map;
 
-			vertexRowStride = 4 * map.MapSize.X;
-			vertices = new Vertex[vertexRowStride * map.MapSize.Y];
+			vertexRowStride = 4 * map.MapSize.Width;
+			vertices = new Vertex[vertexRowStride * map.MapSize.Height];
 			vertexBuffer = Game.Renderer.Context.CreateEmptyVertexBuffer<Vertex>(vertices.Length);
 
-			indexRowStride = 6 * map.MapSize.X;
+			indexRowStride = 6 * map.MapSize.Width;
 			lock (IndexBuffers)
 			{
 				indexBufferWrapper = IndexBuffers.GetValue(world, world => new IndexBufferRc(world));
 				indexBufferWrapper.AddRef();
 			}
 
-			palettes = new PaletteReference[map.MapSize.X * map.MapSize.Y];
+			palettes = new PaletteReference[map.MapSize.Width * map.MapSize.Height];
 			wr.PaletteInvalidated += UpdatePaletteIndices;
 
 			if (wr.TerrainLighting != null)
 			{
-				ignoreTint = new bool[vertexRowStride * map.MapSize.Y];
+				ignoreTint = new bool[vertexRowStride * map.MapSize.Height];
 				wr.TerrainLighting.CellChanged += UpdateTint;
 			}
 		}
@@ -80,7 +80,7 @@ namespace OpenRA.Graphics
 				vertices[i] = new Vertex(v.X, v.Y, v.Z, v.S, v.T, v.U, v.V, c, v.R, v.G, v.B, v.A);
 			}
 
-			for (var row = 0; row < map.MapSize.Y; row++)
+			for (var row = 0; row < map.MapSize.Height; row++)
 				dirtyRows.Add(row);
 		}
 
@@ -193,7 +193,7 @@ namespace OpenRA.Graphics
 
 			var offset = vertexRowStride * uv.V + 4 * uv.U;
 			Util.FastCreateQuad(vertices, pos, sprite, samplers, palette?.TextureIndex ?? 0, offset, scale * sprite.Size, alpha * float3.Ones, alpha);
-			palettes[uv.V * map.MapSize.X + uv.U] = palette;
+			palettes[uv.V * map.MapSize.Width + uv.U] = palette;
 
 			if (worldRenderer.TerrainLighting != null)
 			{
@@ -209,8 +209,8 @@ namespace OpenRA.Graphics
 			var cells = restrictToBounds ? viewport.VisibleCellsInsideBounds : viewport.AllVisibleCells;
 
 			// Only draw the rows that are visible.
-			var firstRow = cells.CandidateMapCoords.TopLeft.V.Clamp(0, map.MapSize.Y);
-			var lastRow = (cells.CandidateMapCoords.BottomRight.V + 1).Clamp(firstRow, map.MapSize.Y);
+			var firstRow = cells.CandidateMapCoords.TopLeft.V.Clamp(0, map.MapSize.Height);
+			var lastRow = (cells.CandidateMapCoords.BottomRight.V + 1).Clamp(firstRow, map.MapSize.Height);
 
 			Game.Renderer.Flush();
 
@@ -250,7 +250,8 @@ namespace OpenRA.Graphics
 
 			public IndexBufferRc(World world)
 			{
-				Buffer = Game.Renderer.Context.CreateIndexBuffer(Util.CreateQuadIndices(world.Map.MapSize.X * world.Map.MapSize.Y));
+				Buffer = Game.Renderer.Context.CreateIndexBuffer(
+					Util.CreateQuadIndices(world.Map.MapSize.Width * world.Map.MapSize.Height));
 			}
 
 			public void AddRef() { count++; }

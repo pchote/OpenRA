@@ -489,9 +489,8 @@ namespace OpenRA.Mods.Common.Traits
 			const int ExternalBias = 4096;
 
 			var size = map.MapSize;
-			var minSpan = Math.Min(size.X, size.Y);
-			var maxSpan = Math.Max(size.X, size.Y);
-			var mapCenter1024ths = size * 512;
+			var minSpan = Math.Min(size.Width, size.Height);
+			var mapCenter1024ths = size.ToInt2() * 512;
 			var wMapCenter = CellLayerUtils.Center(map.Tiles);
 			var matrixMapCenter1024ths = CellLayerUtils.CellBounds(map).Size.ToInt2() * 512;
 			var cellBounds = CellLayerUtils.CellBounds(map);
@@ -756,7 +755,7 @@ namespace OpenRA.Mods.Common.Traits
 					// Limit mountain area to the existing mountain space (starting with all available land)
 					var roominess = MatrixUtils.ChebyshevRoom(cliffPlan, true);
 					var available = 0;
-					var total = size.X * size.Y;
+					var total = size.Width * size.Height;
 					for (var n = 0; n < mountainElevation.Data.Length; n++)
 					{
 						if (roominess.Data[n] < param.MinimumTerrainContourSpacing)
@@ -1719,7 +1718,7 @@ namespace OpenRA.Mods.Common.Traits
 							decorationNoise[mpos] = -1024 * 1024;
 					}
 
-					var mapArea = map.MapSize.X * map.MapSize.Y;
+					var mapArea = map.MapSize.Width * map.MapSize.Height;
 					CellLayerUtils.CalibrateQuantileInPlace(
 						decorationNoise,
 						0,

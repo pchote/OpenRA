@@ -74,7 +74,7 @@ namespace OpenRA.Mods.Cnc.UtilityCommands
 				if (!ModData.DefaultTerrainInfo.TryGetValue(tileset, out var terrainInfo))
 					throw new InvalidDataException($"Unknown tileset {tileset}");
 
-				Map = new Map(ModData, terrainInfo, MapSize, MapSize)
+				Map = new Map(ModData, terrainInfo, new Size(MapSize, MapSize))
 				{
 					Title = basic.GetValue("Name", Path.GetFileNameWithoutExtension(filename)),
 					Author = author,

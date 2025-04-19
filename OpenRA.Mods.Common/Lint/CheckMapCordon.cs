@@ -18,7 +18,7 @@ namespace OpenRA.Mods.Common.Lint
 		public void Run(Action<string> emitError, Action<string> emitWarning, ModData modData, Map map)
 		{
 			if (map.Bounds.Left == 0 || map.Bounds.Top == 0
-				|| map.Bounds.Right == map.MapSize.X || map.Bounds.Bottom == map.MapSize.Y)
+				|| map.Bounds.Right == map.MapSize.Width || map.Bounds.Bottom == map.MapSize.Height)
 				emitError("This map does not define a valid cordon.\n"
 					+ "A one cell (or greater) border is required on all four sides "
 					+ "between the playable bounds and the map edges.");

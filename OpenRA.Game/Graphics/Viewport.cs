@@ -155,8 +155,8 @@ namespace OpenRA.Graphics
 			if (wr.World.Type == WorldType.Editor)
 			{
 				// The full map is visible in the editor
-				var width = map.MapSize.X * tileSize.Width;
-				var height = map.MapSize.Y * tileSize.Height;
+				var width = map.MapSize.Width * tileSize.Width;
+				var height = map.MapSize.Height * tileSize.Height;
 				if (wr.World.Map.Grid.Type == MapGridType.RectangularIsometric)
 					height /= 2;
 

@@ -61,8 +61,8 @@ namespace OpenRA.Mods.Common.Traits
 
 			var tileScale = map.Grid.TileScale;
 			partitionedLightSources = new SpatiallyPartitioned<LightSource>(
-				(map.MapSize.X + 1) * tileScale,
-				(map.MapSize.Y + 1) * tileScale,
+				(map.MapSize.Width + 1) * tileScale,
+				(map.MapSize.Height + 1) * tileScale,
 				info.BinSize * tileScale);
 		}
 

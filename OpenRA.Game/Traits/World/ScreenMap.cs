@@ -62,8 +62,8 @@ namespace OpenRA.Traits
 		public ScreenMap(World world, ScreenMapInfo info)
 		{
 			var size = world.Map.Rules.TerrainInfo.TileSize;
-			var width = world.Map.MapSize.X * size.Width;
-			var height = world.Map.MapSize.Y * size.Height;
+			var width = world.Map.MapSize.Width * size.Width;
+			var height = world.Map.MapSize.Height * size.Height;
 
 			partitionedMouseFrozenActors = new Cache<Player, SpatiallyPartitioned<FrozenActor>>(
 				_ => new SpatiallyPartitioned<FrozenActor>(width, height, info.BinSize));

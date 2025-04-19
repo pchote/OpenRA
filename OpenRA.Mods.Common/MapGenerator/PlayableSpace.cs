@@ -70,7 +70,6 @@ namespace OpenRA.Mods.Common.MapGenerator
 			List<ActorPlan> actorPlans,
 			Dictionary<TerrainTile, Playability> playabilityMap)
 		{
-			var size = map.MapSize;
 			var regions = new List<Region>();
 			var regionMap = new CellLayer<int>(map);
 			regionMap.Clear(NullRegion);

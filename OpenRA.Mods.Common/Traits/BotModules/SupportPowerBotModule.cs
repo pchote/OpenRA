@@ -140,9 +140,9 @@ namespace OpenRA.Mods.Common.Traits
 			var suitableLocations = new List<(MPos UV, int Attractiveness)>();
 			var totalAttractiveness = 0;
 
-			for (var i = 0; i < map.MapSize.X; i += checkRadius)
+			for (var i = 0; i < map.MapSize.Width; i += checkRadius)
 			{
-				for (var j = 0; j < map.MapSize.Y; j += checkRadius)
+				for (var j = 0; j < map.MapSize.Height; j += checkRadius)
 				{
 					var tl = new MPos(i, j);
 					var br = new MPos(i + checkRadius, j + checkRadius);

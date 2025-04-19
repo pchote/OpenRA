@@ -314,7 +314,7 @@ namespace OpenRA.Mods.Common.Traits
 			cellsDirty.Clear(true);
 			anyCellDirty = true;
 			var tl = new PPos(0, 0);
-			var br = new PPos(map.MapSize.X - 1, map.MapSize.Y - 1);
+			var br = new PPos(map.MapSize.Width - 1, map.MapSize.Height - 1);
 			UpdateShroud(new ProjectedCellRegion(map, tl, br));
 		}
 

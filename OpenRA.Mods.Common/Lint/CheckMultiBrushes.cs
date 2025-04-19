@@ -12,6 +12,7 @@
 using System;
 using OpenRA.Mods.Common.MapGenerator;
 using OpenRA.Mods.Common.Terrain;
+using OpenRA.Primitives;
 
 namespace OpenRA.Mods.Common.Lint
 {
@@ -23,8 +24,9 @@ namespace OpenRA.Mods.Common.Lint
 			{
 				if (terrainInfo is ITemplatedTerrainInfo templatedTerrainInfo && templatedTerrainInfo.MultiBrushCollections.Count > 0)
 				{
-					var map = new Map(modData, terrainInfo, 1, 1);
+					var map = new Map(modData, terrainInfo, new Size(1, 1));
 					foreach (var (collectionName, collection) in templatedTerrainInfo.MultiBrushCollections)
+					{
 						foreach (var info in collection)
 						{
 							try
@@ -41,6 +43,7 @@ namespace OpenRA.Mods.Common.Lint
 								emitError($"Tileset {terrainInfoName} has invalid MultiBrush collection `{collectionName}`: {e.Message}");
 							}
 						}
+					}
 				}
 			}
 		}

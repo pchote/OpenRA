@@ -74,9 +74,9 @@ namespace OpenRA.Mods.Cnc.Traits
 			var terrainInfo = map.Rules.TerrainInfo;
 			var info = terrainInfo.TerrainTypes[terrainInfo.GetTerrainIndex(terrainType)];
 
-			for (var i = 0; i < map.MapSize.X; i++)
+			for (var i = 0; i < map.MapSize.Width; i++)
 			{
-				for (var j = 0; j < map.MapSize.Y; j++)
+				for (var j = 0; j < map.MapSize.Height; j++)
 				{
 					var uv = new MPos(i, j);
 
