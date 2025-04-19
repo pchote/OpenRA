@@ -76,7 +76,7 @@ namespace OpenRA.Mods.Cnc.UtilityCommands
 			var usedAreaSize = new Size(iniSize[2], 2 * iniSize[3]);
 			var mapCanvasSize = new Size(usedAreaSize.Width + Cordon.Left + Cordon.Right, usedAreaSize.Height + Cordon.Top + Cordon.Bottom);
 
-			var map = new Map(Game.ModData, terrainInfo, mapCanvasSize.Width, mapCanvasSize.Height)
+			var map = new Map(Game.ModData, terrainInfo, mapCanvasSize)
 			{
 				Title = basic.GetValue("Name", Path.GetFileNameWithoutExtension(filename)),
 				Author = author,

@@ -264,7 +264,7 @@ namespace OpenRA.Traits
 			frozenActorsById = [];
 
 			partitionedFrozenActors = new SpatiallyPartitioned<FrozenActor>(
-				world.Map.MapSize.X, world.Map.MapSize.Y, binSize);
+				world.Map.MapSize.Width, world.Map.MapSize.Height, binSize);
 
 			self.Trait<Shroud>().OnShroudChanged += uv =>
 			{

@@ -17,6 +17,7 @@ using System.Linq;
 using System.Text;
 using OpenRA.Mods.Common.MapGenerator;
 using OpenRA.Mods.Common.Traits;
+using OpenRA.Primitives;
 
 namespace OpenRA.Mods.Common.UtilityCommands
 {
@@ -264,7 +265,7 @@ namespace OpenRA.Mods.Common.UtilityCommands
 					if (size.Length != 2)
 						throw new ArgumentException($"bad map size `{iterationChoices[Configuration.SizeVariable]}`");
 
-					var map = new Map(modData, terrainInfo, size[0], size[1]);
+					var map = new Map(modData, terrainInfo, new Size(size[0], size[1]));
 					var maxTerrainHeight = map.Grid.MaximumTerrainHeight;
 					var tl = new PPos(1, 1 + maxTerrainHeight);
 					var br = new PPos(size[0], size[1] + maxTerrainHeight);

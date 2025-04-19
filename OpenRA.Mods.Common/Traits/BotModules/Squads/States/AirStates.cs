@@ -61,8 +61,8 @@ namespace OpenRA.Mods.Common.Traits.BotModules.Squads
 			var dangerRadius = owner.SquadManager.Info.DangerScanRadius;
 			detectedEnemyTarget = null;
 
-			var columnCount = (map.MapSize.X + dangerRadius - 1) / dangerRadius;
-			var rowCount = (map.MapSize.Y + dangerRadius - 1) / dangerRadius;
+			var columnCount = (map.MapSize.Width + dangerRadius - 1) / dangerRadius;
+			var rowCount = (map.MapSize.Height + dangerRadius - 1) / dangerRadius;
 
 			var checkIndices = Exts.MakeArray(columnCount * rowCount, i => i).Shuffle(owner.World.LocalRandom);
 			foreach (var i in checkIndices)

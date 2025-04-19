@@ -194,8 +194,8 @@ namespace OpenRA.Mods.Common.Traits
 			map = world.Map;
 			influence = [new CellLayer<InfluenceNode>(world.Map)];
 
-			cols = CellCoordToBinIndex(world.Map.MapSize.X) + 1;
-			rows = CellCoordToBinIndex(world.Map.MapSize.Y) + 1;
+			cols = CellCoordToBinIndex(world.Map.MapSize.Width) + 1;
+			rows = CellCoordToBinIndex(world.Map.MapSize.Height) + 1;
 			bins = new Bin[rows * cols];
 			for (var row = 0; row < rows; row++)
 				for (var col = 0; col < cols; col++)

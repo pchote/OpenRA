@@ -85,8 +85,8 @@ namespace OpenRA.Mods.Common.Traits
 			cellMap = new SpatiallyPartitioned<EditorActorPreview>(
 				mapCellSize.X, mapCellSize.Y, Exts.IntegerDivisionRoundingAwayFromZero(Info.BinSize, ts.Width));
 
-			var width = world.Map.MapSize.X * ts.Width;
-			var height = world.Map.MapSize.Y * ts.Height;
+			var width = world.Map.MapSize.Width * ts.Width;
+			var height = world.Map.MapSize.Height * ts.Height;
 			screenMap = new SpatiallyPartitioned<EditorActorPreview>(width, height, Info.BinSize);
 
 			foreach (var kv in world.Map.ActorDefinitions)

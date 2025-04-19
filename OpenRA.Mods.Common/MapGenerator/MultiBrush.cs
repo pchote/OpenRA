@@ -533,8 +533,9 @@ namespace OpenRA.Mods.Common.MapGenerator
 			var size = map.MapSize;
 			var replaceMposes = new List<MPos>();
 			var remaining = new CellLayer<bool>(map);
-			for (var v = 0; v < size.Y; v++)
-				for (var u = 0; u < size.X; u++)
+			for (var v = 0; v < size.Height; v++)
+			{
+				for (var u = 0; u < size.Width; u++)
 				{
 					var mpos = new MPos(u, v);
 					if (replace[mpos] != Replaceability.None)
@@ -547,8 +548,9 @@ namespace OpenRA.Mods.Common.MapGenerator
 						remaining[mpos] = false;
 					}
 				}
+			}
 
-			var mposes = new MPos[size.X * size.Y];
+			var mposes = new MPos[size.Width * size.Height];
 			int mposCount;
 
 			void RefreshIndices()

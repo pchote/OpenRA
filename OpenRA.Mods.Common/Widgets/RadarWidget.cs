@@ -75,8 +75,8 @@ namespace OpenRA.Mods.Common.Widgets
 			radarTerrainLayers = world.WorldActor.TraitsImplementing<IRadarTerrainLayer>().ToArray();
 			isRectangularIsometric = world.Map.Grid.Type == MapGridType.RectangularIsometric;
 			cellWidth = isRectangularIsometric ? 2 : 1;
-			previewWidth = world.Map.MapSize.X;
-			previewHeight = world.Map.MapSize.Y;
+			previewWidth = world.Map.MapSize.Width;
+			previewHeight = world.Map.MapSize.Height;
 			if (isRectangularIsometric)
 				previewWidth = 2 * previewWidth - 1;
 		}

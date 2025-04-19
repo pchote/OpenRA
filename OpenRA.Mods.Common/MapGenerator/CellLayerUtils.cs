@@ -322,7 +322,7 @@ namespace OpenRA.Mods.Common.MapGenerator
 		/// </summary>
 		public static Rectangle CellBounds(Map map)
 		{
-			return CellBounds(new Size(map.MapSize.X, map.MapSize.Y), map.Grid.Type);
+			return CellBounds(map.MapSize, map.Grid.Type);
 		}
 
 		/// <summary>
