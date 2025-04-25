@@ -196,6 +196,7 @@ namespace OpenRA
 		}
 
 		static readonly CPos[] NoSpawns = [];
+		readonly object syncRoot = new();
 		readonly MapCache cache;
 		readonly ModData modData;
 		IReadOnlyPackage package;
@@ -452,28 +453,37 @@ namespace OpenRA
 			newData.ModifiedDate = File.GetLastWriteTime(p.Name);
 
 			// Assign the new data atomically
-			innerData = newData;
+			// Local maps have higher precedence than remote/generated maps,
+			// so should always replace their metadata
+			lock (syncRoot)
+				innerData = newData;
 		}
 
-		public void UpdateRemoteSearch(MapStatus status, MiniYaml yaml, Action<MapPreview> parseMetadata = null)
+		public void BeginRemoteSearch()
 		{
 			var newData = innerData.Clone();
-			newData.Status = status;
 			newData.Class = MapClassification.Remote;
+			newData.Status = MapStatus.Searching;
 
-			if (status == MapStatus.DownloadAvailable)
+			// We may have been resolved to a local/generated map by another
+			// async task. Make sure we don't stomp over their state!
+			lock (syncRoot)
+				if (innerData.Class == MapClassification.Unknown)
+					innerData = newData;
+		}
+
+		public void CompleteRemoteSearch(MiniYaml yaml, Action<MapPreview> parseMetadata = null)
+		{
+			var newData = innerData.Clone();
+			newData.Class = MapClassification.Remote;
+			newData.Status = MapStatus.Unavailable;
+
+			if (yaml != null)
 			{
 				try
 				{
 					var r = FieldLoader.Load<RemoteMapData>(yaml);
-
-					// Map download has been disabled server side
-					if (!r.downloading)
-					{
-						newData.Status = MapStatus.Unavailable;
-						return;
-					}
-
+					newData.Status = r.downloading ? MapStatus.DownloadAvailable : MapStatus.Unavailable;
 					newData.Title = r.title;
 					newData.Categories = r.categories;
 					newData.Author = r.author;
@@ -520,19 +530,27 @@ namespace OpenRA
 				{
 					Log.Write("debug", "Failed parsing mapserver response:");
 					Log.Write("debug", e);
+					newData.Status = MapStatus.Unavailable;
 				}
+			}
 
-				// Commit updated data before running the callbacks
-				innerData = newData;
+			// We may have been resolved to a local/generated map by another
+			// async task. Make sure we don't stomp over their state!
+			MapClassification mapClassification;
+			lock (syncRoot)
+			{
+				mapClassification = innerData.Class;
+				if (mapClassification == MapClassification.Remote)
+					innerData = newData;
+			}
 
+			if (mapClassification == MapClassification.Remote)
+			{
 				if (innerData.Preview != null)
 					cache.CacheMinimap(this);
 
 				parseMetadata?.Invoke(this);
 			}
-
-			// Update the status and class unconditionally
-			innerData = newData;
 		}
 
 		public void Install(string mapRepositoryUrl)
