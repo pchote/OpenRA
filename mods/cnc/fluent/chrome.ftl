@@ -518,6 +518,7 @@ label-mapchooser-panel-title = Select Map
 button-mapchooser-system-maps-tab = Official Maps
 button-mapchooser-remote-maps-tab = Server Maps
 button-mapchooser-user-maps-tab = Custom Maps
+button-mapchooser-generated-maps-tab = Generate Map
 label-filter-order-controls-desc = Filter:
 label-filter-order-controls-desc-joiner = in
 label-filter-order-controls-orderby = Order by:
@@ -525,6 +526,13 @@ button-bg-randommap = Random
 button-bg-delete-map = Delete Map
 button-bg-delete-all-maps = Delete All Maps
 button-bg-ok = Ok
+
+label-mapchooser-random-map-title = Random Map
+label-mapchooser-random-generating = Generating...
+label-mapchooser-random-error = Map Generation Failed
+button-bg-generate = Generate
+label-bg-map-size = Map Size:
+label-mapchooser-random-error-desc = Adjust the settings and try again.
 
 ## missionbrowser.yaml
 button-missionbrowser-panel-mission-info = Mission Info

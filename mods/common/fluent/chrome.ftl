@@ -337,6 +337,7 @@ label-mapchooser-panel-title = Choose Map
 button-mapchooser-system-maps-tab = Official Maps
 button-mapchooser-remote-maps-tab = Server Maps
 button-mapchooser-user-maps-tab = Custom Maps
+button-mapchooser-generated-maps-tab = Generate Map
 label-filter-order-controls-desc = Filter:
 label-filter-order-controls-desc-joiner = in
 label-filter-order-controls-orderby = Order by:

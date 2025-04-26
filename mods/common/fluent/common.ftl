@@ -512,10 +512,10 @@ label-player-count =
         [one] { $players } Player
        *[other] { $players } Players
     }
-label-map-size-huge = (Huge)
-label-map-size-large = (Large)
-label-map-size-medium = (Medium)
-label-map-size-small = (Small)
+label-map-size-huge = Huge
+label-map-size-large = Large
+label-map-size-medium = Medium
+label-map-size-small = Small
 label-map-searching-count =
     { $count ->
         [one] Searching the OpenRA Resource Center for { $count } map...

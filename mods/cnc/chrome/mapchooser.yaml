@@ -63,6 +63,9 @@ Container@MAPCHOOSER_PANEL:
 									Width: PARENT_WIDTH
 									Height: PARENT_HEIGHT
 									ItemSpacing: 1
+						Container@GENERATE_MAP_TAB:
+							Width: PARENT_WIDTH
+							Height: PARENT_HEIGHT + 30
 				ScrollItem@MAP_TEMPLATE:
 					Width: 210
 					Height: 262
@@ -186,3 +189,113 @@ Container@MAPCHOOSER_PANEL:
 					Height: 35
 					Text: button-bg-ok
 				TooltipContainer@TOOLTIP_CONTAINER:
+
+Container@MAPCHOOSER_GENERATE_PANEL:
+	Logic: MapGeneratorLogic
+	Width: PARENT_WIDTH
+	Height: PARENT_HEIGHT
+	Children:
+		Background@MAP_BG:
+			X: PARENT_WIDTH - WIDTH
+			Width: 370
+			Height: 370
+			Background: panel-gray
+			Children:
+				GeneratedMapPreview@PREVIEW:
+					X: 1
+					Y: 1
+					Width: PARENT_WIDTH - 2
+					Height: PARENT_HEIGHT - 2
+		Label@TITLE:
+			X: PARENT_WIDTH - WIDTH
+			Y: 380
+			Width: 370
+			Height: 24
+			Align: Center
+			Text: label-mapchooser-random-map-title
+			Font: Bold
+		Label@ERROR:
+			X: PARENT_WIDTH - WIDTH
+			Y: 400
+			Width: 370
+			Height: 24
+			Align: Center
+			Text: label-mapchooser-random-error-desc
+		Label@DETAILS:
+			X: PARENT_WIDTH - WIDTH
+			Y: 360
+			Width: 370
+			X: 4
+			Y: 357
+			Align: Center
+			Font: Tiny
+		LabelWithTooltip@AUTHOR:
+			X: PARENT_WIDTH - WIDTH
+			Y: 360
+			Width: 370
+			Height: 12
+			X: 4
+			Y: 369
+			Align: Center
+			Font: Tiny
+			TooltipContainer: TOOLTIP_CONTAINER
+			TooltipTemplate: SIMPLE_TOOLTIP
+		Label@SIZE:
+			X: PARENT_WIDTH - WIDTH
+			Y: 350
+			Width: 370
+			Height: 12
+			X: 4
+			Y: PARENT_HEIGHT - HEIGHT - 2
+			Align: Center
+			Font: Tiny
+		Button@BUTTON_GENERATE:
+			X: PARENT_WIDTH - 135 - WIDTH
+			Y: PARENT_HEIGHT + 14
+			Width: 140
+			Height: 35
+			Text: button-bg-generate
+		ScrollPanel@SETTINGS_PANEL:
+			TopBottomSpacing: 5
+			Width: 485
+			Height: PARENT_HEIGHT
+			Children:
+				Container@CHECKBOX_TEMPLATE:
+					Width: 230
+					Height: 30
+					Children:
+						Checkbox@CHECKBOX:
+							X: 10
+							Y: 5
+							Width: PARENT_WIDTH - 20
+							Height: 20
+				Container@TEXT_TEMPLATE:
+					Width: 230
+					Height: 50
+					Children:
+						LabelForInput@LABEL:
+							X: 10
+							Width: PARENT_WIDTH - 20
+							Height: 20
+							For: INPUT
+						TextField@INPUT:
+							X: 10
+							Y: 20
+							Width: PARENT_WIDTH - 20
+							Height: 25
+				Container@DROPDOWN_TEMPLATE:
+					Width: 230
+					Height: 50
+					Children:
+						LabelForInput@LABEL:
+							X: 10
+							Width: PARENT_WIDTH - 20
+							Height: 20
+							For: DROPDOWN
+						DropDownButton@DROPDOWN:
+							X: 10
+							Y: 20
+							Width: PARENT_WIDTH - 20
+							Height: 25
+							PanelRoot: GENERATOR_DROPDOWN_PANEL_ROOT # ensure that tooltips for the options are on top of the dropdown panel
+		Container@GENERATOR_DROPDOWN_PANEL_ROOT:

@@ -248,6 +248,25 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 						Game.Settings.Save();
 					});
 
+					var onSelectGenerated = new Action<MapGenerationArgs>(args =>
+					{
+						var nodes = new List<MiniYamlNode>()
+						{
+							new("Uid", args.Uid),
+							new("Generator", args.Generator),
+							new("Tileset", args.Tileset),
+							new("Size", FieldSaver.FormatValue(args.Size)),
+							new("Settings", args.Settings),
+							new("Title", args.Title),
+							new("Author", args.Author)
+						};
+
+						orderManager.IssueOrder(Order.FromTargetString("GenerateMap", nodes.WriteToString(), true));
+						orderManager.IssueOrder(Order.Command("map " + args.Uid));
+						Game.Settings.Server.Map = args.Uid;
+						Game.Settings.Save();
+					});
+
 					// Check for updated maps, if the user has edited a map we'll preselect it for them
 					modData.MapCache.UpdateMaps();
 
@@ -258,6 +277,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 						{ "initialTab", MapClassification.System },
 						{ "onExit", modData.MapCache.UpdateMaps },
 						{ "onSelect", Game.IsHost ? onSelect : null },
+						{ "onSelectGenerated", Game.IsHost ? onSelectGenerated : null },
 						{ "filter", MapVisibility.Lobby },
 					});
 				};
