@@ -32,6 +32,10 @@ namespace OpenRA.Mods.Common.Traits
 		[FluentReference]
 		public readonly string Name = null;
 
+		[FieldLoader.Require]
+		[Desc("Tilesets that are compatible with this map generator.")]
+		public readonly string[] Tilesets = null;
+
 		[FluentReference]
 		[Desc("The title to use for generated maps.")]
 		public readonly string MapTitle = "label-random-map";
@@ -50,6 +54,7 @@ namespace OpenRA.Mods.Common.Traits
 		string IMapGeneratorInfo.Type => Type;
 		string IMapGeneratorInfo.Name => Name;
 		string IMapGeneratorInfo.MapTitle => MapTitle;
+		string[] IEditorMapGeneratorInfo.Tilesets => Tilesets;
 
 		static MiniYaml SettingsLoader(MiniYaml my)
 		{

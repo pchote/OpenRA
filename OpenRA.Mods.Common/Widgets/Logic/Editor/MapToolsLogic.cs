@@ -29,6 +29,9 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			var tools = world.Map.Rules.Actors[SystemActors.EditorWorld].TraitInfos<IEditorToolInfo>();
 			foreach (var tool in tools)
 			{
+				if (tool is IEditorMapGeneratorInfo gi && !gi.Tilesets.Contains(world.Map.Tileset))
+					continue;
+
 				var panel = Game.LoadWidget(world, tool.PanelWidget, widget, new WidgetArgs() { { "tool", tool } });
 				toolPanels.Add(panel);
 				toolLabels.Add(panel, FluentProvider.GetMessage(tool.Label));
