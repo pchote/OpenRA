@@ -18,24 +18,21 @@ Container@MAPCHOOSER_PANEL:
 			Height: PARENT_HEIGHT
 			Background: panel-black
 			Children:
-				Button@SYSTEM_MAPS_TAB_BUTTON:
+				Button@BUTTON1:
 					X: 15
 					Y: 15
 					Height: 31
 					Width: 135
-					Text: button-bg-system-maps-tab
-				Button@REMOTE_MAPS_TAB_BUTTON:
-					X: 15
-					Y: 15
-					Height: 31
-					Width: 135
-					Text: button-bg-remote-maps-tab
-				Button@USER_MAPS_TAB_BUTTON:
+				Button@BUTTON2:
 					X: 155
 					Y: 15
 					Height: 31
 					Width: 135
-					Text: button-bg-user-maps-tab
+				Button@BUTTON3:
+					X: 295
+					Y: 15
+					Height: 31
+					Width: 135
 				Container@MAP_TAB_PANES:
 					Width: PARENT_WIDTH - 30
 					Height: PARENT_HEIGHT - 90

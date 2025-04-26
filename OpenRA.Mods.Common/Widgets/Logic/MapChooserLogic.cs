@@ -82,6 +82,15 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		[FluentReference]
 		const string OrderMapsBySize = "options-order-maps.size";
 
+		[FluentReference]
+		const string SystemMapsTab = "button-mapchooser-system-maps-tab";
+
+		[FluentReference]
+		const string UserMapsTab = "button-mapchooser-user-maps-tab";
+
+		[FluentReference]
+		const string RemoteMapsTab = "button-mapchooser-remote-maps-tab";
+
 		readonly string allMaps;
 
 		readonly Widget widget;
@@ -89,6 +98,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly ModData modData;
 		readonly HashSet<string> remoteMapPool;
 		readonly ScrollItemWidget itemTemplate;
+		readonly MapVisibility filter;
 
 		MapClassification currentTab;
 		bool disposed;
@@ -96,8 +106,9 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		int remoteUnavailable = 0;
 
 		readonly Dictionary<MapClassification, ScrollPanelWidget> scrollpanels = [];
-
 		readonly Dictionary<MapClassification, MapPreview[]> tabMaps = [];
+		readonly Dictionary<MapClassification, string> tabLabels = [];
+
 		string[] visibleMaps;
 
 		string selectedUid;
@@ -116,6 +127,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			this.modData = modData;
 			this.onSelect = onSelect;
 			this.remoteMapPool = remoteMapPool;
+			this.filter = filter;
 
 			allMaps = FluentProvider.GetMessage(AllMaps);
 
@@ -182,8 +194,9 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			{
 				DeleteOneMap(selectedUid, newUid =>
 				{
-					RefreshMaps(currentTab, filter);
+					RefreshMaps(currentTab);
 					EnumerateMaps(currentTab);
+					SetupMapTabs();
 					if (tabMaps[currentTab].Length == 0)
 						SwitchTab(modData.MapCache[newUid].Class);
 				});
@@ -193,10 +206,11 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			deleteAllMapsButton.IsVisible = () => currentTab == MapClassification.User;
 			deleteAllMapsButton.OnClick = () =>
 			{
-				DeleteAllMaps(visibleMaps, (string newUid) =>
+				DeleteAllMaps(visibleMaps, newUid =>
 				{
-					RefreshMaps(currentTab, filter);
+					RefreshMaps(currentTab);
 					EnumerateMaps(currentTab);
+					SetupMapTabs();
 					SwitchTab(modData.MapCache[newUid].Class);
 				});
 			};
@@ -220,29 +234,37 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				modData.MapCache.QueryRemoteMapDetails(services.MapRepository, remoteMapPool);
 			}
 
-			SetupMapTab(MapClassification.User, filter, "USER_MAPS_TAB_BUTTON", "USER_MAPS_TAB");
-			SetupMapTab(MapClassification.System, filter, "SYSTEM_MAPS_TAB_BUTTON", "SYSTEM_MAPS_TAB");
-			SetupMapTab(MapClassification.Remote, filter, "REMOTE_MAPS_TAB_BUTTON", "REMOTE_MAPS_TAB");
+			SetupMapPanel(MapClassification.User, "USER_MAPS_TAB");
+			SetupMapPanel(MapClassification.System, "SYSTEM_MAPS_TAB");
+			SetupMapPanel(MapClassification.Remote, "REMOTE_MAPS_TAB");
 
 			// System and user map tabs are hidden when the server forces a restricted pool
 			if (remoteMapPool != null)
 			{
+				tabLabels[MapClassification.Remote] = RemoteMapsTab;
 				currentTab = MapClassification.Remote;
 				selectedUid = initialMap;
 			}
-			else if (initialMap == null && tabMaps.TryGetValue(initialTab, out var map) && map.Length > 0)
-			{
-				selectedUid = Game.ModData.MapCache.ChooseInitialMap(map.Select(mp => mp.Uid).First(),
-					Game.CosmeticRandom);
-				currentTab = initialTab;
-			}
 			else
 			{
-				selectedUid = Game.ModData.MapCache.ChooseInitialMap(initialMap, Game.CosmeticRandom);
-				currentTab = tabMaps.Keys.FirstOrDefault(k => tabMaps[k].Select(mp => mp.Uid).Contains(selectedUid));
+				tabLabels[MapClassification.System] = SystemMapsTab;
+				tabLabels[MapClassification.User] = UserMapsTab;
+
+				if (initialMap == null && tabMaps.TryGetValue(initialTab, out var map) && map.Length > 0)
+				{
+					var uid = map.Select(mp => mp.Uid).First();
+					selectedUid = Game.ModData.MapCache.ChooseInitialMap(uid, Game.CosmeticRandom);
+					currentTab = initialTab;
+				}
+				else
+				{
+					selectedUid = Game.ModData.MapCache.ChooseInitialMap(initialMap, Game.CosmeticRandom);
+					currentTab = tabMaps.Keys.FirstOrDefault(k => tabMaps[k].Select(mp => mp.Uid).Contains(selectedUid));
+				}
 			}
 
 			EnumerateMaps(currentTab);
+			SetupMapTabs();
 		}
 
 		void SwitchTab(MapClassification tab)
@@ -251,7 +273,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			EnumerateMaps(tab);
 		}
 
-		void RefreshMaps(MapClassification tab, MapVisibility filter)
+		void RefreshMaps(MapClassification tab)
 		{
 			if (tab != MapClassification.Remote)
 				tabMaps[tab] = modData.MapCache.Where(m => m.Status == MapStatus.Available &&
@@ -283,7 +305,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 							return;
 
 						var missingBefore = remoteSearching + remoteUnavailable;
-						RefreshMaps(MapClassification.Remote, filter);
+						RefreshMaps(MapClassification.Remote);
 						var missingAfter = remoteSearching + remoteUnavailable;
 						if (currentTab == MapClassification.Remote && missingBefore != missingAfter)
 							EnumerateMaps(MapClassification.Remote);
@@ -294,7 +316,27 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				tabMaps[tab] = [];
 		}
 
-		void SetupMapTab(MapClassification tab, MapVisibility filter, string tabButtonName, string tabContainerName)
+		void SetupMapTabs()
+		{
+			for (var i = 0; i < 3; i++)
+				widget.Get<ButtonWidget>($"BUTTON{i + 1}").Visible = false;
+
+			var tabCount = 0;
+			foreach (var kv in tabLabels)
+			{
+				var tab = kv.Key;
+				if (tabMaps[tab].Length == 0)
+					continue;
+
+				var tabButton = widget.Get<ButtonWidget>($"BUTTON{++tabCount}");
+				tabButton.IsHighlighted = () => currentTab == tab;
+				tabButton.OnClick = () => SwitchTab(tab);
+				tabButton.Visible = true;
+				tabButton.Text = kv.Value;
+			}
+		}
+
+		void SetupMapPanel(MapClassification tab, string tabContainerName)
 		{
 			var tabContainer = widget.Get<ContainerWidget>(tabContainerName);
 			tabContainer.IsVisible = () => currentTab == tab;
@@ -302,20 +344,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			tabScrollpanel.Layout = new GridLayout(tabScrollpanel);
 			scrollpanels.Add(tab, tabScrollpanel);
 
-			var tabButton = widget.Get<ButtonWidget>(tabButtonName);
-			tabButton.IsHighlighted = () => currentTab == tab;
-
-			if (remoteMapPool != null)
-			{
-				var isRemoteTab = tab == MapClassification.Remote;
-				tabButton.IsVisible = () => isRemoteTab;
-			}
-			else
-				tabButton.IsVisible = () => tabMaps[tab].Length > 0;
-
-			tabButton.OnClick = () => SwitchTab(tab);
-
-			RefreshMaps(tab, filter);
+			RefreshMaps(tab);
 		}
 
 		void SetupGameModeDropdown(MapClassification tab, DropDownButtonWidget gameModeDropdown)
