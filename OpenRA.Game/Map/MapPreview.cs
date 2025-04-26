@@ -535,7 +535,7 @@ namespace OpenRA
 			innerData = newData;
 		}
 
-		public void Install(string mapRepositoryUrl, Action onSuccess)
+		public void Install(string mapRepositoryUrl)
 		{
 			if ((Status != MapStatus.DownloadError && Status != MapStatus.DownloadAvailable) || !Game.Settings.Game.AllowDownloading)
 				return;
@@ -592,10 +592,7 @@ namespace OpenRA
 					if (p == null)
 						innerData.Status = MapStatus.DownloadError;
 					else
-					{
 						UpdateFromMapWithoutOwningPackage(p, mapInstallPackage, MapClassification.User, GridType);
-						Game.RunAfterTick(onSuccess);
-					}
 				}
 				catch (Exception e)
 				{

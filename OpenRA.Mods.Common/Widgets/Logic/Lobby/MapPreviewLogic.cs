@@ -64,7 +64,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		bool mapUpdateAvailable = false;
 
 		[ObjectCreator.UseCtor]
-		internal MapPreviewLogic(Widget widget, ModData modData, OrderManager orderManager, Func<(MapPreview Map, Session.MapStatus Status)> getMap,
+		internal MapPreviewLogic(Widget widget, ModData modData, Func<(MapPreview Map, Session.MapStatus Status)> getMap,
 			Action<MapPreviewWidget, MapPreview, MouseInput> onMouseDown, Func<Dictionary<int, SpawnOccupant>> getSpawnOccupants,
 			bool mapUpdatesEnabled, Action<string> onMapUpdate, Func<HashSet<int>> getDisabledSpawnPoints, bool showUnoccupiedSpawnpoints)
 		{
@@ -132,15 +132,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			{
 				var button = parent.Get<ButtonWidget>("MAP_INSTALL");
 				button.IsHighlighted = () => blink;
-				button.OnClick = () =>
-				{
-					getMap().Map.Install(mapRepository, () =>
-					{
-						if (orderManager != null)
-							Game.RunAfterTick(() => orderManager.IssueOrder(Order.Command($"state {Session.ClientState.NotReady}")));
-					});
-				};
-
+				button.OnClick = () => getMap().Map.Install(mapRepository);
 				return parent;
 			}
 
@@ -187,13 +179,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				mapUpdateAvailable = mapUpdatesEnabled && uid != null && map.Uid != uid;
 
 				if (map.Status == MapStatus.DownloadError)
-				{
-					map.Install(mapRepository, () =>
-					{
-						if (orderManager != null)
-							Game.RunAfterTick(() => orderManager.IssueOrder(Order.Command($"state {Session.ClientState.NotReady}")));
-					});
-				}
+					map.Install(mapRepository);
 				else if (map.Status == MapStatus.Unavailable)
 					modData.MapCache.QueryRemoteMapDetails(mapRepository, [map.Uid]);
 			};
