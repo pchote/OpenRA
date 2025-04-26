@@ -71,6 +71,7 @@ namespace OpenRA.Mods.Common.Terrain
 		public readonly string Name;
 		public readonly string Id;
 		public readonly Size TileSize = new(24, 24);
+		public readonly float DefaultScale = 1.0f;
 		public readonly int SheetSize = 512;
 		public readonly Color[] HeightDebugColors = [Color.Red];
 		public readonly string[] EditorTemplateOrder;
@@ -171,6 +172,7 @@ namespace OpenRA.Mods.Common.Terrain
 
 		string ITerrainInfo.Id => Id;
 		Size ITerrainInfo.TileSize => TileSize;
+		float ITerrainInfo.DefaultScale => DefaultScale;
 		TerrainTypeInfo[] ITerrainInfo.TerrainTypes => TerrainInfo;
 		TerrainTileInfo ITerrainInfo.GetTerrainInfo(TerrainTile r) { return GetTileInfo(r); }
 		bool ITerrainInfo.TryGetTerrainInfo(TerrainTile r, out TerrainTileInfo info) { return TryGetTileInfo(r, out info); }

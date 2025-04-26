@@ -90,7 +90,7 @@ namespace OpenRA.Graphics
 
 		public void OverrideDefaultHeight(float height)
 		{
-			defaultScale = viewportSizes.DefaultScale * Game.Renderer.NativeResolution.Height / height;
+			defaultScale = worldRenderer.World.Map.Rules.TerrainInfo.DefaultScale * Game.Renderer.NativeResolution.Height / height;
 			overrideUserScale = true;
 			UpdateViewportZooms(false);
 		}
@@ -149,7 +149,7 @@ namespace OpenRA.Graphics
 			tileSize = map.Rules.TerrainInfo.TileSize;
 			viewportSizes = Game.ModData.Manifest.Get<WorldViewportSizes>();
 			graphicSettings = Game.Settings.Graphics;
-			defaultScale = viewportSizes.DefaultScale;
+			defaultScale = map.Rules.TerrainInfo.DefaultScale;
 
 			// Calculate map bounds in world-px
 			if (wr.World.Type == WorldType.Editor)

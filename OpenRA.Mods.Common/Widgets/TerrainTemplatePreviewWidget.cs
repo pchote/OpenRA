@@ -23,7 +23,7 @@ namespace OpenRA.Mods.Common.Widgets
 
 		readonly ITiledTerrainRenderer terrainRenderer;
 		readonly WorldRenderer worldRenderer;
-		readonly WorldViewportSizes viewportSizes;
+		readonly float defaultScale;
 
 		TerrainTemplateInfo template;
 
@@ -31,12 +31,11 @@ namespace OpenRA.Mods.Common.Widgets
 		public int2 IdealPreviewSize { get; private set; }
 
 		[ObjectCreator.UseCtor]
-		public TerrainTemplatePreviewWidget(ModData modData, WorldRenderer worldRenderer, World world)
+		public TerrainTemplatePreviewWidget(WorldRenderer worldRenderer, World world)
 		{
 			this.worldRenderer = worldRenderer;
-			viewportSizes = modData.Manifest.Get<WorldViewportSizes>();
-
 			terrainRenderer = world.WorldActor.TraitOrDefault<ITiledTerrainRenderer>();
+			defaultScale = world.Map.Rules.TerrainInfo.DefaultScale;
 			if (terrainRenderer == null)
 				throw new YamlException("TerrainTemplatePreviewWidget requires a tile-based terrain renderer.");
 		}
@@ -45,9 +44,9 @@ namespace OpenRA.Mods.Common.Widgets
 			: base(other)
 		{
 			worldRenderer = other.worldRenderer;
-			viewportSizes = other.viewportSizes;
 			terrainRenderer = other.terrainRenderer;
 			template = other.template;
+			defaultScale = other.defaultScale;
 			GetScale = other.GetScale;
 		}
 
@@ -57,10 +56,10 @@ namespace OpenRA.Mods.Common.Widgets
 		{
 			this.template = template;
 			var b = terrainRenderer.TemplateBounds(template);
-			IdealPreviewSize = new int2((int)(b.Width * viewportSizes.DefaultScale), (int)(b.Height * viewportSizes.DefaultScale));
+			IdealPreviewSize = new int2((int)(b.Width * defaultScale), (int)(b.Height * defaultScale));
 
 			// Measured from the middle of the widget to the middle of the top-left cell of the template
-			PreviewOffset = -new int2((int)(b.Left * viewportSizes.DefaultScale), (int)(b.Top * viewportSizes.DefaultScale)) - IdealPreviewSize / 2;
+			PreviewOffset = -new int2((int)(b.Left * defaultScale), (int)(b.Top * defaultScale)) - IdealPreviewSize / 2;
 		}
 
 		public override void Draw()
@@ -68,7 +67,7 @@ namespace OpenRA.Mods.Common.Widgets
 			if (template == null)
 				return;
 
-			var scale = GetScale() * viewportSizes.DefaultScale;
+			var scale = GetScale() * defaultScale;
 			var origin = RenderOrigin + PreviewOffset + new int2(RenderBounds.Size.Width / 2, RenderBounds.Size.Height / 2);
 
 			foreach (var r in terrainRenderer.RenderUIPreview(worldRenderer, template, origin, scale))

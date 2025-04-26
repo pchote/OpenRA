@@ -23,7 +23,7 @@ namespace OpenRA.Mods.Common.Widgets
 		public Func<float> GetScale = () => 1f;
 
 		readonly WorldRenderer worldRenderer;
-		readonly WorldViewportSizes viewportSizes;
+		readonly float defaultScale;
 		readonly IResourceRenderer[] resourceRenderers;
 		readonly Size tileSize;
 
@@ -47,15 +47,15 @@ namespace OpenRA.Mods.Common.Widgets
 		public Size IdealPreviewSize { get; }
 
 		[ObjectCreator.UseCtor]
-		public ResourcePreviewWidget(ModData modData, WorldRenderer worldRenderer, World world)
+		public ResourcePreviewWidget(WorldRenderer worldRenderer, World world)
 		{
 			this.worldRenderer = worldRenderer;
-			viewportSizes = modData.Manifest.Get<WorldViewportSizes>();
+			defaultScale = world.Map.Rules.TerrainInfo.DefaultScale;
 			resourceRenderers = world.WorldActor.TraitsImplementing<IResourceRenderer>().ToArray();
 			tileSize = world.Map.Rules.TerrainInfo.TileSize;
 			IdealPreviewSize = new Size(
-				(int)(viewportSizes.DefaultScale * tileSize.Width),
-				(int)(viewportSizes.DefaultScale * tileSize.Height));
+				(int)(defaultScale * tileSize.Width),
+				(int)(defaultScale * tileSize.Height));
 		}
 
 		protected ResourcePreviewWidget(ResourcePreviewWidget other)
@@ -63,7 +63,7 @@ namespace OpenRA.Mods.Common.Widgets
 		{
 			GetScale = other.GetScale;
 			worldRenderer = other.worldRenderer;
-			viewportSizes = other.viewportSizes;
+			defaultScale = other.defaultScale;
 			resourceRenderers = other.resourceRenderers;
 			tileSize = other.tileSize;
 			resourceType = other.resourceType;
@@ -78,7 +78,7 @@ namespace OpenRA.Mods.Common.Widgets
 			if (resourceRenderer == null)
 				return;
 
-			var scale = GetScale() * viewportSizes.DefaultScale;
+			var scale = GetScale() * defaultScale;
 			var origin = RenderOrigin + new int2(
 				(int)(0.5f * (RenderBounds.Size.Width - scale * tileSize.Width)),
 				(int)(0.5f * (RenderBounds.Size.Height - scale * tileSize.Height)));

@@ -26,6 +26,7 @@ namespace OpenRA
 	{
 		string Id { get; }
 		Size TileSize { get; }
+		float DefaultScale { get; }
 		TerrainTypeInfo[] TerrainTypes { get; }
 		TerrainTileInfo GetTerrainInfo(TerrainTile r);
 		bool TryGetTerrainInfo(TerrainTile r, out TerrainTileInfo info);

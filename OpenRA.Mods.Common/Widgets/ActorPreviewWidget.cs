@@ -25,7 +25,7 @@ namespace OpenRA.Mods.Common.Widgets
 		public Func<float> GetScale = () => 1f;
 
 		readonly WorldRenderer worldRenderer;
-		readonly WorldViewportSizes viewportSizes;
+		readonly float defaultScale;
 
 		IActorPreview[] preview = [];
 		public int2 PreviewOffset { get; private set; }
@@ -34,7 +34,7 @@ namespace OpenRA.Mods.Common.Widgets
 		[ObjectCreator.UseCtor]
 		public ActorPreviewWidget(ModData modData, WorldRenderer worldRenderer)
 		{
-			viewportSizes = modData.Manifest.Get<WorldViewportSizes>();
+			defaultScale = worldRenderer.World.Map.Rules.TerrainInfo.DefaultScale;
 			this.worldRenderer = worldRenderer;
 		}
 
@@ -43,7 +43,7 @@ namespace OpenRA.Mods.Common.Widgets
 		{
 			preview = other.preview;
 			worldRenderer = other.worldRenderer;
-			viewportSizes = other.viewportSizes;
+			defaultScale = other.defaultScale;
 		}
 
 		public override ActorPreviewWidget Clone() { return new ActorPreviewWidget(this); }
@@ -58,14 +58,14 @@ namespace OpenRA.Mods.Common.Widgets
 			// Calculate the preview bounds
 			var r = preview.SelectMany(p => p.ScreenBounds(worldRenderer, WPos.Zero));
 			var b = r.Union();
-			IdealPreviewSize = new int2((int)(b.Width * viewportSizes.DefaultScale), (int)(b.Height * viewportSizes.DefaultScale));
-			PreviewOffset = -new int2((int)(b.Left * viewportSizes.DefaultScale), (int)(b.Top * viewportSizes.DefaultScale)) - IdealPreviewSize / 2;
+			IdealPreviewSize = new int2((int)(b.Width * defaultScale), (int)(b.Height * defaultScale));
+			PreviewOffset = -new int2((int)(b.Left * defaultScale), (int)(b.Top * defaultScale)) - IdealPreviewSize / 2;
 		}
 
 		IFinalizedRenderable[] renderables;
 		public override void PrepareRenderables()
 		{
-			var scale = GetScale() * viewportSizes.DefaultScale;
+			var scale = GetScale() * defaultScale;
 			var origin = RenderOrigin + PreviewOffset + new int2(RenderBounds.Size.Width / 2, RenderBounds.Size.Height / 2);
 
 			renderables = preview
