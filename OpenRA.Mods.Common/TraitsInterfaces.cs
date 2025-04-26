@@ -988,6 +988,7 @@ namespace OpenRA.Mods.Common.Traits
 
 	public interface IEditorMapGeneratorInfo : IMapGeneratorInfo
 	{
+		string[] Tilesets { get; }
 		IMapGeneratorSettings GetSettings();
 	}
 }

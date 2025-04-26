@@ -2,6 +2,7 @@
 	ExperimentalMapGenerator@experimental:
 		Type: experimental
 		Name: map-generator-experimental
+		Tilesets: DESERT, SNOW, TEMPERAT
 		Settings:
 			MultiChoiceOption@hidden_defaults:
 				Choice@hidden_defaults:
@@ -463,6 +464,7 @@
 	ClearMapGenerator@clear:
 		Type: clear
 		Name: map-generator-clear
+		Tilesets: DESERT, SNOW, TEMPERAT, INTERIOR
 		Settings:
 			MultiChoiceOption@Tile:
 				Label: label-clear-map-generator-option-tile
