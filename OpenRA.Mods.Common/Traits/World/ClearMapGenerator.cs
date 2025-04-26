@@ -32,6 +32,10 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Internal id for this map generator.")]
 		public readonly string Type = null;
 
+		[FieldLoader.Require]
+		[Desc("Tilesets that are compatible with this map generator.")]
+		public readonly string[] Tilesets = null;
+
 		[FluentReference]
 		[Desc("The title to use for generated maps.")]
 		public readonly string MapTitle = "label-random-map";
@@ -115,6 +119,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		string IEditorToolInfo.Label => Name;
 		string IEditorToolInfo.PanelWidget => PanelWidget;
+		string[] IEditorMapGeneratorInfo.Tilesets => Tilesets;
 	}
 
 	public class ClearMapGenerator { /* we're only interested in the Info */ }
