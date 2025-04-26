@@ -104,6 +104,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		bool teamChat;
 		bool updateDiscordStatus = true;
 		bool resetOptionsButtonEnabled;
+		bool mapAvailable;
 		Dictionary<int, SpawnOccupant> spawnOccupants = [];
 
 		readonly string chatLineSound;
@@ -589,6 +590,13 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		public override void Tick()
 		{
+			// Map may have been installed or generated in the background
+			if (!mapAvailable && map.Status == MapStatus.Available)
+			{
+				mapAvailable = true;
+				orderManager.IssueOrder(Order.Command($"state {Session.ClientState.NotReady}"));
+			}
+
 			if (panel == PanelType.Options && OptionsTabDisabled())
 				panel = PanelType.Players;
 
@@ -650,7 +658,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			map = modData.MapCache[uid];
 
 			// Tell the server that we have the map
-			if (map.Status == MapStatus.Available)
+			mapAvailable = map.Status == MapStatus.Available;
+			if (mapAvailable)
 				orderManager.IssueOrder(Order.Command($"state {Session.ClientState.NotReady}"));
 
 			// We don't have the map
