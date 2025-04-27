@@ -1,5 +1,5 @@
 General:
-	Name: Snow
+	Name: tileset-snow
 	Id: SNOW
 	EditorTemplateOrder: Terrain, Debris, Road, Cliffs, Beach, River, Bridge
 	HeightDebugColors: 880000

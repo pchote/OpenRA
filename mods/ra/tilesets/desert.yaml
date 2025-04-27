@@ -1,5 +1,5 @@
 General:
-	Name: Desert
+	Name: tileset-desert
 	Id: DESERT
 	EditorTemplateOrder: Terrain, Debris, Road, Cliffs, Water Cliffs, Beach, River, Bridge
 	HeightDebugColors: 880000
