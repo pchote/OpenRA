@@ -29,21 +29,23 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			panel.Get<ButtonWidget>("CANCEL_BUTTON").OnClick = () => { Ui.CloseWindow(); onExit(); };
 
+			var selectedTerrain = modData.DefaultTerrainInfo.Values.First();
 			var tilesetDropDown = panel.Get<DropDownButtonWidget>("TILESET");
-			var tilesets = modData.DefaultTerrainInfo.Keys;
-			ScrollItemWidget SetupItem(string option, ScrollItemWidget template)
+			ScrollItemWidget SetupItem(ITerrainInfo option, ScrollItemWidget template)
 			{
 				var item = ScrollItemWidget.Setup(template,
-					() => tilesetDropDown.GetText() == option,
-					() => tilesetDropDown.GetText = () => option);
-				item.Get<LabelWidget>("LABEL").GetText = () => option;
+					() => selectedTerrain == option,
+					() => selectedTerrain = option);
+
+				var itemLabel = FluentProvider.GetMessage(option.Name);
+				item.Get<LabelWidget>("LABEL").GetText = () => itemLabel;
 				return item;
 			}
 
-			var firstTileset = tilesets.First();
-			tilesetDropDown.GetText = () => firstTileset;
+			var label = new CachedTransform<ITerrainInfo, string>(ti => FluentProvider.GetMessage(ti.Name));
+			tilesetDropDown.GetText = () => label.Update(selectedTerrain);
 			tilesetDropDown.OnClick = () =>
-				tilesetDropDown.ShowDropDown("LABEL_DROPDOWN_TEMPLATE", 210, tilesets, SetupItem);
+				tilesetDropDown.ShowDropDown("LABEL_DROPDOWN_TEMPLATE", 210, modData.DefaultTerrainInfo.Values, SetupItem);
 
 			var widthTextField = panel.Get<TextFieldWidget>("WIDTH");
 			var heightTextField = panel.Get<TextFieldWidget>("HEIGHT");
@@ -59,8 +61,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				height = Math.Max(2, height);
 
 				var maxTerrainHeight = world.Map.Grid.MaximumTerrainHeight;
-				var tileset = modData.DefaultTerrainInfo[tilesetDropDown.GetText()];
-				var map = new Map(Game.ModData, tileset, new Size(width + 2, height + maxTerrainHeight + 2));
+				var map = new Map(Game.ModData, selectedTerrain, new Size(width + 2, height + maxTerrainHeight + 2));
 
 				var tl = new PPos(1, 1 + maxTerrainHeight);
 				var br = new PPos(width, height + maxTerrainHeight);

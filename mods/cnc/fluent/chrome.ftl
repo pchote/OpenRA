@@ -42,7 +42,7 @@ button-text-input-prompt-accept = OK
 
 ## editor.yaml
 label-new-map-bg-title = New Map
-label-bg-tileset = Tileset:
+label-bg-tileset = Environment:
 label-bg-width = Width:
 label-bg-height = Height:
 button-new-map-bg-create = Create

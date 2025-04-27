@@ -171,6 +171,7 @@ namespace OpenRA.Mods.Common.Terrain
 		}
 
 		string ITerrainInfo.Id => Id;
+		string ITerrainInfo.Name => Name;
 		Size ITerrainInfo.TileSize => TileSize;
 		TerrainTypeInfo[] ITerrainInfo.TerrainTypes => TerrainInfo;
 		TerrainTileInfo ITerrainInfo.GetTerrainInfo(TerrainTile r) { return GetTileInfo(r); }

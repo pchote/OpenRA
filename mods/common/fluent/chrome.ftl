@@ -38,7 +38,7 @@ label-credits-title = Credits
 
 ## editor.yaml
 label-new-map-bg-title = New Map
-label-new-map-bg-tileset = Tileset:
+label-new-map-bg-tileset = Environment:
 label-new-map-bg-width = Width:
 label-new-map-bg-height = Height:
 button-new-map-bg-create = Create
