@@ -25,6 +25,7 @@ namespace OpenRA
 	public interface ITerrainInfo
 	{
 		string Id { get; }
+		string Name { get; }
 		Size TileSize { get; }
 		TerrainTypeInfo[] TerrainTypes { get; }
 		TerrainTileInfo GetTerrainInfo(TerrainTile r);
