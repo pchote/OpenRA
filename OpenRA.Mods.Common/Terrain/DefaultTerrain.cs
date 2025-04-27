@@ -68,6 +68,7 @@ namespace OpenRA.Mods.Common.Terrain
 
 	public class DefaultTerrain : ITemplatedTerrainInfo, ITerrainInfoNotifyMapCreated
 	{
+		[FluentReference]
 		public readonly string Name;
 		public readonly string Id;
 		public readonly Size TileSize = new(24, 24);

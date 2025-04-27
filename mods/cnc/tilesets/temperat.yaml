@@ -1,5 +1,5 @@
 General:
-	Name: Temperate
+	Name: tileset-temperat
 	Id: TEMPERAT
 	EditorTemplateOrder: Terrain, Debris, Road, Cliffs, Beach, River, Bridge
 	HeightDebugColors: AA0000

@@ -1,5 +1,5 @@
 General:
-	Name: Temperate
+	Name: tileset-temperat
 	Id: TEMPERAT
 	SheetSize: 1024
 	EditorTemplateOrder: Terrain, Debris, Road, Cliffs, Water Cliffs, Beach, River, Bridge

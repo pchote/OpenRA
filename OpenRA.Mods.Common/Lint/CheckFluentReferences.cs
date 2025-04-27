@@ -231,6 +231,9 @@ namespace OpenRA.Mods.Common.Lint
 
 		static (Keys UsedKeys, List<FieldInfo> TestedFields) GetUsedFluentKeysInMod(ModData modData)
 		{
+			const BindingFlags ConstBinding = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
+			const BindingFlags InstanceBinding = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+
 			var usedKeys = GetUsedFluentKeysInRuleset(modData.DefaultRules);
 			var testedFields = new List<FieldInfo>();
 			testedFields.AddRange(
@@ -256,15 +259,21 @@ namespace OpenRA.Mods.Common.Lint
 					[resource.Value],
 					(obj, field) => $"`ResourceRenderer.ResourceTypes.{resource.Key}.{field.Name}` in rules yaml");
 
-			const BindingFlags Binding = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
-			var constFields = modData.ObjectCreator.GetTypes().SelectMany(modType => modType.GetFields(Binding)).Where(f => f.IsLiteral);
+			foreach (var terrainInfo in modData.DefaultTerrainInfo.Values)
+				GetUsedFluentKeys(
+					usedKeys, testedFields,
+					terrainInfo.GetType().GetFields(InstanceBinding),
+					[terrainInfo],
+					(obj, field) => $"`{field.ReflectedType.Name}.{field.Name}`");
+
+			var constFields = modData.ObjectCreator.GetTypes().SelectMany(modType => modType.GetFields(ConstBinding)).Where(f => f.IsLiteral);
 			GetUsedFluentKeys(
 				usedKeys, testedFields,
 				constFields,
 				[(object)null],
 				(obj, field) => $"`{field.ReflectedType.Name}.{field.Name}`");
 
-			var modMetadataFields = typeof(ModMetadata).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+			var modMetadataFields = typeof(ModMetadata).GetFields(InstanceBinding);
 			GetUsedFluentKeys(
 				usedKeys, testedFields,
 				modMetadataFields,
