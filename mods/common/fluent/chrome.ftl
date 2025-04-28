@@ -333,9 +333,6 @@ button-settings-title = Settings
 
 ## map-chooser.yaml
 label-mapchooser-panel-title = Choose Map
-button-mapchooser-panel-system-maps-tab = Official Maps
-button-mapchooser-panel-remote-maps-tab = Server Maps
-button-mapchooser-panel-user-maps-tab = Custom Maps
 label-filter-order-controls-desc = Filter:
 label-filter-order-controls-desc-joiner = in
 label-filter-order-controls-orderby = Order by:

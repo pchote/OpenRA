@@ -545,6 +545,10 @@ options-order-maps =
     .date = Date
     .size = Size
 
+button-mapchooser-system-maps-tab = Official Maps
+button-mapchooser-remote-maps-tab = Server Maps
+button-mapchooser-user-maps-tab = Custom Maps
+
 ## MissionBrowserLogic
 dialog-no-video =
     .title = Video not installed
