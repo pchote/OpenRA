@@ -235,7 +235,7 @@ namespace OpenRA
 				.ToList();
 
 			foreach (var uid in queryUids)
-				previews[uid].UpdateRemoteSearch(MapStatus.Searching, null, null);
+				previews[uid].BeginRemoteSearch();
 
 			Task.Run(async () =>
 			{
@@ -251,29 +251,21 @@ namespace OpenRA
 						try
 						{
 							var result = await client.GetStreamAsync(url);
-							var yaml = MiniYaml.FromStream(result, url, stringPool: stringPool);
-							foreach (var kv in yaml)
-								previews[kv.Key].UpdateRemoteSearch(MapStatus.DownloadAvailable, kv.Value, mapDetailsReceived);
-
-							foreach (var uid in batchUids)
-							{
-								var p = previews[uid];
-								if (p.Status != MapStatus.DownloadAvailable)
-									p.UpdateRemoteSearch(MapStatus.Unavailable, null, null);
-							}
+							foreach (var kv in MiniYaml.FromStream(result, url, stringPool: stringPool))
+								previews[kv.Key].CompleteRemoteSearch(kv.Value, mapDetailsReceived);
 						}
 						catch (Exception e)
 						{
 							Log.Write("debug", "Remote map query failed with error:");
 							Log.Write("debug", e);
 							Log.Write("debug", $"URL was: {url}");
+						}
 
-							foreach (var uid in batchUids)
-							{
-								var p = previews[uid];
-								p.UpdateRemoteSearch(MapStatus.Unavailable, null, null);
-								mapQueryFailed?.Invoke(p);
-							}
+						foreach (var uid in batchUids)
+						{
+							var p = previews[uid];
+							if (p.Status == MapStatus.Searching)
+								p.CompleteRemoteSearch(null, mapQueryFailed);
 						}
 					}
 				}
