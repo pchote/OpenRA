@@ -10,3 +10,6 @@ tileset-desert = Desert
 tileset-snow = Snow
 tileset-temperat = Temperate
 tileset-interior = Interior
+
+## SupportPowerTimerWidget
+support-power-timer = { $player }'s { $support-power }: { $time }
