@@ -17,6 +17,8 @@ using OpenRA.Widgets;
 
 namespace OpenRA.Mods.Common.Widgets.Logic
 {
+	[IncludeChromeLogicArgsFluentReferences(nameof(DynamicFluentReferences))]
+	[IncludeStaticFluentReferences(typeof(KeycodeExts), typeof(ModifiersExts))]
 	public class HotkeysSettingsLogic : ChromeLogic
 	{
 		[FluentReference("key")]
@@ -27,6 +29,13 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		[FluentReference]
 		const string AnyContext = HotkeyDefinition.ContextFluentPrefix + "-any";
+
+		public static IEnumerable<(string Key, FluentReferenceAttribute Reference)> DynamicFluentReferences(Dictionary<string, MiniYaml> logicArgs)
+		{
+			if (logicArgs.TryGetValue("HotkeyGroups", out var hotkeyGroupsYaml))
+				foreach (var node in hotkeyGroupsYaml.Nodes)
+					yield return (node.Key, new FluentReferenceAttribute());
+		}
 
 		readonly ModData modData;
 		readonly Dictionary<string, MiniYaml> logicArgs;

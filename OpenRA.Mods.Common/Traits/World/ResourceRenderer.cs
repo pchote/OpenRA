@@ -48,6 +48,7 @@ namespace OpenRA.Mods.Common.Traits
 			}
 		}
 
+		[IncludeFluentReferences(LintDictionaryReference.Values)]
 		[FieldLoader.LoadUsing(nameof(LoadResourceTypes))]
 		public readonly Dictionary<string, ResourceTypeInfo> ResourceTypes = null;
 

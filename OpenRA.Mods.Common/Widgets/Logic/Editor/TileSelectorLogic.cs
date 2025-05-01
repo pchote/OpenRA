@@ -19,6 +19,10 @@ using OpenRA.Widgets;
 
 namespace OpenRA.Mods.Common.Widgets.Logic
 {
+	[IncludeStaticFluentReferences(
+		typeof(PaintTileEditorAction),
+		typeof(FloodFillEditorAction),
+		typeof(CommonSelectorLogic))]
 	public class TileSelectorLogic : CommonSelectorLogic
 	{
 		sealed class TileSelectorTemplate

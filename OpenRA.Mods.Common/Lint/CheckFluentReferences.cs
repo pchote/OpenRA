@@ -10,6 +10,7 @@
 #endregion
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,9 +20,6 @@ using Linguini.Syntax.Ast;
 using Linguini.Syntax.Parser;
 using OpenRA.Mods.Common.Scripting;
 using OpenRA.Mods.Common.Scripting.Global;
-using OpenRA.Mods.Common.Traits;
-using OpenRA.Mods.Common.Warheads;
-using OpenRA.Mods.Common.Widgets.Logic;
 using OpenRA.Scripting;
 using OpenRA.Traits;
 using OpenRA.Widgets;
@@ -30,13 +28,14 @@ namespace OpenRA.Mods.Common.Lint
 {
 	sealed class CheckFluentReferences : ILintPass, ILintMapPass
 	{
+		const BindingFlags StaticBinding = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
+
 		void ILintMapPass.Run(Action<string> emitError, Action<string> emitWarning, ModData modData, Map map)
 		{
 			if (map.FluentMessageDefinitions == null)
 				return;
 
-			var usedKeys = GetUsedFluentKeysInMap(map, emitWarning);
-
+			var usedKeys = ExtractMapFluentKeys(modData, map, emitWarning);
 			foreach (var context in usedKeys.EmptyKeyContexts)
 				emitWarning($"Empty key in map ftl files required by {context}");
 
@@ -45,8 +44,7 @@ namespace OpenRA.Mods.Common.Lint
 
 			// For maps we don't warn on unused keys. They might be unused on *this* map,
 			// but the mod or another map may use them and we don't have sight of that.
-			CheckKeys(modMessages.Concat(mapMessages), map.Open, usedKeys,
-				_ => false, emitError, emitWarning);
+			CheckKeys(modMessages.Concat(mapMessages), map.Open, usedKeys, _ => false, emitError, emitWarning);
 
 			var modFluentBundle = new FluentBundle(modData.Manifest.FluentCulture, modMessages, modData.DefaultFileSystem, _ => { });
 			var mapFluentBundle = new FluentBundle(modData.Manifest.FluentCulture, mapMessages, map, error => emitError(error.Message));
@@ -74,85 +72,40 @@ namespace OpenRA.Mods.Common.Lint
 		void ILintPass.Run(Action<string> emitError, Action<string> emitWarning, ModData modData)
 		{
 			Console.WriteLine("Testing Fluent references");
-			var (usedKeys, testedFields) = GetUsedFluentKeysInMod(modData);
-
+			var usedKeys = ExtractModFluentKeys(modData);
 			foreach (var context in usedKeys.EmptyKeyContexts)
 				emitWarning($"Empty key in mod translation files required by {context}");
 
 			var modMessages = modData.Manifest.FluentMessages.ToArray();
-			CheckModWidgets(modData, usedKeys, testedFields);
 
 			// With the fully populated keys, check keys and variables are not missing and not unused across all language files.
-			var keyWithAttrs = CheckKeys(
-				modMessages, modData.DefaultFileSystem.Open, usedKeys,
+			var keyWithAttrs = CheckKeys(modMessages, modData.DefaultFileSystem.Open, usedKeys,
 				file =>
 					!modData.Manifest.AllowUnusedFluentMessagesInExternalPackages ||
 					!modData.DefaultFileSystem.IsExternalFile(file),
 				emitError, emitWarning);
 
 			foreach (var group in usedKeys.KeysWithContext)
-			{
-				if (keyWithAttrs.Contains(group.Key))
-					continue;
-
-				foreach (var context in group)
-					emitWarning($"Missing key `{group.Key}` in mod ftl files required by {context}");
-			}
-
-			// Check if we couldn't test any fields.
-			const BindingFlags Binding = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
-			var allFluentFields = modData.ObjectCreator.GetTypes().SelectMany(t =>
-				t.GetFields(Binding).Where(m => Utility.HasAttribute<FluentReferenceAttribute>(m))).ToArray();
-			var untestedFields = allFluentFields.Except(testedFields);
-			foreach (var field in untestedFields)
-				emitError(
-					$"Lint pass ({nameof(CheckFluentReferences)}) lacks the know-how to test translatable field " +
-					$"`{field.ReflectedType.Name}.{field.Name}` - previous warnings may be incorrect");
+				if (!keyWithAttrs.Contains(group.Key))
+					foreach (var context in group)
+						emitWarning($"Missing key `{group.Key}` in mod ftl files required by {context}");
 		}
 
-		static Keys GetUsedFluentKeysInRuleset(Ruleset rules)
+		static void ExtractRulesetFluentKeys(ModData modData, Ruleset rules, Keys keys)
 		{
-			var usedKeys = new Keys();
 			foreach (var actorInfo in rules.Actors)
-			{
-				foreach (var traitInfo in actorInfo.Value.TraitInfos<TraitInfo>())
-				{
-					var traitType = traitInfo.GetType();
-					foreach (var field in Utility.GetFields(traitType))
-					{
-						var fluentReference = Utility.GetCustomAttributes<FluentReferenceAttribute>(field, true).SingleOrDefault();
-						if (fluentReference == null)
-							continue;
+				foreach (var ti in actorInfo.Value.TraitInfos<TraitInfo>())
+					ExtractFluentKeys(modData, ti, $"Actor `{actorInfo.Key}` trait {ti.GetType().Name[..^4]}", keys);
 
-						foreach (var key in LintExts.GetFieldValues(traitInfo, field, fluentReference.DictionaryReference))
-							usedKeys.Add(key, fluentReference, $"Actor `{actorInfo.Key}` trait `{traitType.Name[..^4]}.{field.Name}`");
-					}
-				}
-			}
-
-			foreach (var weapon in rules.Weapons)
-			{
-				foreach (var warhead in weapon.Value.Warheads)
-				{
-					var warheadType = warhead.GetType();
-					foreach (var field in Utility.GetFields(warheadType))
-					{
-						var fluentReference = Utility.GetCustomAttributes<FluentReferenceAttribute>(field, true).SingleOrDefault();
-						if (fluentReference == null)
-							continue;
-
-						foreach (var key in LintExts.GetFieldValues(warhead, field, fluentReference.DictionaryReference))
-							usedKeys.Add(key, fluentReference, $"Weapon `{weapon.Key}` warhead `{warheadType.Name[..^7]}.{field.Name}`");
-					}
-				}
-			}
-
-			return usedKeys;
+			foreach (var w in rules.Weapons)
+				foreach (var wh in w.Value.Warheads)
+					ExtractFluentKeys(modData, wh, $"Weapon `{w.Key}` warhead {wh.GetType().Name[..^7]}", keys);
 		}
 
-		static Keys GetUsedFluentKeysInMap(Map map, Action<string> emitWarning)
+		static Keys ExtractMapFluentKeys(ModData modData, Map map, Action<string> emitWarning)
 		{
-			var usedKeys = GetUsedFluentKeysInRuleset(map.Rules);
+			var keys = new Keys();
+			ExtractRulesetFluentKeys(modData, map.Rules, keys);
 
 			var luaScriptInfo = map.Rules.Actors[SystemActors.World].TraitInfoOrDefault<LuaScriptInfo>();
 			if (luaScriptInfo != null)
@@ -211,7 +164,7 @@ namespace OpenRA.Mods.Common.Lint
 						foreach (var (key, attrs, variable, line) in references)
 						{
 							var context = $"Script {script}:{line}";
-							usedKeys.Add(key, new FluentReferenceAttribute(attrs), context);
+							keys.Add(key, new FluentReferenceAttribute(attrs), context);
 
 							if (variable != "")
 							{
@@ -226,136 +179,134 @@ namespace OpenRA.Mods.Common.Lint
 				}
 			}
 
-			return usedKeys;
+			return keys;
 		}
 
-		static (Keys UsedKeys, List<FieldInfo> TestedFields) GetUsedFluentKeysInMod(ModData modData)
+		static Keys ExtractModFluentKeys(ModData modData)
 		{
-			const BindingFlags ConstBinding = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
-			const BindingFlags InstanceBinding = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+			var keys = new Keys();
 
-			var usedKeys = GetUsedFluentKeysInRuleset(modData.DefaultRules);
-			var testedFields = new List<FieldInfo>();
-			testedFields.AddRange(
-				modData.ObjectCreator.GetTypes()
-				.Where(t => t.IsSubclassOf(typeof(TraitInfo)) || t.IsSubclassOf(typeof(Warhead)))
-				.SelectMany(t => Utility.GetFields(t).Where(Utility.HasAttribute<FluentReferenceAttribute>)));
+			// Extract hardcoded core engine references
+			ExtractConstFluentKeys(modData, typeof(Game), keys);
 
-			// TODO: linter does not work with LoadUsing
-			foreach (var speed in modData.Manifest.Get<GameSpeeds>().Speeds)
-				GetUsedFluentKeys(
-					usedKeys, testedFields,
-					Utility.GetFields(typeof(GameSpeed)),
-					[speed.Value],
-					(obj, field) => $"`GameSpeeds.Speeds.{speed.Key}.{field.Name}` in mod.yaml");
+			// Extract references from mod.yaml (metadata, server traits, IGlobalModData)
+			ExtractFluentKeys(modData, modData.Manifest.Metadata, "mod.yaml", keys);
+			foreach (var traitName in modData.Manifest.ServerTraits)
+			{
+				var traitType = modData.ObjectCreator.FindType(traitName);
+				if (traitType != null)
+					ExtractConstFluentKeys(modData, traitType, keys);
+			}
 
-			// TODO: linter does not work with LoadUsing
-			foreach (var resource in modData.DefaultRules.Actors
-				.SelectMany(actorInfo => actorInfo.Value.TraitInfos<ResourceRendererInfo>())
-				.SelectMany(info => info.ResourceTypes))
-				GetUsedFluentKeys(
-					usedKeys, testedFields,
-					Utility.GetFields(typeof(ResourceRendererInfo.ResourceTypeInfo)),
-					[resource.Value],
-					(obj, field) => $"`ResourceRenderer.ResourceTypes.{resource.Key}.{field.Name}` in rules yaml");
+			var hasModule = modData.Manifest.GetType().GetMethod(nameof(Manifest.Contains));
+			var getModule = modData.Manifest.GetType().GetMethod(nameof(Manifest.Get), []);
+			var globalModData = modData.ObjectCreator.GetTypesImplementing<IGlobalModData>()
+				.Where(t => (bool)hasModule.MakeGenericMethod(t).Invoke(modData.Manifest, []));
 
+			foreach (var module in globalModData)
+			{
+				var value = getModule.MakeGenericMethod(module).Invoke(modData.Manifest, []);
+				ExtractFluentKeys(modData, value, "mod.yaml", keys);
+			}
+
+			// Load screen
+			var loadScreenType = modData.ObjectCreator.FindType(modData.Manifest.LoadScreen.Value);
+			if (loadScreenType != null)
+				ExtractConstFluentKeys(modData, loadScreenType, keys);
+
+			// Traits, Weapons
+			ExtractRulesetFluentKeys(modData, modData.DefaultRules, keys);
+			foreach (var hotkey in modData.Hotkeys.Definitions)
+				ExtractFluentKeys(modData, hotkey, $"Hotkey {hotkey.GetType().Name}", keys);
+
+			// TerrainInfo
 			foreach (var terrainInfo in modData.DefaultTerrainInfo.Values)
-				GetUsedFluentKeys(
-					usedKeys, testedFields,
-					terrainInfo.GetType().GetFields(InstanceBinding),
-					[terrainInfo],
-					(obj, field) => $"`{field.ReflectedType.Name}.{field.Name}`");
+				ExtractFluentKeys(modData, terrainInfo, $"Tileset {terrainInfo.Id}", keys);
 
-			var constFields = modData.ObjectCreator.GetTypes().SelectMany(modType => modType.GetFields(ConstBinding)).Where(f => f.IsLiteral);
-			GetUsedFluentKeys(
-				usedKeys, testedFields,
-				constFields,
-				[(object)null],
-				(obj, field) => $"`{field.ReflectedType.Name}.{field.Name}`");
+			// Chrome
+			ExtractChromeFluentKeys(modData, keys);
 
-			var modMetadataFields = typeof(ModMetadata).GetFields(InstanceBinding);
-			GetUsedFluentKeys(
-				usedKeys, testedFields,
-				modMetadataFields,
-				[modData.Manifest.Metadata],
-				(obj, field) => $"`Metadata.{field.Name}` in mod.yaml");
-
-			var modContent = modData.Manifest.Get<ModContent>();
-			GetUsedFluentKeys(
-				usedKeys, testedFields,
-				Utility.GetFields(typeof(ModContent)),
-				[modContent],
-				(obj, field) => $"`ModContent.{field.Name}` in mod.yaml");
-			GetUsedFluentKeys(
-				usedKeys, testedFields,
-				Utility.GetFields(typeof(ModContent.ModPackage)),
-				modContent.Packages.Values.ToArray(),
-				(obj, field) => $"`ModContent.Packages.ContentPackage.{field.Name}` in mod.yaml");
-
-			GetUsedFluentKeys(
-				usedKeys, testedFields,
-				Utility.GetFields(typeof(HotkeyDefinition)),
-				modData.Hotkeys.Definitions,
-				(obj, field) => $"`{obj.Name}.{field.Name}` in hotkeys yaml");
-
-			// All keycodes and modifiers should be marked as used, as they can all be configured for use at hotkeys at runtime.
-			GetUsedFluentKeys(
-				usedKeys, testedFields,
-				Utility.GetFields(typeof(KeycodeExts)).Concat(Utility.GetFields(typeof(ModifiersExts))),
-				[(object)null],
-				(obj, field) => $"`{field.ReflectedType.Name}.{field.Name}`");
-
-			foreach (var filename in modData.Manifest.ChromeLayout)
-				CheckHotkeysSettingsLogic(usedKeys, MiniYaml.FromStream(modData.DefaultFileSystem.Open(filename), filename));
-
-			static void CheckHotkeysSettingsLogic(Keys usedKeys, IEnumerable<MiniYamlNode> nodes)
-			{
-				foreach (var node in nodes)
-				{
-					if (node.Value.Nodes != null)
-						CheckHotkeysSettingsLogic(usedKeys, node.Value.Nodes);
-
-					if (node.Key != "Logic" || node?.Value.Value != "HotkeysSettingsLogic")
-						continue;
-
-					var hotkeyGroupsNode = node.Value.NodeWithKeyOrDefault("HotkeyGroups");
-					if (hotkeyGroupsNode == null)
-						continue;
-
-					var hotkeyGroupsKeys = hotkeyGroupsNode?.Value.Nodes.Select(n => n.Key);
-					foreach (var key in hotkeyGroupsKeys)
-						usedKeys.Add(key, new FluentReferenceAttribute(), $"`{nameof(HotkeysSettingsLogic)}.HotkeyGroups`");
-				}
-			}
-
-			return (usedKeys, testedFields);
+			return keys;
 		}
 
-		static void GetUsedFluentKeys<T>(
-			Keys usedKeys, List<FieldInfo> testedFields,
-			IEnumerable<FieldInfo> newFields, IEnumerable<T> objects,
-			Func<T, FieldInfo, string> getContext)
+		static void ExtractFluentKeys(ModData modData, object o, string prefix, Keys keys)
 		{
-			var fieldsWithAttribute =
-				newFields
-					.Select(f => (Field: f, FluentReference: Utility.GetCustomAttributes<FluentReferenceAttribute>(f, true).SingleOrDefault()))
-					.Where(x => x.FluentReference != null)
-					.ToArray();
-			testedFields.AddRange(fieldsWithAttribute.Select(x => x.Field));
-			foreach (var obj in objects)
+			var type = o.GetType();
+			ExtractConstFluentKeys(modData, type, keys);
+			foreach (var f in Utility.GetFields(type))
 			{
-				foreach (var (field, fluentReference) in fieldsWithAttribute)
+				var reference = Utility.GetCustomAttributes<FluentReferenceAttribute>(f, true).SingleOrDefault();
+				if (reference != null)
+					foreach (var key in LintExts.GetFieldValues(o, f, reference.DictionaryReference))
+						keys.Add(key, reference, $"{prefix}.{f.Name}");
+
+				var lint = Utility.GetCustomAttributes<IncludeFluentReferencesAttribute>(f, true).SingleOrDefault();
+				if (lint != null)
+					ExtractChildFluentKeys(modData, lint.DictionaryReference, f.GetValue(o), $"{prefix}.{f.Name}", keys);
+			}
+		}
+
+		static void ExtractConstFluentKeys(ModData modData, Type t, Keys keys)
+		{
+			var classReferences = t.GetCustomAttributes<IncludeStaticFluentReferencesAttribute>(true);
+			foreach (var classReference in classReferences)
+				foreach (var referencedType in classReference.Types)
+					ExtractConstFluentKeys(modData, referencedType, keys);
+
+			foreach (var f in t.GetFields(StaticBinding))
+			{
+				var reference = Utility.GetCustomAttributes<FluentReferenceAttribute>(f, true).SingleOrDefault();
+				if (reference != null)
+					foreach (var key in LintExts.GetFieldValues(null, f, reference.DictionaryReference))
+						keys.Add(key, reference, $"{t.Name}.{f.Name}");
+
+				var lint = Utility.GetCustomAttributes<IncludeFluentReferencesAttribute>(f, true).SingleOrDefault();
+				if (lint != null)
+					ExtractChildFluentKeys(modData, lint.DictionaryReference, f.GetValue(null), $"{t.Name}.{f.Name}", keys);
+			}
+		}
+
+		static void ExtractChildFluentKeys(ModData modData, LintDictionaryReference dictionaryReference,
+			object fieldValue, string prefix, Keys keys)
+		{
+			var type = fieldValue.GetType();
+			if (typeof(IEnumerable<object>).IsAssignableFrom(type))
+				foreach (var o in (IEnumerable<object>)fieldValue)
+					ExtractFluentKeys(modData, o, prefix, keys);
+
+			if (type.IsGenericType &&
+				(type.GetGenericTypeDefinition() == typeof(Dictionary<,>) ||
+				type.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>)))
+			{
+				// Use an intermediate list to cover the unlikely case where both keys and values are lintable.
+				if (dictionaryReference.HasFlag(LintDictionaryReference.Keys))
 				{
-					var keys = LintExts.GetFieldValues(obj, field, fluentReference.DictionaryReference);
-					foreach (var key in keys)
-						usedKeys.Add(key, fluentReference, getContext(obj, field));
+					IEnumerable fieldKeys = ((IDictionary)fieldValue).Keys;
+					if (typeof(IEnumerable<object>).IsAssignableFrom(type.GenericTypeArguments[0]))
+						fieldKeys = ((ICollection<IEnumerable<object>>)fieldKeys).SelectMany(v => v);
+
+					foreach (var k in fieldKeys)
+						ExtractFluentKeys(modData, k, prefix, keys);
+				}
+
+				if (dictionaryReference.HasFlag(LintDictionaryReference.Values))
+				{
+					IEnumerable fieldValues = ((IDictionary)fieldValue).Values;
+					if (typeof(IEnumerable<object>).IsAssignableFrom(type.GenericTypeArguments[1]))
+						fieldValues = ((ICollection<IEnumerable<object>>)fieldValues).SelectMany(v => v);
+
+					foreach (var v in fieldValues)
+						ExtractFluentKeys(modData, v, prefix, keys);
 				}
 			}
 		}
 
-		static void CheckModWidgets(ModData modData, Keys usedKeys, List<FieldInfo> testedFields)
+		static void ExtractChromeFluentKeys(ModData modData, Keys usedKeys)
 		{
-			var chromeLayoutNodes = BuildChromeTree(modData);
+			// Gather all the nodes together for evaluation.
+			var chromeLayoutNodes = modData.Manifest.ChromeLayout
+				.SelectMany(filename => MiniYaml.FromStream(modData.DefaultFileSystem.Open(filename), filename))
+				.ToArray();
 
 			var widgetTypes = modData.ObjectCreator.GetTypes()
 				.Where(t => t.Name.EndsWith("Widget", StringComparison.InvariantCulture) && t.IsSubclassOf(typeof(Widget)))
@@ -376,27 +327,15 @@ namespace OpenRA.Mods.Common.Lint
 					x => (x.WidgetName, x.FieldName),
 					x => x.FluentReference);
 
-			testedFields.AddRange(widgetTypes.SelectMany(
-				t => Utility.GetFields(t).Where(Utility.HasAttribute<FluentReferenceAttribute>)));
-
 			foreach (var node in chromeLayoutNodes)
-				CheckChrome(node, fluentReferencesByWidgetField, usedKeys);
+				ExtractChromeFluentKeys(modData, node, fluentReferencesByWidgetField, usedKeys);
 		}
 
-		static MiniYamlNode[] BuildChromeTree(ModData modData)
-		{
-			// Gather all the nodes together for evaluation.
-			var chromeLayoutNodes = modData.Manifest.ChromeLayout
-				.SelectMany(filename => MiniYaml.FromStream(modData.DefaultFileSystem.Open(filename), filename))
-				.ToArray();
-
-			return chromeLayoutNodes;
-		}
-
-		static void CheckChrome(
+		static void ExtractChromeFluentKeys(
+			ModData modData,
 			MiniYamlNode rootNode,
 			Dictionary<(string WidgetName, string FieldName), FluentReferenceAttribute> fluentReferencesByWidgetField,
-			Keys usedKeys)
+			Keys keys)
 		{
 			var nodeType = rootNode.Key.Split('@')[0];
 			foreach (var childNode in rootNode.Value.Nodes)
@@ -406,13 +345,40 @@ namespace OpenRA.Mods.Common.Lint
 					continue;
 
 				var key = childNode.Value.Value;
-				usedKeys.Add(key, reference, $"Widget `{rootNode.Key}` field `{childType}` in {rootNode.Location}");
+				keys.Add(key, reference, $"Widget `{rootNode.Key}` field `{childType}` in {rootNode.Location}");
 			}
 
+			var widgetType = modData.ObjectCreator.FindType(nodeType + "Widget");
+			ExtractConstFluentKeys(modData, widgetType, keys);
+
+			Type[] logicArgsTypes = [typeof(Dictionary<string, MiniYaml>)];
 			foreach (var childNode in rootNode.Value.Nodes)
+			{
+				if (childNode.Key == "Logic")
+				{
+					foreach (var logicName in FieldLoader.GetValue<string[]>(childNode.Key, childNode.Value.Value))
+					{
+						var logicType = modData.ObjectCreator.FindType(logicName);
+						if (logicType == null)
+							continue;
+
+						ExtractConstFluentKeys(modData, logicType, keys);
+
+						var chromeArgsReferences = logicType.GetCustomAttributes<IncludeChromeLogicArgsFluentReferencesAttribute>(true);
+						foreach (var methodName in chromeArgsReferences.SelectMany(a => a.MethodNames))
+						{
+							var dynamicReferencesMethod = logicType.GetMethod(methodName, StaticBinding, logicArgsTypes);
+							var dynamicReferences = dynamicReferencesMethod.Invoke(null, [childNode.Value.ToDictionary()]);
+							foreach (var (key, reference) in (IEnumerable<(string Key, FluentReferenceAttribute Reference)>)dynamicReferences)
+								keys.Add(key, reference, logicType.Name);
+						}
+					}
+				}
+
 				if (childNode.Key == "Children")
 					foreach (var n in childNode.Value.Nodes)
-						CheckChrome(n, fluentReferencesByWidgetField, usedKeys);
+						ExtractChromeFluentKeys(modData, n, fluentReferencesByWidgetField, keys);
+			}
 		}
 
 		static HashSet<string> CheckKeys(

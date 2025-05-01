@@ -20,6 +20,10 @@ using static OpenRA.Mods.Common.Traits.MarkerLayerOverlay;
 
 namespace OpenRA.Mods.Common.Widgets.Logic
 {
+	[IncludeStaticFluentReferences(
+		typeof(PaintMarkerTileEditorAction),
+		typeof(ClearSelectedMarkerTilesEditorAction),
+		typeof(ClearAllMarkerTilesEditorAction))]
 	public class MapMarkerTilesLogic : ChromeLogic
 	{
 		[FluentReference]

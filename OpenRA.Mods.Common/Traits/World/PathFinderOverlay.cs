@@ -23,6 +23,7 @@ using OpenRA.Traits;
 namespace OpenRA.Mods.Common.Traits
 {
 	[TraitLocation(SystemActors.World)]
+	[IncludeStaticFluentReferences(typeof(PathFinderOverlay))]
 	[Desc("Renders a visualization overlay showing how the pathfinder searches for paths. Attach this to the world actor.")]
 	public class PathFinderOverlayInfo : TraitInfo, Requires<PathFinderInfo>
 	{

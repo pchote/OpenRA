@@ -47,7 +47,7 @@ namespace OpenRA
 	public static class ModifiersExts
 	{
 		[FluentReference]
-		public const string Cmd = "keycode-modifier.cmd";
+		const string Cmd = "keycode-modifier.cmd";
 
 		[FluentReference(Traits.LintDictionaryReference.Values)]
 		public static readonly IReadOnlyDictionary<Modifiers, string> ModifierFluentKeys = new Dictionary<Modifiers, string>()

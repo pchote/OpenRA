@@ -19,6 +19,7 @@ using OpenRA.Widgets;
 
 namespace OpenRA.Mods.Common.Widgets.Logic
 {
+	[IncludeStaticFluentReferences(typeof(EditActorEditorAction))]
 	public class ActorEditLogic : ChromeLogic
 	{
 		[FluentReference]

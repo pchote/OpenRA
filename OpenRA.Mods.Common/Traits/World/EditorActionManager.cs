@@ -17,6 +17,7 @@ using OpenRA.Traits;
 namespace OpenRA.Mods.Common.Traits
 {
 	[TraitLocation(SystemActors.EditorWorld)]
+	[IncludeStaticFluentReferences(typeof(OpenMapAction))]
 	public class EditorActionManagerInfo : TraitInfo<EditorActionManager> { }
 
 	public class EditorActionManager : IWorldLoaded

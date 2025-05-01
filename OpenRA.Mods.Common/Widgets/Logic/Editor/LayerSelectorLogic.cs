@@ -15,6 +15,7 @@ using OpenRA.Widgets;
 
 namespace OpenRA.Mods.Common.Widgets.Logic
 {
+	[IncludeStaticFluentReferences(typeof(AddResourcesEditorAction))]
 	public class LayerSelectorLogic : ChromeLogic
 	{
 		readonly EditorViewportControllerWidget editor;

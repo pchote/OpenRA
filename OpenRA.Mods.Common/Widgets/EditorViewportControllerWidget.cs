@@ -17,6 +17,12 @@ using Color = OpenRA.Primitives.Color;
 
 namespace OpenRA.Mods.Common.Widgets
 {
+	[IncludeStaticFluentReferences(
+		typeof(ChangeSelectionAction),
+		typeof(DeleteAreaAction),
+		typeof(RemoveActorAction),
+		typeof(RemoveResourceAction),
+		typeof(MoveActorAction))]
 	public class EditorViewportControllerWidget : Widget
 	{
 		[Desc("Main color of the selection grid.")]

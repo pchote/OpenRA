@@ -27,6 +27,7 @@ using OpenRA.Widgets;
 
 namespace OpenRA
 {
+	[IncludeStaticFluentReferences(typeof(Server.Server), typeof(Player), typeof(UnitOrders), typeof(OrderManager))]
 	public static class Game
 	{
 		[FluentReference("filename")]
