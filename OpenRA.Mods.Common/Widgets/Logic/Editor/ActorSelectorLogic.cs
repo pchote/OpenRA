@@ -19,6 +19,7 @@ using OpenRA.Widgets;
 
 namespace OpenRA.Mods.Common.Widgets.Logic
 {
+	[IncludeStaticFluentReferences(typeof(AddActorAction), typeof(CommonSelectorLogic))]
 	public class ActorSelectorLogic : CommonSelectorLogic
 	{
 		[FluentReference("actorType")]

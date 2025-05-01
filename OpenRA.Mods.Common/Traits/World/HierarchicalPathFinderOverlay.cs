@@ -21,6 +21,7 @@ using OpenRA.Traits;
 namespace OpenRA.Mods.Common.Traits
 {
 	[TraitLocation(SystemActors.World)]
+	[IncludeStaticFluentReferences(typeof(HierarchicalPathFinderOverlay))]
 	[Desc("Renders a debug overlay showing the abstract graph of the hierarchical pathfinder. Attach this to the world actor.")]
 	public class HierarchicalPathFinderOverlayInfo : TraitInfo, Requires<PathFinderInfo>
 	{

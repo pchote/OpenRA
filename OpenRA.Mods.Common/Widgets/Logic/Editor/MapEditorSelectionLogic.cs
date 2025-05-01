@@ -17,6 +17,7 @@ using OpenRA.Widgets;
 
 namespace OpenRA.Mods.Common.Widgets.Logic
 {
+	[IncludeStaticFluentReferences(typeof(CopyPasteEditorAction))]
 	public class MapEditorSelectionLogic : ChromeLogic
 	{
 		[FluentReference]

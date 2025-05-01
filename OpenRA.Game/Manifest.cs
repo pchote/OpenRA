@@ -48,12 +48,12 @@ namespace OpenRA
 		// FieldLoader used here, must matching naming in YAML.
 #pragma warning disable IDE1006 // Naming Styles
 		[FluentReference]
-		readonly string Title;
+		public readonly string Title;
 		public readonly string Version;
 		public readonly string Website;
 		public readonly string WebIcon32;
 		[FluentReference]
-		readonly string WindowTitle;
+		public readonly string WindowTitle;
 		public readonly bool Hidden;
 #pragma warning restore IDE1006 // Naming Styles
 

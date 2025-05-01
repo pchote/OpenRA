@@ -45,6 +45,7 @@ namespace OpenRA.Server
 		Dedicated = 3
 	}
 
+	[IncludeStaticFluentReferences(typeof(PlayerMessageTracker), typeof(VoteKickTracker))]
 	public sealed class Server
 	{
 		[FluentReference]

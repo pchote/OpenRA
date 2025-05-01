@@ -48,6 +48,41 @@ namespace OpenRA
 		}
 	}
 
+	[AttributeUsage(AttributeTargets.Class)]
+	public sealed class IncludeStaticFluentReferencesAttribute : Attribute
+	{
+		public readonly Type[] Types;
+
+		public IncludeStaticFluentReferencesAttribute(params Type[] types)
+		{
+			Types = types;
+		}
+	}
+
+	[AttributeUsage(AttributeTargets.Class)]
+	public sealed class IncludeChromeLogicArgsFluentReferencesAttribute : Attribute
+	{
+		public readonly string[] MethodNames;
+
+		public IncludeChromeLogicArgsFluentReferencesAttribute(params string[] methodNames)
+		{
+			MethodNames = methodNames;
+		}
+	}
+
+	[AttributeUsage(AttributeTargets.Field)]
+	public sealed class IncludeFluentReferencesAttribute : Attribute
+	{
+		public readonly LintDictionaryReference DictionaryReference;
+
+		public IncludeFluentReferencesAttribute() { }
+
+		public IncludeFluentReferencesAttribute(LintDictionaryReference dictionaryReference = LintDictionaryReference.None)
+		{
+			DictionaryReference = dictionaryReference;
+		}
+	}
+
 	public class FluentBundle
 	{
 		readonly Linguini.Bundle.FluentBundle bundle;

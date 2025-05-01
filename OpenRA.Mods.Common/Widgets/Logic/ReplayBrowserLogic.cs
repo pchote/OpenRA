@@ -24,6 +24,7 @@ using OpenRA.Widgets;
 
 namespace OpenRA.Mods.Common.Widgets.Logic
 {
+	[IncludeStaticFluentReferences(typeof(ReplayUtils))]
 	public class ReplayBrowserLogic : ChromeLogic
 	{
 		[FluentReference("time")]

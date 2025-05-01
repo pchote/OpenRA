@@ -21,6 +21,7 @@ using OpenRA.Widgets;
 
 namespace OpenRA.Mods.Common.Widgets.Logic
 {
+	[IncludeStaticFluentReferences(typeof(LobbyUtils))]
 	public class LobbyLogic : ChromeLogic, INotificationHandler<TextNotification>
 	{
 		[FluentReference]
