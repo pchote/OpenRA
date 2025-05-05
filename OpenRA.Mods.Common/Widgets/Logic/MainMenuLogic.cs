@@ -215,6 +215,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					{ "initialTab", MapClassification.User },
 					{ "onExit", () => SwitchMenu(MenuType.MapEditor) },
 					{ "onSelect", onSelect },
+					{ "onSelectGenerated", null },
 					{ "filter", MapVisibility.Lobby | MapVisibility.Shellmap | MapVisibility.MissionSelector },
 				});
 			};

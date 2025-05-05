@@ -102,6 +102,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 						{ "initialTab", MapClassification.System },
 						{ "onExit", () => modData.MapCache.UpdateMaps() },
 						{ "onSelect", (Action<string>)(uid => map = modData.MapCache[uid]) },
+						{ "onSelectGenerated", null },
 						{ "filter", MapVisibility.Lobby },
 						{ "onStart", () => { } }
 					});

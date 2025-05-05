@@ -512,10 +512,10 @@ label-player-count =
         [one] { $players } Player
        *[other] { $players } Players
     }
-label-map-size-huge = (Huge)
-label-map-size-large = (Large)
-label-map-size-medium = (Medium)
-label-map-size-small = (Small)
+label-map-size-huge = Huge
+label-map-size-large = Large
+label-map-size-medium = Medium
+label-map-size-small = Small
 label-map-searching-count =
     { $count ->
         [one] Searching the OpenRA Resource Center for { $count } map...
@@ -548,6 +548,7 @@ options-order-maps =
 button-mapchooser-system-maps-tab = Official Maps
 button-mapchooser-remote-maps-tab = Server Maps
 button-mapchooser-user-maps-tab = Custom Maps
+button-mapchooser-generated-maps-tab = Generate Map
 
 ## MissionBrowserLogic
 dialog-no-video =
