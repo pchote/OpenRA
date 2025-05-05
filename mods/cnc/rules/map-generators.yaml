@@ -176,7 +176,7 @@
 				Priority: 1
 			MultiChoiceOption@Symmetry:
 				Label: label-cnc-map-generator-option-symmetry
-				Default: None
+				Default: 2Rotations
 				Priority: 1
 				Choice@None:
 					Label: label-cnc-map-generator-choice-mirror-none
@@ -332,17 +332,8 @@
 						BuildingWeights:
 							hosp: 2
 							miss: 1
+							bio: 1
 							v19: 9
-				Choice@Extra:
-					Label: label-cnc-map-generator-choice-buildings-extra
-					Settings:
-						MinimumBuildings: 3
-						MaximumBuildings: 6
-						BuildingWeights:
-							hosp: 2
-							miss: 1
-							v19: 9
-							gtwr: 2
 				Choice@OilOnly:
 					Label: label-cnc-map-generator-choice-buildings-oil-only
 					Settings:
@@ -396,16 +387,6 @@
 					Settings:
 						AreaEntityBonus: 800
 						PlayerCountEntityBonus: 0
-			BooleanOption@DenyWalledArea:
-				Label: label-cnc-map-generator-option-deny-walled-areas
-				Parameter: DenyWalledAreas
-				Default: True
-				Priority: 1
-			BooleanOption@Roads:
-				Label: label-cnc-map-generator-option-roads
-				Parameter: Roads
-				Default: True
-				Priority: 1
 			MultiChoiceOption@CivilianDensity:
 				Label: label-cnc-map-generator-option-civilian-density
 				Default: Default
@@ -437,6 +418,16 @@
 					Label: label-cnc-map-generator-choice-civilian-density-max
 					Settings:
 						CivilianBuildings: 1000
+			BooleanOption@DenyWalledArea:
+				Label: label-cnc-map-generator-option-deny-walled-areas
+				Parameter: DenyWalledAreas
+				Default: True
+				Priority: 1
+			BooleanOption@Roads:
+				Label: label-cnc-map-generator-option-roads
+				Parameter: Roads
+				Default: True
+				Priority: 1
 	ClearMapGenerator@clear:
 		Type: clear
 		Name: map-generator-clear
