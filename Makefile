@@ -130,6 +130,18 @@ test: all
 	@echo
 	@echo "Testing Red Alert mod MiniYAML..."
 	@./utility.sh ra --check-yaml
+	@echo
+	@echo "Testing TS mod content..."
+	@./utility.sh ts-content --check-yaml
+	@echo
+	@echo "Testing Dune 2000 mod content..."
+	@./utility.sh d2k-content --check-yaml
+	@echo
+	@echo "Testing Tiberian Dawn mod content..."
+	@./utility.sh cnc-content --check-yaml
+	@echo
+	@echo "Testing Red Alert mod content..."
+	@./utility.sh ra-content --check-yaml
 
 tests:
 	@dotnet build OpenRA.Test/OpenRA.Test.csproj -c Debug --nologo -p:TargetPlatform=$(TARGETPLATFORM)
