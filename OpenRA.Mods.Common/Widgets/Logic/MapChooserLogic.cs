@@ -91,6 +91,17 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		[FluentReference]
 		const string RemoteMapsTab = "button-mapchooser-remote-maps-tab";
 
+		public static string MapSizeLabel(Size size)
+		{
+			var area = size.Width * size.Height;
+			var label = area >= 120 * 120 ? MapSizeHuge :
+				area >= 90 * 90 ? MapSizeLarge :
+				area >= 60 * 60 ? MapSizeMedium :
+				MapSizeSmall;
+
+			return $"{size.Width}x{size.Height} ({FluentProvider.GetMessage(label)})";
+		}
+
 		readonly string allMaps;
 
 		readonly Widget widget;
@@ -498,12 +509,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				var sizeWidget = item.GetOrNull<LabelWidget>("SIZE");
 				if (sizeWidget != null)
 				{
-					var size = preview.Bounds.Width + "x" + preview.Bounds.Height;
-					var numberPlayableCells = preview.Bounds.Width * preview.Bounds.Height;
-					if (numberPlayableCells >= 120 * 120) size += " " + FluentProvider.GetMessage(MapSizeHuge);
-					else if (numberPlayableCells >= 90 * 90) size += " " + FluentProvider.GetMessage(MapSizeLarge);
-					else if (numberPlayableCells >= 60 * 60) size += " " + FluentProvider.GetMessage(MapSizeMedium);
-					else size += " " + FluentProvider.GetMessage(MapSizeSmall);
+					var size = MapSizeLabel(preview.Bounds.Size);
 					sizeWidget.GetText = () => size;
 				}
 
