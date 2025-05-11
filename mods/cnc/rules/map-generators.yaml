@@ -168,6 +168,22 @@
 						Mountains: 1000
 						Roughness: 850
 						MinimumTerrainContourSpacing: 5
+			MultiChoiceOption@Shape:
+				Label: label-cnc-map-generator-option-shape
+				Default: Square
+				Priority: 1
+				Choice@Square:
+					Label: label-cnc-map-generator-choice-shape-square
+					Settings:
+						ExternalCircularBias: 0
+				Choice@CircleMountain:
+					Label: label-cnc-map-generator-choice-shape-circle-mountain
+					Settings:
+						ExternalCircularBias: 1
+				Choice@CircleWater:
+					Label: label-cnc-map-generator-choice-shape-circle-water
+					Settings:
+						ExternalCircularBias: -1
 			MultiIntegerChoiceOption@Players:
 				Label: label-cnc-map-generator-option-players
 				Parameter: Players
@@ -237,22 +253,6 @@
 					Players: 8, 16
 					Settings:
 						Rotations: 8
-			MultiChoiceOption@Shape:
-				Label: label-cnc-map-generator-option-shape
-				Default: Square
-				Priority: 1
-				Choice@Square:
-					Label: label-cnc-map-generator-choice-shape-square
-					Settings:
-						ExternalCircularBias: 0
-				Choice@CircleMountain:
-					Label: label-cnc-map-generator-choice-shape-circle-mountain
-					Settings:
-						ExternalCircularBias: 1
-				Choice@CircleWater:
-					Label: label-cnc-map-generator-choice-shape-circle-water
-					Settings:
-						ExternalCircularBias: -1
 			MultiChoiceOption@Resources:
 				Label: label-cnc-map-generator-option-resources
 				Default: Medium

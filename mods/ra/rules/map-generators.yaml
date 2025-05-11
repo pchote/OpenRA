@@ -195,6 +195,22 @@
 						Forests: 0
 						SpawnBuildSize: 6
 						MinimumSpawnRadius: 4
+			MultiChoiceOption@Shape:
+				Label: label-ra-map-generator-option-shape
+				Default: Square
+				Priority: 1
+				Choice@Square:
+					Label: label-ra-map-generator-choice-shape-square
+					Settings:
+						ExternalCircularBias: 0
+				Choice@CircleMountain:
+					Label: label-ra-map-generator-choice-shape-circle-mountain
+					Settings:
+						ExternalCircularBias: 1
+				Choice@CircleWater:
+					Label: label-ra-map-generator-choice-shape-circle-water
+					Settings:
+						ExternalCircularBias: -1
 			MultiIntegerChoiceOption@Players:
 				Label: label-ra-map-generator-option-players
 				Parameter: Players
@@ -264,22 +280,6 @@
 					Players: 8, 16
 					Settings:
 						Rotations: 8
-			MultiChoiceOption@Shape:
-				Label: label-ra-map-generator-option-shape
-				Default: Square
-				Priority: 1
-				Choice@Square:
-					Label: label-ra-map-generator-choice-shape-square
-					Settings:
-						ExternalCircularBias: 0
-				Choice@CircleMountain:
-					Label: label-ra-map-generator-choice-shape-circle-mountain
-					Settings:
-						ExternalCircularBias: 1
-				Choice@CircleWater:
-					Label: label-ra-map-generator-choice-shape-circle-water
-					Settings:
-						ExternalCircularBias: -1
 			MultiChoiceOption@Resources:
 				Label: label-ra-map-generator-option-resources
 				Default: Medium
