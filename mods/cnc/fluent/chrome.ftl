@@ -523,6 +523,14 @@ button-bg-delete-map = Delete Map
 button-bg-delete-all-maps = Delete All Maps
 button-bg-ok = Ok
 
+label-mapchooser-random-map-title = Random Map
+label-mapchooser-random-map-generating = Generating...
+label-mapchooser-random-map-error = Map Generation Failed
+button-mapchooser-random-map-generate = Generate
+label-mapchooser-random-map-tileset = Environment:
+label-mapchooser-random-map-size = Map Size:
+label-mapchooser-random-map-error-desc = Adjust the settings to try again.
+
 ## missionbrowser.yaml
 button-missionbrowser-panel-mission-info = Mission Info
 button-missionbrowser-panel-mission-options = Options
