@@ -983,6 +983,8 @@ namespace OpenRA.Mods.Common.Traits
 
 		void Randomize(MersenneTwister random);
 
+		void Initialize(MapGenerationArgs args);
+
 		MapGenerationArgs Compile(ITerrainInfo terrainInfo, Size size);
 	}
 
