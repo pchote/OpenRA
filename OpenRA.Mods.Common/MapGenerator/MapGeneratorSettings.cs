@@ -208,6 +208,11 @@ namespace OpenRA.Mods.Common.MapGenerator
 
 	public sealed class MapGeneratorSettings : IMapGeneratorSettings
 	{
+		sealed class MapGenerationArgsWithOptions : MapGenerationArgs
+		{
+			public Dictionary<string, string> Options = [];
+		}
+
 		readonly IMapGeneratorInfo generatorInfo;
 
 		public MapGeneratorSettings(IMapGeneratorInfo generatorInfo, MiniYaml yaml)
@@ -253,6 +258,26 @@ namespace OpenRA.Mods.Common.MapGenerator
 			}
 		}
 
+		public void Initialize(MapGenerationArgs args)
+		{
+			if (args is MapGenerationArgsWithOptions optionArgs)
+			{
+				foreach (var o in Options)
+				{
+					if (!optionArgs.Options.TryGetValue(o.Id, out var value))
+						continue;
+
+					switch (o)
+					{
+						case MapGeneratorBooleanOption bo: bo.Value = FieldLoader.GetValue<bool>(o.Id, value); break;
+						case MapGeneratorIntegerOption io: io.Value = FieldLoader.GetValue<int>(o.Id, value); break;
+						case MapGeneratorMultiIntegerChoiceOption mio: mio.Value = FieldLoader.GetValue<int>(o.Id, value); break;
+						case MapGeneratorMultiChoiceOption mo: mo.Value = value; break;
+					}
+				}
+			}
+		}
+
 		public MapGenerationArgs Compile(ITerrainInfo terrainInfo, Size size)
 		{
 			// Apply the choices in their canonical order.
@@ -261,14 +286,27 @@ namespace OpenRA.Mods.Common.MapGenerator
 				.OrderBy(option => option.Priority)
 				.Select(o => o.GetSettings(terrainInfo, playerCount));
 
-			return new MapGenerationArgs()
+			var options = new Dictionary<string, string>();
+			foreach (var o in Options)
+			{
+				switch (o)
+				{
+					case MapGeneratorBooleanOption bo: options[o.Id] = FieldSaver.FormatValue(bo.Value); break;
+					case MapGeneratorIntegerOption io: options[o.Id] = FieldSaver.FormatValue(io.Value); break;
+					case MapGeneratorMultiIntegerChoiceOption mio: options[o.Id] = FieldSaver.FormatValue(mio.Value); break;
+					case MapGeneratorMultiChoiceOption mo: options[o.Id] = mo.Value; break;
+				}
+			}
+
+			return new MapGenerationArgsWithOptions()
 			{
 				Generator = generatorInfo.Type,
 				Tileset = terrainInfo.Id,
 				Size = size,
 				Title = FluentProvider.GetMessage(generatorInfo.MapTitle),
 				Author = FluentProvider.GetMessage(generatorInfo.Name),
-				Settings = new MiniYaml(null, MiniYaml.Merge(layers))
+				Settings = new MiniYaml(null, MiniYaml.Merge(layers)),
+				Options = options
 			};
 		}
 	}
