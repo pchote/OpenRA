@@ -12,6 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenRA.FileSystem;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Primitives;
 using OpenRA.Widgets;
@@ -128,7 +129,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		string selectedUid;
 		readonly Action<string> onSelect;
-		MapGenerationArgs generatedMap;
+		MapGenerationArgs generatedMapArgs;
+		IReadWritePackage generatedMapPackage;
 
 		string category;
 		string mapFilter;
@@ -150,8 +152,19 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			var approving = new Action(() =>
 			{
 				Ui.CloseWindow();
-				if (currentTab == MapClassification.Generated && generatedMap != null)
-					onSelectGenerated?.Invoke(generatedMap);
+				if (currentTab == MapClassification.Generated && generatedMapArgs != null)
+				{
+					// PERF: Add the map directly into the map cache to allow an instant map switch for the local player
+					var p = modData.MapCache[generatedMapArgs.Uid];
+					if (p.Status != MapStatus.Available && generatedMapPackage is ZipFileLoader.ReadWriteZipFile zipPackage)
+					{
+						// The original package will be disposed, so take a deep copy
+						var package = ZipFileLoader.ReadWriteZipFile.FromBase64String(zipPackage.ToBase64String());
+						p.UpdateFromMap(package, MapClassification.Generated);
+					}
+
+					onSelectGenerated?.Invoke(generatedMapArgs);
+				}
 				else
 					onSelect?.Invoke(selectedUid);
 			});
@@ -160,7 +173,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			var okButton = widget.Get<ButtonWidget>("BUTTON_OK");
 			if (onSelect != null)
-				okButton.IsDisabled = () => currentTab == MapClassification.Generated && generatedMap == null;
+				okButton.IsDisabled = () => currentTab == MapClassification.Generated && generatedMapArgs == null;
 			else
 				okButton.Disabled = true;
 
@@ -394,7 +407,13 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			{
 				{ "modData", modData },
 				{ "initialSettings", initialSettings },
-				{ "onGenerate", (Action<MapGenerationArgs>)(data => generatedMap = data) }
+				{
+					"onGenerate", (Action<MapGenerationArgs, IReadWritePackage>)((args, package) =>
+					{
+						generatedMapArgs = args;
+						generatedMapPackage = package;
+					})
+				}
 			});
 		}
 
