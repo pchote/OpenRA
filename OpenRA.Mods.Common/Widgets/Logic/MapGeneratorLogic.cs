@@ -67,7 +67,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly ModData modData;
 		readonly IEditorMapGeneratorInfo generator;
 		readonly IMapGeneratorSettings settings;
-		readonly Action<MapGenerationArgs> onGenerate;
+		readonly Action<MapGenerationArgs, IReadWritePackage> onGenerate;
 
 		readonly GeneratedMapPreviewWidget preview;
 		readonly ScrollPanelWidget settingsPanel;
@@ -76,6 +76,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly Widget dropdownSettingTemplate;
 		readonly Widget tilesetSetting;
 		readonly Widget sizeSetting;
+		readonly IReadWritePackage package;
 
 		ITerrainInfo selectedTerrain;
 		string selectedSize;
@@ -85,10 +86,11 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		volatile bool failed;
 
 		[ObjectCreator.UseCtor]
-		internal MapGeneratorLogic(Widget widget, ModData modData, MapGenerationArgs initialSettings, Action<MapGenerationArgs> onGenerate)
+		internal MapGeneratorLogic(Widget widget, ModData modData, MapGenerationArgs initialSettings, Action<MapGenerationArgs, IReadWritePackage> onGenerate)
 		{
 			this.modData = modData;
 			this.onGenerate = onGenerate;
+			package = new ZipFileLoader.ReadWriteZipFile();
 
 			generator = modData.DefaultRules.Actors[SystemActors.EditorWorld].TraitInfos<IEditorMapGeneratorInfo>().First();
 			settings = generator.GetSettings();
@@ -215,7 +217,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				if (map.Status == MapStatus.Available)
 				{
 					preview.Update(map);
-					onGenerate(initialSettings);
+					onGenerate(initialSettings, null);
 				}
 				else
 					GenerateMap();
@@ -385,7 +387,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		void GenerateMap()
 		{
 			generating = true;
-			onGenerate(null);
+			onGenerate(null, null);
 			failed = false;
 			preview.Clear();
 			Task.Run(() =>
@@ -398,14 +400,13 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 						var map = generator.Generate(modData, args);
 
 						// Map UID and preview image are generated on save
-						var package = new ZipFileLoader.ReadWriteZipFile();
 						map.Save(package);
 						args.Uid = map.Uid;
 
 						Game.RunAfterTick(() =>
 						{
 							preview.Update(map);
-							onGenerate(args);
+							onGenerate(args, package);
 							generating = false;
 						});
 						return;
@@ -419,6 +420,18 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				failed = true;
 				generating = false;
 			});
+		}
+
+		bool disposed;
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing && !disposed)
+			{
+				disposed = true;
+				package.Dispose();
+			}
+
+			base.Dispose(disposing);
 		}
 	}
 }
