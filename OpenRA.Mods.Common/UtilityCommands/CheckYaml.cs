@@ -100,8 +100,15 @@ namespace OpenRA.Mods.Common.UtilityCommands
 					if (package == null)
 						continue;
 
-					using (var testMap = new Map(modData, package))
-						TestMap(testMap, modData);
+					try
+					{
+						using (var testMap = new Map(modData, package))
+							TestMap(testMap, modData);
+					}
+					catch (Exception e)
+					{
+						EmitError($"Failed to load map {map.Map} with exception: {e}");
+					}
 				}
 
 				if (errors > 0)
