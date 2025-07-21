@@ -21,7 +21,7 @@ namespace OpenRA.Mods.Common.Terrain
 {
 	public record TheaterTemplate(Sprite[] Sprites, int Stride, int Variants);
 
-	public sealed class DefaultTileCache : ITileCache, IDisposable
+	public sealed class DefaultTileCache : IDisposable
 	{
 		readonly Cache<SheetType, SheetBuilder> sheetBuilders;
 		readonly Dictionary<ushort, TheaterTemplate> templates = [];

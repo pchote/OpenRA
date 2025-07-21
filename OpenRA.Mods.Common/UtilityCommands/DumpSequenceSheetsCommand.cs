@@ -14,11 +14,14 @@ using System.Collections.Generic;
 using OpenRA.FileFormats;
 using OpenRA.FileSystem;
 using OpenRA.Graphics;
-using OpenRA.Mods.Common.Terrain;
-using OpenRA.Mods.Common.Traits;
 
 namespace OpenRA.Mods.Common.UtilityCommands
 {
+	public interface IDumpSheetsTerrainInfo : ITerrainInfo
+	{
+		void DumpSheets(string terrainName, ImmutablePalette palette, ref int sheetCount);
+	}
+
 	sealed class DumpSequenceSheetsCommand : IUtilityCommand
 	{
 		static readonly int[] ChannelMasks = [2, 1, 0, 3];
@@ -88,27 +91,14 @@ namespace OpenRA.Mods.Common.UtilityCommands
 					CommitSheet(null, sheet, sequencesName, palette, ref sheetCount);
 
 				modData.DefaultTerrainInfo.TryGetValue(sequence.TileSet, out var terrainInfo);
-				if (terrainInfo is ITemplatedTerrainInfo templatedTerrainInfo)
-				{
-					foreach (var ttr in modData.DefaultRules.Actors[SystemActors.World].TraitInfos<ITiledTerrainRendererInfo>())
-					{
-						if (!ttr.ValidateTileSprites(templatedTerrainInfo, Console.WriteLine, out var tileCache))
-						{
-							sheetBuilder = tileCache.GetSheetBuilder(SheetType.Indexed);
-							foreach (var sheet in sheetBuilder.AllSheets)
-								CommitSheet(sheetBuilder, sheet, terrainName, palette, ref sheetCount);
-
-							foreach (var sheet in tileCache.GetSheetBuilder(SheetType.BGRA).AllSheets)
-								CommitSheet(null, sheet, terrainName, palette, ref sheetCount);
-						}
-					}
-				}
+				if (terrainInfo is IDumpSheetsTerrainInfo dsi)
+					dsi.DumpSheets(terrainName, palette, ref sheetCount);
 
 				sequence.Dispose();
 			}
 		}
 
-		static void CommitSheet(SheetBuilder builder, Sheet sheet, string name, ImmutablePalette palette, ref int count)
+		public static void CommitSheet(SheetBuilder builder, Sheet sheet, string name, ImmutablePalette palette, ref int count)
 		{
 			if (builder == null)
 				sheet.AsPng().Save($"{count++}.{name}.png", Png.Compression.BEST_SPEED);

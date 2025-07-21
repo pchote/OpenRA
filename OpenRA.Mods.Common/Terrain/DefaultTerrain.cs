@@ -14,7 +14,9 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using OpenRA.FileSystem;
+using OpenRA.Graphics;
 using OpenRA.Mods.Common.MapGenerator;
+using OpenRA.Mods.Common.UtilityCommands;
 using OpenRA.Primitives;
 using OpenRA.Support;
 
@@ -66,7 +68,7 @@ namespace OpenRA.Mods.Common.Terrain
 		}
 	}
 
-	public class DefaultTerrain : ITemplatedTerrainInfo, ITerrainInfoNotifyMapCreated
+	public class DefaultTerrain : ITemplatedTerrainInfo, IDumpSheetsTerrainInfo, ITerrainInfoNotifyMapCreated
 	{
 		[FluentReference]
 		public readonly string Name;
@@ -180,11 +182,23 @@ namespace OpenRA.Mods.Common.Terrain
 		IEnumerable<Color> ITerrainInfo.RestrictedPlayerColors { get { return TerrainInfo.Where(ti => ti.RestrictPlayerColor).Select(ti => ti.Color); } }
 		float ITerrainInfo.MinHeightColorBrightness => MinHeightColorBrightness;
 		float ITerrainInfo.MaxHeightColorBrightness => MaxHeightColorBrightness;
+
 		TerrainTile ITerrainInfo.DefaultTerrainTile => new(Templates.First().Key, 0);
 
 		string[] ITemplatedTerrainInfo.EditorTemplateOrder => EditorTemplateOrder;
 		IReadOnlyDictionary<ushort, TerrainTemplateInfo> ITemplatedTerrainInfo.Templates => Templates;
 		IReadOnlyDictionary<string, IEnumerable<MultiBrushInfo>> ITemplatedTerrainInfo.MultiBrushCollections => MultiBrushCollections;
+
+		void IDumpSheetsTerrainInfo.DumpSheets(string terrainName, ImmutablePalette palette, ref int sheetCount)
+		{
+			var tileCache = new DefaultTileCache(this);
+			var sb = tileCache.GetSheetBuilder(SheetType.Indexed);
+			foreach (var s in sb.AllSheets)
+				DumpSequenceSheetsCommand.CommitSheet(sb, s, terrainName, palette, ref sheetCount);
+
+			foreach (var s in tileCache.GetSheetBuilder(SheetType.BGRA).AllSheets)
+				DumpSequenceSheetsCommand.CommitSheet(null, s, terrainName, palette, ref sheetCount);
+		}
 
 		void ITerrainInfoNotifyMapCreated.MapCreated(Map map)
 		{
