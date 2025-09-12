@@ -31,18 +31,19 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("The widget tree to open when the tool is selected.")]
 		public readonly string PanelWidget = "MARKER_TOOL_PANEL";
 
+		[FluentReference(LintDictionaryReference.Keys)]
 		[Desc("A list of colors to be used for drawing.")]
-		public readonly Color[] Colors =
-		[
-			Color.FromArgb(255, 0, 0),
-			Color.FromArgb(255, 127, 0),
-			Color.FromArgb(255, 238, 70),
-			Color.FromArgb(0, 255, 33),
-			Color.FromArgb(0, 255, 255),
-			Color.FromArgb(0, 42, 255),
-			Color.FromArgb(165, 0, 255),
-			Color.FromArgb(255, 0, 220),
-		];
+		public readonly Dictionary<string, Color> Colors = new()
+		{
+			{ "notification-added-marker-tiles-markers.red", Color.FromArgb(255, 0, 0) },
+			{ "notification-added-marker-tiles-markers.orange", Color.FromArgb(255, 127, 0) },
+			{ "notification-added-marker-tiles-markers.yellow", Color.FromArgb(255, 238, 70) },
+			{ "notification-added-marker-tiles-markers.green", Color.FromArgb(0, 255, 33) },
+			{ "notification-added-marker-tiles-markers.cyan", Color.FromArgb(0, 255, 255) },
+			{ "notification-added-marker-tiles-markers.blue", Color.FromArgb(0, 42, 255) },
+			{ "notification-added-marker-tiles-markers.purple", Color.FromArgb(165, 0, 255) },
+			{ "notification-added-marker-tiles-markers.magenta", Color.FromArgb(255, 0, 220) }
+		};
 
 		[Desc("Default alpha blend.")]
 		public readonly int Alpha = 85;
@@ -139,7 +140,7 @@ namespace OpenRA.Mods.Common.Traits
 			PanelWidget = info.PanelWidget;
 
 			tileAlpha = info.Alpha;
-			alphaBlendColors = new Color[info.Colors.Length];
+			alphaBlendColors = new Color[info.Colors.Count];
 			UpdateTileAlpha();
 
 			CellLayer = new CellLayer<int?>(map);
@@ -184,8 +185,8 @@ namespace OpenRA.Mods.Common.Traits
 
 		void UpdateTileAlpha()
 		{
-			for (var i = 0; i < Info.Colors.Length; i++)
-				alphaBlendColors[i] = Color.FromArgb(tileAlpha, Info.Colors[i]);
+			for (var i = 0; i < Info.Colors.Count; i++)
+				alphaBlendColors[i] = Color.FromArgb(tileAlpha, Info.Colors.ElementAt(i).Value);
 		}
 
 		public void ClearSelected(int tileType)
