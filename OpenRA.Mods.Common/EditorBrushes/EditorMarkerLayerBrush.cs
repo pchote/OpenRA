@@ -163,9 +163,13 @@ namespace OpenRA.Mods.Common.Widgets
 			this.paintTiles = paintTiles;
 			this.markerLayerOverlay = markerLayerOverlay;
 
-			Text = type != null
-				? FluentProvider.GetMessage(AddedMarkerTiles, "count", paintTiles.Length, "type", type)
-				: FluentProvider.GetMessage(RemovedMarkerTiles, "count", paintTiles.Length);
+			if (type != null)
+			{
+				var typeLabel = FluentProvider.GetMessage(markerLayerOverlay.Info.Colors.ElementAt(type.Value).Key);
+				Text = FluentProvider.GetMessage(AddedMarkerTiles, "count", paintTiles.Length, "type", typeLabel);
+			}
+			else
+				Text = FluentProvider.GetMessage(RemovedMarkerTiles, "count", paintTiles.Length);
 		}
 
 		public void Execute() { }
@@ -202,7 +206,8 @@ namespace OpenRA.Mods.Common.Widgets
 			this.markerLayerOverlay = markerLayerOverlay;
 
 			tiles = markerLayerOverlay.Tiles[tile].ToImmutableArray();
-			Text = FluentProvider.GetMessage(ClearedSelectedMarkerTiles, "count", tiles.Length, "type", tile);
+			var typeLabel = FluentProvider.GetMessage(markerLayerOverlay.Info.Colors.ElementAt(tile).Key);
+			Text = FluentProvider.GetMessage(ClearedSelectedMarkerTiles, "count", tiles.Length, "type", typeLabel);
 		}
 
 		public void Execute()

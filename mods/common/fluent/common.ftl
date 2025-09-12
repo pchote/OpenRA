@@ -809,17 +809,30 @@ notification-added-tile = Added tile { $id }
 notification-filled-tile = Filled with tile { $id }
 
 ## EditorMarkerLayerBrush
+notification-added-marker-tiles-markers =
+    .red = red
+    .orange = orange
+    .yellow = yellow
+    .green = green
+    .cyan = cyan
+    .blue = blue
+    .purple = purple
+    .magenta = magenta
 notification-added-marker-tiles =
     { $count ->
-       [one] Added one marker tile of type { $type }
-      *[other] Added { $count } marker tiles of type { $type }
+       [one] Added { $type } marker tile
+      *[other] Added { $count } { $type } marker tiles
     }
 notification-removed-marker-tiles =
     { $count ->
-       [one] Removed one marker tile
+       [one] Removed marker tile
       *[other] Removed { $count } marker tiles
     }
-notification-cleared-selected-marker-tiles = Cleared { $count } marker tiles of type { $type }
+notification-cleared-selected-marker-tiles =
+    { $count ->
+       [one] Cleared { $type } marker tile
+      *[other] Cleared { $count } { $type } marker tiles
+    }
 notification-cleared-all-marker-tiles = Cleared { $count } marker tiles
 
 ## EditorActionManager
