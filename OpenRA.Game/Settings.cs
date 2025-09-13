@@ -71,14 +71,13 @@ namespace OpenRA
 		[Desc("Takes a comma separated list of IP addresses that are not allowed to join.")]
 		public string[] Ban = [];
 
-		[Desc("For dedicated servers only, allow anonymous clients to join.")]
+		[Desc("For dedicated servers only, controls whether anonymous clients can join.")]
 		public bool RequireAuthentication = false;
 
-		[Desc("For dedicated servers only, if non-empty, only allow authenticated players with these profile IDs to join.")]
-		public int[] ProfileIDWhitelist = [];
-
-		[Desc("For dedicated servers only, if non-empty, always reject players with these user IDs from joining.")]
-		public int[] ProfileIDBlacklist = [];
+		[Desc(
+			"For dedicated servers with RequireAuthentication only, query this URL with a clients ProfileID " +
+			"to determine whether they should be blocked or promoted to game admin.")]
+		public string ProfileIDFilterURL = null;
 
 		[Desc("For dedicated servers only, controls whether a game can be started with just one human player in the lobby.")]
 		public bool EnableSingleplayer = false;

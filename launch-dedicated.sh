@@ -20,8 +20,7 @@ Password="${Password:-""}"
 RecordReplays="${RecordReplays:-"False"}"
 
 RequireAuthentication="${RequireAuthentication:-"False"}"
-ProfileIDBlacklist="${ProfileIDBlacklist:-""}"
-ProfileIDWhitelist="${ProfileIDWhitelist:-""}"
+ProfileIDFilterURL="${ProfileIDFilterURL:-""}"
 
 EnableSingleplayer="${EnableSingleplayer:-"False"}"
 EnableSyncReports="${EnableSyncReports:-"False"}"
@@ -44,8 +43,7 @@ while true; do
      Server.Password="$Password" \
      Server.RecordReplays="$RecordReplays" \
      Server.RequireAuthentication="$RequireAuthentication" \
-     Server.ProfileIDBlacklist="$ProfileIDBlacklist" \
-     Server.ProfileIDWhitelist="$ProfileIDWhitelist" \
+     Server.ProfileIDFilterURL="$ProfileIDFilterURL" \
      Server.EnableSyncReports="$EnableSyncReports" \
      Server.EnableGeoIP="$EnableGeoIP" \
      Server.EnableLintChecks="$EnableLintChecks" \

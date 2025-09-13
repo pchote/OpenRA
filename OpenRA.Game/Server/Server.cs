@@ -542,7 +542,7 @@ namespace OpenRA.Server
 					return;
 				}
 
-				void CompleteConnection()
+				void CompleteConnection(bool forceAdmin = false)
 				{
 					lock (LobbyInfo)
 					{
@@ -564,6 +564,15 @@ namespace OpenRA.Server
 						// Promote connection to a valid client
 						LobbyInfo.Clients.Add(client);
 						newConn.Validated = true;
+
+						if (forceAdmin && !client.IsAdmin)
+						{
+							foreach (var c in LobbyInfo.Clients)
+								c.IsAdmin = false;
+
+							client.IsAdmin = true;
+							SendFluentMessage(NewAdmin, "player", client.Name);
+						}
 
 						// Disable chat UI to stop the client sending messages that we know we will reject
 						if (!client.IsAdmin && Settings.FloodLimitJoinCooldown > 0)
@@ -659,37 +668,51 @@ namespace OpenRA.Server
 							Log.Write("server", ex.ToString());
 						}
 
+						var profileBlocked = false;
+						var profileAdmin = false;
+
+						if (profile != null && !string.IsNullOrEmpty(Settings.ProfileIDFilterURL))
+						{
+							try
+							{
+								var httpClient = HttpClientFactory.Create();
+								var url = Settings.ProfileIDFilterURL + profile.ProfileID;
+								var httpResponseMessage = await httpClient.GetAsync(url);
+								var result = await httpResponseMessage.Content.ReadAsStringAsync();
+								profileBlocked = result == "block";
+								profileAdmin = result == "admin";
+							}
+							catch (Exception ex)
+							{
+								Log.Write("server", $"{newConn.EndPoint} failed to authenticate as {handshake.Fingerprint} (exception occurred during custom validation)");
+								Log.Write("server", ex.ToString());
+							}
+						}
+
 						events.Add(new CallbackEvent(() =>
 						{
-							var notAuthenticated = Type == ServerType.Dedicated && profile == null && (Settings.RequireAuthentication || Settings.ProfileIDWhitelist.Length > 0);
-							var blacklisted = Type == ServerType.Dedicated && profile != null && Settings.ProfileIDBlacklist.Contains(profile.ProfileID);
-							var notWhitelisted = Type == ServerType.Dedicated && Settings.ProfileIDWhitelist.Length > 0 &&
-								(profile == null || !Settings.ProfileIDWhitelist.Contains(profile.ProfileID));
-
+							var notAuthenticated = Type == ServerType.Dedicated && profile == null && Settings.RequireAuthentication;
 							if (notAuthenticated)
 							{
 								Log.Write("server", $"Rejected connection from {newConn.EndPoint}; Not authenticated.");
 								SendOrderTo(newConn, "ServerError", RequiresAuthentication);
 								DropClient(newConn);
 							}
-							else if (blacklisted || notWhitelisted)
+							else if (profileBlocked)
 							{
-								if (blacklisted)
-									Log.Write("server", $"Rejected connection from {newConn.EndPoint}; In server blacklist.");
-								else
-									Log.Write("server", $"Rejected connection from {newConn.EndPoint}; Not in server whitelist.");
+								Log.Write("server", $"Rejected connection from {newConn.EndPoint}; Rejected by server profile validation.");
 
 								SendOrderTo(newConn, "ServerError", NoPermission);
 								DropClient(newConn);
 							}
 							else
-								CompleteConnection();
+								CompleteConnection(profileAdmin);
 						}));
 					});
 				}
 				else
 				{
-					if (Type == ServerType.Dedicated && (Settings.RequireAuthentication || Settings.ProfileIDWhitelist.Length > 0))
+					if (Type == ServerType.Dedicated && Settings.RequireAuthentication)
 					{
 						Log.Write("server", $"Rejected connection from {newConn.EndPoint}; Not authenticated.");
 						SendOrderTo(newConn, "ServerError", RequiresAuthentication);
