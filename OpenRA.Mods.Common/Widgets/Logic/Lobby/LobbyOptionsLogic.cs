@@ -34,6 +34,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly OrderManager orderManager;
 		readonly Func<bool> configurationDisabled;
 		MapPreview mapPreview;
+		MapStatus mapStatus;
 
 		[ObjectCreator.UseCtor]
 		internal LobbyOptionsLogic(Widget widget, OrderManager orderManager, Func<MapPreview> getMap, Func<bool> configurationDisabled)
@@ -49,13 +50,14 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			dropdownRowTemplate = optionsContainer.Get("DROPDOWN_ROW_TEMPLATE");
 
 			mapPreview = getMap();
+			mapStatus = mapPreview.Status;
 			RebuildOptions();
 		}
 
 		public override void Tick()
 		{
 			var newMapPreview = getMap();
-			if (newMapPreview == mapPreview)
+			if (newMapPreview == mapPreview && mapStatus == mapPreview.Status)
 				return;
 
 			// We are currently enumerating the widget tree and so can't modify any layout
@@ -63,6 +65,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			Game.RunAfterTick(() =>
 			{
 				mapPreview = newMapPreview;
+				mapStatus = mapPreview.Status;
 				RebuildOptions();
 			});
 		}
