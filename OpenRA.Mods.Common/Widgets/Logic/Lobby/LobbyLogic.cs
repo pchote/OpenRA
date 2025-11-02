@@ -601,7 +601,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		bool OptionsTabDisabled()
 		{
-			return !MapIsPlayable || panel == PanelType.Kick || panel == PanelType.ForceStart;
+			return map.Status == MapStatus.Unavailable || map.Status == MapStatus.Searching ||
+				!MapIsPlayable || panel == PanelType.Kick || panel == PanelType.ForceStart;
 		}
 
 		public override void Tick()
