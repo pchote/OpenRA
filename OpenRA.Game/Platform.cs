@@ -221,6 +221,9 @@ namespace OpenRA
 			if (!Directory.Exists(path))
 				throw new DirectoryNotFoundException(path);
 
+			// Ensure that userSupportPath is an absolute path
+			path = Path.GetFullPath(path);
+
 			if (!path.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal) &&
 					!path.EndsWith(Path.AltDirectorySeparatorChar.ToString(), StringComparison.Ordinal))
 				path += Path.DirectorySeparatorChar;
