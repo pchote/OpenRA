@@ -610,7 +610,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			if (!mapAvailable && map.Status == MapStatus.Available)
 			{
 				mapAvailable = true;
-				orderManager.IssueOrder(Order.Command($"state {Session.ClientState.NotReady}"));
+				CurrentMapBecameAvailable();
 			}
 
 			if (panel == PanelType.Options && OptionsTabDisabled())
@@ -664,6 +664,15 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			}
 		}
 
+		void CurrentMapBecameAvailable()
+		{
+			orderManager.IssueOrder(Order.Command($"state {Session.ClientState.NotReady}"));
+
+			var missionData = map.WorldActorInfo.TraitInfoOrDefault<MissionDataInfo>();
+			if (missionData != null && !string.IsNullOrEmpty(missionData.Briefing))
+				TextNotificationsManager.AddSystemLine(missionData.Briefing.Replace("\\n", "\n"));
+		}
+
 		void UpdateCurrentMap()
 		{
 			mapStatus = orderManager.LobbyInfo.GlobalSettings.MapStatus;
@@ -676,7 +685,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			// Tell the server that we have the map
 			mapAvailable = map.Status == MapStatus.Available;
 			if (mapAvailable)
-				orderManager.IssueOrder(Order.Command($"state {Session.ClientState.NotReady}"));
+				CurrentMapBecameAvailable();
 
 			// We don't have the map
 			else if (map.Status != MapStatus.DownloadAvailable && Game.Settings.Game.AllowDownloading)
