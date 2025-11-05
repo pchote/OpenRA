@@ -133,7 +133,7 @@ namespace OpenRA.Mods.Common.Terrain
 							kv.Key,
 							MultiBrushInfo.ParseCollection(kv.Value)))
 						.ToImmutableDictionary()
-					: ImmutableDictionary<string, IEnumerable<MultiBrushInfo>>.Empty;
+					: [];
 		}
 
 		public TerrainTypeInfo this[byte index] => TerrainInfo[index];
