@@ -37,7 +37,7 @@ namespace OpenRA.Mods.Common.Traits.Render
 			wsb = self.TraitsImplementing<WithSpriteBody>().Single(w => w.Info.Name == info.Body);
 		}
 
-		void INotifyBuildingPlaced.BuildingPlaced(Actor self)
+		void INotifyBuildingPlaced.BuildingPlaced(Actor self, Actor building)
 		{
 			if (!IsTraitDisabled)
 				wsb.PlayCustomAnimation(self, Info.Sequence);

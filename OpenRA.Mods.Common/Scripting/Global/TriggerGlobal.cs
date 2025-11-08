@@ -231,6 +231,16 @@ namespace OpenRA.Mods.Common.Scripting
 			GetScriptTriggers(player.PlayerActor).RegisterCallback(Trigger.OnObjectiveFailed, func, Context);
 		}
 
+		[Desc("Call a function when this player places a building. " +
+			"The callback function will be called as func(p: player, placed: actor).")]
+		public void OnBuildingPlaced(Player player, [ScriptEmmyTypeOverride("fun(p: player, placed: actor)")] LuaFunction func)
+		{
+			if (player == null)
+				throw new NullReferenceException(nameof(player));
+
+			GetScriptTriggers(player.PlayerActor).RegisterCallback(Trigger.OnBuildingPlaced, func, Context);
+		}
+
 		[Desc("Call a function when this actor is added to the world. " +
 			"The callback function will be called as func(self: actor).")]
 		public void OnAddedToWorld(Actor actor, [ScriptEmmyTypeOverride("fun(self: actor)")] LuaFunction func)
