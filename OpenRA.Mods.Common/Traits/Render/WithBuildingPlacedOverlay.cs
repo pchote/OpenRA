@@ -60,7 +60,7 @@ namespace OpenRA.Mods.Common.Traits.Render
 			overlay.ReplaceAnim(RenderSprites.NormalizeSequence(overlay, e.DamageState, overlay.CurrentSequence.Name));
 		}
 
-		void INotifyBuildingPlaced.BuildingPlaced(Actor self)
+		void INotifyBuildingPlaced.BuildingPlaced(Actor self, Actor building)
 		{
 			visible = true;
 			overlay.PlayThen(overlay.CurrentSequence.Name, () => visible = false);
