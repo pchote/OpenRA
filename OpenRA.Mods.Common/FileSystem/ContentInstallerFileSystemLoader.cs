@@ -65,5 +65,12 @@ namespace OpenRA.Mods.Common.FileSystem
 
 			return !isContentAvailable;
 		}
+
+		void IFileSystemExternalContent.ManageContent(ModData modData)
+		{
+			// Switching mods changes the world state (by disposing it),
+			// so we can't do this inside the input handler.
+			Game.RunAfterTick(() => Game.InitializeMod(ContentInstallerMod, new Arguments()));
+		}
 	}
 }
