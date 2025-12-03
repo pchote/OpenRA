@@ -83,18 +83,9 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			var contentButton = mainMenu.GetOrNull<ButtonWidget>("CONTENT_BUTTON");
 			if (contentButton != null)
 			{
-				var contentInstaller = modData.FileSystemLoader as ContentInstallerFileSystemLoader;
+				var contentInstaller = modData.FileSystemLoader as IFileSystemExternalContent;
 				contentButton.Disabled = contentInstaller == null;
-				contentButton.OnClick = () =>
-				{
-					// Switching mods changes the world state (by disposing it),
-					// so we can't do this inside the input handler.
-					Game.RunAfterTick(() =>
-					{
-						if (contentInstaller != null)
-							Game.InitializeMod(contentInstaller.ContentInstallerMod, new Arguments());
-					});
-				};
+				contentButton.OnClick = () => contentInstaller?.ManageContent(modData);
 			}
 
 			mainMenu.Get<ButtonWidget>("SETTINGS_BUTTON").OnClick = () =>

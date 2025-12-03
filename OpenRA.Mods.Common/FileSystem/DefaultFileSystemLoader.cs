@@ -18,6 +18,7 @@ namespace OpenRA.Mods.Common.FileSystem
 	public interface IFileSystemExternalContent
 	{
 		bool InstallContentIfRequired(ModData modData);
+		void ManageContent(ModData modData);
 	}
 
 	public class DefaultFileSystemLoader : IFileSystemLoader
