@@ -66,6 +66,7 @@ namespace OpenRA
 		void PumpInput(IInputHandler inputHandler);
 		string GetClipboardText();
 		bool SetClipboardText(string text);
+		bool TryOpenUrl(string url);
 
 		void GrabWindowMouseFocus();
 		void ReleaseWindowMouseFocus();
