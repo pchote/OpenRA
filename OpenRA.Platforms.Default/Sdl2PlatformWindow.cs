@@ -513,6 +513,18 @@ namespace OpenRA.Platforms.Default
 			return Sdl2Input.SetClipboardText(text);
 		}
 
+		public bool TryOpenUrl(string url)
+		{
+			try
+			{
+				return SDL.SDL_OpenURL(url) == 0;
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
 		static void SetSDLAttributes(GLProfile profile)
 		{
 			SDL.SDL_GL_ResetAttributes();
