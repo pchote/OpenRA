@@ -25,10 +25,23 @@ namespace OpenRA
 
 	public interface IPlatform
 	{
-		IPlatformWindow CreateWindow(
-			Size size, WindowMode windowMode, float scaleModifier, int vertexBatchSize, int indexBatchSize, int videoDisplay, GLProfile profile);
+		IPlatformWindow CreateWindow(PlatformConfig config);
 		ISoundEngine CreateSound(string device);
 		IFont CreateFont(byte[] data);
+	}
+
+	public class PlatformConfig
+	{
+		public Size WindowSize;
+		public WindowMode WindowMode;
+		public int WindowDisplay;
+		public GLProfile GLProfile;
+		public bool VSync;
+		public float ScaleModifier;
+		public int VertexBatchSize;
+		public int IndexBatchSize;
+		public bool LockMouseToWindow;
+		public bool DisableGLDebugMessageCallback;
 	}
 
 	public interface IHardwareCursor : IDisposable { }

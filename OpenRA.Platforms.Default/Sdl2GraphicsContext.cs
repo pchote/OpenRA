@@ -18,13 +18,15 @@ namespace OpenRA.Platforms.Default
 	sealed class Sdl2GraphicsContext : ThreadAffine, IGraphicsContext
 	{
 		readonly Sdl2PlatformWindow window;
+		readonly bool disableGLDebugMessageCallback;
 		IntPtr context;
 
 		public string GLVersion => OpenGL.Version;
 
-		public Sdl2GraphicsContext(Sdl2PlatformWindow window)
+		public Sdl2GraphicsContext(Sdl2PlatformWindow window, PlatformConfig config)
 		{
 			this.window = window;
+			disableGLDebugMessageCallback = config.DisableGLDebugMessageCallback;
 
 			// SDL requires us to create the GL context on the main thread to avoid various platform-specific issues.
 			// We must then release it from the main thread before we rebind it to the render thread (in InitializeOpenGL below).
@@ -40,7 +42,7 @@ namespace OpenRA.Platforms.Default
 			if (SDL.SDL_GL_MakeCurrent(window.Window, context) < 0)
 				throw new InvalidOperationException($"Can not bind OpenGL context. (Error: {SDL.SDL_GetError()})");
 
-			OpenGL.Initialize();
+			OpenGL.Initialize(disableGLDebugMessageCallback);
 			OpenGL.CheckGLError();
 
 			OpenGL.glGenVertexArrays(1, out var vao);

@@ -132,13 +132,12 @@ namespace OpenRA.Platforms.Default
 		[DllImport("libX11")]
 		static extern IntPtr XFlush(IntPtr display);
 
-		public Sdl2PlatformWindow(Size requestEffectiveWindowSize, WindowMode windowMode,
-			float scaleModifier, int vertexBatchSize, int indexBatchSize, int videoDisplay, GLProfile requestProfile)
+		public Sdl2PlatformWindow(PlatformConfig config)
 		{
 			// Lock the Window/Surface properties until initialization is complete
 			lock (syncObject)
 			{
-				this.scaleModifier = scaleModifier;
+				scaleModifier = config.ScaleModifier;
 
 				// Disable legacy scaling on Windows
 				if (Platform.CurrentPlatform == PlatformType.Windows)
@@ -160,7 +159,7 @@ namespace OpenRA.Platforms.Default
 					throw new InvalidOperationException("No supported OpenGL profiles were found.");
 				}
 
-				profile = supportedProfiles.Contains(requestProfile) ? requestProfile : supportedProfiles[0];
+				profile = supportedProfiles.Contains(config.GLProfile) ? config.GLProfile : supportedProfiles[0];
 
 				// Note: This must be called after the CanCreateGLWindow checks above,
 				// which needs to create and destroy its own SDL contexts as a workaround for specific buggy drivers
@@ -169,10 +168,10 @@ namespace OpenRA.Platforms.Default
 
 				SetSDLAttributes(profile);
 				Console.WriteLine($"Using SDL 2 with OpenGL ({profile}) renderer");
-				if (videoDisplay < 0 || videoDisplay >= DisplayCount)
-					videoDisplay = 0;
+				if (config.WindowDisplay < 0 || config.WindowDisplay >= DisplayCount)
+					config.WindowDisplay = 0;
 
-				SDL.SDL_GetCurrentDisplayMode(videoDisplay, out var display);
+				SDL.SDL_GetCurrentDisplayMode(config.WindowDisplay, out var display);
 
 				// Windows and Linux define window sizes in native pixel units.
 				// Query the display/dpi scale so we can convert our requested effective size to pixels.
@@ -183,7 +182,7 @@ namespace OpenRA.Platforms.Default
 					// Otherwise fall back to Windows's DPI configuration
 					var scaleVariable = Environment.GetEnvironmentVariable("OPENRA_DISPLAY_SCALE");
 					if (scaleVariable == null || !float.TryParse(scaleVariable, NumberStyles.Float, NumberFormatInfo.InvariantInfo, out windowScale) || windowScale <= 0)
-						if (SDL.SDL_GetDisplayDPI(videoDisplay, out var ddpi, out _, out _) == 0)
+						if (SDL.SDL_GetDisplayDPI(config.WindowDisplay, out var ddpi, out _, out _) == 0)
 							windowScale = ddpi / 96;
 				}
 				else if (Platform.CurrentPlatform == PlatformType.Linux)
@@ -214,23 +213,23 @@ namespace OpenRA.Platforms.Default
 				}
 
 				Console.WriteLine($"Desktop resolution: {display.w}x{display.h}");
-				if (requestEffectiveWindowSize.Width == 0 && requestEffectiveWindowSize.Height == 0)
+				if (config.WindowSize.Width == 0 && config.WindowSize.Height == 0)
 				{
 					Console.WriteLine("No custom resolution provided, using desktop resolution");
 					surfaceSize = windowSize = new Size(display.w, display.h);
 				}
 				else
-					surfaceSize = windowSize = new Size((int)(requestEffectiveWindowSize.Width * windowScale), (int)(requestEffectiveWindowSize.Height * windowScale));
+					surfaceSize = windowSize = new Size((int)(config.WindowSize.Width * windowScale), (int)(config.WindowSize.Height * windowScale));
 
 				Console.WriteLine($"Using resolution: {windowSize.Width}x{windowSize.Height}");
 
 				const SDL.SDL_WindowFlags WindowFlags = SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI;
 
 				// HiDPI doesn't work properly on OSX with (legacy) fullscreen mode
-				if (Platform.CurrentPlatform == PlatformType.OSX && windowMode == WindowMode.Fullscreen)
+				if (Platform.CurrentPlatform == PlatformType.OSX && config.WindowMode == WindowMode.Fullscreen)
 					SDL.SDL_SetHint(SDL.SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
 
-				window = SDL.SDL_CreateWindow("OpenRA", SDL.SDL_WINDOWPOS_CENTERED_DISPLAY(videoDisplay), SDL.SDL_WINDOWPOS_CENTERED_DISPLAY(videoDisplay),
+				window = SDL.SDL_CreateWindow("OpenRA", SDL.SDL_WINDOWPOS_CENTERED_DISPLAY(config.WindowDisplay), SDL.SDL_WINDOWPOS_CENTERED_DISPLAY(config.WindowDisplay),
 					windowSize.Width, windowSize.Height, WindowFlags);
 
 				if (Platform.CurrentPlatform == PlatformType.Linux)
@@ -279,12 +278,12 @@ namespace OpenRA.Platforms.Default
 				else
 					windowSize = new Size((int)(surfaceSize.Width / windowScale), (int)(surfaceSize.Height / windowScale));
 
-				if (Game.Settings.Game.LockMouseWindow)
+				if (config.LockMouseToWindow)
 					GrabWindowMouseFocus();
 				else
 					ReleaseWindowMouseFocus();
 
-				if (windowMode == WindowMode.Fullscreen)
+				if (config.WindowMode == WindowMode.Fullscreen)
 				{
 					SDL.SDL_SetWindowFullscreen(Window, (uint)SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN);
 
@@ -301,7 +300,7 @@ namespace OpenRA.Platforms.Default
 						windowScale = 1;
 					}
 				}
-				else if (windowMode == WindowMode.PseudoFullscreen)
+				else if (config.WindowMode == WindowMode.PseudoFullscreen)
 				{
 					// Gnome >= 44 does not consider SDL_WINDOW_FULLSCREEN_DESKTOP to be borderless!
 					// This must be called before SetWindowFullscreen for the workaround to function.
@@ -342,16 +341,16 @@ namespace OpenRA.Platforms.Default
 			// The calling thread will then have more time to process other tasks, since rendering happens in parallel.
 			// If the calling thread is the main game thread, this means it can run more logic and render ticks.
 			// This is disabled when running in windowed mode on Windows because it breaks the ability to minimize/restore the window.
-			if (Platform.CurrentPlatform == PlatformType.Windows && windowMode == WindowMode.Windowed)
+			if (Platform.CurrentPlatform == PlatformType.Windows && config.WindowMode == WindowMode.Windowed)
 			{
-				var ctx = new Sdl2GraphicsContext(this);
+				var ctx = new Sdl2GraphicsContext(this, config);
 				ctx.InitializeOpenGL();
 				Context = ctx;
 			}
 			else
-				Context = new ThreadedGraphicsContext(new Sdl2GraphicsContext(this), vertexBatchSize, indexBatchSize);
+				Context = new ThreadedGraphicsContext(new Sdl2GraphicsContext(this, config), config.VertexBatchSize, config.IndexBatchSize);
 
-			Context.SetVSyncEnabled(Game.Settings.Graphics.VSync);
+			Context.SetVSyncEnabled(config.VSync);
 
 			SDL.SDL_SetModState(SDL.SDL_Keymod.KMOD_NONE);
 			input = new Sdl2Input();

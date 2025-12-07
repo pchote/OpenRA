@@ -496,7 +496,7 @@ namespace OpenRA.Platforms.Default
 
 		#endregion
 
-		public static void Initialize()
+		public static void Initialize(bool disableGLDebugMessageCallback)
 		{
 			try
 			{
@@ -520,7 +520,7 @@ namespace OpenRA.Platforms.Default
 			}
 
 			// Allow users to force-disable the debug message callback feature to work around driver bugs
-			if (Features.HasFlag(GLFeatures.DebugMessagesCallback) && Game.Settings.Graphics.DisableGLDebugMessageCallback)
+			if (Features.HasFlag(GLFeatures.DebugMessagesCallback) && disableGLDebugMessageCallback)
 				Features ^= GLFeatures.DebugMessagesCallback;
 
 			// Force disable the debug message callback feature on Linux + AMD GPU to work around a startup freeze

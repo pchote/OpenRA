@@ -439,7 +439,7 @@ namespace OpenRA
 				try
 				{
 					var platform = CreatePlatform(p);
-					Renderer = new Renderer(platform, Settings.Graphics, manifest.RendererConstants.VertexBatchSize);
+					Renderer = new Renderer(platform, Settings.Game, Settings.Graphics, manifest.RendererConstants.VertexBatchSize);
 					Sound = new Sound(platform, Settings.Sound);
 
 					break;

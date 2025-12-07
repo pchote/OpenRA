@@ -83,7 +83,7 @@ namespace OpenRA
 		IBatchRenderer currentBatchRenderer;
 		RenderType renderType = RenderType.None;
 
-		public Renderer(IPlatform platform, GraphicSettings graphicSettings, int vertexBatchSize)
+		public Renderer(IPlatform platform, GameSettings gameSettings, GraphicSettings graphicSettings, int vertexBatchSize)
 		{
 			this.platform = platform;
 			var resolution = GetResolution(graphicSettings);
@@ -91,9 +91,19 @@ namespace OpenRA
 			TempVertexBufferSize = vertexBatchSize - vertexBatchSize % 4;
 			TempIndexBufferSize = TempVertexBufferSize / 4 * 6;
 
-			Window = platform.CreateWindow(new Size(resolution.Width, resolution.Height),
-				graphicSettings.Mode, graphicSettings.UIScale, TempVertexBufferSize, TempIndexBufferSize,
-				graphicSettings.VideoDisplay, graphicSettings.GLProfile);
+			Window = platform.CreateWindow(new PlatformConfig
+			{
+				WindowSize = new Size(resolution.Width, resolution.Height),
+				WindowMode = graphicSettings.Mode,
+				WindowDisplay = graphicSettings.VideoDisplay,
+				GLProfile = graphicSettings.GLProfile,
+				VSync = graphicSettings.VSync,
+				ScaleModifier = graphicSettings.UIScale,
+				VertexBatchSize = TempVertexBufferSize,
+				IndexBatchSize = TempIndexBufferSize,
+				LockMouseToWindow = gameSettings.LockMouseWindow,
+				DisableGLDebugMessageCallback = graphicSettings.DisableGLDebugMessageCallback,
+			});
 
 			Context = Window.Context;
 
