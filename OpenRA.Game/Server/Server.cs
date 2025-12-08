@@ -1356,8 +1356,8 @@ namespace OpenRA.Server
 
 				gameInfo = new GameInformation()
 				{
-					Mod = Game.ModData.Manifest.Id,
-					Version = Game.ModData.Manifest.Metadata.Version,
+					Mod = ModData.Manifest.Id,
+					Version = ModData.Manifest.Metadata.Version,
 					MapUid = Map.Uid,
 					MapTitle = Map.Title,
 					StartTimeUtc = DateTime.UtcNow,
@@ -1376,7 +1376,7 @@ namespace OpenRA.Server
 
 				SyncLobbyInfo();
 
-				var gameSpeeds = Game.ModData.GetOrCreate<GameSpeeds>();
+				var gameSpeeds = ModData.GetOrCreate<GameSpeeds>();
 				var gameSpeedName = LobbyInfo.GlobalSettings.OptionOrDefault("gamespeed", gameSpeeds.DefaultSpeed);
 
 				var gameSpeed = gameSpeeds.Speeds[gameSpeedName];

@@ -75,7 +75,7 @@ namespace OpenRA.Widgets
 			if (!args.ContainsKey("modData"))
 				args = new WidgetArgs(args) { { "modData", modData } };
 
-			var window = Game.ModData.WidgetLoader.LoadWidget(args, Root, id);
+			var window = modData.WidgetLoader.LoadWidget(args, Root, id);
 			if (WindowList.Count > 0)
 				Root.HideChild(WindowList.Peek());
 			WindowList.Push(window);
@@ -100,7 +100,7 @@ namespace OpenRA.Widgets
 			if (!args.ContainsKey("modData"))
 				args = new WidgetArgs(args) { { "modData", modData } };
 
-			return Game.ModData.WidgetLoader.LoadWidget(args, parent, id);
+			return modData.WidgetLoader.LoadWidget(args, parent, id);
 		}
 
 		public static void Tick() { Root.TickOuter(); }

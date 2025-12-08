@@ -147,13 +147,13 @@ namespace OpenRA.Scripting
 
 			World = world;
 			WorldRenderer = worldRenderer;
-			knownActorCommands = Game.ModData.ObjectCreator
+			knownActorCommands = world.ModData.ObjectCreator
 				.GetTypesImplementing<ScriptActorProperties>()
 				.ToArray();
 
 			ActorCommands = new Cache<ActorInfo, Type[]>(FilterActorCommands);
 
-			var knownPlayerCommands = Game.ModData.ObjectCreator
+			var knownPlayerCommands = world.ModData.ObjectCreator
 				.GetTypesImplementing<ScriptPlayerProperties>()
 				.ToArray();
 			PlayerCommands = FilterCommands(world.Map.Rules.Actors[SystemActors.Player], knownPlayerCommands);
@@ -194,7 +194,7 @@ namespace OpenRA.Scripting
 				runtime.Globals["print"] = fn;
 
 			// Register global tables
-			var bindings = Game.ModData.ObjectCreator.GetTypesImplementing<ScriptGlobal>();
+			var bindings = world.ModData.ObjectCreator.GetTypesImplementing<ScriptGlobal>();
 			foreach (var b in bindings)
 			{
 				var ctor = b.GetConstructors(BindingFlags.Public | BindingFlags.Instance).FirstOrDefault(c =>

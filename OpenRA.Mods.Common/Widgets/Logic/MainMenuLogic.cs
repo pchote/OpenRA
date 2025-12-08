@@ -81,7 +81,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			discordService = modData.GetOrNull<DiscordService>();
 			if (gameSettings.EnableDiscordService)
-				discordService?.Start();
+				discordService?.Start(modData);
 
 			// Menu buttons
 			var mainMenu = widget.Get("MAIN_MENU");
@@ -246,7 +246,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			// Check for updates in the background
 			var webServices = modData.GetOrCreate<WebServices>();
 			if (debugSettings.CheckVersion)
-				webServices.CheckModVersion();
+				webServices.CheckModVersion(modData);
 
 			var updateLabel = rootMenu.GetOrNull("UPDATE_NOTICE");
 			if (updateLabel != null)

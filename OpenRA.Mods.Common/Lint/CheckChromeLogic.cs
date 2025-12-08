@@ -21,10 +21,10 @@ namespace OpenRA.Mods.Common.Lint
 		public void Run(Action<string> emitError, Action<string> emitWarning, ModData modData)
 		{
 			foreach (var filename in modData.Manifest.ChromeLayout)
-				CheckInner(MiniYaml.FromStream(modData.DefaultFileSystem.Open(filename), filename), filename, emitError);
+				CheckInner(modData, MiniYaml.FromStream(modData.DefaultFileSystem.Open(filename), filename), filename, emitError);
 		}
 
-		static void CheckInner(IEnumerable<MiniYamlNode> nodes, string filename, Action<string> emitError)
+		static void CheckInner(ModData modData, IEnumerable<MiniYamlNode> nodes, string filename, Action<string> emitError)
 		{
 			foreach (var node in nodes)
 			{
@@ -36,7 +36,7 @@ namespace OpenRA.Mods.Common.Lint
 					var typeNames = FieldLoader.GetValue<ImmutableArray<string>>(node.Key, node.Value.Value);
 					foreach (var typeName in typeNames)
 					{
-						var type = Game.ModData.ObjectCreator.FindType(typeName);
+						var type = modData.ObjectCreator.FindType(typeName);
 						if (type == null)
 							emitError($"{filename} refers to a logic object `{typeName}` that does not exist.");
 						else if (!typeof(ChromeLogic).IsAssignableFrom(type))
@@ -45,7 +45,7 @@ namespace OpenRA.Mods.Common.Lint
 				}
 
 				if (node.Value.Nodes != null)
-					CheckInner(node.Value.Nodes, filename, emitError);
+					CheckInner(modData, node.Value.Nodes, filename, emitError);
 			}
 		}
 	}

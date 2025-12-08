@@ -104,7 +104,7 @@ namespace OpenRA.Mods.Common.Lint
 					var checkArgKeys = new List<string>();
 					foreach (var typeName in typeNames)
 					{
-						var type = Game.ModData.ObjectCreator.FindType(typeName);
+						var type = modData.ObjectCreator.FindType(typeName);
 						if (type == null)
 							continue;
 

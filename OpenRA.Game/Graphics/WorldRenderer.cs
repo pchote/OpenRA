@@ -54,7 +54,7 @@ namespace OpenRA.Graphics
 			World = world;
 			TileSize = World.Map.Rules.TerrainInfo.TileSize;
 			TileScale = World.Map.Grid.TileScale;
-			Viewport = new Viewport(this, world.Map);
+			Viewport = new Viewport(modData, this, world.Map);
 
 			createPaletteReference = CreatePaletteReference;
 

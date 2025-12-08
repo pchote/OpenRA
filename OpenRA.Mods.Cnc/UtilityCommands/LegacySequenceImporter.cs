@@ -34,7 +34,7 @@ namespace OpenRA.Mods.Cnc.UtilityCommands
 		{
 			// HACK: The engine code assumes that Game.modData is set.
 			Game.ModData = utility.ModData;
-			tileSize = Game.ModData.DefaultTerrainInfo.Values.First().TileSize;
+			tileSize = utility.ModData.DefaultTerrainInfo.Values.First().TileSize;
 			file = new IniFile(File.Open(args[1], FileMode.Open));
 
 			foreach (var section in file.Sections)

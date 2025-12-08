@@ -205,7 +205,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			var uiScaleDropdown = panel.Get<DropDownButtonWidget>("UI_SCALE_DROPDOWN");
 			var uiScaleLabel = new CachedTransform<float, string>(s => $"{(int)(100 * s)}%");
-			uiScaleDropdown.OnMouseDown = _ => ShowUIScaleDropdown(uiScaleDropdown, graphicSettings);
+			uiScaleDropdown.OnMouseDown = _ => ShowUIScaleDropdown(uiScaleDropdown, graphicSettings, viewportSizes);
 			uiScaleDropdown.GetText = () => uiScaleLabel.Update(graphicSettings.UIScale);
 
 			var minResolution = viewportSizes.MinEffectiveResolution;
@@ -529,7 +529,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				RecalculateWidgetLayout(c, insideScrollPanel || w is ScrollPanelWidget);
 		}
 
-		public static void ShowUIScaleDropdown(DropDownButtonWidget dropdown, GraphicSettings graphicSettings)
+		public static void ShowUIScaleDropdown(DropDownButtonWidget dropdown, GraphicSettings graphicSettings, WorldViewportSizes viewportSizes)
 		{
 			ScrollItemWidget SetupItem(float o, ScrollItemWidget itemTemplate)
 			{
@@ -553,7 +553,6 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				return item;
 			}
 
-			var viewportSizes = Game.ModData.GetOrCreate<WorldViewportSizes>();
 			var maxScales = new float2(Game.Renderer.NativeResolution) / new float2(viewportSizes.MinEffectiveResolution);
 			var maxScale = Math.Min(maxScales.X, maxScales.Y);
 

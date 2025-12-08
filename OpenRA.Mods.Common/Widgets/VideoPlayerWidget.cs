@@ -22,6 +22,7 @@ namespace OpenRA.Mods.Common.Widgets
 {
 	public class VideoPlayerWidget : Widget
 	{
+		readonly ModData modData;
 		public Hotkey CancelKey = new(Keycode.ESCAPE, Modifiers.None);
 		public float AspectRatio = 1.2f;
 		public bool DrawOverlay = true;
@@ -44,6 +45,11 @@ namespace OpenRA.Mods.Common.Widgets
 
 		Action onComplete;
 
+		public VideoPlayerWidget(ModData modData)
+		{
+			this.modData = modData;
+		}
+
 		/// <summary>
 		/// Tries to load a video from the specified file and play it. Does nothing if the file name matches the already loaded video.
 		/// </summary>
@@ -54,8 +60,8 @@ namespace OpenRA.Mods.Common.Widgets
 				return;
 
 			cachedVideoFileName = filename;
-			var stream = Game.ModData.DefaultFileSystem.Open(filename);
-			var video = VideoLoader.GetVideo(stream, true, Game.ModData.VideoLoaders);
+			var stream = modData.DefaultFileSystem.Open(filename);
+			var video = VideoLoader.GetVideo(stream, true, modData.VideoLoaders);
 			Play(video);
 		}
 
@@ -78,8 +84,8 @@ namespace OpenRA.Mods.Common.Widgets
 			{
 				try
 				{
-					var stream = Game.ModData.DefaultFileSystem.Open(filename);
-					var video = VideoLoader.GetVideo(stream, true, Game.ModData.VideoLoaders);
+					var stream = modData.DefaultFileSystem.Open(filename);
+					var video = VideoLoader.GetVideo(stream, true, modData.VideoLoaders);
 
 					// Safeguard against race conditions with two videos being loaded at the same time - prefer to play only the last one.
 					if (filename != cachedVideoFileName)

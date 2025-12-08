@@ -28,7 +28,7 @@ namespace OpenRA.Mods.Common
 		public ModVersionStatus ModVersionStatus { get; private set; }
 		const int VersionCheckProtocol = 1;
 
-		public void CheckModVersion()
+		public void CheckModVersion(ModData modData)
 		{
 			Task.Run(async () =>
 			{
@@ -36,8 +36,8 @@ namespace OpenRA.Mods.Common
 				{
 					{ "protocol", VersionCheckProtocol },
 					{ "engine", Game.EngineVersion },
-					{ "mod", Game.ModData.Manifest.Id },
-					{ "version", Game.ModData.Manifest.Metadata.Version }
+					{ "mod", modData.Manifest.Id },
+					{ "version", modData.Manifest.Metadata.Version }
 				}.ToString();
 
 				try

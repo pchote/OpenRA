@@ -37,7 +37,6 @@ namespace OpenRA.Mods.Cnc.Traits
 			loader = new VoxelLoader(map, info.SheetSize);
 			foreach (var kv in map.Rules.ModelSequences)
 			{
-				Game.ModData.LoadScreen.Display();
 				try
 				{
 					CacheModel(kv.Key, kv.Value.Value);

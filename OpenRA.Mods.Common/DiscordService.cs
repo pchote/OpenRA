@@ -33,6 +33,8 @@ namespace OpenRA.Mods.Common
 	{
 		public readonly string ApplicationId = null;
 		public readonly string Tooltip = "Open Source real-time strategy game engine for early Westwood titles.";
+
+		ModData modData;
 		DiscordRpcClient client;
 		DiscordState currentState;
 
@@ -41,8 +43,9 @@ namespace OpenRA.Mods.Common
 			FieldLoader.Load(this, yaml);
 		}
 
-		public void Start()
+		public void Start(ModData modData)
 		{
+			this.modData = modData;
 			client = new DiscordRpcClient(ApplicationId, autoEvents: true)
 			{
 				SkipIdenticalPresence = false
@@ -139,7 +142,7 @@ namespace OpenRA.Mods.Common
 					new Button
 					{
 						Label = "Visit Website",
-						Url = Game.ModData.Manifest.Metadata.Website
+						Url = modData.Manifest.Metadata.Website
 					}
 				];
 			}

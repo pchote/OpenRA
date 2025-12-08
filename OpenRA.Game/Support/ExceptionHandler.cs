@@ -26,17 +26,13 @@ namespace OpenRA
 			if (Game.EngineVersion != null)
 				Log.Write("exception", $"OpenRA engine version {Game.EngineVersion}");
 
-			if (Game.ModData != null)
-			{
-				var manifest = Game.ModData.Manifest;
+			var manifest = Game.ModData?.Manifest;
+			if (manifest != null)
 				Log.Write("exception", $"{manifest.Id} mod version {manifest.Metadata.Version}");
-			}
 
-			if (Game.OrderManager != null && Game.OrderManager.World != null && Game.OrderManager.World.Map != null)
-			{
-				var map = Game.OrderManager.World.Map;
+			var map = Game.OrderManager?.World?.Map;
+			if (map != null)
 				Log.Write("exception", $"on map {map.Uid} ({map.Title} by {map.Author}).");
-			}
 
 			Log.Write("exception", $"Date: {DateTime.UtcNow:u}");
 			Log.Write("exception", $"Operating System: {Platform.CurrentPlatform} ({Platform.CurrentArchitecture}, {Environment.OSVersion})");

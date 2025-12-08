@@ -131,7 +131,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			var uiScaleDropdown = widget.Get<DropDownButtonWidget>("UI_SCALE_DROPDOWN");
 			var uiScaleLabel = new CachedTransform<float, string>(s => $"{(int)(100 * s)}%");
-			uiScaleDropdown.OnMouseDown = _ => DisplaySettingsLogic.ShowUIScaleDropdown(uiScaleDropdown, graphicSettings);
+			uiScaleDropdown.OnMouseDown = _ => DisplaySettingsLogic.ShowUIScaleDropdown(uiScaleDropdown, graphicSettings, viewportSizes);
 			uiScaleDropdown.GetText = () => uiScaleLabel.Update(graphicSettings.UIScale);
 
 			var minResolution = viewportSizes.MinEffectiveResolution;

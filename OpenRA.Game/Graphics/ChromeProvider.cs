@@ -85,7 +85,7 @@ namespace OpenRA.Graphics
 
 			foreach (var c in chrome)
 				if (!c.Key.StartsWith('^'))
-					LoadCollection(c.Key, c.Value);
+					LoadCollection(modData, c.Key, c.Value);
 		}
 
 		public static void Deinitialize()
@@ -101,9 +101,9 @@ namespace OpenRA.Graphics
 			cachedCollectionSheets = null;
 		}
 
-		static void LoadCollection(string name, MiniYaml yaml)
+		static void LoadCollection(ModData modData, string name, MiniYaml yaml)
 		{
-			Game.ModData.LoadScreen?.Display();
+			modData.LoadScreen?.Display();
 			collections.Add(name, FieldLoader.Load<Collection>(yaml));
 		}
 

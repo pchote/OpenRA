@@ -30,6 +30,7 @@ namespace OpenRA
 	public sealed class World : IDisposable
 	{
 		internal readonly TraitDictionary TraitDict = new();
+		internal readonly ModData ModData;
 		readonly SortedDictionary<uint, Actor> actors = [];
 		readonly List<IEffect> effects = [];
 		readonly List<IEffect> unpartitionedEffects = [];
@@ -177,6 +178,7 @@ namespace OpenRA
 
 		internal World(Map map, ModData modData, OrderManager orderManager, WorldType type)
 		{
+			ModData = modData;
 			Type = type;
 			OrderManager = orderManager;
 			this.modData = modData;
@@ -219,8 +221,8 @@ namespace OpenRA
 
 			gameInfo = new GameInformation
 			{
-				Mod = Game.ModData.Manifest.Id,
-				Version = Game.ModData.Manifest.Metadata.Version,
+				Mod = modData.Manifest.Id,
+				Version = modData.Manifest.Metadata.Version,
 
 				MapUid = Map.Uid,
 				MapTitle = Map.Title
