@@ -71,12 +71,12 @@ namespace OpenRA.Mods.Common.Widgets
 				Game.Renderer.RgbaColorRenderer.DrawRect(a, b, 1, color);
 
 				// Render actors in the dragbox
-				rollover = SelectionUtils.SelectActorsInBoxWithDeadzone(World, dragStart, mousePos, modifiers);
+				rollover = SelectionUtils.SelectActorsInBoxWithDeadzone(World, dragStart, mousePos, modifiers, gameSettings.SelectionDeadzone);
 			}
 			else
 			{
 				// Render actors under the mouse pointer
-				rollover = SelectionUtils.SelectActorsInBoxWithDeadzone(World, mousePos, mousePos, modifiers);
+				rollover = SelectionUtils.SelectActorsInBoxWithDeadzone(World, mousePos, mousePos, modifiers, gameSettings.SelectionDeadzone);
 			}
 
 			worldRenderer.World.Selection.SetRollover(rollover);
@@ -151,7 +151,7 @@ namespace OpenRA.Mods.Common.Widgets
 					*/
 					if (isDragging && (uog.ClearSelectionOnLeftClick || IsValidDragbox))
 					{
-						var newSelection = SelectionUtils.SelectActorsInBoxWithDeadzone(World, dragStart, mousePos, mi.Modifiers);
+						var newSelection = SelectionUtils.SelectActorsInBoxWithDeadzone(World, dragStart, mousePos, mi.Modifiers, gameSettings.SelectionDeadzone);
 						World.Selection.Combine(World, newSelection, mi.Modifiers.HasModifier(Modifiers.Shift), dragStart == mousePos);
 					}
 				}

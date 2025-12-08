@@ -58,10 +58,10 @@ namespace OpenRA.Mods.Common.Widgets
 				yield return selected;
 		}
 
-		public static IEnumerable<Actor> SelectActorsInBoxWithDeadzone(World world, int2 a, int2 b, Modifiers modifiers)
+		public static IEnumerable<Actor> SelectActorsInBoxWithDeadzone(World world, int2 a, int2 b, Modifiers modifiers, int deadzone)
 		{
 			// For dragboxes that are too small, shrink the dragbox to a single point (point b)
-			if ((a - b).Length <= Game.Settings.Game.SelectionDeadzone)
+			if ((a - b).Length <= deadzone)
 				a = b;
 
 			if (a == b)
