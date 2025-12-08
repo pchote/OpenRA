@@ -116,6 +116,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly Action onStart;
 		readonly ModData modData;
 		readonly WebServices services;
+		readonly DiscordService discordService;
 
 		MapPreview map;
 		ReplayMetadata selectedReplay;
@@ -129,6 +130,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			panel = widget;
 
 			services = modData.GetOrCreate<WebServices>();
+			discordService = modData.GetOrNull<DiscordService>();
 			this.modData = modData;
 			this.onStart = onStart;
 			Game.BeforeGameStart += OnGameStart;
@@ -781,7 +783,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			{
 				cancelLoadingReplays = true;
 
-				DiscordService.UpdateStatus(DiscordState.WatchingReplay);
+				discordService?.UpdateStatus(DiscordState.WatchingReplay);
 
 				Game.JoinReplay(selectedReplay.FilePath);
 			}

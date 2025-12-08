@@ -150,6 +150,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly World world;
 		readonly WorldRenderer worldRenderer;
 		readonly MenuPostProcessEffect mpe;
+		readonly DiscordService discordService;
 		readonly bool isSinglePlayer;
 		readonly bool hasError;
 		bool leaving;
@@ -166,6 +167,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			this.worldRenderer = worldRenderer;
 			this.onExit = onExit;
 
+			discordService = modData.GetOrNull<DiscordService>();
 			var buttonHandlers = new Dictionary<string, Action>
 			{
 				{ "ABORT_MISSION", CreateAbortMissionButton },
@@ -593,7 +595,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 							Game.LoadShellMap();
 						else
 						{
-							DiscordService.UpdateStatus(DiscordState.InMapEditor);
+							discordService?.UpdateStatus(DiscordState.InMapEditor);
 							Game.LoadEditor(map);
 						}
 					}

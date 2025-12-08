@@ -33,36 +33,16 @@ namespace OpenRA.Mods.Common
 	{
 		public readonly string ApplicationId = null;
 		public readonly string Tooltip = "Open Source real-time strategy game engine for early Westwood titles.";
-		readonly DiscordRpcClient client;
+		DiscordRpcClient client;
 		DiscordState currentState;
-
-		static DiscordService instance;
-		static DiscordService Service
-		{
-			get
-			{
-				if (instance != null)
-					return instance;
-
-				if (!Game.Settings.Game.EnableDiscordService)
-					return null;
-
-				instance = Game.ModData.GetOrNull<DiscordService>();
-				return instance;
-			}
-		}
 
 		public DiscordService(MiniYaml yaml)
 		{
 			FieldLoader.Load(this, yaml);
+		}
 
-			if (!Game.Settings.Game.EnableDiscordService)
-				return;
-
-			// HACK: Prevent service from starting when launching the utility or server.
-			if (Game.Renderer == null)
-				return;
-
+		public void Start()
+		{
 			client = new DiscordRpcClient(ApplicationId, autoEvents: true)
 			{
 				SkipIdenticalPresence = false
@@ -84,8 +64,7 @@ namespace OpenRA.Mods.Common
 
 		void OnJoinRequested(object sender, JoinRequestMessage args)
 		{
-			var client = (DiscordRpcClient)sender;
-			client.Respond(args, true);
+			((DiscordRpcClient)sender).Respond(args, true);
 		}
 
 		void OnJoin(object sender, JoinMessage args)
@@ -97,12 +76,9 @@ namespace OpenRA.Mods.Common
 			Game.RunAfterTick(() => Game.RemoteDirectConnect(new ConnectionTarget(server[0], Exts.ParseInt32Invariant(server[1]))));
 		}
 
-		void SetStatus(DiscordState state, string details = null, string secret = null, int? players = null, int? slots = null)
+		public void UpdateStatus(DiscordState state, string details = null, string secret = null, int? players = null, int? slots = null)
 		{
-			if (currentState == state)
-				return;
-
-			if (client == null)
+			if (client == null || currentState == state)
 				return;
 
 			string stateText;
@@ -187,7 +163,7 @@ namespace OpenRA.Mods.Common
 			currentState = state;
 		}
 
-		void UpdateParty(int players, int slots)
+		public void UpdatePlayers(int players, int slots)
 		{
 			if (client == null)
 				return;
@@ -206,33 +182,14 @@ namespace OpenRA.Mods.Common
 			});
 		}
 
-		void SetDetails(string details)
+		public void UpdateDetails(string details)
 		{
-			if (client == null)
-				return;
-
-			client.UpdateDetails(details);
+			client?.UpdateDetails(details);
 		}
 
 		public void Dispose()
 		{
 			client?.Dispose();
-			instance = null;
-		}
-
-		public static void UpdateStatus(DiscordState state, string details = null, string secret = null, int? players = null, int? slots = null)
-		{
-			Service?.SetStatus(state, details, secret, players, slots);
-		}
-
-		public static void UpdatePlayers(int players, int slots)
-		{
-			Service?.UpdateParty(players, slots);
-		}
-
-		public static void UpdateDetails(string details)
-		{
-			Service?.SetDetails(details);
 		}
 	}
 }

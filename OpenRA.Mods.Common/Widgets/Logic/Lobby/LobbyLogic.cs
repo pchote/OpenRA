@@ -70,6 +70,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly bool skirmishMode;
 		readonly Ruleset modRules;
 		readonly WebServices services;
+		readonly DiscordService discordService;
 
 		enum PanelType { Players, Options, Music, Servers, Kick, ForceStart }
 		PanelType panel = PanelType.Players;
@@ -166,6 +167,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			modRules = modData.DefaultRules;
 
 			services = modData.GetOrCreate<WebServices>();
+			discordService = modData.GetOrNull<DiscordService>();
 
 			Game.LobbyInfoChanged += UpdateCurrentMap;
 			Game.LobbyInfoChanged += UpdatePlayerList;
@@ -918,15 +920,15 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 				var state = skirmishMode ? DiscordState.InSkirmishLobby : DiscordState.InMultiplayerLobby;
 
-				DiscordService.UpdateStatus(state, details, secret, numberOfPlayers, slots);
+				discordService?.UpdateStatus(state, details, secret, numberOfPlayers, slots);
 				updateDiscordStatus = false;
 			}
 			else
 			{
 				if (!skirmishMode)
-					DiscordService.UpdatePlayers(numberOfPlayers, slots);
+					discordService?.UpdatePlayers(numberOfPlayers, slots);
 
-				DiscordService.UpdateDetails(details);
+				discordService?.UpdateDetails(details);
 			}
 		}
 
@@ -959,7 +961,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			var state = skirmishMode ? DiscordState.PlayingSkirmish : DiscordState.PlayingMultiplayer;
 			var details = map.Title + " - " + orderManager.LobbyInfo.GlobalSettings.ServerName;
-			DiscordService.UpdateStatus(state, details);
+			discordService?.UpdateStatus(state, details);
 
 			onStart();
 		}

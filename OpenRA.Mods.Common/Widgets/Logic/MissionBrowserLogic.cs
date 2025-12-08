@@ -73,6 +73,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly DropDownButtonWidget gameSpeedButton;
 		readonly string unsetDifficulty;
 		readonly string defaultTooltop;
+		readonly DiscordService discordService;
 
 		// For remembering options
 		// TODO: this should be persistent across game sessions
@@ -92,6 +93,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			this.onStart = onStart;
 			Game.BeforeGameStart += OnGameStart;
 
+			discordService = modData.GetOrNull<DiscordService>();
 			missionList = widget.Get<ScrollPanelWidget>("MISSION_LIST");
 
 			headerTemplate = widget.Get<ScrollItemWidget>("HEADER");
@@ -241,7 +243,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		{
 			Ui.CloseWindow();
 
-			DiscordService.UpdateStatus(DiscordState.PlayingCampaign);
+			discordService?.UpdateStatus(DiscordState.PlayingCampaign);
 
 			onStart();
 		}

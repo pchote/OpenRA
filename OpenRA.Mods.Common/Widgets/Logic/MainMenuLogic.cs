@@ -50,6 +50,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly DebugSettings debugSettings;
 		readonly GameSettings gameSettings;
 		readonly ServerSettings serverSettings;
+		readonly DiscordService discordService;
 
 		// Update news once per game launch
 		static bool fetchedNews;
@@ -62,7 +63,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		{
 			menuType = type;
 
-			DiscordService.UpdateStatus(DiscordState.InMenu);
+			discordService?.UpdateStatus(DiscordState.InMenu);
 
 			// Update button mouseover
 			Game.RunAfterTick(Ui.ResetTooltips);
@@ -77,6 +78,10 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			debugSettings = modData.GetSettings<DebugSettings>();
 			gameSettings = modData.GetSettings<GameSettings>();
 			serverSettings = modData.GetSettings<ServerSettings>();
+
+			discordService = modData.GetOrNull<DiscordService>();
+			if (gameSettings.EnableDiscordService)
+				discordService?.Start();
 
 			// Menu buttons
 			var mainMenu = widget.Get("MAIN_MENU");
@@ -282,7 +287,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			Game.OnShellmapLoaded += OpenMenuBasedOnLastGame;
 
-			DiscordService.UpdateStatus(DiscordState.InMenu);
+			discordService?.UpdateStatus(DiscordState.InMenu);
 		}
 
 		void LoadAndDisplayNews(WebServices webServices, Widget newsBG)
@@ -362,11 +367,11 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			});
 		}
 
-		static void LoadMapIntoEditor(string uid)
+		void LoadMapIntoEditor(string uid)
 		{
 			Game.LoadEditor(uid);
 
-			DiscordService.UpdateStatus(DiscordState.InMapEditor);
+			discordService?.UpdateStatus(DiscordState.InMapEditor);
 
 			lastGameState = MenuPanel.MapEditor;
 		}

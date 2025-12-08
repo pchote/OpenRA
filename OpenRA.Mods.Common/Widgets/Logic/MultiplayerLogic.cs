@@ -23,6 +23,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly Action onStart;
 		readonly Action onExit;
 		readonly ServerListLogic serverListLogic;
+		readonly DiscordService discordService;
 
 		[ObjectCreator.UseCtor]
 		public MultiplayerLogic(Widget widget, ModData modData, Action onStart, Action onExit, ConnectionTarget directConnectEndPoint)
@@ -30,6 +31,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			// MultiplayerLogic is a superset of the ServerListLogic
 			// but cannot be a direct subclass because it needs to pass object-level state to the constructor
 			serverListLogic = new ServerListLogic(widget, modData, Join);
+			discordService = modData.GetOrNull<DiscordService>();
 
 			this.onStart = onStart;
 			this.onExit = onExit;
@@ -96,7 +98,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 				Game.Disconnect();
 
-				DiscordService.UpdateStatus(DiscordState.InMenu);
+				discordService?.UpdateStatus(DiscordState.InMenu);
 			}
 
 			Game.OpenWindow("SERVER_LOBBY", new WidgetArgs
