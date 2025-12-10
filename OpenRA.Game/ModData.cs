@@ -107,7 +107,7 @@ namespace OpenRA
 			SpriteLoaders = ObjectCreator.GetLoaders<ISpriteLoader>(Manifest.SpriteFormats, "sprite");
 			VideoLoaders = ObjectCreator.GetLoaders<IVideoLoader>(Manifest.VideoFormats, "video");
 			SpriteSequenceLoader = ObjectCreator.GetLoader<ISpriteSequenceLoader>(Manifest.SpriteSequenceFormat, "sequence");
-			Hotkeys = new HotkeyManager(ModFiles, Game.Settings.Keys, Manifest);
+			Hotkeys = new HotkeyManager(ModFiles, ObjectCreator, Manifest);
 			Cursors = ParseCursors(Manifest, DefaultFileSystem);
 
 			defaultRules = Exts.Lazy(() => Ruleset.LoadDefaults(this));

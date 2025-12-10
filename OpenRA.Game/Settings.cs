@@ -383,7 +383,6 @@ namespace OpenRA
 		public readonly ServerSettings Server;
 		public readonly DebugSettings Debug;
 		public readonly SinglePlayerGameSettings SinglePlayerSettings;
-		internal readonly Dictionary<string, Hotkey> Keys = [];
 
 		readonly Arguments args;
 		readonly TypeDictionary modules = [];
@@ -409,12 +408,6 @@ namespace OpenRA
 			Server = GetOrCreate<ServerSettings>(null);
 			Debug = GetOrCreate<DebugSettings>(null);
 			SinglePlayerSettings = GetOrCreate<SinglePlayerGameSettings>(null);
-
-			var keysNode = yaml.FirstOrDefault(n => n.Key == "Keys");
-			if (keysNode != null)
-				foreach (var node in keysNode.Value.Nodes)
-					if (node.Key != null)
-						Keys[node.Key] = FieldLoader.GetValue<Hotkey>(node.Key, node.Value.Value);
 		}
 
 		public T GetOrCreate<T>(ObjectCreator objectCreator, string mod = null) where T : SettingsModule
@@ -487,17 +480,6 @@ namespace OpenRA
 			if (commitModules)
 				foreach (var m in modules)
 					((SettingsModule)m).Commit();
-
-			var keysNode = yaml.FirstOrDefault(n => n.Key == "Keys");
-			if (keysNode == null)
-			{
-				keysNode = new MiniYamlNodeBuilder("Keys", "");
-				yaml.Add(keysNode);
-			}
-
-			keysNode.Value.Nodes.Clear();
-			foreach (var kv in Keys)
-				keysNode.Value.Nodes.Add(new MiniYamlNodeBuilder(kv.Key, FieldSaver.FormatValue(kv.Value)));
 
 			// Filter out modules with no fields and force a newline between each module
 			var container = new[] { null, new MiniYamlNodeBuilder("", "") };
