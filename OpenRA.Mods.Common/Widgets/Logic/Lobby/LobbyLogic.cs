@@ -71,6 +71,9 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly Ruleset modRules;
 		readonly WebServices services;
 		readonly DiscordService discordService;
+		readonly GameSettings gameSettings;
+		readonly PlayerSettings playerSettings;
+		readonly ServerSettings serverSettings;
 
 		enum PanelType { Players, Options, Music, Servers, Kick, ForceStart }
 		PanelType panel = PanelType.Players;
@@ -168,6 +171,9 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			services = modData.GetOrCreate<WebServices>();
 			discordService = modData.GetOrNull<DiscordService>();
+			gameSettings = modData.GetSettings<GameSettings>();
+			playerSettings = modData.GetSettings<PlayerSettings>();
+			serverSettings = modData.GetSettings<ServerSettings>();
 
 			Game.LobbyInfoChanged += UpdateCurrentMap;
 			Game.LobbyInfoChanged += UpdatePlayerList;
@@ -202,8 +208,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					"onMapUpdate", (Action<string>)(uid =>
 					{
 						orderManager.IssueOrder(Order.Command("map " + uid));
-						Game.Settings.Server.Map = uid;
-						Game.Settings.Save();
+						serverSettings.Map = uid;
+						serverSettings.Save();
 					})
 				},
 			});
@@ -248,8 +254,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 							return;
 
 						orderManager.IssueOrder(Order.Command("map " + uid));
-						Game.Settings.Server.Map = uid;
-						Game.Settings.Save();
+						serverSettings.Map = uid;
+						serverSettings.Save();
 					});
 
 					var onSelectGenerated = new Action<MapGenerationArgs>(args =>
@@ -260,8 +266,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 						lastGeneratedMap = args;
 						orderManager.IssueOrder(Order.FromTargetString("GenerateMap", args.Serialize(), true));
 						orderManager.IssueOrder(Order.Command("map " + args.Uid));
-						Game.Settings.Server.Map = args.Uid;
-						Game.Settings.Save();
+						serverSettings.Map = args.Uid;
+						serverSettings.Save();
 					});
 
 					// Check for updated maps, if the user has edited a map we'll preselect it for them
@@ -682,7 +688,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				orderManager.IssueOrder(Order.Command($"state {Session.ClientState.NotReady}"));
 
 			// We don't have the map
-			else if (map.Status != MapStatus.DownloadAvailable && Game.Settings.Game.AllowDownloading)
+			else if (map.Status != MapStatus.DownloadAvailable && gameSettings.AllowDownloading)
 				modData.MapCache.QueryRemoteMapDetails(services.MapRepository, [uid]);
 		}
 
@@ -750,9 +756,9 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					if (client.Bot != null)
 						LobbyUtils.SetupEditableSlotWidget(template, slot, client, orderManager, map, modData);
 					else
-						LobbyUtils.SetupEditableNameWidget(template, client, orderManager, worldRenderer);
+						LobbyUtils.SetupEditableNameWidget(template, client, orderManager, worldRenderer, playerSettings);
 
-					LobbyUtils.SetupEditableColorWidget(template, slot, client, orderManager, worldRenderer, colorManager);
+					LobbyUtils.SetupEditableColorWidget(template, slot, client, orderManager, worldRenderer, colorManager, playerSettings);
 					LobbyUtils.SetupEditableFactionWidget(template, slot, client, orderManager, factions);
 					LobbyUtils.SetupEditableTeamWidget(template, slot, client, orderManager, map);
 					LobbyUtils.SetupEditableHandicapWidget(template, slot, client, orderManager);
@@ -814,7 +820,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					if (template == null || template.Id != editableSpectatorTemplate.Id)
 						template = editableSpectatorTemplate.Clone();
 
-					LobbyUtils.SetupEditableNameWidget(template, c, orderManager, worldRenderer);
+					LobbyUtils.SetupEditableNameWidget(template, c, orderManager, worldRenderer, playerSettings);
 
 					if (client.IsAdmin)
 						LobbyUtils.SetupEditableReadyWidget(template, client, orderManager, map, MapIsPlayable);

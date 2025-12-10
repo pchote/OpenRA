@@ -374,7 +374,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			}
 		}
 
-		public static void SetupEditableNameWidget(Widget parent, Session.Client c, OrderManager orderManager, WorldRenderer worldRenderer)
+		public static void SetupEditableNameWidget(Widget parent, Session.Client c, OrderManager orderManager,
+			WorldRenderer worldRenderer, PlayerSettings playerSettings)
 		{
 			var name = parent.Get<TextFieldWidget>("NAME");
 			name.IsVisible = () => true;
@@ -397,8 +398,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				{
 					name.Text = Settings.SanitizedPlayerName(name.Text);
 					orderManager.IssueOrder(Order.Command("name " + name.Text));
-					Game.Settings.Player.Name = name.Text;
-					Game.Settings.Save();
+					playerSettings.Name = name.Text;
+					playerSettings.Save();
 				}
 			};
 
@@ -546,7 +547,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		}
 
 		public static void SetupEditableColorWidget(Widget parent, Session.Slot s, Session.Client c,
-			OrderManager orderManager, WorldRenderer worldRenderer, IColorPickerManagerInfo colorManager)
+			OrderManager orderManager, WorldRenderer worldRenderer, IColorPickerManagerInfo colorManager, PlayerSettings playerSettings)
 		{
 			var colorDropdown = parent.Get<DropDownButtonWidget>("COLOR");
 			colorDropdown.IsDisabled = () => (s != null && s.LockColor) || orderManager.LocalClient.IsReady;
@@ -554,8 +555,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			{
 				if (c == orderManager.LocalClient)
 				{
-					Game.Settings.Player.Color = color;
-					Game.Settings.Save();
+					playerSettings.Color = color;
+					playerSettings.Save();
 				}
 
 				orderManager.IssueOrder(Order.Command($"color {c.Index} {color}"));
