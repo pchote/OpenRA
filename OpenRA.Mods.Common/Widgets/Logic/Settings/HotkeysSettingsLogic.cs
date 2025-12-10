@@ -317,7 +317,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			WidgetUtils.TruncateButtonToTooltip(selectedHotkeyButton, hotkeyEntryWidget.Key.DisplayString());
 			modData.Hotkeys.Set(selectedHotkeyDefinition.Name, hotkeyEntryWidget.Key);
-			Game.Settings.Save();
+			modData.Hotkeys.Save();
 		}
 
 		void ResetHotkey()
@@ -338,7 +338,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			if (duplicateHotkeyButton != null)
 				WidgetUtils.TruncateButtonToTooltip(duplicateHotkeyButton, Hotkey.Invalid.DisplayString());
 			modData.Hotkeys.Set(duplicateHotkeyDefinition.Name, Hotkey.Invalid);
-			Game.Settings.Save();
+			modData.Hotkeys.Save();
 			hotkeyEntryWidget.YieldKeyboardFocus();
 		}
 

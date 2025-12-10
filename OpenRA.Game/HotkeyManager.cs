@@ -17,13 +17,16 @@ namespace OpenRA
 {
 	public sealed class HotkeyManager
 	{
-		readonly Dictionary<string, Hotkey> settings;
+		[YamlNode("Keys", shared: true)]
+		sealed class HotkeySettings : SettingsModule { }
+
 		readonly Dictionary<string, HotkeyDefinition> definitions = [];
 		readonly Dictionary<string, Hotkey> keys = [];
+		readonly HotkeySettings hotkeySettings;
 
-		public HotkeyManager(IReadOnlyFileSystem fileSystem, Dictionary<string, Hotkey> settings, Manifest manifest)
+		public HotkeyManager(IReadOnlyFileSystem fileSystem, ObjectCreator objectCreator, Manifest manifest)
 		{
-			this.settings = settings;
+			hotkeySettings = Game.Settings.GetOrCreate<HotkeySettings>(objectCreator, manifest.Id);
 
 			var keyDefinitions = MiniYaml.Load(fileSystem, manifest.Hotkeys, null);
 			foreach (var kd in keyDefinitions)
@@ -33,11 +36,9 @@ namespace OpenRA
 				keys[kd.Key] = definition.Default;
 			}
 
-			foreach (var kv in settings)
-			{
-				if (definitions.TryGetValue(kv.Key, out var definition) && !definition.Readonly)
-					keys[kv.Key] = kv.Value;
-			}
+			foreach (var node in hotkeySettings.Yaml.Nodes)
+				if (definitions.TryGetValue(node.Key, out var definition) && !definition.Readonly)
+					keys[node.Key] = FieldLoader.GetValue<Hotkey>(node.Key, node.Value.Value);
 
 			foreach (var hd in definitions)
 				hd.Value.HasDuplicates = GetFirstDuplicate(hd.Value, this[hd.Value.Name].GetValue()) != null;
@@ -68,10 +69,9 @@ namespace OpenRA
 				return;
 
 			keys[name] = value;
+			hotkeySettings.Yaml.Nodes.RemoveAll(n => n.Key == name);
 			if (value != definition.Default)
-				settings[name] = value;
-			else
-				settings.Remove(name);
+				hotkeySettings.Yaml.Nodes.Add(new MiniYamlNodeBuilder(name, FieldSaver.FormatValue(value)));
 
 			var hadDuplicates = definition.HasDuplicates;
 			definition.HasDuplicates = GetFirstDuplicate(definition, this[definition.Name].GetValue()) != null;
@@ -108,5 +108,10 @@ namespace OpenRA
 		public HotkeyReference this[string name] => new(GetHotkeyReference(name));
 
 		public IEnumerable<HotkeyDefinition> Definitions => definitions.Values;
+
+		public void Save()
+		{
+			hotkeySettings.Save();
+		}
 	}
 }
