@@ -300,15 +300,6 @@ namespace OpenRA
 		public ImmutableArray<Color> CustomColors = [];
 	}
 
-	[YamlNode("SinglePlayerSettings", shared: true)]
-	public class SinglePlayerGameSettings : SettingsModule
-	{
-		[Desc("Sets the Auto-save frequency, in seconds")]
-		public int AutoSaveInterval = 0;
-		[Desc("Sets the AutoSave number of max files to bes saved on the file-system")]
-		public int AutoSaveMaxFileCount = 10;
-	}
-
 	[YamlNode("Game", shared: true)]
 	public class GameSettings : SettingsModule
 	{
@@ -382,7 +373,6 @@ namespace OpenRA
 		public readonly GraphicSettings Graphics;
 		public readonly ServerSettings Server;
 		public readonly DebugSettings Debug;
-		public readonly SinglePlayerGameSettings SinglePlayerSettings;
 
 		readonly Arguments args;
 		readonly TypeDictionary modules = [];
@@ -407,7 +397,6 @@ namespace OpenRA
 			Graphics = GetOrCreate<GraphicSettings>(null);
 			Server = GetOrCreate<ServerSettings>(null);
 			Debug = GetOrCreate<DebugSettings>(null);
-			SinglePlayerSettings = GetOrCreate<SinglePlayerGameSettings>(null);
 		}
 
 		public T GetOrCreate<T>(ObjectCreator objectCreator, string mod = null) where T : SettingsModule
