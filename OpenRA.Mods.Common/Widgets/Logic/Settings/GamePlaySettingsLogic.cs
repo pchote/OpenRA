@@ -11,6 +11,7 @@
 
 using System;
 using System.Collections.Generic;
+using OpenRA.Mods.Common.Traits;
 using OpenRA.Widgets;
 
 namespace OpenRA.Mods.Common.Widgets.Logic
@@ -31,10 +32,13 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly int[] autoSaveSeconds = [0, 10, 30, 45, 60, 120, 180, 300, 600];
 
 		readonly int[] autoSaveFileNumbers = [3, 5, 10, 20, 50, 100];
+		readonly AutoSaveSettings autoSaveSettings;
 
 		[ObjectCreator.UseCtor]
-		public GameplaySettingsLogic(Action<string, string, Func<Widget, Func<bool>>, Func<Widget, Action>> registerPanel, string panelID, string label)
+		public GameplaySettingsLogic(ModData modData, Action<string, string, Func<Widget, Func<bool>>, Func<Widget, Action>> registerPanel,
+			string panelID, string label)
 		{
+			autoSaveSettings = modData.GetSettings<AutoSaveSettings>();
 			registerPanel(panelID, label, InitPanel, ResetPanel);
 		}
 
@@ -49,17 +53,14 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			autoSaveIntervalDropDown.OnClick = () =>
 				ShowAutoSaveIntervalDropdown(autoSaveIntervalDropDown, autoSaveSeconds);
 
-			autoSaveIntervalDropDown.GetText = () => GetMessageForAutoSaveInterval(Game.Settings.SinglePlayerSettings.AutoSaveInterval);
+			autoSaveIntervalDropDown.GetText = () => GetMessageForAutoSaveInterval(autoSaveSettings.AutoSaveInterval);
 
 			// Setup dropdown for auto-save number.
 			var autoSaveNoDropDown = panel.Get<DropDownButtonWidget>("AUTO_SAVE_FILE_NUMBER_DROP_DOWN");
 
-			autoSaveNoDropDown.OnMouseDown = _ =>
-				ShowAutoSaveFileNumberDropdown(autoSaveNoDropDown, autoSaveFileNumbers);
-
-			autoSaveNoDropDown.GetText = () => FluentProvider.GetMessage(AutoSaveMaxFileNumber, "saves", Game.Settings.SinglePlayerSettings.AutoSaveMaxFileCount);
-
-			autoSaveNoDropDown.IsDisabled = () => Game.Settings.SinglePlayerSettings.AutoSaveInterval <= 0;
+			autoSaveNoDropDown.OnMouseDown = _ => ShowAutoSaveFileNumberDropdown(autoSaveNoDropDown, autoSaveFileNumbers);
+			autoSaveNoDropDown.GetText = () => FluentProvider.GetMessage(AutoSaveMaxFileNumber, "saves", autoSaveSettings.AutoSaveMaxFileCount);
+			autoSaveNoDropDown.IsDisabled = () => autoSaveSettings.AutoSaveInterval <= 0;
 
 			return () => false;
 		}
@@ -71,15 +72,13 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		void ShowAutoSaveIntervalDropdown(DropDownButtonWidget dropdown, IEnumerable<int> options)
 		{
-			var gsp = Game.Settings.SinglePlayerSettings;
-
 			ScrollItemWidget SetupItem(int o, ScrollItemWidget itemTemplate)
 			{
 				var item = ScrollItemWidget.Setup(itemTemplate,
-					() => gsp.AutoSaveInterval == o,
+					() => autoSaveSettings.AutoSaveInterval == o,
 					() =>
 					{
-						gsp.AutoSaveInterval = o;
+						autoSaveSettings.AutoSaveInterval = o;
 						Game.Settings.Save();
 					});
 
@@ -94,15 +93,13 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		void ShowAutoSaveFileNumberDropdown(DropDownButtonWidget dropdown, IEnumerable<int> options)
 		{
-			var gsp = Game.Settings.SinglePlayerSettings;
-
 			ScrollItemWidget SetupItem(int o, ScrollItemWidget itemTemplate)
 			{
 				var item = ScrollItemWidget.Setup(itemTemplate,
-					() => gsp.AutoSaveMaxFileCount == o,
+					() => autoSaveSettings.AutoSaveMaxFileCount == o,
 					() =>
 					{
-						gsp.AutoSaveMaxFileCount = o;
+						autoSaveSettings.AutoSaveMaxFileCount = o;
 						Game.Settings.Save();
 					});
 

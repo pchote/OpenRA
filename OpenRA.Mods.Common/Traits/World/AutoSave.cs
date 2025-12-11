@@ -18,6 +18,16 @@ using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits
 {
+	[YamlNode("AutoSave", shared: true)]
+	public class AutoSaveSettings : SettingsModule
+	{
+		[Desc("Sets the Auto-save frequency, in seconds")]
+		public int AutoSaveInterval = 0;
+
+		[Desc("Sets the AutoSave number of max files to bes saved on the file-system")]
+		public int AutoSaveMaxFileCount = 10;
+	}
+
 	[TraitLocation(SystemActors.World)]
 	[Desc("Add this trait to the world actor to enable auto-save.")]
 	public class AutoSaveInfo : TraitInfo
@@ -32,11 +42,13 @@ namespace OpenRA.Mods.Common.Traits
 		int ticksUntilAutoSave;
 		int lastSaveInverval;
 		readonly bool isDisabled;
+		readonly AutoSaveSettings autoSaveSettings;
 
 		public AutoSave(Actor self, AutoSaveInfo info)
 		{
+			autoSaveSettings = self.World.GetSettings<AutoSaveSettings>();
 			ticksUntilAutoSave = GetTicksBetweenAutosaves(self);
-			lastSaveInverval = Game.Settings.SinglePlayerSettings.AutoSaveInterval;
+			lastSaveInverval = autoSaveSettings.AutoSaveInterval;
 
 			isDisabled = self.World.LobbyInfo.GlobalSettings.Dedicated || self.World.LobbyInfo.NonBotClients.Count() > 1;
 		}
@@ -46,18 +58,13 @@ namespace OpenRA.Mods.Common.Traits
 			if (isDisabled || self.World.IsReplay || self.World.IsLoadingGameSave)
 				return;
 
-			var autoSaveValue = Game.Settings.SinglePlayerSettings.AutoSaveInterval;
-
-			if (autoSaveValue == 0)
+			if (autoSaveSettings.AutoSaveInterval == 0)
 				return;
 
-			var autoSaveFileLimit = Game.Settings.SinglePlayerSettings.AutoSaveMaxFileCount;
-
-			autoSaveFileLimit = autoSaveFileLimit < 3 ? 3 : autoSaveFileLimit;
-
-			if (lastSaveInverval != autoSaveValue)
+			var autoSaveFileLimit = Math.Max(autoSaveSettings.AutoSaveMaxFileCount, 3);
+			if (lastSaveInverval != autoSaveSettings.AutoSaveInterval)
 			{
-				lastSaveInverval = autoSaveValue;
+				lastSaveInverval = autoSaveSettings.AutoSaveInterval;
 				ticksUntilAutoSave = GetTicksBetweenAutosaves(self);
 			}
 
@@ -91,9 +98,9 @@ namespace OpenRA.Mods.Common.Traits
 			return autoSaveDirectoryInfo.EnumerateFiles($"{AutoSavePattern}*{SaveFileExtension}");
 		}
 
-		static int GetTicksBetweenAutosaves(Actor self)
+		int GetTicksBetweenAutosaves(Actor self)
 		{
-			return 1000 / self.World.Timestep * Game.Settings.SinglePlayerSettings.AutoSaveInterval;
+			return 1000 / self.World.Timestep * autoSaveSettings.AutoSaveInterval;
 		}
 	}
 }
