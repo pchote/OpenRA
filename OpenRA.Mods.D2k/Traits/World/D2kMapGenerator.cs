@@ -57,14 +57,14 @@ namespace OpenRA.Mods.D2k.Traits
 		string IMapGeneratorInfo.MapTitle => MapTitle;
 		ImmutableArray<string> IEditorMapGeneratorInfo.Tilesets => Tilesets;
 
-		static MiniYaml SettingsLoader(MiniYaml my)
+		static MiniYaml SettingsLoader(ModData _, MiniYaml my)
 		{
 			return my.NodeWithKey("Settings").Value;
 		}
 
-		static object FluentReferencesLoader(MiniYaml my)
+		static object FluentReferencesLoader(ModData modData, MiniYaml my)
 		{
-			return new MapGeneratorSettings(null, my.NodeWithKey("Settings").Value)
+			return new MapGeneratorSettings(modData, null, my.NodeWithKey("Settings").Value)
 				.Options.SelectMany(o => o.GetFluentReferences()).ToImmutableArray();
 		}
 
@@ -207,9 +207,9 @@ namespace OpenRA.Mods.D2k.Traits
 			[FieldLoader.Ignore]
 			public readonly IReadOnlyList<MultiBrush> DuneBrushes;
 
-			public Parameters(Map map, MiniYaml my)
+			public Parameters(ModData modData, Map map, MiniYaml my)
 			{
-				FieldLoader.Load(this, my);
+				FieldLoader.Load(modData, this, my);
 
 				var terrainInfo = (ITemplatedTerrainInfo)map.Rules.TerrainInfo;
 
@@ -233,7 +233,7 @@ namespace OpenRA.Mods.D2k.Traits
 				DuneBrushes = MultiBrush.LoadCollection(map, my.NodeWithKey("DuneBrushes").Value.Value);
 			}
 
-			static object MirrorLoader(MiniYaml my)
+			static object MirrorLoader(ModData _, MiniYaml my)
 			{
 				if (Symmetry.TryParseMirror(my.NodeWithKey("Mirror").Value.Value, out var mirror))
 					return mirror;
@@ -242,9 +242,9 @@ namespace OpenRA.Mods.D2k.Traits
 			}
 		}
 
-		public IMapGeneratorSettings GetSettings()
+		public IMapGeneratorSettings GetSettings(ModData modData)
 		{
-			return new MapGeneratorSettings(this, Settings);
+			return new MapGeneratorSettings(modData, this, Settings);
 		}
 
 		public Map Generate(ModData modData, MapGenerationArgs args)
@@ -255,7 +255,7 @@ namespace OpenRA.Mods.D2k.Traits
 			var map = new Map(modData, terrainInfo, size);
 			var actorPlans = new List<ActorPlan>();
 
-			var param = new Parameters(map, args.Settings);
+			var param = new Parameters(modData, map, args.Settings);
 
 			var terraformer = new Terraformer(args, map, modData, actorPlans, param.Mirror, param.Rotations);
 

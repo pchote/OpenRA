@@ -53,20 +53,20 @@ namespace OpenRA.Mods.Common.Traits
 		string IMapGeneratorInfo.Name => Name;
 		string IMapGeneratorInfo.MapTitle => MapTitle;
 
-		static MiniYaml SettingsLoader(MiniYaml my)
+		static MiniYaml SettingsLoader(ModData _, MiniYaml my)
 		{
 			return my.NodeWithKey("Settings").Value;
 		}
 
-		static object FluentReferencesLoader(MiniYaml my)
+		static object FluentReferencesLoader(ModData modData, MiniYaml my)
 		{
-			return new MapGeneratorSettings(null, my.NodeWithKey("Settings").Value)
+			return new MapGeneratorSettings(modData, null, my.NodeWithKey("Settings").Value)
 				.Options.SelectMany(o => o.GetFluentReferences()).ToImmutableArray();
 		}
 
-		public IMapGeneratorSettings GetSettings()
+		public IMapGeneratorSettings GetSettings(ModData modData)
 		{
-			return new MapGeneratorSettings(this, Settings);
+			return new MapGeneratorSettings(modData, this, Settings);
 		}
 
 		public Map Generate(ModData modData, MapGenerationArgs args)

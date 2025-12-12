@@ -39,13 +39,13 @@ namespace OpenRA.Mods.Common.MapGenerator
 				Type = type;
 			}
 
-			public ActorInfo(MiniYaml my)
+			public ActorInfo(ModData modData, MiniYaml my)
 			{
 				if (string.IsNullOrEmpty(my.Value))
 					throw new YamlException("Missing actor type");
 
 				Type = my.Value;
-				FieldLoader.Load(this, my);
+				FieldLoader.Load(modData, this, my);
 			}
 		}
 
@@ -60,7 +60,7 @@ namespace OpenRA.Mods.Common.MapGenerator
 				Type = type;
 			}
 
-			public TemplateInfo(MiniYaml my)
+			public TemplateInfo(ModData modData, MiniYaml my)
 			{
 				if (string.IsNullOrEmpty(my.Value))
 					throw new YamlException("Missing template type");
@@ -68,7 +68,7 @@ namespace OpenRA.Mods.Common.MapGenerator
 				if (!Exts.TryParseUshortInvariant(my.Value, out Type))
 					throw new YamlException($"Invalid MultiBrush Template `${my.Value}`");
 
-				FieldLoader.Load(this, my);
+				FieldLoader.Load(modData, this, my);
 			}
 		}
 
@@ -78,7 +78,7 @@ namespace OpenRA.Mods.Common.MapGenerator
 			public readonly TerrainTile Type;
 			public readonly CVec Offset = CVec.Zero;
 
-			public TileInfo(MiniYaml my)
+			public TileInfo(ModData modData, MiniYaml my)
 			{
 				if (string.IsNullOrEmpty(my.Value))
 					throw new YamlException("Missing tile type");
@@ -86,7 +86,7 @@ namespace OpenRA.Mods.Common.MapGenerator
 				if (!TerrainTile.TryParse(my.Value, out Type))
 					throw new YamlException($"Invalid MultiBrush Tile `${my.Value}`");
 
-				FieldLoader.Load(this, my);
+				FieldLoader.Load(modData, this, my);
 			}
 		}
 
@@ -99,6 +99,7 @@ namespace OpenRA.Mods.Common.MapGenerator
 		public readonly MultiBrushSegment Segment;
 
 		public MultiBrushInfo(
+			ModData modData,
 			MiniYaml my = null,
 			int weight = MultiBrush.DefaultWeight,
 			IEnumerable<ActorInfo> actors = null,
@@ -121,7 +122,7 @@ namespace OpenRA.Mods.Common.MapGenerator
 							throw new YamlException($"Invalid MultiBrush Weight `{node.Value.Value}`");
 						break;
 					case "Actor":
-						actorsAcc.Add(new ActorInfo(node.Value));
+						actorsAcc.Add(new ActorInfo(modData, node.Value));
 						break;
 					case "BackingTile":
 						if (TerrainTile.TryParse(node.Value.Value, out var bt))
@@ -130,15 +131,15 @@ namespace OpenRA.Mods.Common.MapGenerator
 							throw new YamlException($"Invalid MultiBrush BackingTile `{node.Value.Value}`");
 						break;
 					case "Template":
-						templatesAcc.Add(new TemplateInfo(node.Value));
+						templatesAcc.Add(new TemplateInfo(modData, node.Value));
 						break;
 					case "Tile":
-						tilesAcc.Add(new TileInfo(node.Value));
+						tilesAcc.Add(new TileInfo(modData, node.Value));
 						break;
 					case "Segment":
 						if (Segment != null)
 							throw new YamlException("Multiple MultiBrush Segment definitions");
-						Segment = new MultiBrushSegment(node.Value);
+						Segment = new MultiBrushSegment(modData, node.Value);
 						break;
 					default:
 						throw new YamlException($"Unrecognized MultiBrush key {node.Key.Split('@')[0]}");
@@ -149,7 +150,7 @@ namespace OpenRA.Mods.Common.MapGenerator
 			Tiles = [.. tilesAcc];
 		}
 
-		public static ImmutableArray<MultiBrushInfo> ParseCollection(MiniYaml my)
+		public static ImmutableArray<MultiBrushInfo> ParseCollection(ModData modData, MiniYaml my)
 		{
 			var brushes = new List<MultiBrushInfo>();
 			foreach (var node in my.Nodes)
@@ -157,18 +158,19 @@ namespace OpenRA.Mods.Common.MapGenerator
 				switch (node.Key.Split('@')[0])
 				{
 					case "MultiBrush":
-						brushes.Add(new MultiBrushInfo(node.Value));
+						brushes.Add(new MultiBrushInfo(modData, node.Value));
 						break;
 					case "FromTemplates":
 						foreach (var template in FieldLoader.GetValue<List<ushort>>(node.Key, node.Value.Value))
 							brushes.Add(new MultiBrushInfo(
+								modData,
 								my: node.Value,
 								templates: [new TemplateInfo(template)]));
 
 						break;
 					case "FromActors":
 						foreach (var actor in FieldLoader.GetValue<List<string>>(node.Key, node.Value.Value))
-							brushes.Add(new MultiBrushInfo(
+							brushes.Add(new MultiBrushInfo(modData,
 								my: node.Value,
 								actors: [new ActorInfo(actor)]));
 
@@ -219,9 +221,9 @@ namespace OpenRA.Mods.Common.MapGenerator
 			Points = points;
 		}
 
-		public MultiBrushSegment(MiniYaml my)
+		public MultiBrushSegment(ModData modData, MiniYaml my)
 		{
-			FieldLoader.Load(this, my);
+			FieldLoader.Load(modData, this, my);
 			{
 				// Unlike FieldLoader.ParseInt2Array, whitespace is ignored.
 				var value = my.NodeWithKey("Points").Value.Value;

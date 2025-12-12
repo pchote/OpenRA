@@ -36,9 +36,9 @@ namespace OpenRA.Mods.Common.Terrain
 
 		readonly TerrainTileInfo[] tileInfo;
 
-		public TerrainTemplateInfo(ITerrainInfo terrainInfo, MiniYaml my)
+		public TerrainTemplateInfo(ModData modData, ITerrainInfo terrainInfo, MiniYaml my)
 		{
-			FieldLoader.Load(this, my);
+			FieldLoader.Load(modData, this, my);
 
 			var nodes = my.NodeWithKey("Tiles").Value.Nodes;
 
@@ -56,7 +56,7 @@ namespace OpenRA.Mods.Common.Terrain
 							$"Tileset `{terrainInfo.Id}` template `{Id}` references frame {key}, " +
 							$"but only [0..{tileInfo.Length - 1}] are valid for a {Size.X}x{Size.Y} Size template.");
 
-					tileInfo[key] = LoadTileInfo(terrainInfo, node.Value);
+					tileInfo[key] = LoadTileInfo(modData, terrainInfo, node.Value);
 				}
 			}
 			else
@@ -72,15 +72,14 @@ namespace OpenRA.Mods.Common.Terrain
 					if (key != i++)
 						throw new YamlException($"Tileset `{terrainInfo.Id}` template `{Id}` is missing a definition for frame {i - 1}.");
 
-					tileInfo[key] = LoadTileInfo(terrainInfo, node.Value);
+					tileInfo[key] = LoadTileInfo(modData, terrainInfo, node.Value);
 				}
 			}
 		}
 
-		protected virtual TerrainTileInfo LoadTileInfo(ITerrainInfo terrainInfo, MiniYaml my)
+		protected virtual TerrainTileInfo LoadTileInfo(ModData modData, ITerrainInfo terrainInfo, MiniYaml my)
 		{
-			var tile = new TerrainTileInfo();
-			FieldLoader.Load(tile, my);
+			var tile = FieldLoader.Load<TerrainTileInfo>(modData, my);
 
 			// Terrain type must be converted from a string to an index
 			tile.GetType().GetField(nameof(tile.TerrainType)).SetValue(tile, terrainInfo.GetTerrainIndex(my.Value));

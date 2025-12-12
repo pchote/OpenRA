@@ -73,7 +73,7 @@ namespace OpenRA
 			}
 		}
 
-		public void RefreshPlayerData(Action onComplete = null)
+		public void RefreshPlayerData(ModData modData, Action onComplete = null)
 		{
 			if (State != LinkState.Unlinked && State != LinkState.Linked && State != LinkState.ConnectionFailed)
 				return;
@@ -91,7 +91,7 @@ namespace OpenRA
 					var yaml = MiniYaml.FromStream(result, url).First();
 					if (yaml.Key == "Player")
 					{
-						innerData = FieldLoader.Load<PlayerProfile>(yaml.Value);
+						innerData = FieldLoader.Load<PlayerProfile>(modData, yaml.Value);
 						if (innerData.KeyRevoked)
 						{
 							Log.Write("debug", $"Revoking key with fingerprint {Fingerprint}");

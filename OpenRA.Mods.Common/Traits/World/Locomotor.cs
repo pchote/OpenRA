@@ -83,7 +83,7 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Lower the value on rough terrain. Leave out entries for impassable terrain.")]
 		public readonly FrozenDictionary<string, TerrainInfo> TerrainSpeeds;
 
-		protected static object LoadSpeeds(MiniYaml y)
+		protected static object LoadSpeeds(ModData modData, MiniYaml y)
 		{
 			var speeds = y.NodeWithKey("TerrainSpeeds").Value.Nodes;
 			var ret = new Dictionary<string, TerrainInfo>(speeds.Length);

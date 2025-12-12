@@ -66,7 +66,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					var yaml = MiniYaml.FromStream(result, url).First();
 					if (yaml.Key == "Player")
 					{
-						profile = FieldLoader.Load<PlayerProfile>(yaml.Value);
+						profile = FieldLoader.Load<PlayerProfile>(modData, yaml.Value);
 						Game.RunAfterTick(() =>
 						{
 							var nameLabel = profileHeader.Get<LabelWidget>("PROFILE_NAME");

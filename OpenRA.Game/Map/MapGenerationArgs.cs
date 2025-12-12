@@ -36,7 +36,7 @@ namespace OpenRA
 
 		[FieldLoader.LoadUsing(nameof(LoadSettings))]
 		public MiniYaml Settings = null;
-		static MiniYaml LoadSettings(MiniYaml yaml)
+		static MiniYaml LoadSettings(ModData _, MiniYaml yaml)
 		{
 			return yaml.NodeWithKey("Settings").Value;
 		}

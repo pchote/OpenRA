@@ -26,13 +26,13 @@ namespace OpenRA.Mods.Common.Traits
 		public readonly FrozenDictionary<string, ResourceLayerInfo.ResourceTypeInfo> ResourceTypes = null;
 
 		// Copied from ResourceLayerInfo
-		protected static object LoadResourceTypes(MiniYaml yaml)
+		protected static object LoadResourceTypes(ModData modData, MiniYaml yaml)
 		{
 			var ret = new Dictionary<string, ResourceLayerInfo.ResourceTypeInfo>();
 			var resources = yaml.NodeWithKeyOrDefault("ResourceTypes");
 			if (resources != null)
 				foreach (var r in resources.Value.Nodes)
-					ret[r.Key] = new ResourceLayerInfo.ResourceTypeInfo(r.Value);
+					ret[r.Key] = new ResourceLayerInfo.ResourceTypeInfo(modData, r.Value);
 
 			return ret.ToFrozenDictionary();
 		}

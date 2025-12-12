@@ -58,7 +58,7 @@ namespace OpenRA.Network
 		[FieldLoader.LoadUsing(nameof(LoadArguments))]
 		public readonly ImmutableArray<object> Arguments;
 
-		static object LoadArguments(MiniYaml yaml)
+		static object LoadArguments(ModData modData, MiniYaml yaml)
 		{
 			var argumentsNode = yaml.NodeWithKeyOrDefault("Arguments");
 
@@ -68,7 +68,7 @@ namespace OpenRA.Network
 			var arguments = new List<object>(argumentsNode.Value.Nodes.Length * 2);
 			foreach (var argumentNode in argumentsNode.Value.Nodes)
 			{
-				var argument = FieldLoader.Load<FluentArgument>(argumentNode.Value);
+				var argument = FieldLoader.Load<FluentArgument>(modData, argumentNode.Value);
 				arguments.Add(argument.Key);
 				if (argument.Type == FluentArgument.FluentArgumentType.Number)
 				{
@@ -84,10 +84,10 @@ namespace OpenRA.Network
 			return arguments.ToImmutableArray();
 		}
 
-		public FluentMessage(MiniYaml yaml)
+		public FluentMessage(ModData modData, MiniYaml yaml)
 		{
 			// Let the FieldLoader do the dirty work of loading the public fields.
-			FieldLoader.Load(this, yaml);
+			FieldLoader.Load(modData, this, yaml);
 		}
 
 		public static string Serialize(string key, object[] args)

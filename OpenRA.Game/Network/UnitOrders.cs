@@ -48,7 +48,7 @@ namespace OpenRA.Network
 
 		static bool OrderNotFromServerOrWorldIsReplay(int clientId, World world) => clientId != 0 || (world != null && world.IsReplay);
 
-		internal static void ProcessOrder(OrderManager orderManager, World world, int clientId, Order order)
+		internal static void ProcessOrder(ModData modData, OrderManager orderManager, World world, int clientId, Order order)
 		{
 			switch (order.OrderString)
 			{
@@ -66,7 +66,7 @@ namespace OpenRA.Network
 					var yaml = MiniYaml.FromString(order.TargetString, order.OrderString);
 					foreach (var node in yaml)
 					{
-						var message = new FluentMessage(node.Value);
+						var message = new FluentMessage(modData, node.Value);
 						if (message.Key == Joined)
 							TextNotificationsManager.AddPlayerJoinedLine(message.Key, message.Arguments.ToArray());
 						else if (message.Key == Left)
@@ -245,7 +245,7 @@ namespace OpenRA.Network
 				{
 					// Switch to the server's mod if we need and are able to
 					var mod = Game.ModData.Manifest;
-					var request = HandshakeRequest.Deserialize(order.TargetString, order.OrderString);
+					var request = HandshakeRequest.Deserialize(modData, order.TargetString, order.OrderString);
 
 					var externalKey = ExternalMod.MakeKey(request.Mod, request.Version);
 					if ((request.Mod != mod.Id || request.Version != mod.Metadata.Version) &&
@@ -313,7 +313,7 @@ namespace OpenRA.Network
 
 				case "SyncInfo":
 				{
-					orderManager.LobbyInfo = Session.Deserialize(order.TargetString, order.OrderString);
+					orderManager.LobbyInfo = Session.Deserialize(modData, order.TargetString, order.OrderString);
 					Game.SyncLobbyInfo();
 					break;
 				}
@@ -326,7 +326,7 @@ namespace OpenRA.Network
 					{
 						var strings = node.Key.Split('@');
 						if (strings[0] == "Client")
-							clients.Add(Session.Client.Deserialize(node.Value));
+							clients.Add(Session.Client.Deserialize(modData, node.Value));
 					}
 
 					orderManager.LobbyInfo.Clients = clients;
@@ -343,7 +343,7 @@ namespace OpenRA.Network
 						var strings = node.Key.Split('@');
 						if (strings[0] == "Slot")
 						{
-							var slot = Session.Slot.Deserialize(node.Value);
+							var slot = Session.Slot.Deserialize(modData, node.Value);
 							slots.Add(slot.PlayerReference, slot);
 						}
 					}
@@ -360,7 +360,7 @@ namespace OpenRA.Network
 					{
 						var strings = node.Key.Split('@');
 						if (strings[0] == "GlobalSettings")
-							orderManager.LobbyInfo.GlobalSettings = Session.Global.Deserialize(node.Value);
+							orderManager.LobbyInfo.GlobalSettings = Session.Global.Deserialize(modData, node.Value);
 					}
 
 					Game.SyncLobbyInfo();
@@ -393,7 +393,7 @@ namespace OpenRA.Network
 				case "GenerateMap":
 				{
 					var yaml = new MiniYaml(order.OrderString, MiniYaml.FromString(order.TargetString, order.OrderString));
-					Game.ModData.MapCache.GenerateMap(Game.ModData, FieldLoader.Load<MapGenerationArgs>(yaml));
+					Game.ModData.MapCache.GenerateMap(Game.ModData, FieldLoader.Load<MapGenerationArgs>(modData, yaml));
 					break;
 				}
 

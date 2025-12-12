@@ -23,13 +23,11 @@ using OpenRA.Support;
 
 namespace OpenRA.Mods.Common.Terrain
 {
-	public class DefaultTerrainLoader : ITerrainLoader
+	public class DefaultTerrainLoader(ModData modData) : ITerrainLoader
 	{
-		public DefaultTerrainLoader(ModData modData) { }
-
 		public ITerrainInfo ParseTerrain(IReadOnlyFileSystem fileSystem, string path)
 		{
-			return new DefaultTerrain(fileSystem, path);
+			return new DefaultTerrain(modData, fileSystem, path);
 		}
 	}
 
@@ -46,13 +44,13 @@ namespace OpenRA.Mods.Common.Terrain
 		public readonly ImmutableArray<int> Frames;
 		public readonly string Palette;
 
-		public DefaultTerrainTemplateInfo(ITerrainInfo terrainInfo, MiniYaml my)
-			: base(terrainInfo, my) { }
+		public DefaultTerrainTemplateInfo(ModData modData, ITerrainInfo terrainInfo, MiniYaml my)
+			: base(modData, terrainInfo, my) { }
 
-		protected override DefaultTerrainTileInfo LoadTileInfo(ITerrainInfo terrainInfo, MiniYaml my)
+		protected override DefaultTerrainTileInfo LoadTileInfo(ModData modData, ITerrainInfo terrainInfo, MiniYaml my)
 		{
 			var tile = new DefaultTerrainTileInfo();
-			FieldLoader.Load(tile, my);
+			FieldLoader.Load(modData, tile, my);
 
 			// Terrain type must be converted from a string to an index
 			tile.GetType().GetField(nameof(tile.TerrainType)).SetValue(tile, terrainInfo.GetTerrainIndex(my.Value));
@@ -94,17 +92,17 @@ namespace OpenRA.Mods.Common.Terrain
 		readonly FrozenDictionary<string, byte> terrainIndexByType;
 		readonly byte defaultWalkableTerrainIndex;
 
-		public DefaultTerrain(IReadOnlyFileSystem fileSystem, string filepath)
+		public DefaultTerrain(ModData modData, IReadOnlyFileSystem fileSystem, string filepath)
 		{
 			var yaml = MiniYaml.FromStream(fileSystem.Open(filepath), filepath)
 				.ToDictionary(x => x.Key, x => x.Value);
 
 			// General info
-			FieldLoader.Load(this, yaml["General"]);
+			FieldLoader.Load(modData, this, yaml["General"]);
 
 			// TerrainTypes
 			TerrainInfo = yaml["Terrain"].ToDictionary().Values
-				.Select(y => new TerrainTypeInfo(y))
+				.Select(y => new TerrainTypeInfo(modData, y))
 				.OrderBy(tt => tt.Type)
 				.ToImmutableArray();
 
@@ -126,7 +124,7 @@ namespace OpenRA.Mods.Common.Terrain
 
 			// Templates
 			Templates = yaml["Templates"].ToDictionary().Values
-				.Select(y => (TerrainTemplateInfo)new DefaultTerrainTemplateInfo(this, y))
+				.Select(y => (TerrainTemplateInfo)new DefaultTerrainTemplateInfo(modData, this, y))
 				.ToDictionary(t => t.Id)
 				.ToFrozenDictionary();
 
@@ -135,7 +133,7 @@ namespace OpenRA.Mods.Common.Terrain
 					? collectionDefinitions.ToDictionary()
 						.Select(kv => new KeyValuePair<string, ImmutableArray<MultiBrushInfo>>(
 							kv.Key,
-							MultiBrushInfo.ParseCollection(kv.Value)))
+							MultiBrushInfo.ParseCollection(modData, kv.Value)))
 						.ToFrozenDictionary()
 					: FrozenDictionary<string, ImmutableArray<MultiBrushInfo>>.Empty;
 		}

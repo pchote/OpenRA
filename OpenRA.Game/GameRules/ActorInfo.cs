@@ -35,7 +35,7 @@ namespace OpenRA
 		readonly TypeDictionary traits = [];
 		TraitInfo[] constructOrderCache = null;
 
-		public ActorInfo(ObjectCreator creator, string name, MiniYaml node)
+		public ActorInfo(ModData modData, string name, MiniYaml node)
 		{
 			try
 			{
@@ -47,7 +47,7 @@ namespace OpenRA
 					{
 						// HACK: The linter does not want to crash when a trait doesn't exist but only print an error instead
 						// LoadTraitInfo will only return null to signal us to abort here if the linter is running
-						var trait = LoadTraitInfo(creator, t.Key, t.Value);
+						var trait = LoadTraitInfo(modData, t.Key, t.Value);
 						if (trait != null)
 							traits.Add(trait);
 					}
@@ -73,7 +73,7 @@ namespace OpenRA
 			traits.TrimExcess();
 		}
 
-		static TraitInfo LoadTraitInfo(ObjectCreator creator, string traitName, MiniYaml my)
+		static TraitInfo LoadTraitInfo(ModData modData, string traitName, MiniYaml my)
 		{
 			if (!string.IsNullOrEmpty(my.Value))
 				throw new YamlException($"Junk value `{my.Value}` on trait node {traitName}");
@@ -81,7 +81,7 @@ namespace OpenRA
 			// HACK: The linter does not want to crash when a trait doesn't exist but only print an error instead
 			// ObjectCreator will only return null to signal us to abort here if the linter is running
 			var traitInstance = traitName.Split(TraitInstanceSeparator);
-			var info = creator.CreateObject<TraitInfo>(traitInstance[0] + "Info");
+			var info = modData.ObjectCreator.CreateObject<TraitInfo>(traitInstance[0] + "Info");
 			if (info == null)
 				return null;
 
@@ -90,7 +90,7 @@ namespace OpenRA
 				if (traitInstance.Length > 1)
 					info.GetType().GetField(nameof(info.InstanceName)).SetValue(info, traitInstance[1]);
 
-				FieldLoader.Load(info, my);
+				FieldLoader.Load(modData, info, my);
 			}
 			catch (FieldLoader.MissingFieldsException e)
 			{

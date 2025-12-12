@@ -19,7 +19,7 @@ namespace OpenRA.Mods.Common.Lint
 	{
 		public void Run(Action<string> emitError, Action<string> emitWarning, ModData modData, Map map)
 		{
-			var playerNames = new MapPlayers(map.PlayerDefinitions).Players.Values
+			var playerNames = new MapPlayers(modData, map.PlayerDefinitions).Players.Values
 				.Select(p => p.Name)
 				.ToHashSet();
 

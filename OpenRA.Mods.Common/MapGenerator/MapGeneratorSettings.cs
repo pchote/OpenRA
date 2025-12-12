@@ -28,10 +28,10 @@ namespace OpenRA.Mods.Common.MapGenerator
 		public readonly string Label = null;
 		public readonly int Priority = 0;
 
-		protected MapGeneratorOption(string id, MiniYaml yaml)
+		protected MapGeneratorOption(ModData modData, string id, MiniYaml yaml)
 		{
 			Id = id;
-			FieldLoader.Load(this, yaml);
+			FieldLoader.Load(modData, this, yaml);
 		}
 
 		public abstract IReadOnlyCollection<MiniYamlNode> GetSettings(ITerrainInfo terrainInfo, int playerCount);
@@ -50,8 +50,8 @@ namespace OpenRA.Mods.Common.MapGenerator
 		public readonly bool Default = false;
 		public bool Value;
 
-		public MapGeneratorBooleanOption(string id, MiniYaml yaml)
-			: base(id, yaml)
+		public MapGeneratorBooleanOption(ModData modData, string id, MiniYaml yaml)
+			: base(modData, id, yaml)
 		{
 			Value = Default;
 		}
@@ -69,8 +69,8 @@ namespace OpenRA.Mods.Common.MapGenerator
 		public readonly int Default = 0;
 		public int Value;
 
-		public MapGeneratorIntegerOption(string id, MiniYaml yaml)
-			: base(id, yaml)
+		public MapGeneratorIntegerOption(ModData modData, string id, MiniYaml yaml)
+			: base(modData, id, yaml)
 		{
 			Value = Default;
 		}
@@ -93,7 +93,7 @@ namespace OpenRA.Mods.Common.MapGenerator
 			[FieldLoader.Require]
 			public readonly ImmutableArray<MiniYamlNode> Settings = default;
 
-			static object LoadSettings(MiniYaml yaml)
+			static object LoadSettings(ModData _, MiniYaml yaml)
 			{
 				return yaml.NodeWithKey("Settings").Value.Nodes.ToImmutableArray();
 			}
@@ -102,14 +102,14 @@ namespace OpenRA.Mods.Common.MapGenerator
 		[FieldLoader.LoadUsing(nameof(LoadChoices))]
 		public readonly Dictionary<string, MapGeneratorDropdownChoice> Choices = null;
 
-		static Dictionary<string, MapGeneratorDropdownChoice> LoadChoices(MiniYaml yaml)
+		static Dictionary<string, MapGeneratorDropdownChoice> LoadChoices(ModData modData, MiniYaml yaml)
 		{
 			var ret = new Dictionary<string, MapGeneratorDropdownChoice>();
 			foreach (var node in yaml.Nodes)
 			{
 				var split = node.Key.Split('@');
 				if (split.Length == 2 && split[0] == "Choice")
-					ret.Add(split[1], FieldLoader.Load<MapGeneratorDropdownChoice>(node.Value));
+					ret.Add(split[1], FieldLoader.Load<MapGeneratorDropdownChoice>(modData, node.Value));
 			}
 
 			return ret;
@@ -118,8 +118,8 @@ namespace OpenRA.Mods.Common.MapGenerator
 		public readonly ImmutableArray<string> Default = default;
 		string value = null;
 
-		public MapGeneratorMultiChoiceOption(string id, MiniYaml yaml)
-			: base(id, yaml) { }
+		public MapGeneratorMultiChoiceOption(ModData modData, string id, MiniYaml yaml)
+			: base(modData, id, yaml) { }
 
 		public override IReadOnlyCollection<MiniYamlNode> GetSettings(ITerrainInfo terrainInfo, int playerCount)
 		{
@@ -183,8 +183,8 @@ namespace OpenRA.Mods.Common.MapGenerator
 		public readonly int? Default = null;
 		int value;
 
-		public MapGeneratorMultiIntegerChoiceOption(string id, MiniYaml yaml)
-			: base(id, yaml)
+		public MapGeneratorMultiIntegerChoiceOption(ModData modData, string id, MiniYaml yaml)
+			: base(modData, id, yaml)
 		{
 			Value = Default ?? (Choices != null ? Choices[0] : 0);
 		}
@@ -216,7 +216,7 @@ namespace OpenRA.Mods.Common.MapGenerator
 
 		readonly IMapGeneratorInfo generatorInfo;
 
-		public MapGeneratorSettings(IMapGeneratorInfo generatorInfo, MiniYaml yaml)
+		public MapGeneratorSettings(ModData modData, IMapGeneratorInfo generatorInfo, MiniYaml yaml)
 		{
 			this.generatorInfo = generatorInfo;
 
@@ -228,13 +228,13 @@ namespace OpenRA.Mods.Common.MapGenerator
 					continue;
 
 				if (split[0] == "BooleanOption")
-					options.Add(new MapGeneratorBooleanOption(split[1], node.Value));
+					options.Add(new MapGeneratorBooleanOption(modData, split[1], node.Value));
 				else if (split[0] == "IntegerOption")
-					options.Add(new MapGeneratorIntegerOption(split[1], node.Value));
+					options.Add(new MapGeneratorIntegerOption(modData, split[1], node.Value));
 				else if (split[0] == "MultiIntegerChoiceOption")
-					options.Add(new MapGeneratorMultiIntegerChoiceOption(split[1], node.Value));
+					options.Add(new MapGeneratorMultiIntegerChoiceOption(modData, split[1], node.Value));
 				else if (split[0] == "MultiChoiceOption")
-					options.Add(new MapGeneratorMultiChoiceOption(split[1], node.Value));
+					options.Add(new MapGeneratorMultiChoiceOption(modData, split[1], node.Value));
 			}
 
 			Options = options.ToImmutableArray();

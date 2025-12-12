@@ -91,7 +91,7 @@ namespace OpenRA
 
 		void LoadMod(MiniYaml yaml, string path = null, bool forceRegistration = false)
 		{
-			var mod = FieldLoader.Load<ExternalMod>(yaml);
+			var mod = FieldLoader.Load<ExternalMod>(null, yaml);
 
 			if (sheetBuilder != null)
 			{
@@ -206,7 +206,7 @@ namespace OpenRA
 					try
 					{
 						var yaml = MiniYaml.FromFile(path).First().Value;
-						var m = FieldLoader.Load<ExternalMod>(yaml);
+						var m = FieldLoader.Load<ExternalMod>(null, yaml);
 						modKey = ExternalMod.MakeKey(m);
 
 						// Continue to the next entry if this one is valid

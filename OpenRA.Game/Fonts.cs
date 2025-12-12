@@ -26,11 +26,11 @@ namespace OpenRA
 		[FieldLoader.LoadUsing(nameof(LoadFonts))]
 		public readonly FrozenDictionary<string, FontData> FontList;
 
-		static object LoadFonts(MiniYaml y)
+		static object LoadFonts(ModData modData, MiniYaml y)
 		{
 			var ret = new Dictionary<string, FontData>(y.Nodes.Length);
 			foreach (var node in y.Nodes)
-				ret.Add(node.Key, FieldLoader.Load<FontData>(node.Value));
+				ret.Add(node.Key, FieldLoader.Load<FontData>(modData, node.Value));
 
 			return ret.ToFrozenDictionary();
 		}

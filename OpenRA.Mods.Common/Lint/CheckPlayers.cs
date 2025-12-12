@@ -23,7 +23,7 @@ namespace OpenRA.Mods.Common.Lint
 	{
 		void ILintMapPass.Run(Action<string> emitError, Action<string> emitWarning, ModData modData, Map map)
 		{
-			var players = new MapPlayers(map.PlayerDefinitions);
+			var players = new MapPlayers(modData, map.PlayerDefinitions);
 			var spawns = new List<CPos>();
 			foreach (var kv in map.ActorDefinitions.Where(d => d.Value.Value == "mpspawn"))
 			{

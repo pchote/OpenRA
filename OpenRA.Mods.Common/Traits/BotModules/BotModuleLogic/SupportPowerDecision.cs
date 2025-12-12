@@ -47,17 +47,17 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Maximum ticks to wait until next Decision scan attempt.")]
 		public readonly int MaximumScanTimeInterval = 262;
 
-		public SupportPowerDecision(MiniYaml yaml)
+		public SupportPowerDecision(ModData modData, MiniYaml yaml)
 		{
-			FieldLoader.Load(this, yaml);
+			FieldLoader.Load(modData, this, yaml);
 		}
 
-		static object LoadConsiderations(MiniYaml yaml)
+		static object LoadConsiderations(ModData modData, MiniYaml yaml)
 		{
 			var ret = new List<Consideration>();
 			foreach (var d in yaml.Nodes)
 				if (d.Key.Split('@')[0] == "Consideration")
-					ret.Add(new Consideration(d.Value));
+					ret.Add(new Consideration(modData, d.Value));
 
 			return ret.ToImmutableArray();
 		}
@@ -139,9 +139,9 @@ namespace OpenRA.Mods.Common.Traits
 			[Desc("What is the check radius of this decision?")]
 			public readonly WDist CheckRadius = WDist.FromCells(5);
 
-			public Consideration(MiniYaml yaml)
+			public Consideration(ModData modData, MiniYaml yaml)
 			{
-				FieldLoader.Load(this, yaml);
+				FieldLoader.Load(modData, this, yaml);
 			}
 
 			/// <summary>Evaluates a single actor according to the rules defined in this consideration.</summary>

@@ -98,7 +98,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			parentWidget = widget.Parent;
 
 			generator = modData.DefaultRules.Actors[SystemActors.EditorWorld].TraitInfos<IEditorMapGeneratorInfo>().First();
-			settings = generator.GetSettings();
+			settings = generator.GetSettings(modData);
 			preview = widget.Get<GeneratedMapPreviewWidget>("PREVIEW");
 
 			widget.Get("ERROR").IsVisible = () => failed;

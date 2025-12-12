@@ -20,10 +20,10 @@ namespace OpenRA.Network
 		public string Version;
 		public string AuthToken;
 
-		public static HandshakeRequest Deserialize(string data, string name)
+		public static HandshakeRequest Deserialize(ModData modData, string data, string name)
 		{
 			var handshake = new HandshakeRequest();
-			FieldLoader.Load(handshake, MiniYaml.FromString(data, name).First().Value);
+			FieldLoader.Load(modData, handshake, MiniYaml.FromString(data, name).First().Value);
 			return handshake;
 		}
 
@@ -51,7 +51,7 @@ namespace OpenRA.Network
 		[FieldLoader.Ignore]
 		public Session.Client Client;
 
-		public static HandshakeResponse Deserialize(string data, string name)
+		public static HandshakeResponse Deserialize(ModData modData, string data, string name)
 		{
 			var handshake = new HandshakeResponse
 			{
@@ -64,10 +64,10 @@ namespace OpenRA.Network
 				switch (y.Key)
 				{
 					case "Handshake":
-						FieldLoader.Load(handshake, y.Value);
+						FieldLoader.Load(modData, handshake, y.Value);
 						break;
 					case "Client":
-						FieldLoader.Load(handshake.Client, y.Value);
+						FieldLoader.Load(modData, handshake.Client, y.Value);
 						break;
 				}
 			}

@@ -30,9 +30,9 @@ namespace OpenRA.Mods.Common
 			public readonly bool Required;
 			public readonly string Download;
 
-			public ModPackage(MiniYaml yaml)
+			public ModPackage(ModData modData, MiniYaml yaml)
 			{
-				FieldLoader.Load(this, yaml);
+				FieldLoader.Load(modData, this, yaml);
 			}
 
 			public bool IsInstalled()
@@ -61,7 +61,7 @@ namespace OpenRA.Mods.Common
 
 			public readonly string TooltipText;
 
-			public ModSource(MiniYaml yaml)
+			public ModSource(ModData modData, MiniYaml yaml)
 			{
 				Title = yaml.Value;
 
@@ -77,7 +77,7 @@ namespace OpenRA.Mods.Common
 				if (installNode != null)
 					Install = installNode.Value.Nodes;
 
-				FieldLoader.Load(this, yaml);
+				FieldLoader.Load(modData, this, yaml);
 			}
 		}
 
@@ -90,10 +90,10 @@ namespace OpenRA.Mods.Common
 			public readonly string Type;
 			public readonly FrozenDictionary<string, string> Extract;
 
-			public ModDownload(MiniYaml yaml)
+			public ModDownload(ModData modData, MiniYaml yaml)
 			{
 				Title = yaml.Value;
-				FieldLoader.Load(this, yaml);
+				FieldLoader.Load(modData, this, yaml);
 			}
 		}
 
@@ -106,13 +106,13 @@ namespace OpenRA.Mods.Common
 		[FieldLoader.LoadUsing(nameof(LoadPackages))]
 		public readonly ImmutableArray<KeyValuePair<string, ModPackage>> Packages = [];
 
-		static object LoadPackages(MiniYaml yaml)
+		static object LoadPackages(ModData modData, MiniYaml yaml)
 		{
 			var packages = new List<KeyValuePair<string, ModPackage>>();
 			var packageNode = yaml.NodeWithKeyOrDefault("Packages");
 			if (packageNode != null)
 				foreach (var node in packageNode.Value.Nodes)
-					packages.Add(KeyValuePair.Create(node.Key, new ModPackage(node.Value)));
+					packages.Add(KeyValuePair.Create(node.Key, new ModPackage(modData, node.Value)));
 
 			return packages.ToImmutableArray();
 		}
@@ -120,7 +120,7 @@ namespace OpenRA.Mods.Common
 		[FieldLoader.LoadUsing(nameof(LoadDownloads))]
 		public readonly ImmutableArray<string> Downloads = [];
 
-		static object LoadDownloads(MiniYaml yaml)
+		static object LoadDownloads(ModData _, MiniYaml yaml)
 		{
 			var downloadNode = yaml.NodeWithKeyOrDefault("Downloads");
 			return downloadNode != null ? downloadNode.Value.Nodes.Select(n => n.Key).ToImmutableArray() : [];
@@ -129,7 +129,7 @@ namespace OpenRA.Mods.Common
 		[FieldLoader.LoadUsing(nameof(LoadSources))]
 		public readonly ImmutableArray<string> Sources = [];
 
-		static object LoadSources(MiniYaml yaml)
+		static object LoadSources(ModData _, MiniYaml yaml)
 		{
 			var sourceNode = yaml.NodeWithKeyOrDefault("Sources");
 			return sourceNode != null ? sourceNode.Value.Nodes.Select(n => n.Key).ToImmutableArray() : [];

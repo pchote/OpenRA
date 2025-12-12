@@ -78,7 +78,7 @@ namespace OpenRA.Mods.Common.LoadScreens
 				ReplayMetadata replayMeta = null;
 				try
 				{
-					replayMeta = ReplayMetadata.Read(Launch.Replay);
+					replayMeta = ReplayMetadata.Read(Game.ModData, Launch.Replay);
 				}
 				catch { }
 

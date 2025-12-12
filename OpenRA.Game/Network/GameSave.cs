@@ -64,9 +64,9 @@ namespace OpenRA.Network
 				client.Name = BotName;
 		}
 
-		public static SlotClient Deserialize(MiniYaml data)
+		public static SlotClient Deserialize(ModData modData, MiniYaml data)
 		{
-			return FieldLoader.Load<SlotClient>(data);
+			return FieldLoader.Load<SlotClient>(modData, data);
 		}
 
 		public MiniYamlNode Serialize(string key)
@@ -105,7 +105,7 @@ namespace OpenRA.Network
 			Slots = [];
 		}
 
-		public GameSave(string filepath)
+		public GameSave(ModData modData, string filepath)
 		{
 			using (var rs = File.OpenRead(filepath))
 			{
@@ -124,13 +124,13 @@ namespace OpenRA.Network
 				lastSyncPacket = rs.ReadBytes(Order.SyncHashOrderLength);
 
 				var globalSettings = MiniYaml.FromString(rs.ReadLengthPrefixedString(Encoding.UTF8, Connection.MaxOrderLength), $"{filepath}:globalSettings");
-				GlobalSettings = Session.Global.Deserialize(globalSettings.First().Value);
+				GlobalSettings = Session.Global.Deserialize(modData, globalSettings.First().Value);
 
 				var slots = MiniYaml.FromString(rs.ReadLengthPrefixedString(Encoding.UTF8, Connection.MaxOrderLength), $"{filepath}:slots");
 				Slots = [];
 				foreach (var s in slots)
 				{
-					var slot = Session.Slot.Deserialize(s.Value);
+					var slot = Session.Slot.Deserialize(modData, s.Value);
 					Slots.Add(slot.PlayerReference, slot);
 				}
 
@@ -138,7 +138,7 @@ namespace OpenRA.Network
 				SlotClients = [];
 				foreach (var s in slotClients)
 				{
-					var slotClient = SlotClient.Deserialize(s.Value);
+					var slotClient = SlotClient.Deserialize(modData, s.Value);
 					SlotClients.Add(slotClient.Slot, slotClient);
 				}
 
@@ -156,7 +156,7 @@ namespace OpenRA.Network
 			}
 		}
 
-		public void StartGame(Session lobbyInfo, MapPreview map)
+		public void StartGame(ModData modData, Session lobbyInfo, MapPreview map)
 		{
 			if (map.Class == MapClassification.Generated)
 				MapData = map.ToBase64String();
@@ -171,12 +171,12 @@ namespace OpenRA.Network
 			}).ToArray();
 
 			// Perform a deep clone by round-tripping the data
-			GlobalSettings = Session.Global.Deserialize(lobbyInfo.GlobalSettings.Serialize().Value);
+			GlobalSettings = Session.Global.Deserialize(modData, lobbyInfo.GlobalSettings.Serialize().Value);
 			Slots = [];
 			SlotClients = [];
 			foreach (var s in lobbyInfo.Slots)
 			{
-				Slots[s.Key] = Session.Slot.Deserialize(s.Value.Serialize().Value);
+				Slots[s.Key] = Session.Slot.Deserialize(modData, s.Value.Serialize().Value);
 
 				var playerReference = map.Players.Players[s.Value.PlayerReference];
 				var client = lobbyInfo.ClientInSlot(s.Key);

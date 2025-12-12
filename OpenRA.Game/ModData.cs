@@ -64,7 +64,7 @@ namespace OpenRA
 			ModFiles = new FS(mod.Id, mods, PackageLoaders);
 
 			FileSystemLoader = ObjectCreator.GetLoader<IFileSystemLoader>(Manifest.FileSystem.Value, "filesystem");
-			FieldLoader.Load(FileSystemLoader, Manifest.FileSystem);
+			FieldLoader.Load(this, FileSystemLoader, Manifest.FileSystem);
 			FileSystemLoader.Mount(ModFiles, ObjectCreator);
 			ModFiles.TrimExcess();
 
@@ -75,17 +75,17 @@ namespace OpenRA
 					throw new InvalidDataException($"`{kv.Key}` is not a valid mod manifest entry.");
 
 				IGlobalModData module;
-				var ctor = t.GetConstructor([typeof(MiniYaml)]);
+				var ctor = t.GetConstructor([typeof(ModData), typeof(MiniYaml)]);
 				if (ctor != null)
 				{
 					// Class has opted-in to DIY initialization
-					module = (IGlobalModData)ctor.Invoke([kv.Value]);
+					module = (IGlobalModData)ctor.Invoke([this, kv.Value]);
 				}
 				else
 				{
 					// Automatically load the child nodes using FieldLoader
 					module = ObjectCreator.CreateObject<IGlobalModData>(kv.Key);
-					FieldLoader.Load(module, kv.Value);
+					FieldLoader.Load(this, module, kv.Value);
 				}
 
 				modules.Add(module);

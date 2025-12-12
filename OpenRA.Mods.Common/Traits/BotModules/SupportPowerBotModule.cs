@@ -24,13 +24,13 @@ namespace OpenRA.Mods.Common.Traits
 		[FieldLoader.LoadUsing(nameof(LoadDecisions))]
 		public readonly ImmutableArray<SupportPowerDecision> Decisions = [];
 
-		static object LoadDecisions(MiniYaml yaml)
+		static object LoadDecisions(ModData modData, MiniYaml yaml)
 		{
 			var ret = new List<SupportPowerDecision>();
 			var decisions = yaml.NodeWithKeyOrDefault("Decisions");
 			if (decisions != null)
 				foreach (var d in decisions.Value.Nodes)
-					ret.Add(new SupportPowerDecision(d.Value));
+					ret.Add(new SupportPowerDecision(modData, d.Value));
 
 			return ret.ToImmutableArray();
 		}

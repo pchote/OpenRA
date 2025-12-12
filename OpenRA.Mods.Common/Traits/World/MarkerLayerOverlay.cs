@@ -84,10 +84,10 @@ namespace OpenRA.Mods.Common.Traits
 				TileAlpha = markerLayerOverlay.TileAlpha;
 			}
 
-			public static MarkerLayer Deserialize(string path)
+			public static MarkerLayer Deserialize(ModData modData, string path)
 			{
 				var yaml = MiniYaml.FromFile(path).First().Value;
-				return FieldLoader.Load<MarkerLayer>(yaml);
+				return FieldLoader.Load<MarkerLayer>(modData, yaml);
 			}
 
 			public List<MiniYamlNode> Serialize()
@@ -168,7 +168,7 @@ namespace OpenRA.Mods.Common.Traits
 				if (!File.Exists(markerTilePath))
 					return;
 
-				var file = MarkerLayer.Deserialize(markerTilePath);
+				var file = MarkerLayer.Deserialize(modData, markerTilePath);
 
 				TileAlpha = file.TileAlpha;
 				MirrorMode = file.MirrorMode;

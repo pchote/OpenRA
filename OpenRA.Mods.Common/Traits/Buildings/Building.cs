@@ -62,7 +62,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		public override object Create(ActorInitializer init) { return new Building(init, this); }
 
-		protected static object LoadFootprint(MiniYaml yaml)
+		protected static object LoadFootprint(ModData modData, MiniYaml yaml)
 		{
 			var footprintYaml = yaml.NodeWithKeyOrDefault("Footprint");
 			var footprintChars = footprintYaml?.Value.Value.Where(x => !char.IsWhiteSpace(x)).ToArray() ?? ['x'];

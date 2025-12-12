@@ -24,12 +24,12 @@ namespace OpenRA
 		public const int MaximumPlayerCount = 63;
 		public readonly Dictionary<string, PlayerReference> Players;
 
-		public MapPlayers()
-			: this([]) { }
+		public MapPlayers(ModData modData)
+			: this(modData, []) { }
 
-		public MapPlayers(IEnumerable<MiniYamlNode> playerDefinitions)
+		public MapPlayers(ModData modData, IEnumerable<MiniYamlNode> playerDefinitions)
 		{
-			Players = playerDefinitions.Select(pr => new PlayerReference(new MiniYaml(pr.Key, pr.Value.Nodes)))
+			Players = playerDefinitions.Select(pr => new PlayerReference(new MiniYaml(pr.Key, pr.Value.Nodes), modData))
 				.ToDictionary(player => player.Name);
 		}
 

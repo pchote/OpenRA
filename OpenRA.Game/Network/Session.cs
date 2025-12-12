@@ -41,7 +41,7 @@ namespace OpenRA.Network
 			return null;
 		}
 
-		public static Session Deserialize(string data, string name)
+		public static Session Deserialize(ModData modData, string data, string name)
 		{
 			try
 			{
@@ -55,15 +55,15 @@ namespace OpenRA.Network
 					switch (strings[0])
 					{
 						case "Client":
-							session.Clients.Add(Client.Deserialize(node.Value));
+							session.Clients.Add(Client.Deserialize(modData, node.Value));
 							break;
 
 						case "GlobalSettings":
-							session.GlobalSettings = Global.Deserialize(node.Value);
+							session.GlobalSettings = Global.Deserialize(modData, node.Value);
 							break;
 
 						case "Slot":
-							var s = Slot.Deserialize(node.Value);
+							var s = Slot.Deserialize(modData, node.Value);
 							session.Slots.Add(s.PlayerReference, s);
 							break;
 						case "DisabledSpawnPoints":
@@ -120,9 +120,9 @@ namespace OpenRA.Network
 
 		public class Client
 		{
-			public static Client Deserialize(MiniYaml data)
+			public static Client Deserialize(ModData modData, MiniYaml data)
 			{
-				return FieldLoader.Load<Client>(data);
+				return FieldLoader.Load<Client>(modData, data);
 			}
 
 			public int Index;
@@ -174,9 +174,9 @@ namespace OpenRA.Network
 			public bool LockSpawn;
 			public bool Required;
 
-			public static Slot Deserialize(MiniYaml data)
+			public static Slot Deserialize(ModData modData, MiniYaml data)
 			{
-				return FieldLoader.Load<Slot>(data);
+				return FieldLoader.Load<Slot>(modData, data);
 			}
 
 			public MiniYamlNode Serialize()
@@ -223,14 +223,14 @@ namespace OpenRA.Network
 			[FieldLoader.Ignore]
 			public Dictionary<string, LobbyOptionState> LobbyOptions = [];
 
-			public static Global Deserialize(MiniYaml data)
+			public static Global Deserialize(ModData modData, MiniYaml data)
 			{
-				var gs = FieldLoader.Load<Global>(data);
+				var gs = FieldLoader.Load<Global>(modData, data);
 
 				var optionsNode = data.NodeWithKeyOrDefault("Options");
 				if (optionsNode != null)
 					foreach (var n in optionsNode.Value.Nodes)
-						gs.LobbyOptions[n.Key] = FieldLoader.Load<LobbyOptionState>(n.Value);
+						gs.LobbyOptions[n.Key] = FieldLoader.Load<LobbyOptionState>(modData, n.Value);
 
 				return gs;
 			}

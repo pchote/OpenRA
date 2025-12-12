@@ -177,9 +177,9 @@ namespace OpenRA
 
 		protected CompositeActorInit() { }
 
-		public virtual void Initialize(MiniYaml yaml)
+		public virtual void Initialize(ModData modData, MiniYaml yaml)
 		{
-			FieldLoader.Load(this, yaml);
+			FieldLoader.Load(modData, this, yaml);
 		}
 
 		public virtual void Initialize(Dictionary<string, object> values)

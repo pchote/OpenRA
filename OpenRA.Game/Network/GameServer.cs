@@ -140,7 +140,7 @@ namespace OpenRA.Network
 
 		public string ModLabel => $"{ModTitle} ({Version})";
 
-		static object LoadClients(MiniYaml yaml)
+		static object LoadClients(ModData modData, MiniYaml yaml)
 		{
 			var clients = new List<GameClient>();
 			var clientsNode = yaml.NodeWithKeyOrDefault("Clients");
@@ -149,15 +149,15 @@ namespace OpenRA.Network
 				var regex = new Regex(@"Client@\d+");
 				foreach (var client in clientsNode.Value.Nodes)
 					if (regex.IsMatch(client.Key))
-						clients.Add(FieldLoader.Load<GameClient>(client.Value));
+						clients.Add(FieldLoader.Load<GameClient>(modData, client.Value));
 			}
 
 			return clients.ToImmutableArray();
 		}
 
-		public GameServer(MiniYaml yaml)
+		public GameServer(ModData modData, MiniYaml yaml)
 		{
-			FieldLoader.Load(this, yaml);
+			FieldLoader.Load(modData, this, yaml);
 
 			// Games advertised using the old API used a single Mods field
 			if (Mod == null || Version == null)

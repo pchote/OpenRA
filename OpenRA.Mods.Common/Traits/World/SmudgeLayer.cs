@@ -59,7 +59,7 @@ namespace OpenRA.Mods.Common.Traits
 		[FieldLoader.LoadUsing(nameof(LoadInitialSmudges))]
 		public readonly FrozenDictionary<CPos, MapSmudge> InitialSmudges;
 
-		public static object LoadInitialSmudges(MiniYaml yaml)
+		public static object LoadInitialSmudges(ModData modData, MiniYaml yaml)
 		{
 			var smudges = new Dictionary<CPos, MapSmudge>();
 			var smudgeYaml = yaml.NodeWithKeyOrDefault("InitialSmudges");

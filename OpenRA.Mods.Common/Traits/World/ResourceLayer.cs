@@ -46,9 +46,9 @@ namespace OpenRA.Mods.Common.Traits
 			[Desc("Maximum number of resource units allowed in a single cell.")]
 			public readonly byte MaxDensity = 10;
 
-			public ResourceTypeInfo(MiniYaml yaml)
+			public ResourceTypeInfo(ModData modData, MiniYaml yaml)
 			{
-				FieldLoader.Load(this, yaml);
+				FieldLoader.Load(modData, this, yaml);
 			}
 		}
 
@@ -59,13 +59,13 @@ namespace OpenRA.Mods.Common.Traits
 		public readonly bool RecalculateResourceDensity = false;
 
 		// Copied to EditorResourceLayerInfo, ResourceRendererInfo
-		protected static object LoadResourceTypes(MiniYaml yaml)
+		protected static object LoadResourceTypes(ModData modData, MiniYaml yaml)
 		{
 			var ret = new Dictionary<string, ResourceTypeInfo>();
 			var resources = yaml.NodeWithKeyOrDefault("ResourceTypes");
 			if (resources != null)
 				foreach (var r in resources.Value.Nodes)
-					ret[r.Key] = new ResourceTypeInfo(r.Value);
+					ret[r.Key] = new ResourceTypeInfo(modData, r.Value);
 
 			return ret.ToFrozenDictionary();
 		}

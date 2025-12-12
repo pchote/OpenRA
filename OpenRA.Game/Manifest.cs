@@ -113,7 +113,7 @@ namespace OpenRA
 			// Merge inherited overrides
 			var yaml = new MiniYaml(null, MiniYaml.Merge([nodes])).ToDictionary();
 
-			Metadata = FieldLoader.Load<ModMetadata>(yaml["Metadata"]);
+			Metadata = FieldLoader.Load<ModMetadata>(null, yaml["Metadata"]);
 
 			// TODO: Use fieldloader
 			MapFolders = YamlDictionary(yaml, "MapFolders");
@@ -179,7 +179,7 @@ namespace OpenRA
 					FieldLoader.GetValue<bool>("AllowUnusedFluentMessagesInExternalPackages", entry.Value);
 
 			if (yaml.TryGetValue("RendererConstants", out entry))
-				RendererConstants = FieldLoader.Load<RendererConstants>(entry);
+				RendererConstants = FieldLoader.Load<RendererConstants>(null, entry);
 			else
 				RendererConstants = new RendererConstants();
 

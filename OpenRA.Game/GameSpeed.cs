@@ -36,7 +36,7 @@ namespace OpenRA
 		[FieldLoader.LoadUsing(nameof(LoadSpeeds))]
 		public readonly Dictionary<string, GameSpeed> Speeds;
 
-		static object LoadSpeeds(MiniYaml y)
+		static object LoadSpeeds(ModData modData, MiniYaml y)
 		{
 			var ret = new Dictionary<string, GameSpeed>();
 			var speedsNode = y.NodeWithKeyOrDefault("Speeds");
@@ -47,7 +47,7 @@ namespace OpenRA
 			{
 				try
 				{
-					ret.Add(node.Key, FieldLoader.Load<GameSpeed>(node.Value));
+					ret.Add(node.Key, FieldLoader.Load<GameSpeed>(modData, node.Value));
 				}
 				catch (FieldLoader.MissingFieldsException e)
 				{

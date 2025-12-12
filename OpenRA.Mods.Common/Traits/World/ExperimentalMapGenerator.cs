@@ -56,14 +56,14 @@ namespace OpenRA.Mods.Common.Traits
 		string IMapGeneratorInfo.MapTitle => MapTitle;
 		ImmutableArray<string> IEditorMapGeneratorInfo.Tilesets => Tilesets;
 
-		static MiniYaml SettingsLoader(MiniYaml my)
+		static MiniYaml SettingsLoader(ModData _, MiniYaml my)
 		{
 			return my.NodeWithKey("Settings").Value;
 		}
 
-		static object FluentReferencesLoader(MiniYaml my)
+		static object FluentReferencesLoader(ModData modData, MiniYaml my)
 		{
-			return new MapGeneratorSettings(null, my.NodeWithKey("Settings").Value)
+			return new MapGeneratorSettings(modData, null, my.NodeWithKey("Settings").Value)
 				.Options.SelectMany(o => o.GetFluentReferences()).ToImmutableArray();
 		}
 
@@ -230,9 +230,9 @@ namespace OpenRA.Mods.Common.Traits
 			[FieldLoader.Ignore]
 			public readonly IReadOnlyList<string> RoadSegmentTypes;
 
-			public Parameters(Map map, MiniYaml my)
+			public Parameters(ModData modData, Map map, MiniYaml my)
 			{
-				FieldLoader.Load(this, my);
+				FieldLoader.Load(modData, this, my);
 
 				var terrainInfo = (ITemplatedTerrainInfo)map.Rules.TerrainInfo;
 				SegmentedBrushes = MultiBrush.LoadCollection(map, "Segmented");
@@ -307,7 +307,7 @@ namespace OpenRA.Mods.Common.Traits
 				Validate(terrainInfo);
 			}
 
-			static object MirrorLoader(MiniYaml my)
+			static object MirrorLoader(ModData _, MiniYaml my)
 			{
 				if (Symmetry.TryParseMirror(my.NodeWithKey("Mirror").Value.Value, out var mirror))
 					return mirror;
@@ -315,7 +315,7 @@ namespace OpenRA.Mods.Common.Traits
 					throw new YamlException($"Invalid Mirror value `{my.NodeWithKey("Mirror").Value.Value}`");
 			}
 
-			static IReadOnlyDictionary<string, int> BuildingWeightsLoader(MiniYaml my)
+			static IReadOnlyDictionary<string, int> BuildingWeightsLoader(ModData _, MiniYaml my)
 			{
 				return my.NodeWithKey("BuildingWeights").Value.ToDictionary(subMy =>
 					{
@@ -326,7 +326,7 @@ namespace OpenRA.Mods.Common.Traits
 					});
 			}
 
-			static IReadOnlyDictionary<string, int> ResourceSpawnWeightsLoader(MiniYaml my)
+			static IReadOnlyDictionary<string, int> ResourceSpawnWeightsLoader(ModData _, MiniYaml my)
 			{
 				return my.NodeWithKey("ResourceSpawnWeights").Value.ToDictionary(subMy =>
 					{
@@ -469,9 +469,9 @@ namespace OpenRA.Mods.Common.Traits
 			}
 		}
 
-		public IMapGeneratorSettings GetSettings()
+		public IMapGeneratorSettings GetSettings(ModData modData)
 		{
-			return new MapGeneratorSettings(this, Settings);
+			return new MapGeneratorSettings(modData, this, Settings);
 		}
 
 		public Map Generate(ModData modData, MapGenerationArgs args)
@@ -482,7 +482,7 @@ namespace OpenRA.Mods.Common.Traits
 			var map = new Map(modData, terrainInfo, size);
 			var actorPlans = new List<ActorPlan>();
 
-			var param = new Parameters(map, args.Settings);
+			var param = new Parameters(modData, map, args.Settings);
 
 			var terraformer = new Terraformer(args, map, modData, actorPlans, param.Mirror, param.Rotations);
 

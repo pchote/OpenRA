@@ -70,7 +70,7 @@ namespace OpenRA
 			playersByRuntime = [];
 		}
 
-		public static GameInformation Deserialize(string data, string path)
+		public static GameInformation Deserialize(ModData modData, string data, string path)
 		{
 			try
 			{
@@ -84,11 +84,11 @@ namespace OpenRA
 					switch (keyParts[0])
 					{
 						case "Root":
-							FieldLoader.Load(info, node.Value);
+							FieldLoader.Load(modData, info, node.Value);
 							break;
 
 						case "Player":
-							info.Players.Add(FieldLoader.Load<Player>(node.Value));
+							info.Players.Add(FieldLoader.Load<Player>(modData, node.Value));
 							break;
 					}
 				}

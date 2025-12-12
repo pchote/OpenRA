@@ -40,7 +40,7 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Engine comes with support for `Circle`, `Capsule`, `Polygon` and `Rectangle`. Defaults to `Circle` when left empty.")]
 		public readonly IHitShape Type;
 
-		static object LoadShape(MiniYaml yaml)
+		static object LoadShape(ModData modData, MiniYaml yaml)
 		{
 			IHitShape ret;
 
@@ -51,8 +51,8 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				try
 				{
-					ret = Game.CreateObject<IHitShape>(shape + "Shape");
-					FieldLoader.Load(ret, shapeNode.Value);
+					ret = modData.ObjectCreator.CreateObject<IHitShape>(shape + "Shape");
+					FieldLoader.Load(modData, ret, shapeNode.Value);
 				}
 				catch (YamlException e)
 				{

@@ -34,10 +34,10 @@ namespace OpenRA.Network
 		public readonly Session LobbyInfo;
 		public readonly string Filename;
 
-		public ReplayConnection(string replayFilename)
+		public ReplayConnection(ModData modData, string replayFilename)
 		{
 			Filename = replayFilename;
-			FinalGameTick = ReplayMetadata.Read(replayFilename).GameInfo.FinalGameTick;
+			FinalGameTick = ReplayMetadata.Read(modData, replayFilename).GameInfo.FinalGameTick;
 
 			// Parse replay data into a struct that can be fed to the game in chunks
 			// to avoid issues with all immediate orders being resolved on the first tick.
@@ -69,7 +69,7 @@ namespace OpenRA.Network
 								if (o.OrderString == "StartGame")
 									IsValid = true;
 								else if (o.OrderString == "SyncInfo" && !IsValid)
-									LobbyInfo = Session.Deserialize(o.TargetString, o.OrderString);
+									LobbyInfo = Session.Deserialize(modData, o.TargetString, o.OrderString);
 							}
 						}
 					}

@@ -1023,6 +1023,6 @@ namespace OpenRA.Mods.Common.Traits
 	public interface IEditorMapGeneratorInfo : IMapGeneratorInfo
 	{
 		ImmutableArray<string> Tilesets { get; }
-		IMapGeneratorSettings GetSettings();
+		IMapGeneratorSettings GetSettings(ModData modData);
 	}
 }

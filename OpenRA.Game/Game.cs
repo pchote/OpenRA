@@ -69,7 +69,7 @@ namespace OpenRA
 			if (recordReplay)
 				newConnection.StartRecording(() => TimestampedFilename());
 
-			var om = new OrderManager(newConnection);
+			var om = new OrderManager(ModData, newConnection);
 			JoinInner(om);
 			CurrentServerSettings.Password = password;
 			CurrentServerSettings.Target = endpoint;
@@ -105,12 +105,12 @@ namespace OpenRA
 
 		public static void JoinReplay(string replayFile)
 		{
-			JoinInner(new OrderManager(new ReplayConnection(replayFile)));
+			JoinInner(new OrderManager(ModData, new ReplayConnection(ModData, replayFile)));
 		}
 
 		static void JoinLocal()
 		{
-			JoinInner(new OrderManager(new EchoConnection()));
+			JoinInner(new OrderManager(ModData, new EchoConnection()));
 
 			// Add a spectator client for the local player
 			// On the shellmap this player is controlling the map via scripted orders
@@ -954,11 +954,6 @@ namespace OpenRA
 		public static void CloseServer()
 		{
 			server?.Shutdown();
-		}
-
-		public static T CreateObject<T>(string name)
-		{
-			return ModData.ObjectCreator.CreateObject<T>(name);
 		}
 
 		public static ConnectionTarget CreateServer(ServerSettings settings)

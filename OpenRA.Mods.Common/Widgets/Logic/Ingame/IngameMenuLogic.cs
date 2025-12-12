@@ -489,7 +489,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 				var playerDefinitions = editorActorLayer.Players.ToMiniYaml();
 
-				var playerCount = new MapPlayers(playerDefinitions).Players.Count;
+				var playerCount = new MapPlayers(modData, playerDefinitions).Players.Count;
 				if (playerCount > MapPlayers.MaximumPlayerCount)
 				{
 					ConfirmationDialogs.ButtonPrompt(modData,

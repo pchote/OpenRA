@@ -478,7 +478,7 @@ namespace OpenRA.Server
 					return;
 				}
 
-				var handshake = HandshakeResponse.Deserialize(data, name);
+				var handshake = HandshakeResponse.Deserialize(ModData, data, name);
 
 				if (!string.IsNullOrEmpty(Settings.Password) && handshake.Password != Settings.Password)
 				{
@@ -631,7 +631,7 @@ namespace OpenRA.Server
 							var yaml = MiniYaml.FromStream(result, url).First();
 							if (yaml.Key == "Player")
 							{
-								profile = FieldLoader.Load<PlayerProfile>(yaml.Value);
+								profile = FieldLoader.Load<PlayerProfile>(ModData, yaml.Value);
 
 								var publicKey = Encoding.ASCII.GetString(Convert.FromBase64String(profile.PublicKey));
 								var parameters = CryptoUtil.DecodePEMPublicKey(publicKey);
@@ -1075,7 +1075,7 @@ namespace OpenRA.Server
 							ModData.Manifest.Metadata.Version,
 							filename);
 
-						GameSave = new GameSave(savePath);
+						GameSave = new GameSave(ModData, savePath);
 						LobbyInfo.GlobalSettings = GameSave.GlobalSettings;
 						LobbyInfo.Slots = GameSave.Slots;
 
@@ -1133,7 +1133,7 @@ namespace OpenRA.Server
 						try
 						{
 							var yaml = new MiniYaml(o.OrderString, MiniYaml.FromString(o.TargetString, o.OrderString));
-							var args = FieldLoader.Load<MapGenerationArgs>(yaml);
+							var args = FieldLoader.Load<MapGenerationArgs>(ModData, yaml);
 							var preview = ModData.MapCache[args.Uid];
 							if (preview.Status != MapStatus.Available)
 								ModData.MapCache.GenerateMap(ModData, args);
@@ -1395,7 +1395,7 @@ namespace OpenRA.Server
 				var startGameData = "";
 				if (GameSave != null)
 				{
-					GameSave.StartGame(LobbyInfo, Map);
+					GameSave.StartGame(ModData, LobbyInfo, Map);
 					if (GameSave.LastOrdersFrame >= 0)
 					{
 						startGameData = new List<MiniYamlNode>()

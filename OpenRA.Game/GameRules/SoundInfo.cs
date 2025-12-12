@@ -30,9 +30,9 @@ namespace OpenRA.GameRules
 		public readonly Lazy<FrozenDictionary<string, SoundPool>> VoicePools;
 		public readonly Lazy<FrozenDictionary<string, SoundPool>> NotificationsPools;
 
-		public SoundInfo(MiniYaml y)
+		public SoundInfo(ModData modData, MiniYaml y)
 		{
-			FieldLoader.Load(this, y);
+			FieldLoader.Load(modData, this, y);
 
 			VoicePools = Exts.Lazy(() => Voices.ToFrozenDictionary(a => a.Key, a => new SoundPool(1f, SoundPool.DefaultInterruptType, a.Value)));
 			NotificationsPools = Exts.Lazy(() => ParseSoundPool(y, "Notifications"));

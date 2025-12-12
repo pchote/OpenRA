@@ -31,7 +31,18 @@ namespace OpenRA
 		public string Faction;
 
 		public bool LockColor = false;
-		public Color Color = Game.ModData.GetOrCreate<DefaultPlayer>().Color;
+
+		[FieldLoader.LoadUsing(nameof(LoadColor))]
+		public Color Color;
+
+		static object LoadColor(ModData modData, MiniYaml yaml)
+		{
+			var colorNode = yaml.NodeWithKeyOrDefault("Color");
+			if (colorNode != null)
+				return FieldLoader.GetValue<Color>("Color", colorNode.Value.Value);
+
+			return modData.GetOrCreate<DefaultPlayer>().Color;
+		}
 
 		/// <summary>
 		/// Sets the "Home" location, which can be used by traits and scripts to e.g. set the initial camera
@@ -58,7 +69,7 @@ namespace OpenRA
 		public ImmutableArray<string> Enemies = [];
 
 		public PlayerReference() { }
-		public PlayerReference(MiniYaml my) { FieldLoader.Load(this, my); }
+		public PlayerReference(MiniYaml my, ModData modData) { FieldLoader.Load(modData, this, my); }
 
 		public override string ToString() { return Name; }
 	}

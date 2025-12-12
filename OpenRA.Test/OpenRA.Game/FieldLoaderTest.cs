@@ -58,7 +58,7 @@ namespace OpenRA.Test
 			static int privateStaticField;
 			public static int PublicStaticField;
 
-			static object LoadInt32(MiniYaml _) => 123;
+			static object LoadInt32(ModData _, MiniYaml __) => 123;
 #pragma warning restore RCS1170 // Use read-only auto-implemented property
 #pragma warning restore IDE0051 // Remove unused private members
 #pragma warning restore IDE0044 // Add readonly modifier
@@ -92,12 +92,12 @@ namespace OpenRA.Test
 			Assert.That(infos[3].Field, Is.EqualTo(typeof(TypeInfo).GetField("privateLoadUsingField", BindingFlags.NonPublic | BindingFlags.Instance)));
 			Assert.That(infos[3].Attribute, Is.EqualTo(new FieldLoader.LoadUsingAttribute("LoadInt32")));
 			Assert.That(infos[3].YamlName, Is.EqualTo("privateLoadUsingField"));
-			Assert.That(infos[3].Loader(new MiniYaml(null)), Is.EqualTo(123));
+			Assert.That(infos[3].Loader(Game.ModData, new MiniYaml(null)), Is.EqualTo(123));
 
 			Assert.That(infos[4].Field, Is.EqualTo(typeof(TypeInfo).GetField(nameof(TypeInfo.PublicLoadUsingField))));
 			Assert.That(infos[4].Attribute, Is.EqualTo(new FieldLoader.LoadUsingAttribute("LoadInt32")));
 			Assert.That(infos[4].YamlName, Is.EqualTo(nameof(TypeInfo.PublicLoadUsingField)));
-			Assert.That(infos[4].Loader(new MiniYaml(null)), Is.EqualTo(123));
+			Assert.That(infos[4].Loader(Game.ModData, new MiniYaml(null)), Is.EqualTo(123));
 		}
 
 		[Test]
@@ -624,7 +624,7 @@ namespace OpenRA.Test
 					new MiniYamlNode(nameof(LoadTarget.String), "test"),
 				]);
 
-			FieldLoader.Load(target, yaml);
+			FieldLoader.Load(Game.ModData, target, yaml);
 
 			Assert.That(target.Int, Is.EqualTo(123));
 			Assert.That(target.String, Is.EqualTo("test"));
@@ -641,9 +641,9 @@ namespace OpenRA.Test
 					new MiniYamlNode(nameof(LoadTarget.Int), "123"),
 					new MiniYamlNode(nameof(LoadTarget.String), "test"),
 				]);
-			FieldLoader.Load(expected, yaml);
+			FieldLoader.Load(Game.ModData, expected, yaml);
 
-			var actual = FieldLoader.Load<LoadTarget>(yaml);
+			var actual = FieldLoader.Load<LoadTarget>(Game.ModData, yaml);
 
 			Assert.That(actual.Int, Is.EqualTo(expected.Int));
 			Assert.That(actual.String, Is.EqualTo(expected.String));
@@ -672,7 +672,7 @@ namespace OpenRA.Test
 							]))
 				]);
 
-			FieldLoader.Load(target, yaml);
+			FieldLoader.Load(Game.ModData, target, yaml);
 
 			Assert.That(target.Dictionary, Is.EquivalentTo(new Dictionary<int, int> { { 12, 34 }, { 56, 78 } }));
 		}
@@ -699,7 +699,7 @@ namespace OpenRA.Test
 							]))
 				]);
 
-			FieldLoader.Load(target, yaml);
+			FieldLoader.Load(Game.ModData, target, yaml);
 
 			Assert.That(target.Dictionary, Is.EquivalentTo(new Dictionary<int, int> { { 12, 34 }, { 56, 78 } }));
 		}
@@ -728,7 +728,7 @@ namespace OpenRA.Test
 					new MiniYamlNode(nameof(LoadRequiredTarget.Int4), "456"),
 				]);
 
-			void Act() => FieldLoader.Load(target, yaml);
+			void Act() => FieldLoader.Load(Game.ModData, target, yaml);
 
 			Assert.That(Act,
 				Throws.TypeOf<FieldLoader.MissingFieldsException>().And
@@ -761,7 +761,7 @@ namespace OpenRA.Test
 					new MiniYamlNode(nameof(LoadIgnoreTarget.Int3), "456"),
 				]);
 
-			FieldLoader.Load(target, yaml);
+			FieldLoader.Load(Game.ModData, target, yaml);
 
 			Assert.That(target.Int1, Is.EqualTo(1));
 			Assert.That(target.Int2, Is.EqualTo(2));
@@ -798,7 +798,7 @@ namespace OpenRA.Test
 					new MiniYamlNode(nameof(LoadUsingTarget.Int5), "56"),
 				]);
 
-			void Act() => FieldLoader.Load(target, yaml);
+			void Act() => FieldLoader.Load(Game.ModData, target, yaml);
 
 			Assert.That(Act,
 				Throws.TypeOf<FieldLoader.MissingFieldsException>().And
@@ -822,7 +822,7 @@ namespace OpenRA.Test
 			var target = new LoadUsingMissingTarget();
 			var yaml = new MiniYaml(null);
 
-			void Act() => FieldLoader.Load(target, yaml);
+			void Act() => FieldLoader.Load(Game.ModData, target, yaml);
 
 			Assert.That(Act,
 				Throws.TypeOf<InvalidOperationException>().And

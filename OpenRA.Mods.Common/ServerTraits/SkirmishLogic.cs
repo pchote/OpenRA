@@ -24,7 +24,7 @@ namespace OpenRA.Mods.Common.Server
 	{
 		sealed class SkirmishSlot
 		{
-			static string LoadSlot(MiniYaml yaml) => yaml.Value;
+			static string LoadSlot(ModData _, MiniYaml yaml) => yaml.Value;
 
 			[FieldLoader.LoadUsing(nameof(LoadSlot))]
 			public readonly string Slot;
@@ -46,9 +46,9 @@ namespace OpenRA.Mods.Common.Server
 				Handicap = c.Handicap;
 			}
 
-			public static void DeserializeToClient(MiniYaml yaml, Session.Client c)
+			public static void DeserializeToClient(ModData modData, MiniYaml yaml, Session.Client c)
 			{
-				var s = FieldLoader.Load<SkirmishSlot>(yaml);
+				var s = FieldLoader.Load<SkirmishSlot>(modData, yaml);
 				c.Slot = s.Slot;
 				c.Color = c.PreferredColor = s.Color;
 				c.Faction = s.Faction;
@@ -109,7 +109,7 @@ namespace OpenRA.Mods.Common.Server
 			if (playerNode != null)
 			{
 				var client = server.GetClient(conn);
-				SkirmishSlot.DeserializeToClient(playerNode.Value, client);
+				SkirmishSlot.DeserializeToClient(server.ModData, playerNode.Value, client);
 				client.Color = LobbyCommands.SanitizePlayerColor(server, client.Color, client.Index);
 				client.Faction = LobbyCommands.SanitizePlayerFaction(server, client.Faction, selectableFactions);
 			}
@@ -136,7 +136,7 @@ namespace OpenRA.Mods.Common.Server
 						BotControllerClientIndex = botController.Index
 					};
 
-					SkirmishSlot.DeserializeToClient(botNode.Value, client);
+					SkirmishSlot.DeserializeToClient(server.ModData, botNode.Value, client);
 
 					// Validate whether color is allowed and get an alternative if it isn't
 					if (client.Slot != null && !server.LobbyInfo.Slots[client.Slot].LockColor)

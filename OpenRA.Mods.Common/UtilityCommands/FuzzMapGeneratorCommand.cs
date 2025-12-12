@@ -266,7 +266,7 @@ namespace OpenRA.Mods.Common.UtilityCommands
 					if (size.Length != 2)
 						throw new ArgumentException($"bad map size `{iterationChoices[Configuration.SizeVariable]}`");
 
-					var settings = generator.GetSettings();
+					var settings = generator.GetSettings(utility.ModData);
 					foreach (var o in settings.Options)
 					{
 						if (iterationChoices.TryGetValue(o.Id, out var choice))

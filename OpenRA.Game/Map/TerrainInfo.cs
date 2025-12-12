@@ -67,7 +67,7 @@ namespace OpenRA
 		public readonly Color Color;
 		public readonly bool RestrictPlayerColor = false;
 
-		public TerrainTypeInfo(MiniYaml my) { FieldLoader.Load(this, my); }
+		public TerrainTypeInfo(ModData modData, MiniYaml my) { FieldLoader.Load(modData, this, my); }
 	}
 
 	// HACK: Temporary placeholder to avoid having to change all the traits that reference this constant.

@@ -27,7 +27,7 @@ namespace OpenRA.Mods.Common.FileSystem
 		[FieldLoader.LoadUsing(nameof(LoadPackages))]
 		public readonly ImmutableArray<KeyValuePair<string, string>> Packages = default;
 
-		static object LoadPackages(MiniYaml yaml)
+		static object LoadPackages(ModData _, MiniYaml yaml)
 		{
 			var packageNode = yaml.NodeWithKeyOrDefault(nameof(Packages));
 			if (packageNode == null)

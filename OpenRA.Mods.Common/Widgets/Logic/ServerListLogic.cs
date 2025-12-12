@@ -466,7 +466,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					{
 						try
 						{
-							var gs = new GameServer(node.Value);
+							var gs = new GameServer(modData, node.Value);
 							if (gs.Address != null)
 								games.Add(gs);
 						}
@@ -507,7 +507,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 							game.Nodes.Add(new MiniYamlNodeBuilder("Location", "Local Network"));
 
-							lanGames.Add(new GameServer(game.Build()));
+							lanGames.Add(new GameServer(modData, game.Build()));
 						}
 					}
 					catch

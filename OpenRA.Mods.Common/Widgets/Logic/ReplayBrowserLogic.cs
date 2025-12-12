@@ -203,7 +203,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 						return;
 					}
 
-					var replay = ReplayMetadata.Read(fileName);
+					var replay = ReplayMetadata.Read(modData, fileName);
 					if (replay != null)
 						loadedReplays.Add(replay);
 				});

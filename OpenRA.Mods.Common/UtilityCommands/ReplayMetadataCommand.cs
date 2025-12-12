@@ -27,7 +27,7 @@ namespace OpenRA.Mods.Common.UtilityCommands
 		[Desc("REPLAYFILE", "Print the game metadata from a replay file.")]
 		void IUtilityCommand.Run(Utility utility, string[] args)
 		{
-			var replay = ReplayMetadata.Read(args[1]);
+			var replay = ReplayMetadata.Read(utility.ModData, args[1]);
 			if (replay == null)
 				throw new InvalidDataException("Failed to read replay meta data");
 

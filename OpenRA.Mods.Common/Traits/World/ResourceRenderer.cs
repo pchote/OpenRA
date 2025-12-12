@@ -44,9 +44,9 @@ namespace OpenRA.Mods.Common.Traits
 			[FluentReference]
 			public readonly string Name = null;
 
-			public ResourceTypeInfo(MiniYaml yaml)
+			public ResourceTypeInfo(ModData modData, MiniYaml yaml)
 			{
-				FieldLoader.Load(this, yaml);
+				FieldLoader.Load(modData, this, yaml);
 			}
 		}
 
@@ -55,13 +55,13 @@ namespace OpenRA.Mods.Common.Traits
 		public readonly FrozenDictionary<string, ResourceTypeInfo> ResourceTypes = null;
 
 		// Copied from ResourceLayerInfo
-		protected static object LoadResourceTypes(MiniYaml yaml)
+		protected static object LoadResourceTypes(ModData modData, MiniYaml yaml)
 		{
 			var ret = new Dictionary<string, ResourceTypeInfo>();
 			var resources = yaml.NodeWithKeyOrDefault("ResourceTypes");
 			if (resources != null)
 				foreach (var r in resources.Value.Nodes)
-					ret[r.Key] = new ResourceTypeInfo(r.Value);
+					ret[r.Key] = new ResourceTypeInfo(modData, r.Value);
 
 			return ret.ToFrozenDictionary();
 		}

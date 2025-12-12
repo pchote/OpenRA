@@ -354,7 +354,7 @@ namespace OpenRA
 					foreach (var yamlSection in yamlCache)
 					{
 						if (yamlSection.Key != null && Sections.TryGetValue(yamlSection.Key, out var settingsSection))
-							LoadSectionYaml(yamlSection.Value, settingsSection);
+							LoadSectionYaml(null, yamlSection.Value, settingsSection);
 					}
 
 					var keysNode = yamlCache.FirstOrDefault(n => n.Key == "Keys");
@@ -468,7 +468,7 @@ namespace OpenRA
 			return clean;
 		}
 
-		static void LoadSectionYaml(MiniYaml yaml, object section)
+		static void LoadSectionYaml(ModData modData, MiniYaml yaml, object section)
 		{
 			var defaults = Activator.CreateInstance(section.GetType());
 			FieldLoader.InvalidValueAction = (s, t, f) =>
@@ -478,7 +478,7 @@ namespace OpenRA
 				return ret;
 			};
 
-			FieldLoader.Load(section, yaml);
+			FieldLoader.Load(modData, section, yaml);
 		}
 	}
 }

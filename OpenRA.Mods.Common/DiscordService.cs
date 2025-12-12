@@ -52,9 +52,9 @@ namespace OpenRA.Mods.Common
 			}
 		}
 
-		public DiscordService(MiniYaml yaml)
+		public DiscordService(ModData modData, MiniYaml yaml)
 		{
-			FieldLoader.Load(this, yaml);
+			FieldLoader.Load(modData, this, yaml);
 
 			if (!Game.Settings.Game.EnableDiscordService)
 				return;

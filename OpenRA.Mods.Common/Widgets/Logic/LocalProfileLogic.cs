@@ -25,7 +25,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		bool badgesVisible;
 
 		[ObjectCreator.UseCtor]
-		public LocalProfileLogic(Widget widget, WorldRenderer worldRenderer, Func<bool> minimalProfile)
+		public LocalProfileLogic(Widget widget, ModData modData, WorldRenderer worldRenderer, Func<bool> minimalProfile)
 		{
 			this.worldRenderer = worldRenderer;
 			this.widget = widget;
@@ -55,7 +55,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			widget.Get<ButtonWidget>("GENERATE_KEY").OnClick = localProfile.GenerateKeypair;
 
-			widget.Get<ButtonWidget>("CHECK_KEY").OnClick = () => localProfile.RefreshPlayerData(() => RefreshComplete(true));
+			widget.Get<ButtonWidget>("CHECK_KEY").OnClick = () => localProfile.RefreshPlayerData(modData, () => RefreshComplete(true));
 
 			widget.Get<ButtonWidget>("DELETE_KEY").OnClick = () =>
 			{
@@ -69,7 +69,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				Game.RunAfterTick(Ui.ResetTooltips);
 			};
 
-			widget.Get<ButtonWidget>("CONNECTION_ERROR_RETRY").OnClick = () => localProfile.RefreshPlayerData(() => RefreshComplete(true));
+			widget.Get<ButtonWidget>("CONNECTION_ERROR_RETRY").OnClick = () => localProfile.RefreshPlayerData(modData, () => RefreshComplete(true));
 
 			// Profile view
 			widget.Get("PROFILE_HEADER").IsVisible = () => localProfile.State == LocalPlayerProfile.LinkState.Linked;
@@ -84,7 +84,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			badgeContainer.IsVisible = () => badgesVisible && !minimalProfile()
 				&& localProfile.State == LocalPlayerProfile.LinkState.Linked;
 
-			localProfile.RefreshPlayerData(() => RefreshComplete(false));
+			localProfile.RefreshPlayerData(modData, () => RefreshComplete(false));
 		}
 
 		public void RefreshComplete(bool updateNotFound)

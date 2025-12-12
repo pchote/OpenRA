@@ -23,7 +23,7 @@ namespace OpenRA.GameRules
 		public int Length { get; private set; } // seconds
 		public bool Exists { get; private set; }
 
-		public MusicInfo(string key, MiniYaml value)
+		public MusicInfo(ModData modData, string key, MiniYaml value)
 		{
 			Title = value.Value;
 

@@ -26,14 +26,14 @@ namespace OpenRA
 		[FieldLoader.LoadUsing(nameof(LoadBadges))]
 		public readonly List<PlayerBadge> Badges;
 
-		static object LoadBadges(MiniYaml yaml)
+		static object LoadBadges(ModData modData, MiniYaml yaml)
 		{
 			var badges = new List<PlayerBadge>();
 
 			var badgesNode = yaml.NodeWithKeyOrDefault("Badges");
 			if (badgesNode != null)
 			{
-				var playerDatabase = Game.ModData.GetOrCreate<PlayerDatabase>();
+				var playerDatabase = modData.GetOrCreate<PlayerDatabase>();
 				foreach (var badgeNode in badgesNode.Value.Nodes)
 				{
 					Game.RunAfterTick(() =>

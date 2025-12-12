@@ -124,20 +124,20 @@ namespace OpenRA
 			void LoadRuleset()
 			{
 				var actors = MergeOrDefault("Manifest,Rules", fs, m.Rules, null, null,
-					k => new ActorInfo(modData.ObjectCreator, k.Key.ToLowerInvariant(), k.Value),
+					k => new ActorInfo(modData, k.Key.ToLowerInvariant(), k.Value),
 					filterNode: n => n.Key.StartsWith(ActorInfo.AbstractActorPrefix));
 
 				var weapons = MergeOrDefault("Manifest,Weapons", fs, m.Weapons, null, null,
-					k => new WeaponInfo(k.Value));
+					k => new WeaponInfo(modData, k.Value));
 
 				var voices = MergeOrDefault("Manifest,Voices", fs, m.Voices, null, null,
-					k => new SoundInfo(k.Value));
+					k => new SoundInfo(modData, k.Value));
 
 				var notifications = MergeOrDefault("Manifest,Notifications", fs, m.Notifications, null, null,
-					k => new SoundInfo(k.Value));
+					k => new SoundInfo(modData, k.Value));
 
 				var music = MergeOrDefault("Manifest,Music", fs, m.Music, null, null,
-					k => new MusicInfo(k.Key, k.Value));
+					k => new MusicInfo(modData, k.Key, k.Value));
 
 				var modelSequences = MergeOrDefault("Manifest,ModelSequences", fs, m.ModelSequences, null, null,
 					k => k);
@@ -182,20 +182,20 @@ namespace OpenRA
 			void LoadRuleset()
 			{
 				var actors = MergeOrDefault("Rules", fileSystem, m.Rules, mapRules, dr.Actors,
-					k => new ActorInfo(modData.ObjectCreator, k.Key.ToLowerInvariant(), k.Value),
+					k => new ActorInfo(modData, k.Key.ToLowerInvariant(), k.Value),
 					filterNode: n => n.Key.StartsWith(ActorInfo.AbstractActorPrefix));
 
 				var weapons = MergeOrDefault("Weapons", fileSystem, m.Weapons, mapWeapons, dr.Weapons,
-					k => new WeaponInfo(k.Value));
+					k => new WeaponInfo(modData, k.Value));
 
 				var voices = MergeOrDefault("Voices", fileSystem, m.Voices, mapVoices, dr.Voices,
-					k => new SoundInfo(k.Value));
+					k => new SoundInfo(modData, k.Value));
 
 				var notifications = MergeOrDefault("Notifications", fileSystem, m.Notifications, mapNotifications, dr.Notifications,
-					k => new SoundInfo(k.Value));
+					k => new SoundInfo(modData, k.Value));
 
 				var music = MergeOrDefault("Music", fileSystem, m.Music, mapMusic, dr.Music,
-					k => new MusicInfo(k.Key, k.Value));
+					k => new MusicInfo(modData, k.Key, k.Value));
 
 				// TODO: Add support for merging custom terrain modifications
 				var terrainInfo = modData.DefaultTerrainInfo[tileSet];

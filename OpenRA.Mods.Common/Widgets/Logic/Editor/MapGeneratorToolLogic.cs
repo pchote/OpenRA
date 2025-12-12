@@ -52,7 +52,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			this.worldRenderer = worldRenderer;
 			this.modData = modData;
 			generator = tool.TraitInfo as IEditorMapGeneratorInfo;
-			settings = generator.GetSettings();
+			settings = generator.GetSettings(modData);
 
 			settingsPanel = widget.Get<ScrollPanelWidget>("SETTINGS_PANEL");
 			checkboxSettingTemplate = settingsPanel.Get<Widget>("CHECKBOX_TEMPLATE");
@@ -287,7 +287,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			}
 
 			var previews = new Dictionary<string, EditorActorPreview>();
-			var players = generatedMap.PlayerDefinitions.Select(pr => new PlayerReference(new MiniYaml(pr.Key, pr.Value.Nodes)))
+			var players = generatedMap.PlayerDefinitions.Select(pr => new PlayerReference(new MiniYaml(pr.Key, pr.Value.Nodes), modData))
 				.ToDictionary(player => player.Name);
 			foreach (var kv in generatedMap.ActorDefinitions)
 			{

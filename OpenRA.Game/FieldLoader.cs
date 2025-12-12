@@ -672,7 +672,7 @@ namespace OpenRA
 			return fieldType.GetConstructor([innerType]).Invoke([innerValue]);
 		}
 
-		public static void Load(object self, MiniYaml my)
+		public static void Load(ModData modData, object self, MiniYaml my)
 		{
 			var loadInfo = TypeLoadInfo[self.GetType()];
 			List<string> missing = null;
@@ -687,7 +687,7 @@ namespace OpenRA
 				if (fli.Loader != null)
 				{
 					if (!fli.Attribute.Required || md.ContainsKey(fli.YamlName))
-						val = fli.Loader(my);
+						val = fli.Loader(modData, my);
 					else
 					{
 						missing ??= [];
@@ -727,10 +727,10 @@ namespace OpenRA
 			return true;
 		}
 
-		public static T Load<T>(MiniYaml y) where T : new()
+		public static T Load<T>(ModData modData, MiniYaml y) where T : new()
 		{
 			var t = new T();
-			Load(t, y);
+			Load(modData, t, y);
 			return t;
 		}
 
@@ -813,10 +813,10 @@ namespace OpenRA
 		{
 			public readonly FieldInfo Field;
 			public readonly SerializeAttribute Attribute;
-			public readonly Func<MiniYaml, object> Loader;
+			public readonly Func<ModData, MiniYaml, object> Loader;
 			public string YamlName => Field.Name;
 
-			public FieldLoadInfo(FieldInfo field, SerializeAttribute attr, Func<MiniYaml, object> loader = null)
+			public FieldLoadInfo(FieldInfo field, SerializeAttribute attr, Func<ModData, MiniYaml, object> loader = null)
 			{
 				Field = field;
 				Attribute = attr;
@@ -833,10 +833,8 @@ namespace OpenRA
 		{
 			var ret = new List<FieldLoadInfo>();
 
-			foreach (var ff in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+			foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
 			{
-				var field = ff;
-
 				var sa = field.GetCustomAttributes<SerializeAttribute>(false).DefaultIfEmpty(SerializeAttribute.Default).First();
 				if (!sa.Serialize)
 					continue;
@@ -889,7 +887,7 @@ namespace OpenRA
 				Loader = loader;
 			}
 
-			internal Func<MiniYaml, object> GetLoader(Type type)
+			internal Func<ModData, MiniYaml, object> GetLoader(Type type)
 			{
 				const BindingFlags Flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.FlattenHierarchy;
 
@@ -899,7 +897,7 @@ namespace OpenRA
 					if (method == null)
 						throw new InvalidOperationException($"{type.Name} does not specify a loader function '{Loader}'");
 
-					return (Func<MiniYaml, object>)Delegate.CreateDelegate(typeof(Func<MiniYaml, object>), method);
+					return (Func<ModData, MiniYaml, object>)Delegate.CreateDelegate(typeof(Func<ModData, MiniYaml, object>), method);
 				}
 
 				return null;

@@ -35,17 +35,17 @@ namespace OpenRA.Mods.Common.FileSystem
 
 		bool isContentAvailable = true;
 
-		static object LoadSystemPackages(MiniYaml yaml)
+		static object LoadSystemPackages(ModData _, MiniYaml yaml)
 		{
 			return LoadPackages(yaml, nameof(SystemPackages), true);
 		}
 
-		static object LoadContentPackages(MiniYaml yaml)
+		static object LoadContentPackages(ModData _, MiniYaml yaml)
 		{
 			return LoadPackages(yaml, nameof(ContentPackages), false);
 		}
 
-		static object LoadRequiredContentFiles(MiniYaml yaml)
+		static object LoadRequiredContentFiles(ModData _, MiniYaml yaml)
 		{
 			return LoadPackages(yaml, nameof(RequiredContentFiles), false);
 		}

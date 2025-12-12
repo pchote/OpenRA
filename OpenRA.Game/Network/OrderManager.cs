@@ -29,6 +29,7 @@ namespace OpenRA.Network
 		readonly SyncReport syncReport;
 		readonly Dictionary<int, Queue<(int Frame, OrderPacket Orders)>> pendingOrders = [];
 		readonly Dictionary<int, (int SyncHash, ulong DefeatState)> syncForFrame = [];
+		readonly ModData modData;
 
 		public Session LobbyInfo = new();
 
@@ -115,8 +116,9 @@ namespace OpenRA.Network
 			Connection.StartGame();
 		}
 
-		public OrderManager(IConnection conn)
+		public OrderManager(ModData modData, IConnection conn)
 		{
+			this.modData = modData;
 			Connection = conn;
 			syncReport = new SyncReport(this);
 
@@ -178,7 +180,7 @@ namespace OpenRA.Network
 		{
 			foreach (var o in orders.GetOrders(World))
 			{
-				UnitOrders.ProcessOrder(this, World, clientId, o);
+				UnitOrders.ProcessOrder(modData, this, World, clientId, o);
 
 				// A mod switch or other event has pulled the ground from beneath us
 				if (disposed)
@@ -254,7 +256,7 @@ namespace OpenRA.Network
 
 				foreach (var order in orders.GetOrders(World))
 				{
-					UnitOrders.ProcessOrder(this, World, clientId, order);
+					UnitOrders.ProcessOrder(modData, this, World, clientId, order);
 					processClientOrders.Add(new ClientOrder { Client = clientId, Order = order });
 				}
 			}

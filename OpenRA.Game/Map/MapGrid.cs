@@ -133,9 +133,9 @@ namespace OpenRA
 
 		public int TileScale { get; }
 
-		public MapGrid(MiniYaml yaml)
+		public MapGrid(ModData modData, MiniYaml yaml)
 		{
-			FieldLoader.Load(this, yaml);
+			FieldLoader.Load(modData, this, yaml);
 
 			TileScale = Type == MapGridType.RectangularIsometric ? 1448 : 1024;
 

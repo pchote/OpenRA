@@ -32,7 +32,7 @@ namespace OpenRA.FileFormats
 			GameInfo = info;
 		}
 
-		ReplayMetadata(FileStream fs, string path)
+		ReplayMetadata(ModData modData, FileStream fs, string path)
 		{
 			FilePath = path;
 
@@ -47,7 +47,7 @@ namespace OpenRA.FileFormats
 
 			// Read game info (max 100K limit as a safeguard against corrupted files)
 			var data = fs.ReadLengthPrefixedString(Encoding.UTF8, 1024 * 100);
-			GameInfo = GameInformation.Deserialize(data, path);
+			GameInfo = GameInformation.Deserialize(modData, data, path);
 		}
 
 		public void Write(BinaryWriter writer)
@@ -76,7 +76,7 @@ namespace OpenRA.FileFormats
 			FilePath = newPath;
 		}
 
-		public static ReplayMetadata Read(string path)
+		public static ReplayMetadata Read(ModData modData, string path)
 		{
 			try
 			{
@@ -94,7 +94,7 @@ namespace OpenRA.FileFormats
 					{
 						// Go back by (end marker + length storage + data + version + start marker) bytes
 						fs.Seek(-(4 + 4 + dataLength + 4 + 4), SeekOrigin.Current);
-						return new ReplayMetadata(fs, path);
+						return new ReplayMetadata(modData, fs, path);
 					}
 				}
 			}

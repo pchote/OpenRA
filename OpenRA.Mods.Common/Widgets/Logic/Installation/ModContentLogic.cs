@@ -77,11 +77,11 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			var sourceYaml = MiniYaml.Load(modData.DefaultFileSystem, content.Sources, null);
 			foreach (var s in sourceYaml)
-				sources.Add(s.Key, new ModContent.ModSource(s.Value));
+				sources.Add(s.Key, new ModContent.ModSource(modData, s.Value));
 
 			var downloadYaml = MiniYaml.Load(modData.DefaultFileSystem, content.Downloads, null);
 			foreach (var d in downloadYaml)
-				downloads.Add(d.Key, new ModContent.ModDownload(d.Value));
+				downloads.Add(d.Key, new ModContent.ModDownload(modData, d.Value));
 
 			scrollPanel = panel.Get<ScrollPanelWidget>("PACKAGES");
 			template = scrollPanel.Get<ContainerWidget>("PACKAGE_TEMPLATE");

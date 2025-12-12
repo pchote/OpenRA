@@ -171,11 +171,11 @@ namespace OpenRA
 
 						var yamlNodes = MiniYaml.Merge(sources);
 						WorldActorInfo = new ActorInfo(
-							modData.ObjectCreator,
+							modData,
 							"world",
 							yamlNodes.First(n => string.Equals(n.Key, "world", StringComparison.InvariantCultureIgnoreCase)).Value);
 						PlayerActorInfo = new ActorInfo(
-							modData.ObjectCreator,
+							modData,
 							"player",
 							yamlNodes.First(n => string.Equals(n.Key, "player", StringComparison.InvariantCultureIgnoreCase)).Value);
 						return;
@@ -449,12 +449,13 @@ namespace OpenRA
 				// Player definitions may change if the map format changes
 				if (yaml.TryGetValue("Players", out var playerDefinitions))
 				{
-					newData.Players = new MapPlayers(playerDefinitions.Nodes);
+					newData.Players = new MapPlayers(modData, playerDefinitions.Nodes);
 					newData.PlayerCount = newData.Players.Players.Count(x => x.Value.Playable);
 				}
 			}
-			catch (Exception)
+			catch (Exception e)
 			{
+				Console.WriteLine(e);
 				newData.Status = MapStatus.Unavailable;
 			}
 
@@ -513,7 +514,7 @@ namespace OpenRA
 			{
 				try
 				{
-					var r = FieldLoader.Load<RemoteMapData>(yaml);
+					var r = FieldLoader.Load<RemoteMapData>(modData, yaml);
 					newData.Status = r.downloading ? MapStatus.DownloadAvailable : MapStatus.Unavailable;
 					newData.Title = r.title;
 					newData.Categories = r.categories;
@@ -543,7 +544,7 @@ namespace OpenRA
 					}
 
 					var playersString = Encoding.UTF8.GetString(Convert.FromBase64String(r.players_block));
-					newData.Players = new MapPlayers(MiniYaml.FromString(playersString,
+					newData.Players = new MapPlayers(modData, MiniYaml.FromString(playersString,
 						$"{yaml.NodeWithKey(nameof(r.players_block)).Location.Name}:{nameof(r.players_block)}"));
 
 					var rulesString = Encoding.UTF8.GetString(Convert.FromBase64String(r.rules));

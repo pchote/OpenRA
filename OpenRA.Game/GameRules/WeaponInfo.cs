@@ -136,38 +136,38 @@ namespace OpenRA.GameRules
 		/// </summary>
 		public WeaponInfo() { }
 
-		public WeaponInfo(MiniYaml content)
+		public WeaponInfo(ModData modData, MiniYaml content)
 		{
 			// Resolve any weapon-level yaml inheritance or removals
 			// HACK: The "Defaults" sequence syntax prevents us from doing this generally during yaml parsing
 			content = content.WithNodes(MiniYaml.Merge([content.Nodes]));
-			FieldLoader.Load(this, content);
+			FieldLoader.Load(modData, this, content);
 		}
 
-		static object LoadProjectile(MiniYaml yaml)
+		static object LoadProjectile(ModData modData, MiniYaml yaml)
 		{
 			var proj = yaml.NodeWithKeyOrDefault("Projectile")?.Value;
 			if (proj == null)
 				return null;
 
-			var ret = Game.CreateObject<IProjectileInfo>(proj.Value + "Info");
+			var ret = modData.ObjectCreator.CreateObject<IProjectileInfo>(proj.Value + "Info");
 			if (ret == null)
 				return null;
 
-			FieldLoader.Load(ret, proj);
+			FieldLoader.Load(modData, ret, proj);
 			return ret;
 		}
 
-		static object LoadWarheads(MiniYaml yaml)
+		static object LoadWarheads(ModData modData, MiniYaml yaml)
 		{
 			var retList = new List<IWarhead>();
 			foreach (var node in yaml.Nodes.Where(n => n.Key.StartsWith("Warhead", StringComparison.Ordinal)))
 			{
-				var ret = Game.CreateObject<IWarhead>(node.Value.Value + "Warhead");
+				var ret = modData.ObjectCreator.CreateObject<IWarhead>(node.Value.Value + "Warhead");
 				if (ret == null)
 					continue;
 
-				FieldLoader.Load(ret, node.Value);
+				FieldLoader.Load(modData, ret, node.Value);
 				retList.Add(ret);
 			}
 

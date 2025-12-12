@@ -86,7 +86,7 @@ namespace OpenRA.Mods.Common.Traits
 	{
 		void ICreatePlayers.CreatePlayers(World w, MersenneTwister playerRandom)
 		{
-			var players = new MapPlayers(w.Map.PlayerDefinitions).Players;
+			var players = new MapPlayers(Game.ModData, w.Map.PlayerDefinitions).Players;
 			var worldPlayers = new List<Player>();
 			var worldOwnerFound = false;
 
