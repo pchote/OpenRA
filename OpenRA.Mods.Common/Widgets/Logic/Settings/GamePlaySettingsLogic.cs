@@ -35,11 +35,10 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly AutoSaveSettings autoSaveSettings;
 
 		[ObjectCreator.UseCtor]
-		public GameplaySettingsLogic(ModData modData, Action<string, string, Func<Widget, Func<bool>>, Func<Widget, Action>> registerPanel,
-			string panelID, string label)
+		public GameplaySettingsLogic(ModData modData, SettingsLogic settingsLogic, string panelID, string label)
 		{
 			autoSaveSettings = modData.GetSettings<AutoSaveSettings>();
-			registerPanel(panelID, label, InitPanel, ResetPanel);
+			settingsLogic.RegisterSettingsPanel(panelID, label, InitPanel, ResetPanel);
 		}
 
 		Func<bool> InitPanel(Widget panel)
@@ -79,7 +78,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					() =>
 					{
 						autoSaveSettings.AutoSaveInterval = o;
-						Game.Settings.Save();
+						autoSaveSettings.Save();
 					});
 
 				var deviceLabel = item.Get<LabelWidget>("LABEL");
@@ -100,7 +99,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					() =>
 					{
 						autoSaveSettings.AutoSaveMaxFileCount = o;
-						Game.Settings.Save();
+						autoSaveSettings.Save();
 					});
 
 				var deviceLabel = item.Get<LabelWidget>("LABEL");

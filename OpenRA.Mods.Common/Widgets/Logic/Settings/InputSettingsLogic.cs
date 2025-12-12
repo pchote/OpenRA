@@ -36,71 +36,70 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		[FluentReference]
 		const string Joystick = "options-mouse-scroll-type.joystick";
 
-		static InputSettingsLogic() { }
-
 		readonly string classic;
 		readonly string modern;
+		readonly GameSettings gameSettings;
 
 		[ObjectCreator.UseCtor]
-		public InputSettingsLogic(Action<string, string, Func<Widget, Func<bool>>, Func<Widget, Action>> registerPanel, string panelID, string label)
+		public InputSettingsLogic(ModData modData, SettingsLogic settingsLogic, string panelID, string label)
 		{
 			classic = FluentProvider.GetMessage(Classic);
 			modern = FluentProvider.GetMessage(Modern);
+			gameSettings = modData.GetSettings<GameSettings>();
 
-			registerPanel(panelID, label, InitPanel, ResetPanel);
+			settingsLogic.RegisterSettingsPanel(panelID, label, InitPanel, ResetPanel);
 		}
 
 		Func<bool> InitPanel(Widget panel)
 		{
-			var gs = Game.Settings.Game;
 			var scrollPanel = panel.Get<ScrollPanelWidget>("SETTINGS_SCROLLPANEL");
 
-			SettingsUtils.BindCheckboxPref(panel, "ALTERNATE_SCROLL_CHECKBOX", gs, "UseAlternateScrollButton");
-			SettingsUtils.BindCheckboxPref(panel, "EDGESCROLL_CHECKBOX", gs, "ViewportEdgeScroll");
-			SettingsUtils.BindCheckboxPref(panel, "LOCKMOUSE_CHECKBOX", gs, "LockMouseWindow");
-			SettingsUtils.BindSliderPref(panel, "ZOOMSPEED_SLIDER", gs, "ZoomSpeed");
-			SettingsUtils.BindSliderPref(panel, "SCROLLSPEED_SLIDER", gs, "ViewportEdgeScrollStep");
-			SettingsUtils.BindSliderPref(panel, "UI_SCROLLSPEED_SLIDER", gs, "UIScrollSpeed");
+			SettingsUtils.BindCheckboxPref(panel, "ALTERNATE_SCROLL_CHECKBOX", gameSettings, "UseAlternateScrollButton");
+			SettingsUtils.BindCheckboxPref(panel, "EDGESCROLL_CHECKBOX", gameSettings, "ViewportEdgeScroll");
+			SettingsUtils.BindCheckboxPref(panel, "LOCKMOUSE_CHECKBOX", gameSettings, "LockMouseWindow");
+			SettingsUtils.BindSliderPref(panel, "ZOOMSPEED_SLIDER", gameSettings, "ZoomSpeed");
+			SettingsUtils.BindSliderPref(panel, "SCROLLSPEED_SLIDER", gameSettings, "ViewportEdgeScrollStep");
+			SettingsUtils.BindSliderPref(panel, "UI_SCROLLSPEED_SLIDER", gameSettings, "UIScrollSpeed");
 
 			var mouseControlDropdown = panel.Get<DropDownButtonWidget>("MOUSE_CONTROL_DROPDOWN");
-			mouseControlDropdown.OnMouseDown = _ => ShowMouseControlDropdown(mouseControlDropdown, gs);
-			mouseControlDropdown.GetText = () => gs.UseClassicMouseStyle ? classic : modern;
+			mouseControlDropdown.OnMouseDown = _ => ShowMouseControlDropdown(mouseControlDropdown, gameSettings);
+			mouseControlDropdown.GetText = () => gameSettings.UseClassicMouseStyle ? classic : modern;
 
 			var mouseScrollDropdown = panel.Get<DropDownButtonWidget>("MOUSE_SCROLL_TYPE_DROPDOWN");
-			mouseScrollDropdown.OnMouseDown = _ => ShowMouseScrollDropdown(mouseScrollDropdown, gs);
+			mouseScrollDropdown.OnMouseDown = _ => ShowMouseScrollDropdown(mouseScrollDropdown, gameSettings);
 
 			// MouseScroll can change, must display latest value.
 #pragma warning disable IDE0200 // Remove unnecessary lambda expression
-			mouseScrollDropdown.GetText = () => gs.MouseScroll.ToString();
+			mouseScrollDropdown.GetText = () => gameSettings.MouseScroll.ToString();
 #pragma warning restore IDE0200
 
 			var mouseControlDescClassic = panel.Get("MOUSE_CONTROL_DESC_CLASSIC");
-			mouseControlDescClassic.IsVisible = () => gs.UseClassicMouseStyle;
+			mouseControlDescClassic.IsVisible = () => gameSettings.UseClassicMouseStyle;
 
 			var mouseControlDescModern = panel.Get("MOUSE_CONTROL_DESC_MODERN");
-			mouseControlDescModern.IsVisible = () => !gs.UseClassicMouseStyle;
+			mouseControlDescModern.IsVisible = () => !gameSettings.UseClassicMouseStyle;
 
 			foreach (var container in new[] { mouseControlDescClassic, mouseControlDescModern })
 			{
 				var classicScrollRight = container.Get("DESC_SCROLL_RIGHT");
-				classicScrollRight.IsVisible = () => gs.UseClassicMouseStyle ^ gs.UseAlternateScrollButton;
+				classicScrollRight.IsVisible = () => gameSettings.UseClassicMouseStyle ^ gameSettings.UseAlternateScrollButton;
 
 				var classicScrollMiddle = container.Get("DESC_SCROLL_MIDDLE");
-				classicScrollMiddle.IsVisible = () => !gs.UseClassicMouseStyle ^ gs.UseAlternateScrollButton;
+				classicScrollMiddle.IsVisible = () => !gameSettings.UseClassicMouseStyle ^ gameSettings.UseAlternateScrollButton;
 
 				var zoomDesc = container.Get("DESC_ZOOM");
-				zoomDesc.IsVisible = () => gs.ZoomModifier == Modifiers.None;
+				zoomDesc.IsVisible = () => gameSettings.ZoomModifier == Modifiers.None;
 
 				var zoomDescModifier = container.Get<LabelWidget>("DESC_ZOOM_MODIFIER");
-				zoomDescModifier.IsVisible = () => gs.ZoomModifier != Modifiers.None;
+				zoomDescModifier.IsVisible = () => gameSettings.ZoomModifier != Modifiers.None;
 
 				var zoomDescModifierTemplate = zoomDescModifier.GetText();
 				var zoomDescModifierLabel = new CachedTransform<Modifiers, string>(
 					mod => zoomDescModifierTemplate.Replace("MODIFIER", mod.ToString()));
-				zoomDescModifier.GetText = () => zoomDescModifierLabel.Update(gs.ZoomModifier);
+				zoomDescModifier.GetText = () => zoomDescModifierLabel.Update(gameSettings.ZoomModifier);
 
 				var edgescrollDesc = container.Get<LabelWidget>("DESC_EDGESCROLL");
-				edgescrollDesc.IsVisible = () => gs.ViewportEdgeScroll;
+				edgescrollDesc.IsVisible = () => gameSettings.ViewportEdgeScroll;
 			}
 
 			// Apply mouse focus preferences immediately
@@ -112,15 +111,15 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				// applying the changes live.
 				oldOnClick();
 
-				MakeMouseFocusSettingsLive();
+				MakeMouseFocusSettingsLive(gameSettings);
 			};
 
 			var zoomModifierDropdown = panel.Get<DropDownButtonWidget>("ZOOM_MODIFIER");
-			zoomModifierDropdown.OnMouseDown = _ => ShowZoomModifierDropdown(zoomModifierDropdown, gs);
+			zoomModifierDropdown.OnMouseDown = _ => ShowZoomModifierDropdown(zoomModifierDropdown, gameSettings);
 
 			// ZoomModifier can change, must display latest value.
 #pragma warning disable IDE0200 // Remove unnecessary lambda expression
-			zoomModifierDropdown.GetText = () => gs.ZoomModifier.ToString();
+			zoomModifierDropdown.GetText = () => gameSettings.ZoomModifier.ToString();
 #pragma warning restore IDE0200
 
 			SettingsUtils.AdjustSettingsScrollPanelLayout(scrollPanel);
@@ -130,29 +129,28 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		Action ResetPanel(Widget panel)
 		{
-			var gs = Game.Settings.Game;
-			var dgs = new GameSettings();
+			var defaultGameSettings = new GameSettings();
 
 			return () =>
 			{
-				gs.UseClassicMouseStyle = dgs.UseClassicMouseStyle;
-				gs.MouseScroll = dgs.MouseScroll;
-				gs.UseAlternateScrollButton = dgs.UseAlternateScrollButton;
-				gs.LockMouseWindow = dgs.LockMouseWindow;
-				gs.ViewportEdgeScroll = dgs.ViewportEdgeScroll;
-				gs.ViewportEdgeScrollStep = dgs.ViewportEdgeScrollStep;
-				gs.ZoomSpeed = dgs.ZoomSpeed;
-				gs.UIScrollSpeed = dgs.UIScrollSpeed;
-				gs.ZoomModifier = dgs.ZoomModifier;
+				gameSettings.UseClassicMouseStyle = defaultGameSettings.UseClassicMouseStyle;
+				gameSettings.MouseScroll = defaultGameSettings.MouseScroll;
+				gameSettings.UseAlternateScrollButton = defaultGameSettings.UseAlternateScrollButton;
+				gameSettings.LockMouseWindow = defaultGameSettings.LockMouseWindow;
+				gameSettings.ViewportEdgeScroll = defaultGameSettings.ViewportEdgeScroll;
+				gameSettings.ViewportEdgeScrollStep = defaultGameSettings.ViewportEdgeScrollStep;
+				gameSettings.ZoomSpeed = defaultGameSettings.ZoomSpeed;
+				gameSettings.UIScrollSpeed = defaultGameSettings.UIScrollSpeed;
+				gameSettings.ZoomModifier = defaultGameSettings.ZoomModifier;
 
-				panel.Get<SliderWidget>("SCROLLSPEED_SLIDER").Value = gs.ViewportEdgeScrollStep;
-				panel.Get<SliderWidget>("UI_SCROLLSPEED_SLIDER").Value = gs.UIScrollSpeed;
+				panel.Get<SliderWidget>("SCROLLSPEED_SLIDER").Value = gameSettings.ViewportEdgeScrollStep;
+				panel.Get<SliderWidget>("UI_SCROLLSPEED_SLIDER").Value = gameSettings.UIScrollSpeed;
 
-				MakeMouseFocusSettingsLive();
+				MakeMouseFocusSettingsLive(gameSettings);
 			};
 		}
 
-		public static void ShowMouseControlDropdown(DropDownButtonWidget dropdown, GameSettings s)
+		public static void ShowMouseControlDropdown(DropDownButtonWidget dropdown, GameSettings gameSettings)
 		{
 			var options = new Dictionary<string, bool>()
 			{
@@ -163,8 +161,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			ScrollItemWidget SetupItem(string o, ScrollItemWidget itemTemplate)
 			{
 				var item = ScrollItemWidget.Setup(itemTemplate,
-					() => s.UseClassicMouseStyle == options[o],
-					() => s.UseClassicMouseStyle = options[o]);
+					() => gameSettings.UseClassicMouseStyle == options[o],
+					() => gameSettings.UseClassicMouseStyle = options[o]);
 				item.Get<LabelWidget>("LABEL").GetText = () => o;
 				return item;
 			}
@@ -172,7 +170,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			dropdown.ShowDropDown("LABEL_DROPDOWN_TEMPLATE", 500, options.Keys, SetupItem);
 		}
 
-		static void ShowMouseScrollDropdown(DropDownButtonWidget dropdown, GameSettings s)
+		static void ShowMouseScrollDropdown(DropDownButtonWidget dropdown, GameSettings gameSettings)
 		{
 			var options = new Dictionary<string, MouseScrollType>()
 			{
@@ -185,8 +183,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			ScrollItemWidget SetupItem(string o, ScrollItemWidget itemTemplate)
 			{
 				var item = ScrollItemWidget.Setup(itemTemplate,
-					() => s.MouseScroll == options[o],
-					() => s.MouseScroll = options[o]);
+					() => gameSettings.MouseScroll == options[o],
+					() => gameSettings.MouseScroll = options[o]);
 				item.Get<LabelWidget>("LABEL").GetText = () => o;
 				return item;
 			}
@@ -194,7 +192,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			dropdown.ShowDropDown("LABEL_DROPDOWN_TEMPLATE", 500, options.Keys, SetupItem);
 		}
 
-		static void ShowZoomModifierDropdown(DropDownButtonWidget dropdown, GameSettings s)
+		static void ShowZoomModifierDropdown(DropDownButtonWidget dropdown, GameSettings gameSettings)
 		{
 			var options = new Dictionary<string, Modifiers>()
 			{
@@ -208,8 +206,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			ScrollItemWidget SetupItem(string o, ScrollItemWidget itemTemplate)
 			{
 				var item = ScrollItemWidget.Setup(itemTemplate,
-					() => s.ZoomModifier == options[o],
-					() => s.ZoomModifier = options[o]);
+					() => gameSettings.ZoomModifier == options[o],
+					() => gameSettings.ZoomModifier = options[o]);
 				item.Get<LabelWidget>("LABEL").GetText = () => o;
 				return item;
 			}
@@ -217,10 +215,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			dropdown.ShowDropDown("LABEL_DROPDOWN_TEMPLATE", 500, options.Keys, SetupItem);
 		}
 
-		static void MakeMouseFocusSettingsLive()
+		static void MakeMouseFocusSettingsLive(GameSettings gameSettings)
 		{
-			var gameSettings = Game.Settings.Game;
-
 			if (gameSettings.LockMouseWindow)
 				Game.Renderer.GrabWindowMouseFocus();
 			else

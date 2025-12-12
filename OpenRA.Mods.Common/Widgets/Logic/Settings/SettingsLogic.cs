@@ -17,7 +17,12 @@ using OpenRA.Widgets;
 
 namespace OpenRA.Mods.Common.Widgets.Logic
 {
-	public class SettingsLogic : ChromeLogic
+	public interface ISettingsLogic
+	{
+		void RegisterSettingsPanel(string panelID, string label, Func<Widget, Func<bool>> init, Func<Widget, Action> reset);
+	}
+
+	public class SettingsLogic : ChromeLogic, ISettingsLogic
 	{
 		[FluentReference]
 		const string SettingsSaveTitle = "dialog-settings-save.title";
@@ -64,8 +69,6 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		bool needsRestart = false;
 
-		static SettingsLogic() { }
-
 		[ObjectCreator.UseCtor]
 		public SettingsLogic(Widget widget, Action onExit, WorldRenderer worldRenderer, Dictionary<string, MiniYaml> logicArgs, ModData modData)
 		{
@@ -92,7 +95,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 					Game.LoadWidget(worldRenderer.World, panel.Key, container, new WidgetArgs()
 					{
-						{ "registerPanel", (Action<string, string, Func<Widget, Func<bool>>, Func<Widget, Action>>)RegisterSettingsPanel },
+						{ "settingsLogic", this },
 						{ "panelID", panel.Key },
 						{ "label", panel.Value }
 					});
@@ -102,8 +105,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			widget.Get<ButtonWidget>("BACK_BUTTON").OnClick = () =>
 			{
 				needsRestart |= leavePanelActions[activePanel]();
-				var current = Game.Settings;
-				current.Save();
+				Game.Settings.Save();
 
 				void CloseAndExit() { Ui.CloseWindow(); onExit(); }
 				if (needsRestart)

@@ -271,6 +271,11 @@ namespace OpenRA
 			"Legacy: OpenGL 2.1 with framebuffer_object extension (requires DisableLegacyGL: False)",
 			"Automatic: Use the first supported profile.")]
 		public GLProfile GLProfile = GLProfile.Automatic;
+
+		public GraphicSettings Clone()
+		{
+			return (GraphicSettings)MemberwiseClone();
+		}
 	}
 
 	[YamlNode("Sound", shared: true)]
@@ -288,6 +293,11 @@ namespace OpenRA
 		public bool CashTicks = true;
 		public bool Mute = false;
 		public bool MuteBackgroundMusic = false;
+
+		public SoundSettings Clone()
+		{
+			return (SoundSettings)MemberwiseClone();
+		}
 	}
 
 	[YamlNode("Player", shared: true)]

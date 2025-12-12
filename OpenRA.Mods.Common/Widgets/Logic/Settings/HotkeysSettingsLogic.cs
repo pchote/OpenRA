@@ -60,17 +60,13 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		Widget emptyListMessage;
 		Widget remapDialog;
 
-		static HotkeysSettingsLogic() { }
-
 		[ObjectCreator.UseCtor]
-		public HotkeysSettingsLogic(
-			Action<string, string, Func<Widget, Func<bool>>, Func<Widget, Action>> registerPanel,
-			string panelID, string label, ModData modData, Dictionary<string, MiniYaml> logicArgs)
+		public HotkeysSettingsLogic(ModData modData, SettingsLogic settingsLogic, string panelID, string label, Dictionary<string, MiniYaml> logicArgs)
 		{
 			this.modData = modData;
 			this.logicArgs = logicArgs;
 
-			registerPanel(panelID, label, InitPanel, ResetPanel);
+			settingsLogic.RegisterSettingsPanel(panelID, label, InitPanel, ResetPanel);
 		}
 
 		void BindHotkeyPref(HotkeyDefinition hd, Widget template)

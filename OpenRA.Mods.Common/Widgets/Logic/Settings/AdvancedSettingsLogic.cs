@@ -16,79 +16,75 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 {
 	public class AdvancedSettingsLogic : ChromeLogic
 	{
-		static readonly bool OriginalServerDiscoverNatDevices;
-
-		static AdvancedSettingsLogic()
-		{
-			var original = Game.Settings;
-			OriginalServerDiscoverNatDevices = original.Server.DiscoverNatDevices;
-		}
+		readonly DebugSettings debugSettings;
+		readonly GameSettings gameSettings;
+		readonly ServerSettings serverSettings;
+		static ServerSettings originalServerSettings;
 
 		[ObjectCreator.UseCtor]
-		public AdvancedSettingsLogic(Action<string, string, Func<Widget, Func<bool>>, Func<Widget, Action>> registerPanel, string panelID, string label)
+		public AdvancedSettingsLogic(ModData modData, SettingsLogic settingsLogic, string panelID, string label)
 		{
-			registerPanel(panelID, label, InitPanel, ResetPanel);
+			debugSettings = modData.GetSettings<DebugSettings>();
+			gameSettings = modData.GetSettings<GameSettings>();
+			serverSettings = modData.GetSettings<ServerSettings>();
+			originalServerSettings ??= serverSettings.Clone();
+			settingsLogic.RegisterSettingsPanel(panelID, label, InitPanel, ResetPanel);
 		}
 
 		Func<bool> InitPanel(Widget panel)
 		{
-			var ds = Game.Settings.Debug;
-			var ss = Game.Settings.Server;
-			var gs = Game.Settings.Game;
 			var scrollPanel = panel.Get<ScrollPanelWidget>("SETTINGS_SCROLLPANEL");
 
 			// Advanced
-			SettingsUtils.BindCheckboxPref(panel, "NAT_DISCOVERY", ss, "DiscoverNatDevices");
-			SettingsUtils.BindCheckboxPref(panel, "PERFTEXT_CHECKBOX", ds, "PerfText");
-			SettingsUtils.BindCheckboxPref(panel, "PERFGRAPH_CHECKBOX", ds, "PerfGraph");
-			SettingsUtils.BindCheckboxPref(panel, "FETCH_NEWS_CHECKBOX", gs, "FetchNews");
-			SettingsUtils.BindCheckboxPref(panel, "SENDSYSINFO_CHECKBOX", ds, "SendSystemInformation");
-			SettingsUtils.BindCheckboxPref(panel, "CHECK_VERSION_CHECKBOX", ds, "CheckVersion");
+			SettingsUtils.BindCheckboxPref(panel, "NAT_DISCOVERY", serverSettings, "DiscoverNatDevices");
+			SettingsUtils.BindCheckboxPref(panel, "PERFTEXT_CHECKBOX", debugSettings, "PerfText");
+			SettingsUtils.BindCheckboxPref(panel, "PERFGRAPH_CHECKBOX", debugSettings, "PerfGraph");
+			SettingsUtils.BindCheckboxPref(panel, "FETCH_NEWS_CHECKBOX", gameSettings, "FetchNews");
+			SettingsUtils.BindCheckboxPref(panel, "SENDSYSINFO_CHECKBOX", debugSettings, "SendSystemInformation");
+			SettingsUtils.BindCheckboxPref(panel, "CHECK_VERSION_CHECKBOX", debugSettings, "CheckVersion");
 
 			var ssi = panel.Get<CheckboxWidget>("SENDSYSINFO_CHECKBOX");
-			ssi.IsDisabled = () => !gs.FetchNews;
+			ssi.IsDisabled = () => !gameSettings.FetchNews;
 
 			// Developer
-			SettingsUtils.BindCheckboxPref(panel, "BOTDEBUG_CHECKBOX", ds, "BotDebug");
-			SettingsUtils.BindCheckboxPref(panel, "LUADEBUG_CHECKBOX", ds, "LuaDebug");
-			SettingsUtils.BindCheckboxPref(panel, "REPLAY_COMMANDS_CHECKBOX", ds, "EnableDebugCommandsInReplays");
-			SettingsUtils.BindCheckboxPref(panel, "CHECKUNSYNCED_CHECKBOX", ds, "SyncCheckUnsyncedCode");
-			SettingsUtils.BindCheckboxPref(panel, "CHECKBOTSYNC_CHECKBOX", ds, "SyncCheckBotModuleCode");
-			SettingsUtils.BindCheckboxPref(panel, "PERFLOGGING_CHECKBOX", ds, "EnableSimulationPerfLogging");
+			SettingsUtils.BindCheckboxPref(panel, "BOTDEBUG_CHECKBOX", debugSettings, "BotDebug");
+			SettingsUtils.BindCheckboxPref(panel, "LUADEBUG_CHECKBOX", debugSettings, "LuaDebug");
+			SettingsUtils.BindCheckboxPref(panel, "REPLAY_COMMANDS_CHECKBOX", debugSettings, "EnableDebugCommandsInReplays");
+			SettingsUtils.BindCheckboxPref(panel, "CHECKUNSYNCED_CHECKBOX", debugSettings, "SyncCheckUnsyncedCode");
+			SettingsUtils.BindCheckboxPref(panel, "CHECKBOTSYNC_CHECKBOX", debugSettings, "SyncCheckBotModuleCode");
+			SettingsUtils.BindCheckboxPref(panel, "PERFLOGGING_CHECKBOX", debugSettings, "EnableSimulationPerfLogging");
 
-			panel.Get("BOTDEBUG_CHECKBOX_CONTAINER").IsVisible = () => ds.DisplayDeveloperSettings;
-			panel.Get("CHECKUNSYNCED_CHECKBOX_CONTAINER").IsVisible = () => ds.DisplayDeveloperSettings;
-			panel.Get("CHECKBOTSYNC_CHECKBOX_CONTAINER").IsVisible = () => ds.DisplayDeveloperSettings;
-			panel.Get("LUADEBUG_CHECKBOX_CONTAINER").IsVisible = () => ds.DisplayDeveloperSettings;
-			panel.Get("REPLAY_COMMANDS_CHECKBOX_CONTAINER").IsVisible = () => ds.DisplayDeveloperSettings;
-			panel.Get("PERFLOGGING_CHECKBOX_CONTAINER").IsVisible = () => ds.DisplayDeveloperSettings;
-			panel.Get("DEBUG_HIDDEN_CONTAINER").IsVisible = () => !ds.DisplayDeveloperSettings;
+			panel.Get("BOTDEBUG_CHECKBOX_CONTAINER").IsVisible = () => debugSettings.DisplayDeveloperSettings;
+			panel.Get("CHECKUNSYNCED_CHECKBOX_CONTAINER").IsVisible = () => debugSettings.DisplayDeveloperSettings;
+			panel.Get("CHECKBOTSYNC_CHECKBOX_CONTAINER").IsVisible = () => debugSettings.DisplayDeveloperSettings;
+			panel.Get("LUADEBUG_CHECKBOX_CONTAINER").IsVisible = () => debugSettings.DisplayDeveloperSettings;
+			panel.Get("REPLAY_COMMANDS_CHECKBOX_CONTAINER").IsVisible = () => debugSettings.DisplayDeveloperSettings;
+			panel.Get("PERFLOGGING_CHECKBOX_CONTAINER").IsVisible = () => debugSettings.DisplayDeveloperSettings;
+			panel.Get("DEBUG_HIDDEN_CONTAINER").IsVisible = () => !debugSettings.DisplayDeveloperSettings;
 
 			SettingsUtils.AdjustSettingsScrollPanelLayout(scrollPanel);
 
-			return () => ss.DiscoverNatDevices != OriginalServerDiscoverNatDevices;
+			return () => serverSettings.DiscoverNatDevices != originalServerSettings.DiscoverNatDevices;
 		}
 
 		Action ResetPanel(Widget panel)
 		{
-			var ds = Game.Settings.Debug;
-			var ss = Game.Settings.Server;
-			var dds = new DebugSettings();
-			var dss = new ServerSettings();
+			var defaultDebugSettings = new DebugSettings();
+			var defaultServerSettings = new ServerSettings();
 
 			return () =>
 			{
-				ss.DiscoverNatDevices = dss.DiscoverNatDevices;
-				ds.PerfText = dds.PerfText;
-				ds.PerfGraph = dds.PerfGraph;
-				ds.SyncCheckUnsyncedCode = dds.SyncCheckUnsyncedCode;
-				ds.SyncCheckBotModuleCode = dds.SyncCheckBotModuleCode;
-				ds.BotDebug = dds.BotDebug;
-				ds.LuaDebug = dds.LuaDebug;
-				ds.SendSystemInformation = dds.SendSystemInformation;
-				ds.CheckVersion = dds.CheckVersion;
-				ds.EnableDebugCommandsInReplays = dds.EnableDebugCommandsInReplays;
-				ds.EnableSimulationPerfLogging = dds.EnableSimulationPerfLogging;
+				serverSettings.DiscoverNatDevices = defaultServerSettings.DiscoverNatDevices;
+				debugSettings.PerfText = defaultDebugSettings.PerfText;
+				debugSettings.PerfGraph = defaultDebugSettings.PerfGraph;
+				debugSettings.SyncCheckUnsyncedCode = defaultDebugSettings.SyncCheckUnsyncedCode;
+				debugSettings.SyncCheckBotModuleCode = defaultDebugSettings.SyncCheckBotModuleCode;
+				debugSettings.BotDebug = defaultDebugSettings.BotDebug;
+				debugSettings.LuaDebug = defaultDebugSettings.LuaDebug;
+				debugSettings.SendSystemInformation = defaultDebugSettings.SendSystemInformation;
+				debugSettings.CheckVersion = defaultDebugSettings.CheckVersion;
+				debugSettings.EnableDebugCommandsInReplays = defaultDebugSettings.EnableDebugCommandsInReplays;
+				debugSettings.EnableSimulationPerfLogging = defaultDebugSettings.EnableSimulationPerfLogging;
 			};
 		}
 	}
