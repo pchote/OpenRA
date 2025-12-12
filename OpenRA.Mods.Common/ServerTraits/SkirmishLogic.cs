@@ -10,7 +10,6 @@
 #endregion
 
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using OpenRA.Network;
 using OpenRA.Primitives;
@@ -22,6 +21,9 @@ namespace OpenRA.Mods.Common.Server
 {
 	public class SkirmishLogic : ServerTrait, IClientJoined, INotifySyncLobbyInfo
 	{
+		[YamlNode("Skirmish", shared: false)]
+		public class SkirmishSettings : SettingsModule { }
+
 		sealed class SkirmishSlot
 		{
 			static string LoadSlot(MiniYaml yaml) => yaml.Value;
@@ -64,12 +66,9 @@ namespace OpenRA.Mods.Common.Server
 			}
 		}
 
-		static bool TryInitializeFromFile(S server, string path, Connection conn)
+		static bool TryInitializeFromSettings(S server, SkirmishSettings skirmishSettings, Connection conn)
 		{
-			if (!File.Exists(path))
-				return false;
-
-			var nodes = new MiniYaml("", MiniYaml.FromFile(path));
+			var nodes = skirmishSettings.Yaml.Build();
 			var mapNode = nodes.NodeWithKeyOrDefault("Map");
 			if (mapNode == null)
 				return false;
@@ -157,9 +156,8 @@ namespace OpenRA.Mods.Common.Server
 			if (server.Type != ServerType.Skirmish)
 				return;
 
-			var path = Path.Combine(Platform.SupportDir, $"skirmish.{server.ModData.Manifest.Id}.yaml");
 			var playerClient = server.LobbyInfo.NonBotClients.First();
-			new List<MiniYamlNode>
+			var nodes = new List<MiniYamlNode>
 			{
 				new("Map", server.LobbyInfo.GlobalSettings.Map),
 				new("Options", new MiniYaml("", server.LobbyInfo.GlobalSettings.LobbyOptions
@@ -167,7 +165,11 @@ namespace OpenRA.Mods.Common.Server
 				new("Player", new SkirmishSlot(playerClient).ToYaml()),
 				new("Bots", new MiniYaml("", server.LobbyInfo.Clients.Where(c => c.IsBot)
 					.Select(b => new MiniYamlNode(b.Bot, new SkirmishSlot(b).ToYaml()))))
-			}.WriteToFile(path);
+			};
+
+			var skirmishSettings = server.ModData.GetSettings<SkirmishSettings>();
+			skirmishSettings.Yaml.Nodes = new MiniYamlBuilder("", nodes).Nodes;
+			skirmishSettings.Save();
 		}
 
 		void IClientJoined.ClientJoined(S server, Connection conn)
@@ -175,8 +177,8 @@ namespace OpenRA.Mods.Common.Server
 			if (server.Type != ServerType.Skirmish)
 				return;
 
-			var skirmishFile = Path.Combine(Platform.SupportDir, $"skirmish.{server.ModData.Manifest.Id}.yaml");
-			if (TryInitializeFromFile(server, skirmishFile, conn))
+			var skirmishSettings = server.ModData.GetSettings<SkirmishSettings>();
+			if (TryInitializeFromSettings(server, skirmishSettings, conn))
 				return;
 
 			var slot = server.LobbyInfo.FirstEmptyBotSlot();
