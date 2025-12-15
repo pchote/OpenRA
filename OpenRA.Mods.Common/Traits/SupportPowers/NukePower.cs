@@ -210,7 +210,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		public override void SelectTarget(Actor self, string order, SupportPowerManager manager)
 		{
-			self.World.OrderGenerator = new SelectNukePowerTarget(order, manager, info, MouseButton.Left);
+			self.World.OrderGenerator = new SelectNukePowerTarget(order, manager, info);
 		}
 	}
 
@@ -218,8 +218,8 @@ namespace OpenRA.Mods.Common.Traits
 	{
 		readonly NukePowerInfo info;
 
-		public SelectNukePowerTarget(string order, SupportPowerManager manager, NukePowerInfo info, MouseButton button)
-			: base(order, manager, info, button)
+		public SelectNukePowerTarget(string order, SupportPowerManager manager, NukePowerInfo info)
+			: base(order, manager, info)
 		{
 			this.info = info;
 		}

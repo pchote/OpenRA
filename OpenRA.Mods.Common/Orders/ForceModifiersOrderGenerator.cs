@@ -15,10 +15,12 @@ namespace OpenRA.Mods.Common.Orders
 {
 	public class ForceModifiersOrderGenerator : UnitOrderGenerator
 	{
+		protected override MouseActionType ActionType => MouseActionType.ConfirmOrder;
 		public readonly Modifiers Modifiers;
 		readonly bool cancelOnFirstUse;
 
-		public ForceModifiersOrderGenerator(Modifiers modifiers, bool cancelOnFirstUse)
+		public ForceModifiersOrderGenerator(World world, Modifiers modifiers, bool cancelOnFirstUse)
+			: base(world)
 		{
 			Modifiers = modifiers;
 			this.cancelOnFirstUse = cancelOnFirstUse;
@@ -27,8 +29,7 @@ namespace OpenRA.Mods.Common.Orders
 		public override IEnumerable<Order> Order(World world, CPos cell, int2 worldPixel, MouseInput mi)
 		{
 			mi.Modifiers |= Modifiers;
-
-			if (cancelOnFirstUse)
+			if ((cancelOnFirstUse && !mi.Modifiers.HasModifier(Modifiers.Shift)) || mi.Button == CancelButton)
 				world.CancelInputMode();
 
 			return base.Order(world, cell, worldPixel, mi);

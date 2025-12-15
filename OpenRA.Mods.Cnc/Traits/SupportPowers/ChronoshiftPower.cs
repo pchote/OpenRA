@@ -150,12 +150,11 @@ namespace OpenRA.Mods.Cnc.Traits
 			readonly SupportPowerManager manager;
 			readonly string order;
 
-			public SelectChronoshiftTarget(World world, string order, SupportPowerManager manager, ChronoshiftPower power)
-			{
-				// Clear selection if using Left-Click Orders
-				if (Game.Settings.Game.UseClassicMouseStyle)
-					manager.Self.World.Selection.Clear();
+			protected override MouseActionType ActionType => MouseActionType.SupportPower;
 
+			public SelectChronoshiftTarget(World world, string order, SupportPowerManager manager, ChronoshiftPower power)
+				: base(world)
+			{
 				this.manager = manager;
 				this.order = order;
 				this.power = power;
@@ -171,9 +170,7 @@ namespace OpenRA.Mods.Cnc.Traits
 			protected override IEnumerable<Order> OrderInner(World world, CPos cell, int2 worldPixel, MouseInput mi)
 			{
 				world.CancelInputMode();
-				if (mi.Button == MouseButton.Left)
-					world.OrderGenerator = new SelectDestination(world, order, manager, power, cell);
-
+				world.OrderGenerator = new SelectDestination(world, order, manager, power, cell);
 				yield break;
 			}
 
@@ -230,7 +227,10 @@ namespace OpenRA.Mods.Cnc.Traits
 			readonly SupportPowerManager manager;
 			readonly string order;
 
+			protected override MouseActionType ActionType => MouseActionType.SupportPower;
+
 			public SelectDestination(World world, string order, SupportPowerManager manager, ChronoshiftPower power, CPos sourceLocation)
+				: base(world)
 			{
 				this.manager = manager;
 				this.order = order;
@@ -267,12 +267,6 @@ namespace OpenRA.Mods.Cnc.Traits
 
 			protected override IEnumerable<Order> OrderInner(World world, CPos cell, int2 worldPixel, MouseInput mi)
 			{
-				if (mi.Button == MouseButton.Right)
-				{
-					world.CancelInputMode();
-					yield break;
-				}
-
 				var ret = OrderInner(cell).FirstOrDefault();
 				if (ret == null)
 					yield break;

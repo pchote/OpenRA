@@ -216,7 +216,10 @@ namespace OpenRA.Mods.Cnc.Traits
 		readonly PortableChrono portableChrono;
 		readonly PortableChronoInfo info;
 
+		protected override MouseActionType ActionType => MouseActionType.ConfirmOrder;
+
 		public PortableChronoOrderGenerator(Actor self, PortableChrono portableChrono)
+			: base(self.World, false)
 		{
 			this.self = self;
 			this.portableChrono = portableChrono;
@@ -225,12 +228,6 @@ namespace OpenRA.Mods.Cnc.Traits
 
 		protected override IEnumerable<Order> OrderInner(World world, CPos cell, int2 worldPixel, MouseInput mi)
 		{
-			if (mi.Button == Game.Settings.Game.MouseButtonPreference.Cancel)
-			{
-				world.CancelInputMode();
-				yield break;
-			}
-
 			if (self.IsInWorld && self.Location != cell
 				&& self.Trait<PortableChrono>().CanTeleport && self.Owner.Shroud.IsExplored(cell))
 			{

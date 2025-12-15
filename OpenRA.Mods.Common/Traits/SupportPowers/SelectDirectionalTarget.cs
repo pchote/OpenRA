@@ -26,6 +26,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		readonly string order;
 		readonly SupportPowerManager manager;
+		readonly GameSettings gameSettings;
 
 		readonly Arrow[] directionArrows;
 
@@ -43,20 +44,24 @@ namespace OpenRA.Mods.Common.Traits
 			this.order = order;
 			this.manager = manager;
 			this.info = info;
+			gameSettings = Game.Settings.Game;
 
 			directionArrows = LoadArrows(info.DirectionArrowAnimation, world, info.Arrows.Length);
 			mouseAttachment = Ui.Root.Get<MouseAttachmentWidget>("MOUSE_ATTATCHMENT");
 		}
 
+		public MouseButton ActionButton => gameSettings.ResolveActionButton(MouseActionType.SupportPower);
+		public MouseButton CancelButton => gameSettings.ResolveCancelButton(MouseActionType.SupportPower);
+
 		IEnumerable<Order> IOrderGenerator.Order(World world, CPos cell, int2 worldPixel, MouseInput mi)
 		{
-			if (mi.Button == MouseButton.Right)
+			if (mi.Button == CancelButton)
 			{
 				world.CancelInputMode();
 				yield break;
 			}
 
-			if (mi.Button == MouseButton.Left && mi.Event == MouseInputEvent.Down)
+			if (mi.Button == ActionButton && mi.Event == MouseInputEvent.Down)
 			{
 				if (!activated && world.Map.Contains(cell))
 				{
@@ -86,7 +91,7 @@ namespace OpenRA.Mods.Common.Traits
 				dragStarted = true;
 			}
 
-			if (mi.Button == MouseButton.Left && mi.Event == MouseInputEvent.Up)
+			if (mi.Button == ActionButton && mi.Event == MouseInputEvent.Up)
 			{
 				yield return new Order(order, manager.Self, Target.FromCell(manager.Self.World, targetCell), false)
 				{

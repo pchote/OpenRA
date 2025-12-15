@@ -36,6 +36,7 @@ namespace OpenRA.Mods.Common.Widgets
 		public Action AfterClose = () => { };
 		public Action<float> Animating = _ => { };
 
+		readonly ModData modData;
 		readonly World world;
 		readonly WorldRenderer worldRenderer;
 		readonly RadarPings radarPings;
@@ -45,6 +46,7 @@ namespace OpenRA.Mods.Common.Widgets
 		readonly int previewWidth;
 		readonly int previewHeight;
 		readonly string worldDefaultCursor = ChromeMetrics.Get<string>("WorldDefaultCursor");
+		readonly GameSettings gameSettings;
 
 		float radarMinimapHeight;
 		int frame;
@@ -66,10 +68,12 @@ namespace OpenRA.Mods.Common.Widgets
 		Player currentPlayer;
 
 		[ObjectCreator.UseCtor]
-		public RadarWidget(World world, WorldRenderer worldRenderer)
+		public RadarWidget(ModData modData, World world, WorldRenderer worldRenderer)
 		{
+			this.modData = modData;
 			this.world = world;
 			this.worldRenderer = worldRenderer;
+			gameSettings = Game.Settings.Game;
 
 			radarPings = world.WorldActor.TraitOrDefault<RadarPings>();
 			radarTerrainLayers = world.WorldActor.TraitsImplementing<IRadarTerrainLayer>().ToArray();
@@ -294,7 +298,7 @@ namespace OpenRA.Mods.Common.Widgets
 			var mi = new MouseInput
 			{
 				Location = location,
-				Button = Game.Settings.Game.MouseButtonPreference.Action,
+				Button = world.OrderGenerator.ActionButton,
 				Modifiers = Game.GetModifierKeys()
 			};
 
@@ -302,7 +306,7 @@ namespace OpenRA.Mods.Common.Widgets
 			if (cursor == null)
 				return worldDefaultCursor;
 
-			return Game.ModData.Cursors.ContainsKey(cursor + "-minimap") ? cursor + "-minimap" : cursor;
+			return modData.Cursors.ContainsKey(cursor + "-minimap") ? cursor + "-minimap" : cursor;
 		}
 
 		public override bool HandleMouseInput(MouseInput mi)
@@ -315,12 +319,12 @@ namespace OpenRA.Mods.Common.Widgets
 
 			var worldCoords = MinimapPixelToWorldCoords(mi.Location);
 			if ((mi.Event == MouseInputEvent.Down || mi.Event == MouseInputEvent.Move)
-				&& mi.Button == Game.Settings.Game.MouseButtonPreference.Cancel)
+				&& mi.Button == gameSettings.ResolveCancelButton(MouseActionType.Contextual))
 			{
 				worldRenderer.Viewport.Center(worldCoords);
 			}
 
-			if (mi.Event == MouseInputEvent.Down && mi.Button == Game.Settings.Game.MouseButtonPreference.Action && WorldInteractionController != null)
+			if (mi.Event == MouseInputEvent.Down && mi.Button == gameSettings.ResolveActionButton(MouseActionType.Contextual) && WorldInteractionController != null)
 			{
 				var worldPos = worldCoords.ToInt2();
 				var wpos = new WPos(worldPos.X, worldPos.Y, 0);
@@ -330,7 +334,7 @@ namespace OpenRA.Mods.Common.Widgets
 				var fakemi = new MouseInput
 				{
 					Event = MouseInputEvent.Down,
-					Button = Game.Settings.Game.MouseButtonPreference.Action,
+					Button = mi.Button,
 					Modifiers = mi.Modifiers,
 					Location = location,
 				};

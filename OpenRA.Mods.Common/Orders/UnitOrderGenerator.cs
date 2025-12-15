@@ -22,6 +22,16 @@ namespace OpenRA.Mods.Common.Orders
 	{
 		readonly string worldSelectCursor = ChromeMetrics.Get<string>("WorldSelectCursor");
 		readonly string worldDefaultCursor = ChromeMetrics.Get<string>("WorldDefaultCursor");
+		readonly GameSettings gameSettings;
+
+		protected virtual MouseActionType ActionType => MouseActionType.Contextual;
+		public MouseButton ActionButton => gameSettings.ResolveActionButton(ActionType);
+		public MouseButton CancelButton => gameSettings.ResolveCancelButton(ActionType);
+
+		public UnitOrderGenerator(World world)
+		{
+			gameSettings = Game.Settings.Game;
+		}
 
 		protected static Target TargetForInput(World world, CPos cell, int2 worldPixel, MouseInput mi)
 		{
@@ -72,7 +82,7 @@ namespace OpenRA.Mods.Common.Orders
 			var target = TargetForInput(world, cell, worldPixel, mi);
 
 			bool useSelect;
-			if (Game.Settings.Game.UseClassicMouseStyle && !InputOverridesSelection(world, worldPixel, mi))
+			if (gameSettings.UseClassicMouseStyle && !InputOverridesSelection(world, worldPixel, mi))
 				useSelect = target.Type == TargetType.Actor && target.Actor.Info.HasTraitInfo<ISelectableInfo>();
 			else
 			{
@@ -137,9 +147,9 @@ namespace OpenRA.Mods.Common.Orders
 		/// First priority is given to orders that interact with the given actors.
 		/// Second priority is given to actors in the given cell.
 		/// </summary>
-		protected static UnitOrderResult OrderForUnit(Actor self, Target target, CPos xy, MouseInput mi)
+		protected UnitOrderResult OrderForUnit(Actor self, Target target, CPos xy, MouseInput mi)
 		{
-			if (mi.Button != Game.Settings.Game.MouseButtonPreference.Action)
+			if (mi.Button != ActionButton)
 				return null;
 
 			if (self.Owner != self.World.LocalPlayer)

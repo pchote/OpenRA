@@ -35,7 +35,6 @@ namespace OpenRA
 		readonly List<IEffect> unpartitionedEffects = [];
 		readonly List<ISync> syncedEffects = [];
 		readonly GameSettings gameSettings;
-		readonly ModData modData;
 
 		readonly Queue<Action<World>> frameEndActions = [];
 
@@ -169,21 +168,7 @@ namespace OpenRA
 		public readonly ISelection Selection;
 		public readonly IControlGroups ControlGroups;
 
-		public void CancelInputMode() { OrderGenerator = (IOrderGenerator)modData.ObjectCreator.CreateBasic(defaultOrderGeneratorType); }
-
-		public bool ToggleInputMode<T>() where T : IOrderGenerator, new()
-		{
-			if (OrderGenerator is T)
-			{
-				CancelInputMode();
-				return false;
-			}
-			else
-			{
-				OrderGenerator = new T();
-				return true;
-			}
-		}
+		public void CancelInputMode() { OrderGenerator = (IOrderGenerator)defaultOrderGeneratorType.GetConstructor([typeof(World)])?.Invoke([this]); }
 
 		public bool RulesContainTemporaryBlocker { get; }
 
@@ -191,7 +176,6 @@ namespace OpenRA
 
 		internal World(Map map, ModData modData, OrderManager orderManager, WorldType type)
 		{
-			this.modData = modData;
 			Type = type;
 			OrderManager = orderManager;
 			Map = map;
@@ -203,7 +187,7 @@ namespace OpenRA
 			if (defaultOrderGeneratorType == null)
 				throw new InvalidDataException($"{modData.Manifest.DefaultOrderGenerator} is not a valid DefaultOrderGenerator");
 
-			orderGenerator = (IOrderGenerator)modData.ObjectCreator.CreateBasic(defaultOrderGeneratorType);
+			orderGenerator = (IOrderGenerator)defaultOrderGeneratorType.GetConstructor([typeof(World)])?.Invoke([this]);
 
 			var gameSpeeds = modData.GetOrCreate<GameSpeeds>();
 			var gameSpeedName = orderManager.LobbyInfo.GlobalSettings.OptionOrDefault("gamespeed", gameSpeeds.DefaultSpeed);

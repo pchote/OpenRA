@@ -23,6 +23,8 @@ namespace OpenRA
 	public enum StatusBarsType { Standard, DamageShow, AlwaysShow }
 	public enum TargetLinesType { Disabled, Manual, Automatic }
 
+	public enum MouseActionType { Contextual, ConfirmOrder, GlobalCommand, SupportPower, PlaceBuilding }
+
 	[Flags]
 	public enum MPGameFilters
 	{
@@ -270,7 +272,6 @@ namespace OpenRA
 
 		public bool LockMouseWindow = false;
 		public MouseScrollType MouseScroll = MouseScrollType.Joystick;
-		public MouseButtonPreference MouseButtonPreference = new();
 		public float ViewportEdgeScrollStep = 30f;
 		public float UIScrollSpeed = 50f;
 		public float ZoomSpeed = 0.04f;
@@ -306,6 +307,22 @@ namespace OpenRA
 		public bool EnableDiscordService = true;
 
 		public TextNotificationPoolFilters TextNotificationPoolFilters = TextNotificationPoolFilters.Feedback | TextNotificationPoolFilters.Transients;
+
+		public MouseButton ResolveActionButton(MouseActionType actionType)
+		{
+			switch (actionType)
+			{
+				case MouseActionType.ConfirmOrder:
+				case MouseActionType.Contextual:
+					return UseClassicMouseStyle ? MouseButton.Left : MouseButton.Right;
+				default: return MouseButton.Left;
+			}
+		}
+
+		public MouseButton ResolveCancelButton(MouseActionType actionType)
+		{
+			return ResolveActionButton(actionType) == MouseButton.Left ? MouseButton.Right : MouseButton.Left;
+		}
 	}
 
 	public class Settings
