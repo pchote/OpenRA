@@ -17,10 +17,26 @@ namespace OpenRA.Mods.Common.Orders
 {
 	public abstract class OrderGenerator : IOrderGenerator
 	{
+		protected abstract MouseActionType ActionType { get; }
+		readonly GameSettings gameSettings;
+
+		protected OrderGenerator(World world, bool classicClearSelection = true)
+		{
+			gameSettings = Game.Settings.Game;
+			if (classicClearSelection && gameSettings.UseClassicMouseStyle)
+				world.Selection.Clear();
+		}
+
+		public MouseButton ActionButton => gameSettings.ResolveActionButton(ActionType);
+		public MouseButton CancelButton => gameSettings.ResolveCancelButton(ActionType);
+
 		public virtual IEnumerable<Order> Order(World world, CPos cell, int2 worldPixel, MouseInput mi)
 		{
-			if ((mi.Button == MouseButton.Left && mi.Event == MouseInputEvent.Down) || (mi.Button == MouseButton.Right && mi.Event == MouseInputEvent.Up))
+			if (mi.Button == ActionButton && mi.Event == MouseInputEvent.Down)
 				return OrderInner(world, cell, worldPixel, mi);
+
+			if (mi.Button == CancelButton && mi.Event == MouseInputEvent.Up)
+				world.CancelInputMode();
 
 			return [];
 		}

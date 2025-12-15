@@ -17,12 +17,15 @@ namespace OpenRA.Mods.Common.Orders
 {
 	public class BeaconOrderGenerator : OrderGenerator
 	{
+		protected override MouseActionType ActionType => MouseActionType.PlaceBuilding;
+
+		public BeaconOrderGenerator(World world)
+			: base(world) { }
+
 		protected override IEnumerable<Order> OrderInner(World world, CPos cell, int2 worldPixel, MouseInput mi)
 		{
 			world.CancelInputMode();
-
-			if (mi.Button == MouseButton.Left)
-				yield return new Order("PlaceBeacon", world.LocalPlayer.PlayerActor, Target.FromCell(world, cell), false) { SuppressVisualFeedback = true };
+			yield return new Order("PlaceBeacon", world.LocalPlayer.PlayerActor, Target.FromCell(world, cell), false) { SuppressVisualFeedback = true };
 		}
 
 		protected override IEnumerable<IRenderable> Render(WorldRenderer wr, World world) { yield break; }

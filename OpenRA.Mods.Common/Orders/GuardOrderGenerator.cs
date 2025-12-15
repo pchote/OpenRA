@@ -20,27 +20,25 @@ namespace OpenRA.Mods.Common.Orders
 	{
 		readonly string orderName;
 		readonly string cursor;
-		readonly MouseButton expectedButton;
 		IEnumerable<Actor> subjects;
+		protected override MouseActionType ActionType => MouseActionType.ConfirmOrder;
 
-		public GuardOrderGenerator(IEnumerable<Actor> subjects, string order, string cursor, MouseButton button)
+		public GuardOrderGenerator(World world, IEnumerable<Actor> subjects, string order, string cursor)
+			: base(world)
 		{
 			orderName = order;
 			this.cursor = cursor;
-			expectedButton = button;
 			this.subjects = subjects;
 		}
 
 		public override IEnumerable<Order> Order(World world, CPos cell, int2 worldPixel, MouseInput mi)
 		{
-			if (mi.Button != expectedButton)
+			if (mi.Button != ActionButton)
+			{
 				world.CancelInputMode();
+				yield break;
+			}
 
-			return OrderInner(world, mi);
-		}
-
-		IEnumerable<Order> OrderInner(World world, MouseInput mi)
-		{
 			var target = FriendlyGuardableUnits(world, mi).FirstOrDefault();
 			if (target == null)
 				yield break;

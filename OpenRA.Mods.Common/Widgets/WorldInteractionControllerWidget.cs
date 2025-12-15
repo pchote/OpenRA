@@ -27,6 +27,7 @@ namespace OpenRA.Mods.Common.Widgets
 		readonly Color normalSelectionColor;
 		readonly Color altSelectionColor;
 		readonly Color ctrlSelectionColor;
+		readonly GameSettings gameSettings;
 
 		public readonly string ClickSound = ChromeMetrics.Get<string>("ClickSound");
 		public readonly string ClickDisabledSound = ChromeMetrics.Get<string>("ClickDisabledSound");
@@ -40,6 +41,7 @@ namespace OpenRA.Mods.Common.Widgets
 		public WorldInteractionControllerWidget(World world, WorldRenderer worldRenderer)
 		{
 			World = world;
+			gameSettings = Game.Settings.Game;
 			this.worldRenderer = worldRenderer;
 			if (!ChromeMetrics.TryGet("AltSelectionColor", out altSelectionColor))
 				altSelectionColor = Color.White;
@@ -84,8 +86,7 @@ namespace OpenRA.Mods.Common.Widgets
 		{
 			mousePos = worldRenderer.Viewport.ViewToWorldPx(mi.Location);
 
-			var useClassicMouseStyle = Game.Settings.Game.UseClassicMouseStyle;
-
+			var useClassicMouseStyle = gameSettings.UseClassicMouseStyle;
 			var multiClick = mi.MultiTapCount >= 2;
 
 			if (World.OrderGenerator is not UnitOrderGenerator uog)
@@ -218,7 +219,7 @@ namespace OpenRA.Mods.Common.Widgets
 				var mi = new MouseInput
 				{
 					Location = screenPos,
-					Button = Game.Settings.Game.MouseButtonPreference.Action,
+					Button = World.OrderGenerator.ActionButton,
 					Modifiers = Game.GetModifierKeys()
 				};
 

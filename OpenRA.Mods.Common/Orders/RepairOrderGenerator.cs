@@ -19,19 +19,13 @@ namespace OpenRA.Mods.Common.Orders
 {
 	public class RepairOrderGenerator : OrderGenerator
 	{
+		protected override MouseActionType ActionType => MouseActionType.GlobalCommand;
+
+		public RepairOrderGenerator(World world)
+			: base(world) { }
+
 		protected override IEnumerable<Order> OrderInner(World world, CPos cell, int2 worldPixel, MouseInput mi)
 		{
-			if (mi.Button == MouseButton.Right)
-				world.CancelInputMode();
-
-			return OrderInner(world, mi);
-		}
-
-		static IEnumerable<Order> OrderInner(World world, MouseInput mi)
-		{
-			if (mi.Button != MouseButton.Left)
-				yield break;
-
 			var underCursor = world.ScreenMap.ActorsAtMouse(mi)
 				.Select(a => a.Actor)
 				.FirstOrDefault(a => a.AppearsFriendlyTo(world.LocalPlayer.PlayerActor) && !world.FogObscures(a));
@@ -86,8 +80,7 @@ namespace OpenRA.Mods.Common.Orders
 
 		protected override string GetCursor(World world, CPos cell, int2 worldPixel, MouseInput mi)
 		{
-			mi.Button = MouseButton.Left;
-			return OrderInner(world, mi).Any()
+			return OrderInner(world, cell, worldPixel, mi).Any()
 				? "repair" : "repair-blocked";
 		}
 	}

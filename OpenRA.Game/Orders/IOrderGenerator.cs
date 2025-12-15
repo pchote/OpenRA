@@ -16,6 +16,7 @@ namespace OpenRA.Orders
 {
 	public interface IOrderGenerator
 	{
+		MouseButton ActionButton { get; }
 		IEnumerable<Order> Order(World world, CPos cell, int2 worldPixel, MouseInput mi);
 		void Tick(World world);
 		IEnumerable<IRenderable> Render(WorldRenderer wr, World world);

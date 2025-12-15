@@ -50,7 +50,7 @@ namespace OpenRA.Mods.Cnc.Traits
 
 		public override void SelectTarget(Actor self, string order, SupportPowerManager manager)
 		{
-			self.World.OrderGenerator = new SelectAttackPowerTarget(self, order, manager, info.Cursor, MouseButton.Left, attack);
+			self.World.OrderGenerator = new SelectAttackPowerTarget(self, order, manager, info.Cursor, attack);
 		}
 
 		public override void Activate(Actor self, Order order, SupportPowerManager manager)
@@ -81,20 +81,17 @@ namespace OpenRA.Mods.Cnc.Traits
 		readonly string order;
 		readonly string cursor;
 		readonly string cursorBlocked;
-		readonly MouseButton expectedButton;
 		readonly AttackBase attack;
 
-		public SelectAttackPowerTarget(Actor self, string order, SupportPowerManager manager, string cursor, MouseButton button, AttackBase attack)
-		{
-			// Clear selection if using Left-Click Orders
-			if (Game.Settings.Game.UseClassicMouseStyle)
-				manager.Self.World.Selection.Clear();
+		protected override MouseActionType ActionType => MouseActionType.SupportPower;
 
+		public SelectAttackPowerTarget(Actor self, string order, SupportPowerManager manager, string cursor, AttackBase attack)
+			: base(self.World)
+		{
 			instance = manager.GetPowersForActor(self).FirstOrDefault();
 			this.manager = manager;
 			this.order = order;
 			this.cursor = cursor;
-			expectedButton = button;
 			this.attack = attack;
 			cursorBlocked = cursor + "-blocked";
 		}
@@ -110,7 +107,7 @@ namespace OpenRA.Mods.Cnc.Traits
 		protected override IEnumerable<Order> OrderInner(World world, CPos cell, int2 worldPixel, MouseInput mi)
 		{
 			world.CancelInputMode();
-			if (mi.Button == expectedButton && IsValidTarget(world, cell))
+			if (IsValidTarget(world, cell))
 				yield return new Order(order, manager.Self, Target.FromCell(world, cell), false)
 				{
 					SuppressVisualFeedback = true

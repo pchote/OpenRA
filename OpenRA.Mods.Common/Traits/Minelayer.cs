@@ -220,6 +220,8 @@ namespace OpenRA.Mods.Common.Traits
 
 		sealed class MinefieldOrderGenerator : OrderGenerator
 		{
+			protected override MouseActionType ActionType => MouseActionType.ConfirmOrder;
+
 			readonly List<Actor> minelayers;
 			readonly Minelayer minelayer;
 			readonly Sprite validTile, unknownTile, blockedTile;
@@ -229,6 +231,7 @@ namespace OpenRA.Mods.Common.Traits
 			readonly string cursor;
 
 			public MinefieldOrderGenerator(Actor a, CPos xy, bool queued)
+				: base(a.World, false)
 			{
 				minelayers = [a];
 				minefieldStart = xy;
@@ -286,18 +289,9 @@ namespace OpenRA.Mods.Common.Traits
 
 			protected override IEnumerable<Order> OrderInner(World world, CPos cell, int2 worldPixel, MouseInput mi)
 			{
-				if (mi.Button == Game.Settings.Game.MouseButtonPreference.Cancel)
-				{
-					world.CancelInputMode();
-					yield break;
-				}
-
-				if (mi.Button == Game.Settings.Game.MouseButtonPreference.Action)
-				{
-					minelayers[0].World.CancelInputMode();
-					foreach (var minelayer in minelayers)
-						yield return new Order("PlaceMinefield", minelayer, Target.FromCell(world, cell), queued) { ExtraLocation = minefieldStart };
-				}
+				world.CancelInputMode();
+				foreach (var minelayer in minelayers)
+					yield return new Order("PlaceMinefield", minelayer, Target.FromCell(world, cell), queued) { ExtraLocation = minefieldStart };
 			}
 
 			protected override void SelectionChanged(World world, IEnumerable<Actor> selected)

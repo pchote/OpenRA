@@ -104,12 +104,11 @@ namespace OpenRA.Mods.Common.Traits
 	{
 		TraitPair<AttackMove>[] subjects;
 
-		readonly MouseButton expectedButton;
+		protected override MouseActionType ActionType => MouseActionType.ConfirmOrder;
 
-		public AttackMoveOrderGenerator(IEnumerable<Actor> subjects, MouseButton button)
+		public AttackMoveOrderGenerator(World world, IEnumerable<Actor> subjects)
+			: base(world)
 		{
-			expectedButton = button;
-
 			this.subjects = subjects.Where(a => !a.IsDead)
 				.SelectMany(a => a.TraitsImplementing<AttackMove>()
 					.Select(am => new TraitPair<AttackMove>(a, am)))
@@ -118,26 +117,21 @@ namespace OpenRA.Mods.Common.Traits
 
 		public override IEnumerable<Order> Order(World world, CPos cell, int2 worldPixel, MouseInput mi)
 		{
-			if (mi.Button != expectedButton)
+			if (mi.Button != ActionButton)
+			{
+				world.CancelInputMode();
+				yield break;
+			}
+
+			var queued = mi.Modifiers.HasModifier(Modifiers.Shift);
+			if (!queued)
 				world.CancelInputMode();
 
-			return OrderInner(world, cell, mi);
-		}
+			var orderName = mi.Modifiers.HasModifier(Modifiers.Ctrl) ? "AssaultMove" : "AttackMove";
 
-		protected virtual IEnumerable<Order> OrderInner(World world, CPos cell, MouseInput mi)
-		{
-			if (mi.Button == expectedButton)
-			{
-				var queued = mi.Modifiers.HasModifier(Modifiers.Shift);
-				if (!queued)
-					world.CancelInputMode();
-
-				var orderName = mi.Modifiers.HasModifier(Modifiers.Ctrl) ? "AssaultMove" : "AttackMove";
-
-				// Cells outside the playable area should be clamped to the edge for consistency with move orders
-				cell = world.Map.Clamp(cell);
-				yield return new Order(orderName, null, Target.FromCell(world, cell), queued, null, subjects.Select(s => s.Actor).ToArray());
-			}
+			// Cells outside the playable area should be clamped to the edge for consistency with move orders
+			cell = world.Map.Clamp(cell);
+			yield return new Order(orderName, null, Target.FromCell(world, cell), queued, null, subjects.Select(s => s.Actor).ToArray());
 		}
 
 		public override void SelectionChanged(World world, IEnumerable<Actor> selected)

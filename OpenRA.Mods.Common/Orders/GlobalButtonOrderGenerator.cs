@@ -20,17 +20,12 @@ namespace OpenRA.Mods.Common.Orders
 	{
 		readonly string order;
 
-		protected GlobalButtonOrderGenerator(string order)
+		protected override MouseActionType ActionType => MouseActionType.GlobalCommand;
+
+		protected GlobalButtonOrderGenerator(World world, string order)
+			: base(world)
 		{
 			this.order = order;
-		}
-
-		protected override IEnumerable<Order> OrderInner(World world, CPos cell, int2 worldPixel, MouseInput mi)
-		{
-			if (mi.Button == MouseButton.Right)
-				world.CancelInputMode();
-
-			return OrderInner(world, mi);
 		}
 
 		protected virtual bool IsValidTrait(T t)
@@ -38,20 +33,17 @@ namespace OpenRA.Mods.Common.Orders
 			return t.IsTraitEnabled();
 		}
 
-		protected IEnumerable<Order> OrderInner(World world, MouseInput mi)
+		protected override IEnumerable<Order> OrderInner(World world, CPos cell, int2 worldPixel, MouseInput mi)
 		{
-			if (mi.Button == MouseButton.Left)
-			{
-				var underCursor = world.ScreenMap.ActorsAtMouse(mi)
-					.Select(a => a.Actor)
-					.FirstOrDefault(a => a.Owner == world.LocalPlayer && a.TraitsImplementing<T>()
-						.Any(IsValidTrait));
+			var underCursor = world.ScreenMap.ActorsAtMouse(mi)
+				.Select(a => a.Actor)
+				.FirstOrDefault(a => a.Owner == world.LocalPlayer && a.TraitsImplementing<T>()
+					.Any(IsValidTrait));
 
-				if (underCursor == null)
-					yield break;
+			if (underCursor == null)
+				yield break;
 
-				yield return new Order(order, underCursor, false);
-			}
+			yield return new Order(order, underCursor, false);
 		}
 
 		protected override void Tick(World world)
@@ -70,8 +62,8 @@ namespace OpenRA.Mods.Common.Orders
 
 	public class PowerDownOrderGenerator : GlobalButtonOrderGenerator<ToggleConditionOnOrder>
 	{
-		public PowerDownOrderGenerator()
-			: base("PowerDown") { }
+		public PowerDownOrderGenerator(World world)
+			: base(world, "PowerDown") { }
 
 		protected override bool IsValidTrait(ToggleConditionOnOrder t)
 		{
@@ -80,21 +72,18 @@ namespace OpenRA.Mods.Common.Orders
 
 		protected override string GetCursor(World world, CPos cell, int2 worldPixel, MouseInput mi)
 		{
-			mi.Button = MouseButton.Left;
-			return OrderInner(world, mi).Any() ? "powerdown" : "powerdown-blocked";
+			return OrderInner(world, cell, worldPixel, mi).Any() ? "powerdown" : "powerdown-blocked";
 		}
 	}
 
 	public class SellOrderGenerator : GlobalButtonOrderGenerator<Sellable>
 	{
-		public SellOrderGenerator()
-			: base("Sell") { }
+		public SellOrderGenerator(World world)
+			: base(world, "Sell") { }
 
 		protected override string GetCursor(World world, CPos cell, int2 worldPixel, MouseInput mi)
 		{
-			mi.Button = MouseButton.Left;
-
-			var cursor = OrderInner(world, mi)
+			var cursor = OrderInner(world, cell, worldPixel, mi)
 				.SelectMany(o => o.Subject.TraitsImplementing<Sellable>())
 				.Where(t => !t.IsTraitDisabled)
 				.Select(si => si.Info.Cursor)

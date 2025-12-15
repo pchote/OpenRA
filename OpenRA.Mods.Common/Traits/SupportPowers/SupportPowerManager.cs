@@ -282,28 +282,24 @@ namespace OpenRA.Mods.Common.Traits
 
 	public class SelectGenericPowerTarget : OrderGenerator
 	{
+		protected override MouseActionType ActionType => MouseActionType.SupportPower;
 		readonly SupportPowerManager manager;
 		readonly SupportPowerInfo info;
-		readonly MouseButton expectedButton;
 
 		public string OrderKey { get; }
 
-		public SelectGenericPowerTarget(string order, SupportPowerManager manager, SupportPowerInfo info, MouseButton button)
+		public SelectGenericPowerTarget(string order, SupportPowerManager manager, SupportPowerInfo info)
+			: base(manager.Self.World)
 		{
-			// Clear selection if using Left-Click Orders
-			if (Game.Settings.Game.UseClassicMouseStyle)
-				manager.Self.World.Selection.Clear();
-
 			this.manager = manager;
 			OrderKey = order;
 			this.info = info;
-			expectedButton = button;
 		}
 
 		protected override IEnumerable<Order> OrderInner(World world, CPos cell, int2 worldPixel, MouseInput mi)
 		{
 			world.CancelInputMode();
-			if (mi.Button == expectedButton && world.Map.Contains(cell))
+			if (world.Map.Contains(cell))
 				yield return new Order(OrderKey, manager.Self, Target.FromCell(world, cell), false) { SuppressVisualFeedback = true };
 		}
 
