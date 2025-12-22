@@ -20,7 +20,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 	public class IntroductionPromptLogic : ChromeLogic
 	{
 		// Increment the version number when adding new stats
-		const int IntroductionVersion = 1;
+		public const int IntroductionVersion = 1;
 
 		[FluentReference]
 		const string Classic = "options-control-scheme.classic";
@@ -30,11 +30,6 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		readonly string classic;
 		readonly string modern;
-
-		public static bool ShouldShowPrompt()
-		{
-			return Game.Settings.Game.IntroductionPromptVersion < IntroductionVersion;
-		}
 
 		[ObjectCreator.UseCtor]
 		public IntroductionPromptLogic(Widget widget, ModData modData, WorldRenderer worldRenderer, Action onComplete)
@@ -123,7 +118,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			colorDropdown.OnMouseDown = _ => colorManager.ShowColorDropDown(colorDropdown, playerSettings.Color, null, worldRenderer, color =>
 			{
 				playerSettings.Color = color;
-				Game.Settings.Save();
+				playerSettings.Save();
 			});
 			colorDropdown.Get<ColorBlockWidget>("COLORBLOCK").GetColor = () => playerSettings.Color;
 
@@ -152,7 +147,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			widget.Get<ButtonWidget>("CONTINUE_BUTTON").OnClick = () =>
 			{
 				gameSettings.IntroductionPromptVersion = IntroductionVersion;
-				Game.Settings.Save();
+				gameSettings.Save();
 				Ui.CloseWindow();
 				onComplete();
 			};

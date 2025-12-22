@@ -47,6 +47,9 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly Widget newsTemplate;
 		readonly LabelWidget newsStatus;
 		readonly ModData modData;
+		readonly DebugSettings debugSettings;
+		readonly GameSettings gameSettings;
+		readonly ServerSettings serverSettings;
 
 		// Update news once per game launch
 		static bool fetchedNews;
@@ -71,6 +74,9 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			this.modData = modData;
 
 			rootMenu = widget;
+			debugSettings = modData.GetSettings<DebugSettings>();
+			gameSettings = modData.GetSettings<GameSettings>();
+			serverSettings = modData.GetSettings<ServerSettings>();
 
 			// Menu buttons
 			var mainMenu = widget.Get("MAIN_MENU");
@@ -219,7 +225,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			var newsBG = widget.GetOrNull("NEWS_BG");
 			if (newsBG != null)
 			{
-				newsBG.IsVisible = () => Game.Settings.Game.FetchNews && menuType != MenuType.None && menuType != MenuType.StartupPrompts;
+				newsBG.IsVisible = () => gameSettings.FetchNews && menuType != MenuType.None && menuType != MenuType.StartupPrompts;
 
 				newsPanel = Ui.LoadWidget<ScrollPanelWidget>("NEWS_PANEL", null, []);
 				newsTemplate = newsPanel.Get("NEWS_ITEM_TEMPLATE");
@@ -234,7 +240,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			// Check for updates in the background
 			var webServices = modData.GetOrCreate<WebServices>();
-			if (Game.Settings.Debug.CheckVersion)
+			if (debugSettings.CheckVersion)
 				webServices.CheckModVersion();
 
 			var updateLabel = rootMenu.GetOrNull("UPDATE_NOTICE");
@@ -253,7 +259,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					SwitchMenu(MenuType.Main);
 				}
 
-				if (SystemInfoPromptLogic.ShouldShowPrompt())
+				if (debugSettings.SystemInformationVersionPrompt < SystemInfoPromptLogic.SystemInformationVersion)
 				{
 					Ui.OpenWindow("MAINMENU_SYSTEM_INFO_PROMPT", new WidgetArgs
 					{
@@ -264,7 +270,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					OnSysInfoComplete();
 			}
 
-			if (IntroductionPromptLogic.ShouldShowPrompt())
+			if (gameSettings.IntroductionPromptVersion < IntroductionPromptLogic.IntroductionVersion)
 			{
 				Game.OpenWindow("MAINMENU_INTRODUCTION_PROMPT", new WidgetArgs
 				{
@@ -281,7 +287,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		void LoadAndDisplayNews(WebServices webServices, Widget newsBG)
 		{
-			if (newsBG != null && Game.Settings.Game.FetchNews)
+			if (newsBG != null && gameSettings.FetchNews)
 			{
 				var cacheFile = Path.Combine(Platform.SupportDir, webServices.GameNewsFileName);
 				var currentNews = ParseNews(cacheFile);
@@ -300,17 +306,17 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 								var client = HttpClientFactory.Create();
 
 								// Send the mod and engine version to support version-filtered news (update prompts)
-								var url = new HttpQueryBuilder(webServices.GameNews)
+								var queryBuilder = new HttpQueryBuilder(webServices.GameNews)
 								{
 									{ "version", Game.EngineVersion },
 									{ "mod", modData.Manifest.Id },
 									{ "modversion", modData.Manifest.Metadata.Version }
-								}.ToString();
+								};
 
-								// Parameter string is blank if the player has opted out
-								url += SystemInfoPromptLogic.CreateParameterString();
+								if (debugSettings.SendSystemInformation)
+									SystemInfoPromptLogic.AddSystemInformation(modData, queryBuilder);
 
-								var response = await client.GetStringAsync(url);
+								var response = await client.GetStringAsync(queryBuilder.ToString());
 								await File.WriteAllTextAsync(cacheFile, response);
 
 								Game.RunAfterTick(() => // run on the main thread
@@ -447,9 +453,9 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		{
 			SwitchMenu(MenuType.None);
 
-			var map = modData.MapCache.ChooseInitialMap(modData.MapCache.PickLastModifiedMap(MapVisibility.Lobby) ?? Game.Settings.Server.Map, Game.CosmeticRandom);
-			Game.Settings.Server.Map = map;
-			Game.Settings.Save();
+			var map = modData.MapCache.ChooseInitialMap(modData.MapCache.PickLastModifiedMap(MapVisibility.Lobby) ?? serverSettings.Map, Game.CosmeticRandom);
+			serverSettings.Map = map;
+			serverSettings.Save();
 
 			ConnectionLogic.Connect(Game.CreateLocalServer(map, isSkirmish: true),
 				"",

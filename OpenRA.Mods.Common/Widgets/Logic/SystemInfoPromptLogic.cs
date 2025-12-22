@@ -12,7 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
+using OpenRA.Support;
 using OpenRA.Widgets;
 
 namespace OpenRA.Mods.Common.Widgets.Logic
@@ -20,13 +20,15 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 	public class SystemInfoPromptLogic : ChromeLogic
 	{
 		// Increment the version number when adding new stats
-		const int SystemInformationVersion = 6;
+		public const int SystemInformationVersion = 6;
 
-		static Dictionary<string, (string Label, string Value)> GetSystemInformation()
+		static Dictionary<string, (string Label, string Value)> GetSystemInformation(ModData modData)
 		{
+			var debugSettings = modData.GetSettings<DebugSettings>();
+			var graphicSettings = modData.GetSettings<GraphicSettings>();
 			return new Dictionary<string, (string, string)>
 			{
-				{ "id", ("Anonymous ID", Game.Settings.Debug.UUID) },
+				{ "id", ("Anonymous ID", debugSettings.UUID) },
 				{ "platform", ("OS Type", Platform.CurrentPlatform.ToString()) },
 				{ "os", ("OS Version", Platform.OperatingSystem) },
 				{ "arch", ("Architecture", Platform.CurrentArchitecture.ToString()) },
@@ -34,39 +36,31 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				{ "gl", ("OpenGL Version", Game.Renderer.GLVersion) },
 				{ "windowsize", ("Window Size", $"{Game.Renderer.NativeResolution.Width}x{Game.Renderer.NativeResolution.Height}") },
 				{ "windowscale", ("Window Scale", Game.Renderer.NativeWindowScale.ToString("F2", CultureInfo.InvariantCulture)) },
-				{ "uiscale", ("UI Scale", Game.Settings.Graphics.UIScale.ToString("F2", CultureInfo.InvariantCulture)) },
+				{ "uiscale", ("UI Scale", graphicSettings.UIScale.ToString("F2", CultureInfo.InvariantCulture)) },
 				{ "lang", ("System Language", CultureInfo.InstalledUICulture.TwoLetterISOLanguageName) }
 			};
 		}
 
-		public static bool ShouldShowPrompt()
+		public static void AddSystemInformation(ModData modData, HttpQueryBuilder queryBuilder)
 		{
-			return Game.Settings.Debug.SystemInformationVersionPrompt < SystemInformationVersion;
-		}
-
-		public static string CreateParameterString()
-		{
-			if (!Game.Settings.Debug.SendSystemInformation)
-				return "";
-
-			return $"&sysinfoversion={SystemInformationVersion}&"
-				+ GetSystemInformation()
-					.Select(kv => kv.Key + "=" + Uri.EscapeDataString(kv.Value.Value))
-					.JoinWith("&");
+			queryBuilder.Add("sysinfoversion", SystemInformationVersion);
+			foreach (var kv in GetSystemInformation(modData))
+				queryBuilder.Add(kv.Key, kv.Value.Value);
 		}
 
 		[ObjectCreator.UseCtor]
-		public SystemInfoPromptLogic(Widget widget, Action onComplete)
+		public SystemInfoPromptLogic(Widget widget, ModData modData, Action onComplete)
 		{
+			var debugSettings = modData.GetSettings<DebugSettings>();
 			var sysInfoCheckbox = widget.Get<CheckboxWidget>("SYSINFO_CHECKBOX");
-			sysInfoCheckbox.IsChecked = () => Game.Settings.Debug.SendSystemInformation;
-			sysInfoCheckbox.OnClick = () => Game.Settings.Debug.SendSystemInformation ^= true;
+			sysInfoCheckbox.IsChecked = () => debugSettings.SendSystemInformation;
+			sysInfoCheckbox.OnClick = () => debugSettings.SendSystemInformation ^= true;
 
 			var sysInfoData = widget.Get<ScrollPanelWidget>("SYSINFO_DATA");
 			var template = sysInfoData.Get<LabelWidget>("DATA_TEMPLATE");
 			sysInfoData.RemoveChildren();
 
-			foreach (var (name, value) in GetSystemInformation().Values)
+			foreach (var (name, value) in GetSystemInformation(modData).Values)
 			{
 				var label = template.Clone();
 				var text = name + ": " + value;
@@ -76,8 +70,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			widget.Get<ButtonWidget>("CONTINUE_BUTTON").OnClick = () =>
 			{
-				Game.Settings.Debug.SystemInformationVersionPrompt = SystemInformationVersion;
-				Game.Settings.Save();
+				debugSettings.SystemInformationVersionPrompt = SystemInformationVersion;
+				debugSettings.Save();
 				Ui.CloseWindow();
 				onComplete();
 			};
