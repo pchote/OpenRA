@@ -38,6 +38,7 @@ namespace OpenRA
 	public sealed class Sound : IDisposable
 	{
 		readonly ISoundEngine soundEngine;
+		readonly SoundSettings soundSettings;
 		ISoundLoader[] loaders;
 		IReadOnlyFileSystem fileSystem;
 		Cache<string, ISoundSource> sounds;
@@ -50,6 +51,7 @@ namespace OpenRA
 
 		public Sound(IPlatform platform, SoundSettings soundSettings)
 		{
+			this.soundSettings = soundSettings;
 			soundEngine = platform.CreateSound(soundSettings.Device);
 			DummyEngine = soundEngine.Dummy;
 
@@ -151,7 +153,7 @@ namespace OpenRA
 
 		public void SetMusicLooped(bool loop)
 		{
-			Game.Settings.Sound.Repeat = loop;
+			soundSettings.Repeat = loop;
 			soundEngine.SetSoundLooping(loop, music);
 		}
 
@@ -242,7 +244,7 @@ namespace OpenRA
 				return;
 			}
 
-			PlayMusic(m, Game.Settings.Sound.Repeat);
+			PlayMusic(m, soundSettings.Repeat);
 		}
 
 		public void PlayMusic(MusicInfo m, bool looped = false)
@@ -319,22 +321,22 @@ namespace OpenRA
 
 		public float SoundVolume
 		{
-			get => Game.Settings.Sound.SoundVolume;
+			get => soundSettings.SoundVolume;
 
 			set
 			{
-				Game.Settings.Sound.SoundVolume = value;
+				soundSettings.SoundVolume = value;
 				soundEngine.SetSoundVolume(InternalSoundVolume, music, video);
 			}
 		}
 
 		public float MusicVolume
 		{
-			get => Game.Settings.Sound.MusicVolume;
+			get => soundSettings.MusicVolume;
 
 			set
 			{
-				Game.Settings.Sound.MusicVolume = value;
+				soundSettings.MusicVolume = value;
 				if (music != null)
 					music.Volume = value;
 			}
@@ -342,11 +344,11 @@ namespace OpenRA
 
 		public float VideoVolume
 		{
-			get => Game.Settings.Sound.VideoVolume;
+			get => soundSettings.VideoVolume;
 
 			set
 			{
-				Game.Settings.Sound.VideoVolume = value;
+				soundSettings.VideoVolume = value;
 				if (video != null)
 					video.Volume = value;
 			}
