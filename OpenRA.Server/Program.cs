@@ -77,7 +77,7 @@ namespace OpenRA.Server
 			// HACK: The engine code assumes that Game.Settings is set.
 			// This isn't nearly as bad as ModData, but is still not very nice.
 			Game.InitializeSettings(arguments);
-			var settings = Game.Settings.Server;
+			var serverSettings = Game.Settings.GetOrCreate<ServerSettings>(null);
 
 			Nat.Initialize();
 
@@ -88,7 +88,7 @@ namespace OpenRA.Server
 
 			var mods = new InstalledMods(modSearchPaths, explicitModPaths);
 
-			WriteLineWithTimeStamp($"Starting dedicated server for mod: {modID}");
+			WriteLineWithTimeStamp(serverSettings.TimestampFormat, $"Starting dedicated server for mod: {modID}");
 			while (true)
 			{
 				// HACK: The engine code *still* assumes that Game.ModData is set
@@ -96,8 +96,8 @@ namespace OpenRA.Server
 				modData.MapCache.LoadPreviewImages = false; // PERF: Server doesn't need previews, save memory by not loading them.
 				modData.MapCache.LoadMaps(modData);
 
-				var endpoints = new List<IPEndPoint> { new(IPAddress.IPv6Any, settings.ListenPort), new(IPAddress.Any, settings.ListenPort) };
-				var server = new Server(endpoints, settings, modData, ServerType.Dedicated);
+				var endpoints = new List<IPEndPoint> { new(IPAddress.IPv6Any, serverSettings.ListenPort), new(IPAddress.Any, serverSettings.ListenPort) };
+				var server = new Server(endpoints, serverSettings, modData, ServerType.Dedicated);
 
 				GC.Collect();
 				while (true)
@@ -105,20 +105,20 @@ namespace OpenRA.Server
 					Thread.Sleep(1000);
 					if (server.State == ServerState.GameStarted && server.Conns.Count < 1)
 					{
-						WriteLineWithTimeStamp("No one is playing, shutting down...");
+						WriteLineWithTimeStamp(serverSettings.TimestampFormat, "No one is playing, shutting down...");
 						server.Shutdown();
 						break;
 					}
 				}
 
 				modData.Dispose();
-				WriteLineWithTimeStamp("Starting a new server instance...");
+				WriteLineWithTimeStamp(serverSettings.TimestampFormat, "Starting a new server instance...");
 			}
 		}
 
-		static void WriteLineWithTimeStamp(string line)
+		static void WriteLineWithTimeStamp(string timestampFormat, string line)
 		{
-			Console.WriteLine($"[{DateTime.Now.ToString(Game.Settings.Server.TimestampFormat, CultureInfo.CurrentCulture)}] {line}");
+			Console.WriteLine($"[{DateTime.Now.ToString(timestampFormat, CultureInfo.CurrentCulture)}] {line}");
 		}
 	}
 }
