@@ -11,6 +11,7 @@
 
 using System;
 using System.Linq;
+using System.Reflection;
 
 namespace OpenRA.Mods.Common.UtilityCommands
 {
@@ -21,6 +22,29 @@ namespace OpenRA.Mods.Common.UtilityCommands
 		bool IUtilityCommand.ValidateArguments(string[] args)
 		{
 			return true;
+		}
+
+		static void WriteFields(string key, object value)
+		{
+			var fields = Utility.GetFields(value.GetType());
+			foreach (var field in fields)
+			{
+				if (!Utility.HasAttribute<DescAttribute>(field))
+					continue;
+
+				Console.WriteLine(".TP");
+				Console.Write($".BR {key}.{field.Name}=");
+
+				var fieldValue = field.GetValue(value)?.ToString();
+				if (fieldValue != null && !fieldValue.StartsWith("System.", StringComparison.Ordinal))
+					Console.WriteLine($"\\fI{fieldValue}\\fR");
+				else
+					Console.WriteLine();
+
+				var lines = Utility.GetCustomAttributes<DescAttribute>(field, false).SelectMany(d => d.Lines);
+				foreach (var line in lines)
+					Console.WriteLine(line);
+			}
 		}
 
 		[Desc("Create a man page in troff format.")]
@@ -37,30 +61,18 @@ namespace OpenRA.Mods.Common.UtilityCommands
 			Console.WriteLine("starts the game.");
 			Console.WriteLine(".SH OPTIONS");
 
-			var sections = Game.Settings.Sections;
-			sections.Add("Launch", new LaunchArguments(new Arguments([])));
-			foreach (var section in sections.OrderBy(s => s.Key))
+			var sections = utility.ModData.ObjectCreator.GetTypesImplementing<SettingsModule>();
+			foreach (var type in sections.OrderBy(s => s.Name))
 			{
-				var fields = Utility.GetFields(section.Value.GetType());
-				foreach (var field in fields)
-				{
-					if (!Utility.HasAttribute<DescAttribute>(field))
-						continue;
+				var attribute = type.GetCustomAttribute<SettingsModule.YamlNodeAttribute>();
+				if (attribute == null)
+					continue;
 
-					Console.WriteLine(".TP");
-
-					Console.Write($".BR {section.Key}.{field.Name}=");
-					var value = field.GetValue(section.Value);
-					if (value != null && !value.ToString().StartsWith("System.", StringComparison.Ordinal))
-						Console.WriteLine($"\\fI{value}\\fR");
-					else
-						Console.WriteLine();
-
-					var lines = Utility.GetCustomAttributes<DescAttribute>(field, false).SelectMany(d => d.Lines);
-					foreach (var line in lines)
-						Console.WriteLine(line);
-				}
+				var defaults = (SettingsModule)utility.ModData.ObjectCreator.CreateBasic(type);
+				WriteFields(attribute.Key, defaults);
 			}
+
+			WriteFields("Launch", new LaunchArguments(new Arguments()));
 
 			Console.WriteLine(".SH FILES");
 			Console.WriteLine("Settings are stored in the ~/.openra user folder.");

@@ -11,6 +11,7 @@
 
 using System;
 using System.Linq;
+using System.Reflection;
 
 namespace OpenRA.Mods.Common.UtilityCommands.Documentation
 {
@@ -21,6 +22,45 @@ namespace OpenRA.Mods.Common.UtilityCommands.Documentation
 		bool IUtilityCommand.ValidateArguments(string[] args)
 		{
 			return true;
+		}
+
+		static void WriteFields(string key, object value)
+		{
+			var fields = Utility.GetFields(value.GetType());
+			var writeHeader = true;
+
+			foreach (var field in fields)
+			{
+				if (!Utility.HasAttribute<DescAttribute>(field))
+					continue;
+
+				if (writeHeader)
+				{
+					Console.WriteLine($"## {key}");
+					if (key == "Launch")
+						Console.WriteLine("These are runtime parameters which can't be defined in `settings.yaml`.");
+					writeHeader = false;
+				}
+
+				Console.WriteLine($"### {field.Name}");
+				var lines = Utility.GetCustomAttributes<DescAttribute>(field, false).SelectMany(d => d.Lines);
+				foreach (var line in lines)
+				{
+					Console.WriteLine(line);
+					Console.WriteLine();
+				}
+
+				var fieldValue = field.GetValue(value)?.ToString();
+				if (fieldValue != null && !fieldValue.StartsWith("System.", StringComparison.Ordinal))
+				{
+					Console.WriteLine($"**Default Value:** {value}");
+					Console.WriteLine();
+					Console.WriteLine("```miniyaml");
+					Console.WriteLine($"{key}: ");
+					Console.WriteLine($"\t{field.Name}: {fieldValue}");
+					Console.WriteLine("```");
+				}
+			}
 		}
 
 		[Desc("[VERSION]", "Generate settings documentation in markdown format.")]
@@ -55,46 +95,18 @@ namespace OpenRA.Mods.Common.UtilityCommands.Documentation
 				"including settings gets stored there to aid portable installations.");
 			Console.WriteLine();
 
-			var sections = new Settings(null, new Arguments()).Sections;
-			sections.Add("Launch", new LaunchArguments(new Arguments([])));
-			foreach (var section in sections.OrderBy(s => s.Key))
+			var sections = utility.ModData.ObjectCreator.GetTypesImplementing<SettingsModule>();
+			foreach (var type in sections.OrderBy(s => s.Name))
 			{
-				var fields = Utility.GetFields(section.Value.GetType());
-				if (fields.Any(field => Utility.GetCustomAttributes<DescAttribute>(field, false).Length > 0))
-				{
-					Console.WriteLine($"## {section.Key}");
-					if (section.Key == "Launch")
-					{
-						Console.WriteLine("These are runtime parameters which can't be defined in `settings.yaml`.");
-						Console.WriteLine();
-					}
-				}
+				var attribute = type.GetCustomAttribute<SettingsModule.YamlNodeAttribute>();
+				if (attribute == null)
+					continue;
 
-				foreach (var field in fields)
-				{
-					if (!Utility.HasAttribute<DescAttribute>(field))
-						continue;
-
-					Console.WriteLine($"### {field.Name}");
-					var lines = Utility.GetCustomAttributes<DescAttribute>(field, false).SelectMany(d => d.Lines);
-					foreach (var line in lines)
-					{
-						Console.WriteLine(line);
-						Console.WriteLine();
-					}
-
-					var value = field.GetValue(section.Value);
-					if (value != null && !value.ToString().StartsWith("System.", StringComparison.Ordinal))
-					{
-						Console.WriteLine($"**Default Value:** {value}");
-						Console.WriteLine();
-						Console.WriteLine("```miniyaml");
-						Console.WriteLine($"{section.Key}: ");
-						Console.WriteLine($"\t{field.Name}: {value}");
-						Console.WriteLine("```");
-					}
-				}
+				var defaults = (SettingsModule)utility.ModData.ObjectCreator.CreateBasic(type);
+				WriteFields(attribute.Key, defaults);
 			}
+
+			WriteFields("Launch", new LaunchArguments(new Arguments()));
 		}
 	}
 }
