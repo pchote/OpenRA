@@ -377,12 +377,12 @@ namespace OpenRA
 	{
 		readonly string settingsFile;
 
-		public readonly PlayerSettings Player;
-		public readonly GameSettings Game;
-		public readonly SoundSettings Sound;
-		public readonly GraphicSettings Graphics;
-		public readonly ServerSettings Server;
-		public readonly DebugSettings Debug;
+		internal readonly PlayerSettings Player;
+		internal readonly GameSettings Game;
+		internal readonly SoundSettings Sound;
+		internal readonly GraphicSettings Graphics;
+		internal readonly ServerSettings Server;
+		internal readonly DebugSettings Debug;
 
 		readonly Arguments args;
 		readonly TypeDictionary modules = [];
