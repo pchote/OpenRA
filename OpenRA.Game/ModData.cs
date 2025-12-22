@@ -213,6 +213,11 @@ namespace OpenRA
 			return modules.GetOrDefault<T>();
 		}
 
+		public T GetSettings<T>() where T : SettingsModule
+		{
+			return Game.Settings.GetOrCreate<T>(ObjectCreator, Manifest.Id);
+		}
+
 		public void Dispose()
 		{
 			LoadScreen?.Dispose();

@@ -34,6 +34,7 @@ namespace OpenRA
 		readonly List<IEffect> effects = [];
 		readonly List<IEffect> unpartitionedEffects = [];
 		readonly List<ISync> syncedEffects = [];
+		readonly ModData modData;
 		readonly GameSettings gameSettings;
 
 		readonly Queue<Action<World>> frameEndActions = [];
@@ -178,6 +179,7 @@ namespace OpenRA
 		{
 			Type = type;
 			OrderManager = orderManager;
+			this.modData = modData;
 			Map = map;
 
 			if (string.IsNullOrEmpty(modData.Manifest.DefaultOrderGenerator))
@@ -229,7 +231,7 @@ namespace OpenRA
 				gameInfo.MapData = preview.ToBase64String();
 
 			RulesContainTemporaryBlocker = Map.Rules.Actors.Any(a => a.Value.HasTraitInfo<ITemporaryBlockerInfo>());
-			gameSettings = Game.Settings.Game;
+			gameSettings = GetSettings<GameSettings>();
 		}
 
 		public void AddToMaps(Actor self, IOccupySpace ios)
@@ -621,6 +623,11 @@ namespace OpenRA
 
 			// In the event the replay goes out of sync, it becomes no longer usable. For polish we permanently pause the world.
 			ReplayTimestep = 0;
+		}
+
+		public T GetSettings<T>() where T : SettingsModule
+		{
+			return modData.GetSettings<T>();
 		}
 	}
 

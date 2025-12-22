@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using OpenRA.Primitives;
 
 namespace OpenRA
@@ -46,7 +47,47 @@ namespace OpenRA
 
 	public enum WorldViewport { Native, Close, Medium, Far }
 
-	public class ServerSettings
+	public abstract class SettingsModule
+	{
+		[AttributeUsage(AttributeTargets.Class)]
+		public sealed class YamlNodeAttribute(string key, bool shared = true) : Attribute
+		{
+			public readonly string Key = key;
+			public readonly bool Shared = shared;
+		}
+
+		[FieldLoader.Ignore]
+		internal string ModInstance;
+
+		[FieldLoader.Ignore]
+		public readonly MiniYamlBuilder Yaml;
+
+		internal void Commit()
+		{
+			var defaultValues = Activator.CreateInstance(GetType());
+			var fields = FieldLoader.GetTypeLoadInfo(GetType());
+			foreach (var fli in fields)
+			{
+				var serialized = FieldSaver.FormatValue(this, fli.Field);
+				var defaultSerialized = FieldSaver.FormatValue(defaultValues, fli.Field);
+
+				// Fields with their default value are not saved in the settings yaml
+				// Make sure that we erase any previously defined custom values
+				Yaml.Nodes.RemoveAll(n => n.Key == fli.YamlName);
+				if (serialized != defaultSerialized)
+					Yaml.Nodes.Add(new MiniYamlNodeBuilder(fli.YamlName, new MiniYamlBuilder(serialized)));
+			}
+		}
+
+		public void Save()
+		{
+			Commit();
+			Game.Settings.Save(false);
+		}
+	}
+
+	[YamlNode("Server", shared: true)]
+	public class ServerSettings : SettingsModule
 	{
 		[Desc("Sets the server name.")]
 		public string Name = "";
@@ -138,7 +179,8 @@ namespace OpenRA
 		}
 	}
 
-	public class DebugSettings
+	[YamlNode("Debug", shared: true)]
+	public class DebugSettings : SettingsModule
 	{
 		[Desc("Display average FPS and tick/render times")]
 		public bool PerfText = false;
@@ -186,7 +228,8 @@ namespace OpenRA
 		public bool SyncCheckBotModuleCode = false;
 	}
 
-	public class GraphicSettings
+	[YamlNode("Graphics", shared: true)]
+	public class GraphicSettings : SettingsModule
 	{
 		[Desc("This can be set to Windowed, Fullscreen or PseudoFullscreen.")]
 		public WindowMode Mode = WindowMode.PseudoFullscreen;
@@ -230,7 +273,8 @@ namespace OpenRA
 		public GLProfile GLProfile = GLProfile.Automatic;
 	}
 
-	public class SoundSettings
+	[YamlNode("Sound", shared: true)]
+	public class SoundSettings : SettingsModule
 	{
 		public float SoundVolume = 0.5f;
 		public float MusicVolume = 0.5f;
@@ -246,7 +290,8 @@ namespace OpenRA
 		public bool MuteBackgroundMusic = false;
 	}
 
-	public class PlayerSettings
+	[YamlNode("Player", shared: true)]
+	public class PlayerSettings : SettingsModule
 	{
 		[Desc("Sets the player nickname.")]
 		public string Name = "Commander";
@@ -255,7 +300,8 @@ namespace OpenRA
 		public ImmutableArray<Color> CustomColors = [];
 	}
 
-	public class SinglePlayerGameSettings
+	[YamlNode("SinglePlayerSettings", shared: true)]
+	public class SinglePlayerGameSettings : SettingsModule
 	{
 		[Desc("Sets the Auto-save frequency, in seconds")]
 		public int AutoSaveInterval = 0;
@@ -263,7 +309,8 @@ namespace OpenRA
 		public int AutoSaveMaxFileCount = 10;
 	}
 
-	public class GameSettings
+	[YamlNode("Game", shared: true)]
+	public class GameSettings : SettingsModule
 	{
 		public string Platform = "Default";
 
@@ -329,120 +376,138 @@ namespace OpenRA
 	{
 		readonly string settingsFile;
 
-		public readonly PlayerSettings Player = new();
-		public readonly GameSettings Game = new();
-		public readonly SoundSettings Sound = new();
-		public readonly GraphicSettings Graphics = new();
-		public readonly ServerSettings Server = new();
-		public readonly DebugSettings Debug = new();
-		public readonly SinglePlayerGameSettings SinglePlayerSettings = new();
-		internal Dictionary<string, Hotkey> Keys = [];
-		public readonly Dictionary<string, object> Sections;
+		public readonly PlayerSettings Player;
+		public readonly GameSettings Game;
+		public readonly SoundSettings Sound;
+		public readonly GraphicSettings Graphics;
+		public readonly ServerSettings Server;
+		public readonly DebugSettings Debug;
+		public readonly SinglePlayerGameSettings SinglePlayerSettings;
+		internal readonly Dictionary<string, Hotkey> Keys = [];
 
-		// A direct clone of the file loaded from disk.
-		// Any changed settings will be merged over this on save,
-		// allowing us to persist any unknown configuration keys
-		readonly List<MiniYamlNode> yamlCache = [];
+		readonly Arguments args;
+		readonly TypeDictionary modules = [];
+		readonly List<MiniYamlNodeBuilder> yaml;
 
 		public Settings(string file, Arguments args)
 		{
 			settingsFile = file;
-			Sections = new Dictionary<string, object>()
-			{
-				{ "Player", Player },
-				{ "Game", Game },
-				{ "Sound", Sound },
-				{ "Graphics", Graphics },
-				{ "Server", Server },
-				{ "Debug", Debug },
-				{ "SinglePlayerSettings", SinglePlayerSettings },
-			};
+			this.args = args;
 
-			// Override fieldloader to ignore invalid entries
-			var err1 = FieldLoader.UnknownFieldAction;
-			var err2 = FieldLoader.InvalidValueAction;
-			try
-			{
-				FieldLoader.UnknownFieldAction = (s, f) => Console.WriteLine($"Ignoring unknown field `{s}` on `{f.Name}`");
+			if (File.Exists(settingsFile))
+				yaml = MiniYaml.FromFile(settingsFile, false)
+					.Select(n => new MiniYamlNodeBuilder(n))
+					.ToList();
+			else
+				yaml = [];
 
-				if (File.Exists(settingsFile))
-				{
-					yamlCache = MiniYaml.FromFile(settingsFile, false).ToList();
-					foreach (var yamlSection in yamlCache)
-					{
-						if (yamlSection.Key != null && Sections.TryGetValue(yamlSection.Key, out var settingsSection))
-							LoadSectionYaml(yamlSection.Value, settingsSection);
-					}
+			// Load the default sections
+			Player = GetOrCreate<PlayerSettings>(null);
+			Game = GetOrCreate<GameSettings>(null);
+			Sound = GetOrCreate<SoundSettings>(null);
+			Graphics = GetOrCreate<GraphicSettings>(null);
+			Server = GetOrCreate<ServerSettings>(null);
+			Debug = GetOrCreate<DebugSettings>(null);
+			SinglePlayerSettings = GetOrCreate<SinglePlayerGameSettings>(null);
 
-					var keysNode = yamlCache.FirstOrDefault(n => n.Key == "Keys");
-					if (keysNode != null)
-						foreach (var node in keysNode.Value.Nodes)
-							if (node.Key != null)
-								Keys[node.Key] = FieldLoader.GetValue<Hotkey>(node.Key, node.Value.Value);
-				}
-
-				// Override with commandline args
-				foreach (var kv in Sections)
-					foreach (var f in kv.Value.GetType().GetFields())
-						if (args.Contains(kv.Key + "." + f.Name))
-							FieldLoader.LoadFieldOrProperty(kv.Value, f.Name, args.GetValue(kv.Key + "." + f.Name, ""));
-			}
-			finally
-			{
-				FieldLoader.UnknownFieldAction = err1;
-				FieldLoader.InvalidValueAction = err2;
-			}
+			var keysNode = yaml.FirstOrDefault(n => n.Key == "Keys");
+			if (keysNode != null)
+				foreach (var node in keysNode.Value.Nodes)
+					if (node.Key != null)
+						Keys[node.Key] = FieldLoader.GetValue<Hotkey>(node.Key, node.Value.Value);
 		}
 
-		public void Save()
+		public T GetOrCreate<T>(ObjectCreator objectCreator, string mod = null) where T : SettingsModule
 		{
-			var yamlCacheBuilder = yamlCache.ConvertAll(n => new MiniYamlNodeBuilder(n));
-			foreach (var kv in Sections)
+			var attribute = typeof(T).GetCustomAttribute<SettingsModule.YamlNodeAttribute>();
+			if (attribute == null)
+				throw new InvalidDataException("Settings modules must define a YamlNode attribute");
+
+			var module = attribute.Shared ? modules.GetOrDefault<T>() :
+				modules.WithInterface<T>().SingleOrDefault(m => m.ModInstance == mod);
+
+			// Lazily load/create the module on first use
+			if (module == null)
 			{
-				var sectionYaml = yamlCacheBuilder.FirstOrDefault(x => x.Key == kv.Key);
-				if (sectionYaml == null)
+				if (objectCreator != null)
+					module = (T)objectCreator.CreateBasic(typeof(T));
+				else
+					module = Activator.CreateInstance<T>();
+
+				var nodeKey = attribute.Key;
+				if (!attribute.Shared)
 				{
-					sectionYaml = new MiniYamlNodeBuilder(kv.Key, new MiniYamlBuilder(""));
-					yamlCacheBuilder.Add(sectionYaml);
+					module.ModInstance = mod;
+					nodeKey = $"{attribute.Key}@{mod}";
 				}
 
-				var defaultValues = Activator.CreateInstance(kv.Value.GetType());
-				var fields = FieldLoader.GetTypeLoadInfo(kv.Value.GetType());
-				foreach (var fli in fields)
+				var err1 = FieldLoader.UnknownFieldAction;
+				var err2 = FieldLoader.InvalidValueAction;
+				try
 				{
-					var serialized = FieldSaver.FormatValue(kv.Value, fli.Field);
-					var defaultSerialized = FieldSaver.FormatValue(defaultValues, fli.Field);
-
-					// Fields with their default value are not saved in the settings yaml
-					// Make sure that we erase any previously defined custom values
-					if (serialized == defaultSerialized)
-						sectionYaml.Value.Nodes.RemoveAll(n => n.Key == fli.YamlName);
-					else
+					FieldLoader.InvalidValueAction = (s, t, f) =>
 					{
-						// Update or add the custom value
-						var fieldYaml = sectionYaml.Value.NodeWithKeyOrDefault(fli.YamlName);
-						if (fieldYaml != null)
-							fieldYaml.Value.Value = serialized;
-						else
-							sectionYaml.Value.Nodes.Add(new MiniYamlNodeBuilder(fli.YamlName, new MiniYamlBuilder(serialized)));
+						var ret = t.GetField(f)?.GetValue(module);
+						Console.WriteLine($"FieldLoader: Cannot parse `{s}` into `{f}:{t.Name}`; substituting default `{ret}`");
+						return ret;
+					};
+
+					var node = yaml.FirstOrDefault(n => n.Key == nodeKey);
+					if (node == null)
+					{
+						node = new MiniYamlNodeBuilder(nodeKey, "");
+						yaml.Add(node);
+					}
+
+					typeof(T).GetField(nameof(SettingsModule.Yaml))?.SetValue(module, node.Value);
+					FieldLoader.Load(module, node.Value.Build());
+
+					// Override with commandline args
+					foreach (var f in typeof(T).GetFields())
+					{
+						var argName = attribute.Key + "." + f.Name;
+						if (args.Contains(argName))
+							FieldLoader.LoadFieldOrProperty(module, f.Name, args.GetValue(argName, ""));
 					}
 				}
+				finally
+				{
+					FieldLoader.UnknownFieldAction = err1;
+					FieldLoader.InvalidValueAction = err2;
+				}
+
+				modules.Add(module);
 			}
 
-			var keysYaml = yamlCacheBuilder.FirstOrDefault(x => x.Key == "Keys");
-			if (keysYaml == null)
+			return module;
+		}
+
+		public void Save(bool commitModules = true)
+		{
+			if (commitModules)
+				foreach (var m in modules)
+					((SettingsModule)m).Commit();
+
+			var keysNode = yaml.FirstOrDefault(n => n.Key == "Keys");
+			if (keysNode == null)
 			{
-				keysYaml = new MiniYamlNodeBuilder("Keys", new MiniYamlBuilder(""));
-				yamlCacheBuilder.Add(keysYaml);
+				keysNode = new MiniYamlNodeBuilder("Keys", "");
+				yaml.Add(keysNode);
 			}
 
-			keysYaml.Value.Nodes.Clear();
+			keysNode.Value.Nodes.Clear();
 			foreach (var kv in Keys)
-				keysYaml.Value.Nodes.Add(new MiniYamlNodeBuilder(kv.Key, FieldSaver.FormatValue(kv.Value)));
+				keysNode.Value.Nodes.Add(new MiniYamlNodeBuilder(kv.Key, FieldSaver.FormatValue(kv.Value)));
 
-			yamlCacheBuilder.WriteToFile(settingsFile);
-			yamlCache.Clear();
-			yamlCache.AddRange(yamlCacheBuilder.Select(n => n.Build()));
+			// Filter out modules with no fields and force a newline between each module
+			var container = new[] { null, new MiniYamlNodeBuilder("", "") };
+			IEnumerable<MiniYamlNodeBuilder> AddSpacer(MiniYamlNodeBuilder n)
+			{
+				container[0] = n;
+				return container;
+			}
+
+			yaml.Where(n => n.Value.Nodes.Count > 0).SelectMany(AddSpacer).WriteToFile(settingsFile);
 		}
 
 		static string SanitizedName(string dirty)
@@ -483,19 +548,6 @@ namespace OpenRA
 				clean = clean[..16];
 
 			return clean;
-		}
-
-		static void LoadSectionYaml(MiniYaml yaml, object section)
-		{
-			var defaults = Activator.CreateInstance(section.GetType());
-			FieldLoader.InvalidValueAction = (s, t, f) =>
-			{
-				var ret = defaults.GetType().GetField(f).GetValue(defaults);
-				Console.WriteLine($"FieldLoader: Cannot parse `{s}` into `{f}:{t.Name}`; substituting default `{ret}`");
-				return ret;
-			};
-
-			FieldLoader.Load(section, yaml);
 		}
 	}
 }
