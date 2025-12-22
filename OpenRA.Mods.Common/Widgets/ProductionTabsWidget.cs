@@ -66,6 +66,7 @@ namespace OpenRA.Mods.Common.Widgets
 	public class ProductionTabsWidget : Widget
 	{
 		readonly World world;
+		readonly GameSettings gameSettings;
 
 		public readonly string PaletteWidget = null;
 		public readonly string TypesContainer = null;
@@ -111,6 +112,7 @@ namespace OpenRA.Mods.Common.Widgets
 		public ProductionTabsWidget(World world)
 		{
 			this.world = world;
+			gameSettings = world.GetSettings<GameSettings>();
 
 			Groups = world.Map.Rules.Actors.Values.SelectMany(a => a.TraitInfos<ProductionQueueInfo>())
 				.Select(q => q.Group).Distinct().ToDictionary(g => g, g => new ProductionTabGroup() { Group = g });
@@ -236,7 +238,7 @@ namespace OpenRA.Mods.Common.Widgets
 
 		void Scroll(int amount)
 		{
-			listOffset += amount * Game.Settings.Game.UIScrollSpeed;
+			listOffset += amount * gameSettings.UIScrollSpeed;
 			listOffset = Math.Min(0, Math.Max(Bounds.Width - rightButtonRect.Width - leftButtonRect.Width - contentWidth, listOffset));
 		}
 

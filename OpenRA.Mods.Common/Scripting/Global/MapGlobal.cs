@@ -29,7 +29,7 @@ namespace OpenRA.Mods.Common.Scripting
 		{
 			sma = context.World.WorldActor.Trait<SpawnMapActors>();
 			world = context.World;
-			gameSettings = Game.Settings.Game;
+			gameSettings = world.GetSettings<GameSettings>();
 
 			// Register map actors as globals (yuck!)
 			foreach (var kv in sma.Actors)

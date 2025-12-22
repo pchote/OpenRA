@@ -44,7 +44,7 @@ namespace OpenRA.Mods.Common.Traits
 			this.order = order;
 			this.manager = manager;
 			this.info = info;
-			gameSettings = Game.Settings.Game;
+			gameSettings = world.GetSettings<GameSettings>();
 
 			directionArrows = LoadArrows(info.DirectionArrowAnimation, world, info.Arrows.Length);
 			mouseAttachment = Ui.Root.Get<MouseAttachmentWidget>("MOUSE_ATTATCHMENT");

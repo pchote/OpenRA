@@ -26,11 +26,12 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		[ObjectCreator.UseCtor]
 		public PerfDebugLogic(Widget widget, WorldRenderer worldRenderer)
 		{
+			var debugSettings = worldRenderer.World.GetSettings<DebugSettings>();
 			var perfGraph = widget.Get("GRAPH_BG");
-			perfGraph.IsVisible = () => Game.Settings.Debug.PerfGraph;
+			perfGraph.IsVisible = () => debugSettings.PerfGraph;
 
 			var perfText = widget.Get<LabelWidget>("PERF_TEXT");
-			perfText.IsVisible = () => Game.Settings.Debug.PerfText;
+			perfText.IsVisible = () => debugSettings.PerfText;
 
 			fpsTimer = Stopwatch.StartNew();
 			frameTimings.Add((Game.RenderFrame, TimeSpan.Zero));
@@ -48,8 +49,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 				var wfbSize = Game.Renderer.WorldFrameBufferSize;
 				var viewportSize = worldRenderer.Viewport.ViewportSize;
-				return $"FPS: {fps:0}\nTick {Game.LocalTick} @ {PerfHistory.Items["tick_time"].Average(Game.Settings.Debug.Samples):F1} ms\n" +
-					$"Render {Game.RenderFrame} @ {PerfHistory.Items["render"].Average(Game.Settings.Debug.Samples):F1} ms\n" +
+				return $"FPS: {fps:0}\nTick {Game.LocalTick} @ {PerfHistory.Items["tick_time"].Average(debugSettings.Samples):F1} ms\n" +
+					$"Render {Game.RenderFrame} @ {PerfHistory.Items["render"].Average(debugSettings.Samples):F1} ms\n" +
 					$"Batches: {PerfHistory.Items["batches"].LastValue}\n" +
 					$"Viewport Size: {viewportSize.Width} x {viewportSize.Height} / {Game.Renderer.WorldDownscaleFactor}\n" +
 					$"WFB Size: {wfbSize.Width} x {wfbSize.Height}";

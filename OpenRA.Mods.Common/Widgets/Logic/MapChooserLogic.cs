@@ -277,7 +277,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			remoteMapLabel.GetText = () => remoteMapText.Update((remoteSearching, remoteUnavailable));
 
 			// SetupMapTab (through RefreshMap) depends on the map search having already started
-			if (remoteMapPool != null && Game.Settings.Game.AllowDownloading)
+			var gameSettings = modData.GetSettings<GameSettings>();
+			if (remoteMapPool != null && gameSettings.AllowDownloading)
 			{
 				var services = modData.GetOrCreate<WebServices>();
 				modData.MapCache.QueryRemoteMapDetails(services.MapRepository, remoteMapPool);

@@ -21,6 +21,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic.Ingame
 	{
 		readonly World world;
 		readonly WorldRenderer worldRenderer;
+		readonly GameSettings gameSettings;
 
 		[ObjectCreator.UseCtor]
 		public TogglePlayerStanceColorHotkeyLogic(Widget widget, World world, WorldRenderer worldRenderer, ModData modData, Dictionary<string, MiniYaml> logicArgs)
@@ -28,11 +29,12 @@ namespace OpenRA.Mods.Common.Widgets.Logic.Ingame
 		{
 			this.world = world;
 			this.worldRenderer = worldRenderer;
+			gameSettings = modData.GetSettings<GameSettings>();
 		}
 
 		protected override bool OnHotkeyActivated(KeyInput e)
 		{
-			Game.Settings.Game.UsePlayerStanceColors ^= true;
+			gameSettings.UsePlayerStanceColors ^= true;
 			Player.SetupRelationshipColors(world.Players, world.LocalPlayer, worldRenderer, false);
 
 			return true;

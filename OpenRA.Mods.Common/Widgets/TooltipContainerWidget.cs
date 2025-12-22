@@ -31,9 +31,10 @@ namespace OpenRA.Mods.Common.Widgets
 		string id;
 		WidgetArgs widgetArgs;
 
-		public TooltipContainerWidget()
+		[ObjectCreator.UseCtor]
+		public TooltipContainerWidget(ModData modData)
 		{
-			graphicSettings = Game.Settings.Graphics;
+			graphicSettings = modData.GetSettings<GraphicSettings>();
 			IsVisible = () =>
 			{
 				// PERF: Only load widget once visible.

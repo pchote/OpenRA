@@ -38,6 +38,7 @@ namespace OpenRA.Mods.Common.Widgets
 	public class ScrollPanelWidget : Widget
 	{
 		readonly Ruleset modRules;
+		readonly GameSettings gameSettings;
 		public int ScrollbarWidth = 24;
 		public int BorderWidth = 1;
 		public int TopBottomSpacing = 2;
@@ -110,6 +111,7 @@ namespace OpenRA.Mods.Common.Widgets
 		public ScrollPanelWidget(ModData modData)
 		{
 			modRules = modData.DefaultRules;
+			gameSettings = modData.GetSettings<GameSettings>();
 
 			Layout = new ListLayout(this);
 
@@ -242,7 +244,7 @@ namespace OpenRA.Mods.Common.Widgets
 
 		void Scroll(int amount, bool smooth = false)
 		{
-			var newTarget = targetListOffset + amount * Game.Settings.Game.UIScrollSpeed;
+			var newTarget = targetListOffset + amount * gameSettings.UIScrollSpeed;
 			newTarget = Math.Min(0, Math.Max(Bounds.Height - ContentHeight, newTarget));
 
 			SetListOffset(newTarget, smooth);

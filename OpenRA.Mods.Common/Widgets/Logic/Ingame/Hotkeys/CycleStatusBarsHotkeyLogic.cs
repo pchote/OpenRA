@@ -19,15 +19,18 @@ namespace OpenRA.Mods.Common.Widgets.Logic.Ingame
 	public class CycleStatusBarsHotkeyLogic : SingleHotkeyBaseLogic
 	{
 		readonly StatusBarsType[] options = [StatusBarsType.Standard, StatusBarsType.DamageShow, StatusBarsType.AlwaysShow];
+		readonly GameSettings gameSettings;
 
 		[ObjectCreator.UseCtor]
 		public CycleStatusBarsHotkeyLogic(Widget widget, ModData modData, Dictionary<string, MiniYaml> logicArgs)
-			: base(widget, modData, "CycleStatusBarsKey", "WORLD_KEYHANDLER", logicArgs) { }
+			: base(widget, modData, "CycleStatusBarsKey", "WORLD_KEYHANDLER", logicArgs)
+		{
+			gameSettings = modData.GetSettings<GameSettings>();
+		}
 
 		protected override bool OnHotkeyActivated(KeyInput e)
 		{
-			Game.Settings.Game.StatusBars = options[(options.IndexOf(Game.Settings.Game.StatusBars) + 1) % options.Length];
-
+			gameSettings.StatusBars = options[(options.IndexOf(gameSettings.StatusBars) + 1) % options.Length];
 			return true;
 		}
 	}

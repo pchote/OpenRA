@@ -47,6 +47,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly CachedTransform<int, string> chatAvailableIn;
 		readonly string chatDisabled;
 		readonly Dictionary<TextNotificationPool, Widget> templates = [];
+		readonly GameSettings gameSettings;
 
 		readonly TabCompletionLogic tabCompletion = new();
 
@@ -62,6 +63,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			modRules = modData.DefaultRules;
 			this.isMenuChat = isMenuChat;
 			this.world = world;
+			gameSettings = modData.GetSettings<GameSettings>();
+			var debugSettings = modData.GetSettings<DebugSettings>();
 
 			var chatTraits = world.WorldActor.TraitsImplementing<INotifyChat>().ToArray();
 			var players = world.Players.Where(p => p != world.LocalPlayer && !p.NonCombatant && !p.IsBot);
@@ -236,7 +239,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				if (IsNotificationEligible(notification))
 					AddNotification(notification, true);
 
-			chatText.IsDisabled = () => !chatEnabled || (world.IsReplay && !Game.Settings.Debug.EnableDebugCommandsInReplays);
+			chatText.IsDisabled = () => !chatEnabled || (world.IsReplay && !debugSettings.EnableDebugCommandsInReplays);
 
 			if (!isMenuChat)
 			{
@@ -341,7 +344,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		bool IsNotificationMuted(TextNotification notification)
 		{
-			return Game.Settings.Game.HideReplayChat && world.IsReplay && notification.ClientId != TextNotificationsManager.SystemClientId;
+			return gameSettings.HideReplayChat && world.IsReplay && notification.ClientId != TextNotificationsManager.SystemClientId;
 		}
 	}
 }

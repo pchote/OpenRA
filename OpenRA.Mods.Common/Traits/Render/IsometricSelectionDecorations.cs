@@ -27,7 +27,7 @@ namespace OpenRA.Mods.Common.Traits.Render
 		readonly IsometricSelectable selectable;
 
 		public IsometricSelectionDecorations(Actor self, IsometricSelectionDecorationsInfo info)
-			: base(info)
+			: base(self, info)
 		{
 			selectable = self.Trait<IsometricSelectable>();
 		}

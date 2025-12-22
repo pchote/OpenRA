@@ -57,6 +57,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly LabelWidget noticesLabelA, noticesLabelB, noticesLabelC;
 		readonly Action onCreate;
 		readonly Action onExit;
+		readonly ServerSettings serverSettings;
 		MapPreview map = MapCache.UnknownMap;
 		bool advertiseOnline;
 
@@ -67,12 +68,10 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			this.modData = modData;
 			onCreate = openLobby;
 			this.onExit = onExit;
-
-			var settings = Game.Settings;
-
+			serverSettings = modData.GetSettings<ServerSettings>();
 			map = modData.MapCache[
 				modData.MapCache.ChooseInitialMap(
-					modData.MapCache.PickLastModifiedMap(MapVisibility.Lobby) ?? Game.Settings.Server.Map,
+					modData.MapCache.PickLastModifiedMap(MapVisibility.Lobby) ?? serverSettings.Map,
 					Game.CosmeticRandom)];
 
 			Ui.LoadWidget("MAP_PREVIEW", panel.Get("MAP_PREVIEW_ROOT"), new WidgetArgs
@@ -111,17 +110,17 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			}
 
 			var serverName = panel.Get<TextFieldWidget>("SERVER_NAME");
-			serverName.Text = Game.Settings.SanitizedServerName(settings.Server.Name);
+			serverName.Text = Game.Settings.SanitizedServerName(serverSettings.Name);
 			serverName.OnEnterKey = _ => { serverName.YieldKeyboardFocus(); return true; };
 			serverName.OnLoseFocus = () =>
 			{
 				serverName.Text = Game.Settings.SanitizedServerName(serverName.Text);
-				settings.Server.Name = serverName.Text;
+				serverSettings.Name = serverName.Text;
 			};
 
-			panel.Get<TextFieldWidget>("LISTEN_PORT").Text = settings.Server.ListenPort.ToString(NumberFormatInfo.CurrentInfo);
+			panel.Get<TextFieldWidget>("LISTEN_PORT").Text = serverSettings.ListenPort.ToString(NumberFormatInfo.CurrentInfo);
 
-			advertiseOnline = Game.Settings.Server.AdvertiseOnline;
+			advertiseOnline = serverSettings.AdvertiseOnline;
 
 			var advertiseCheckbox = panel.Get<CheckboxWidget>("ADVERTISE_CHECKBOX");
 			advertiseCheckbox.IsChecked = () => advertiseOnline;
@@ -133,7 +132,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			var passwordField = panel.GetOrNull<PasswordFieldWidget>("PASSWORD");
 			if (passwordField != null)
-				passwordField.Text = Game.Settings.Server.Password;
+				passwordField.Text = serverSettings.Password;
 
 			noticesLabelA = panel.GetOrNull<LabelWidget>("NOTICES_HEADER_A");
 			noticesLabelB = panel.GetOrNull<LabelWidget>("NOTICES_HEADER_B");
@@ -221,15 +220,15 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			var password = passwordField != null ? passwordField.Text : "";
 
 			// Save new settings.
-			Game.Settings.Server.Name = name;
-			Game.Settings.Server.ListenPort = listenPort;
-			Game.Settings.Server.AdvertiseOnline = advertiseOnline;
-			Game.Settings.Server.Map = map.Uid;
-			Game.Settings.Server.Password = password;
-			Game.Settings.Save();
+			serverSettings.Name = name;
+			serverSettings.ListenPort = listenPort;
+			serverSettings.AdvertiseOnline = advertiseOnline;
+			serverSettings.Map = map.Uid;
+			serverSettings.Password = password;
+			serverSettings.Save();
 
 			// Take a copy so that subsequent changes don't affect the server.
-			var settings = Game.Settings.Server.Clone();
+			var settings = serverSettings.Clone();
 
 			// Create and join the server.
 			try
@@ -241,7 +240,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			}
 			catch (System.Net.Sockets.SocketException e)
 			{
-				var message = FluentProvider.GetMessage(ServerCreationFailedPrompt, "port", Game.Settings.Server.ListenPort);
+				var message = FluentProvider.GetMessage(ServerCreationFailedPrompt, "port", serverSettings.ListenPort);
 
 				// AddressAlreadyInUse (WSAEADDRINUSE)
 				if (e.ErrorCode == 10048)

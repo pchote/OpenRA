@@ -38,7 +38,7 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Allow palette modifiers to change the palette.")]
 		public readonly bool AllowModifiers = true;
 
-		public override object Create(ActorInitializer init) { return new ColorPickerPalette(this); }
+		public override object Create(ActorInitializer init) { return new ColorPickerPalette(this, init.World); }
 	}
 
 	sealed class ColorPickerPalette : ILoadsPalettes, IProvidesAssetBrowserColorPickerPalettes, ITickRender
@@ -47,14 +47,14 @@ namespace OpenRA.Mods.Common.Traits
 		Color color;
 		Color preferredColor;
 
-		public ColorPickerPalette(ColorPickerPaletteInfo info)
+		public ColorPickerPalette(ColorPickerPaletteInfo info, World world)
 		{
 			this.info = info;
 
 			// All users need to use the same TraitInfo instance, chosen as the default mod rules
 			var colorManager = Game.ModData.DefaultRules.Actors[SystemActors.World].TraitInfo<IColorPickerManagerInfo>();
 			colorManager.OnColorPickerColorUpdate += c => preferredColor = c;
-			preferredColor = Game.Settings.Player.Color;
+			preferredColor = world.GetSettings<PlayerSettings>().Color;
 		}
 
 		void ILoadsPalettes.LoadPalettes(WorldRenderer wr)

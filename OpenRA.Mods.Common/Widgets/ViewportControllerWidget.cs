@@ -90,6 +90,7 @@ namespace OpenRA.Mods.Common.Widgets
 		readonly Lazy<TooltipContainerWidget> tooltipContainer;
 		readonly World world;
 		readonly WorldRenderer worldRenderer;
+		readonly GameSettings gameSettings;
 
 		int2? joystickScrollStart, joystickScrollEnd;
 		int2? standardScrollStart;
@@ -147,6 +148,7 @@ namespace OpenRA.Mods.Common.Widgets
 				Ui.Root.Get<TooltipContainerWidget>(TooltipContainer));
 
 			resourceRenderers = world.WorldActor.TraitsImplementing<IResourceRenderer>().ToArray();
+			gameSettings = modData.GetSettings<GameSettings>();
 		}
 
 		public override void Initialize(WidgetArgs args)
@@ -185,7 +187,7 @@ namespace OpenRA.Mods.Common.Widgets
 			if (IsJoystickScrolling)
 			{
 				// Base the JoystickScrolling speed on the Scroll Speed slider
-				var rate = 0.01f * Game.Settings.Game.ViewportEdgeScrollStep;
+				var rate = 0.01f * gameSettings.ViewportEdgeScrollStep;
 
 				var scroll = (joystickScrollEnd.Value - joystickScrollStart.Value).ToFloat2() * rate;
 				worldRenderer.Viewport.Scroll(scroll, false);
@@ -193,7 +195,7 @@ namespace OpenRA.Mods.Common.Widgets
 			else if (!isStandardScrolling)
 			{
 				edgeDirections = ScrollDirection.None;
-				if (Game.Settings.Game.ViewportEdgeScroll && Game.Renderer.WindowHasInputFocus)
+				if (gameSettings.ViewportEdgeScroll && Game.Renderer.WindowHasInputFocus)
 					edgeDirections = CheckForDirections();
 
 				if (Ui.KeyboardFocusWidget != null)
@@ -211,7 +213,7 @@ namespace OpenRA.Mods.Common.Widgets
 					var deltaScale = Math.Min(Game.RunTime - lastScrollTime, 25f);
 
 					var length = Math.Max(1, scroll.Length);
-					scroll *= deltaScale / (25 * length) * Game.Settings.Game.ViewportEdgeScrollStep;
+					scroll *= deltaScale / (25 * length) * gameSettings.ViewportEdgeScrollStep;
 
 					worldRenderer.Viewport.Scroll(scroll, false);
 					lastScrollTime = Game.RunTime;
@@ -286,7 +288,7 @@ namespace OpenRA.Mods.Common.Widgets
 		public override string GetCursor(int2 pos)
 		{
 			if (!(IsJoystickScrolling || isStandardScrolling) &&
-				(!Game.Settings.Game.ViewportEdgeScroll || Ui.MouseOverWidget != this))
+				(!gameSettings.ViewportEdgeScroll || Ui.MouseOverWidget != this))
 				return null;
 
 			var blockedDirections = worldRenderer.Viewport.GetBlockedDirections();
@@ -308,19 +310,18 @@ namespace OpenRA.Mods.Common.Widgets
 
 		bool IsJoystickScrolling =>
 			joystickScrollStart.HasValue && joystickScrollEnd.HasValue &&
-			(joystickScrollStart.Value - joystickScrollEnd.Value).Length > Game.Settings.Game.MouseScrollDeadzone;
+			(joystickScrollStart.Value - joystickScrollEnd.Value).Length > gameSettings.MouseScrollDeadzone;
 
 		public override bool HandleMouseInput(MouseInput mi)
 		{
-			if (mi.Event == MouseInputEvent.Scroll && mi.Modifiers.HasModifier(Game.Settings.Game.ZoomModifier))
+			if (mi.Event == MouseInputEvent.Scroll && mi.Modifiers.HasModifier(gameSettings.ZoomModifier))
 			{
-				worldRenderer.Viewport.AdjustZoom(mi.Delta.Y * Game.Settings.Game.ZoomSpeed, mi.Location);
+				worldRenderer.Viewport.AdjustZoom(mi.Delta.Y * gameSettings.ZoomSpeed, mi.Location);
 				return true;
 			}
 
-			var gs = Game.Settings.Game;
-			var scrollButton = gs.UseClassicMouseStyle ^ gs.UseAlternateScrollButton ? MouseButton.Right : MouseButton.Middle;
-			var scrollType = mi.Button.HasFlag(scrollButton) ? gs.MouseScroll : MouseScrollType.Disabled;
+			var scrollButton = gameSettings.UseClassicMouseStyle ^ gameSettings.UseAlternateScrollButton ? MouseButton.Right : MouseButton.Middle;
+			var scrollType = mi.Button.HasFlag(scrollButton) ? gameSettings.MouseScroll : MouseScrollType.Disabled;
 
 			if (scrollType == MouseScrollType.Disabled)
 				return IsJoystickScrolling || isStandardScrolling;
@@ -335,7 +336,7 @@ namespace OpenRA.Mods.Common.Widgets
 					standardScrollStart = mi.Location;
 				}
 				else if (mi.Event == MouseInputEvent.Move && (isStandardScrolling ||
-					(standardScrollStart.HasValue && ((standardScrollStart.Value - mi.Location).Length > Game.Settings.Game.MouseScrollDeadzone))))
+					(standardScrollStart.HasValue && ((standardScrollStart.Value - mi.Location).Length > gameSettings.MouseScrollDeadzone))))
 				{
 					isStandardScrolling = true;
 					var d = scrollType == MouseScrollType.Inverted ? -1 : 1;
@@ -485,9 +486,9 @@ namespace OpenRA.Mods.Common.Widgets
 			return world.OrderGenerator.HandleKeyPress(e);
 		}
 
-		static ScrollDirection CheckForDirections()
+		ScrollDirection CheckForDirections()
 		{
-			var margin = Game.Settings.Game.ViewportEdgeScrollMargin;
+			var margin = gameSettings.ViewportEdgeScrollMargin;
 			var directions = ScrollDirection.None;
 			if (Viewport.LastMousePos.X < margin)
 				directions |= ScrollDirection.Left;

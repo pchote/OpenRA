@@ -41,6 +41,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		public void WorldLoaded(World world, WorldRenderer wr)
 		{
+			var gameSettings = world.GetSettings<GameSettings>();
 			var vo = wr.Viewport.CenterPosition;
 			var viewportOrigin = new float2(vo.X, vo.Y);
 
@@ -48,7 +49,7 @@ namespace OpenRA.Mods.Common.Traits
 			long lastTime = 0;
 			wr.Viewport.ViewportCenterProvider = () =>
 			{
-				if (!Game.Settings.Game.PauseShellmap)
+				if (!gameSettings.PauseShellmap)
 				{
 					var currentTime = Game.RunTime;
 					var dt = currentTime - lastTime;

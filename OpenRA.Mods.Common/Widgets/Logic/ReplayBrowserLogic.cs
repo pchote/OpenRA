@@ -117,6 +117,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly ModData modData;
 		readonly WebServices services;
 		readonly DiscordService discordService;
+		readonly GameSettings gameSettings;
 
 		MapPreview map;
 		ReplayMetadata selectedReplay;
@@ -131,6 +132,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			services = modData.GetOrCreate<WebServices>();
 			discordService = modData.GetOrNull<DiscordService>();
+			gameSettings = modData.GetSettings<GameSettings>();
 			this.modData = modData;
 			this.onStart = onStart;
 			Game.BeforeGameStart += OnGameStart;
@@ -715,7 +717,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			try
 			{
-				if (map.Status == MapStatus.Unavailable && Game.Settings.Game.AllowDownloading)
+				if (map.Status == MapStatus.Unavailable && gameSettings.AllowDownloading)
 					modData.MapCache.QueryRemoteMapDetails(services.MapRepository, [map.Uid]);
 
 				var players = replay.GameInfo.Players

@@ -16,10 +16,10 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 	public class MuteIndicatorLogic : ChromeLogic
 	{
 		[ObjectCreator.UseCtor]
-		public MuteIndicatorLogic(Widget widget)
+		public MuteIndicatorLogic(Widget widget, ModData modData)
 		{
-			var gs = Game.Settings.Sound;
-			widget.IsVisible = () => gs.Mute;
+			var soundSettings = modData.GetSettings<SoundSettings>();
+			widget.IsVisible = () => soundSettings.Mute;
 		}
 	}
 }

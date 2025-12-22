@@ -47,6 +47,7 @@ namespace OpenRA.Mods.Common.Traits
 	{
 		readonly MusicPlaylistInfo info;
 		readonly World world;
+		readonly SoundSettings soundSettings;
 
 		readonly MusicInfo[] random;
 		readonly MusicInfo[] playlist;
@@ -55,7 +56,7 @@ namespace OpenRA.Mods.Common.Traits
 		public readonly bool IsMusicAvailable;
 		public readonly bool AllowMuteBackgroundMusic;
 
-		public bool IsBackgroundMusicMuted => AllowMuteBackgroundMusic && Game.Settings.Sound.MuteBackgroundMusic;
+		public bool IsBackgroundMusicMuted => AllowMuteBackgroundMusic && soundSettings.MuteBackgroundMusic;
 
 		public bool CurrentSongIsBackground { get; private set; }
 
@@ -66,6 +67,7 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			this.info = info;
 			this.world = world;
+			soundSettings = world.GetSettings<SoundSettings>();
 
 			IsMusicInstalled = world.Map.Rules.InstalledMusic.Any();
 			if (!IsMusicInstalled)
@@ -217,7 +219,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (!IsMusicAvailable)
 				return null;
 
-			var songs = Game.Settings.Sound.Shuffle ? random : playlist;
+			var songs = soundSettings.Shuffle ? random : playlist;
 
 			var next = reverse ? songs.Reverse().SkipWhile(m => m != currentSong)
 				.Skip(1).FirstOrDefault() ?? songs.Reverse().FirstOrDefault() :

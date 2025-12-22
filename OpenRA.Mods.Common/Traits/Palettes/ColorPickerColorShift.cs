@@ -39,7 +39,7 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Value reference for the color shift.")]
 		public readonly float ReferenceValue = 0.95f;
 
-		public override object Create(ActorInitializer init) { return new ColorPickerColorShift(this); }
+		public override object Create(ActorInitializer init) { return new ColorPickerColorShift(this, init.World); }
 	}
 
 	sealed class ColorPickerColorShift : ILoadsPalettes, ITickRender
@@ -48,14 +48,14 @@ namespace OpenRA.Mods.Common.Traits
 		Color color;
 		Color preferredColor;
 
-		public ColorPickerColorShift(ColorPickerColorShiftInfo info)
+		public ColorPickerColorShift(ColorPickerColorShiftInfo info, World world)
 		{
 			this.info = info;
 
 			// All users need to use the same TraitInfo instance, chosen as the default mod rules
 			var colorManager = Game.ModData.DefaultRules.Actors[SystemActors.World].TraitInfo<IColorPickerManagerInfo>();
 			colorManager.OnColorPickerColorUpdate += c => preferredColor = c;
-			preferredColor = Game.Settings.Player.Color;
+			preferredColor = world.GetSettings<PlayerSettings>().Color;
 		}
 
 		void ILoadsPalettes.LoadPalettes(WorldRenderer wr)

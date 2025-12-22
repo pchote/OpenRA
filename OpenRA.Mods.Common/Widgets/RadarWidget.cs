@@ -73,7 +73,7 @@ namespace OpenRA.Mods.Common.Widgets
 			this.modData = modData;
 			this.world = world;
 			this.worldRenderer = worldRenderer;
-			gameSettings = Game.Settings.Game;
+			gameSettings = world.GetSettings<GameSettings>();
 
 			radarPings = world.WorldActor.TraitOrDefault<RadarPings>();
 			radarTerrainLayers = world.WorldActor.TraitsImplementing<IRadarTerrainLayer>().ToArray();

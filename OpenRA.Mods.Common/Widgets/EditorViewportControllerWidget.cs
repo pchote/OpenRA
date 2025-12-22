@@ -45,6 +45,7 @@ namespace OpenRA.Mods.Common.Widgets
 		readonly Lazy<TooltipContainerWidget> tooltipContainer;
 		readonly WorldRenderer worldRenderer;
 		readonly EditorCursorLayer editorCursor;
+		readonly GameSettings gameSettings;
 		public int2 SelectionAltOffset { get; }
 
 		bool enableTooltips;
@@ -53,6 +54,7 @@ namespace OpenRA.Mods.Common.Widgets
 		public EditorViewportControllerWidget(WorldRenderer worldRenderer)
 		{
 			this.worldRenderer = worldRenderer;
+			gameSettings = worldRenderer.World.GetSettings<GameSettings>();
 			tooltipContainer = Exts.Lazy(() => Ui.Root.Get<TooltipContainerWidget>(TooltipContainer));
 			CurrentBrush = DefaultBrush = new EditorDefaultBrush(this, worldRenderer);
 
@@ -106,9 +108,9 @@ namespace OpenRA.Mods.Common.Widgets
 
 		public override bool HandleMouseInput(MouseInput mi)
 		{
-			if (mi.Event == MouseInputEvent.Scroll && mi.Modifiers.HasModifier(Game.Settings.Game.ZoomModifier))
+			if (mi.Event == MouseInputEvent.Scroll && mi.Modifiers.HasModifier(gameSettings.ZoomModifier))
 			{
-				worldRenderer.Viewport.AdjustZoom(mi.Delta.Y * Game.Settings.Game.ZoomSpeed, mi.Location);
+				worldRenderer.Viewport.AdjustZoom(mi.Delta.Y * gameSettings.ZoomSpeed, mi.Location);
 				return true;
 			}
 

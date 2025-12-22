@@ -30,7 +30,7 @@ namespace OpenRA.Mods.Common.Orders
 
 		public UnitOrderGenerator(World world)
 		{
-			gameSettings = Game.Settings.Game;
+			gameSettings = world.GetSettings<GameSettings>();
 		}
 
 		protected static Target TargetForInput(World world, CPos cell, int2 worldPixel, MouseInput mi)

@@ -38,23 +38,25 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Palette used for rendering sprites.")]
 		public readonly string Palette = TileSet.TerrainPaletteInternalName;
 
-		public override object Create(ActorInitializer init) { return new DrawLineToTarget(this); }
+		public override object Create(ActorInitializer init) { return new DrawLineToTarget(this, init.World); }
 	}
 
 	public class DrawLineToTarget : IRenderAboveShroud, IRenderAnnotationsWhenSelected, INotifySelected
 	{
 		readonly DrawLineToTargetInfo info;
 		readonly List<IRenderable> renderableCache = [];
+		readonly GameSettings gameSettings;
 		long lifetime;
 
-		public DrawLineToTarget(DrawLineToTargetInfo info)
+		public DrawLineToTarget(DrawLineToTargetInfo info, World world)
 		{
 			this.info = info;
+			gameSettings = world.GetSettings<GameSettings>();
 		}
 
 		public void ShowTargetLines(Actor self)
 		{
-			if (Game.Settings.Game.TargetLines < TargetLinesType.Automatic || self.IsIdle)
+			if (gameSettings.TargetLines < TargetLinesType.Automatic || self.IsIdle)
 				return;
 
 			// Reset the order line timeout.
@@ -68,7 +70,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		bool ShouldRender(Actor self)
 		{
-			if (!self.Owner.IsAlliedWith(self.World.LocalPlayer) || Game.Settings.Game.TargetLines == TargetLinesType.Disabled)
+			if (!self.Owner.IsAlliedWith(self.World.LocalPlayer) || gameSettings.TargetLines == TargetLinesType.Disabled)
 				return false;
 
 			// Players want to see the lines when in waypoint mode.

@@ -24,12 +24,14 @@ namespace OpenRA.Mods.Common.Scripting
 	{
 		readonly World world;
 		readonly MusicPlaylist playlist;
+		readonly DebugSettings debugSettings;
 
 		public MediaGlobal(ScriptContext context)
 			: base(context)
 		{
 			world = context.World;
 			playlist = world.WorldActor.Trait<MusicPlaylist>();
+			debugSettings = world.GetSettings<DebugSettings>();
 		}
 
 		[Desc("Play an announcer voice listed in notifications.yaml")]
@@ -141,7 +143,7 @@ namespace OpenRA.Mods.Common.Scripting
 		[Desc("Displays a debug message to the player, if \"Show Map Debug Messages\" is checked in the settings.")]
 		public void Debug(string format)
 		{
-			if (string.IsNullOrEmpty(format) || !Game.Settings.Debug.LuaDebug)
+			if (string.IsNullOrEmpty(format) || !debugSettings.LuaDebug)
 				return;
 
 			TextNotificationsManager.Debug(format);

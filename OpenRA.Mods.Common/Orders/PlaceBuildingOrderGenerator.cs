@@ -99,7 +99,7 @@ namespace OpenRA.Mods.Common.Orders
 			world = queue.Actor.World;
 			placeBuildingInfo = queue.Actor.Owner.PlayerActor.Info.TraitInfo<PlaceBuildingInfo>();
 			viewport = worldRenderer.Viewport;
-			gameSettings = Game.Settings.Game;
+			gameSettings = worldRenderer.World.GetSettings<GameSettings>();
 
 			if (gameSettings.UseClassicMouseStyle)
 				world.Selection.Clear();

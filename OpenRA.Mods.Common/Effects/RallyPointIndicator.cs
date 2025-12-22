@@ -23,6 +23,7 @@ namespace OpenRA.Mods.Common.Effects
 		readonly RallyPoint rp;
 		readonly Animation flag;
 		readonly Animation circles;
+		readonly GameSettings gameSettings;
 
 		readonly List<WPos> targetLineNodes = [];
 		List<CPos> cachedLocations;
@@ -31,6 +32,7 @@ namespace OpenRA.Mods.Common.Effects
 		{
 			this.building = building;
 			this.rp = rp;
+			gameSettings = building.World.GetSettings<GameSettings>();
 
 			if (rp.Info.Image != null)
 			{
@@ -107,7 +109,7 @@ namespace OpenRA.Mods.Common.Effects
 
 		IEnumerable<IRenderable> IEffectAnnotation.RenderAnnotation(WorldRenderer wr)
 		{
-			if (Game.Settings.Game.TargetLines == TargetLinesType.Disabled)
+			if (gameSettings.TargetLines == TargetLinesType.Disabled)
 				return SpriteRenderable.None;
 
 			if (!building.IsInWorld || !building.Owner.IsAlliedWith(building.World.LocalPlayer))

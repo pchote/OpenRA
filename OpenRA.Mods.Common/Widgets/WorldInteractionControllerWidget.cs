@@ -35,13 +35,13 @@ namespace OpenRA.Mods.Common.Widgets
 		int2 dragStart, mousePos;
 		bool isDragging = false;
 
-		bool IsValidDragbox => isDragging && (dragStart - mousePos).Length > Game.Settings.Game.SelectionDeadzone;
+		bool IsValidDragbox => isDragging && (dragStart - mousePos).Length > gameSettings.SelectionDeadzone;
 
 		[ObjectCreator.UseCtor]
 		public WorldInteractionControllerWidget(World world, WorldRenderer worldRenderer)
 		{
 			World = world;
-			gameSettings = Game.Settings.Game;
+			gameSettings = world.GetSettings<GameSettings>();
 			this.worldRenderer = worldRenderer;
 			if (!ChromeMetrics.TryGet("AltSelectionColor", out altSelectionColor))
 				altSelectionColor = Color.White;

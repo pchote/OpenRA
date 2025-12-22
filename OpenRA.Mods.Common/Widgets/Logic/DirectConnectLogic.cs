@@ -21,13 +21,14 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		static readonly Action DoNothing = () => { };
 
 		[ObjectCreator.UseCtor]
-		public DirectConnectLogic(Widget widget, Action onExit, Action openLobby, ConnectionTarget directConnectEndPoint)
+		public DirectConnectLogic(Widget widget, ModData modData, Action onExit, Action openLobby, ConnectionTarget directConnectEndPoint)
 		{
 			var panel = widget;
 			var ipField = panel.Get<TextFieldWidget>("IP");
 			var portField = panel.Get<TextFieldWidget>("PORT");
+			var playerSettings = modData.GetSettings<PlayerSettings>();
 
-			var text = Game.Settings.Player.LastServer;
+			var text = playerSettings.LastServer;
 			var last = text.LastIndexOf(':');
 			if (last < 0)
 			{
@@ -49,8 +50,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				if (!int.TryParse(portField.Text, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out var port))
 					port = 1234;
 
-				Game.Settings.Player.LastServer = $"{ipField.Text}:{port}";
-				Game.Settings.Save();
+				playerSettings.LastServer = $"{ipField.Text}:{port}";
+				playerSettings.Save();
 
 				ConnectionLogic.Connect(new ConnectionTarget(ipField.Text, port), "", () => { Ui.CloseWindow(); openLobby(); }, DoNothing);
 			};

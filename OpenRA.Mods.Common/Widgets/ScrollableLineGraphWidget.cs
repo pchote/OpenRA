@@ -21,6 +21,7 @@ namespace OpenRA.Mods.Common.Widgets
 	public class ScrollableLineGraphWidget : Widget
 	{
 		protected readonly Ruleset ModRules;
+		readonly GameSettings gameSettings;
 		public Func<IEnumerable<ScrollableLineGraphSeries>> GetSeries;
 		public Func<string> GetValueFormat;
 		public Func<string> GetXAxisValueFormat;
@@ -96,6 +97,7 @@ namespace OpenRA.Mods.Common.Widgets
 
 			getLeftArrowImage = WidgetUtils.GetCachedStatefulImage(ScrollbarDecorations, DecorationScrollLeft);
 			getRightArrowImage = WidgetUtils.GetCachedStatefulImage(ScrollbarDecorations, DecorationScrollRight);
+			gameSettings = modData.GetSettings<GameSettings>();
 		}
 
 		protected ScrollableLineGraphWidget(ScrollableLineGraphWidget other)
@@ -138,6 +140,7 @@ namespace OpenRA.Mods.Common.Widgets
 
 			getLeftArrowImage = WidgetUtils.GetCachedStatefulImage(ScrollbarDecorations, DecorationScrollLeft);
 			getRightArrowImage = WidgetUtils.GetCachedStatefulImage(ScrollbarDecorations, DecorationScrollRight);
+			gameSettings = other.gameSettings;
 		}
 
 		void SetHorizontalOffset(float value, bool smooth)
@@ -176,7 +179,7 @@ namespace OpenRA.Mods.Common.Widgets
 
 		void Scroll(float amount, bool smooth = true)
 		{
-			var newTarget = targetHorizontalOffset + amount * Game.Settings.Game.UIScrollSpeed;
+			var newTarget = targetHorizontalOffset + amount * gameSettings.UIScrollSpeed;
 			SetHorizontalOffset(newTarget, smooth);
 			autoScrollEnabled = false;
 			manuallyScrolled = true;

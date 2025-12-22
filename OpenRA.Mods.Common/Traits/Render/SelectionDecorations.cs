@@ -27,7 +27,7 @@ namespace OpenRA.Mods.Common.Traits.Render
 		readonly Interactable interactable;
 
 		public SelectionDecorations(Actor self, SelectionDecorationsInfo info)
-			: base(info)
+			: base(self, info)
 		{
 			interactable = self.Trait<Interactable>();
 		}

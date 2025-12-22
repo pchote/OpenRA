@@ -28,6 +28,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly World world;
 		readonly Player player;
 		readonly PlayerResources playerResources;
+		readonly SoundSettings soundSettings;
 		readonly LabelWithTooltipWidget cashLabel;
 		readonly CachedTransform<(int Resources, int Capacity), string> siloUsageTooltipCache;
 
@@ -37,11 +38,12 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		string siloUsageTooltip = "";
 
 		[ObjectCreator.UseCtor]
-		public IngameCashCounterLogic(Widget widget, ModData modData, World world)
+		public IngameCashCounterLogic(Widget widget, World world)
 		{
 			this.world = world;
 			player = world.LocalPlayer;
 			playerResources = player.PlayerActor.Trait<PlayerResources>();
+			soundSettings = world.GetSettings<SoundSettings>();
 			displayResources = playerResources.GetCashAndResources();
 
 			siloUsageTooltipCache = new CachedTransform<(int Resources, int Capacity), string>(x =>
@@ -64,14 +66,14 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			{
 				displayResources += move;
 
-				if (Game.Settings.Sound.CashTicks)
+				if (soundSettings.CashTicks)
 					Game.Sound.PlayNotification(world.Map.Rules, player, "Sounds", playerResources.Info.CashTickUpNotification, player.Faction.InternalName);
 			}
 			else if (displayResources > actual)
 			{
 				displayResources -= move;
 
-				if (Game.Settings.Sound.CashTicks && nextCashTickTime == 0)
+				if (soundSettings.CashTicks && nextCashTickTime == 0)
 				{
 					Game.Sound.PlayNotification(world.Map.Rules, player, "Sounds", playerResources.Info.CashTickDownNotification, player.Faction.InternalName);
 					nextCashTickTime = 2;

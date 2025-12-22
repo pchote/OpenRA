@@ -26,14 +26,16 @@ namespace OpenRA.Mods.Common.Traits.Render
 	{
 		IDecoration[] decorations;
 		IDecoration[] selectedDecorations;
+		readonly GameSettings gameSettings;
 
 		protected readonly SelectionDecorationsBaseInfo Info;
 
 		DeveloperMode developerMode;
 
-		protected SelectionDecorationsBase(SelectionDecorationsBaseInfo info)
+		protected SelectionDecorationsBase(Actor self, SelectionDecorationsBaseInfo info)
 		{
 			Info = info;
+			gameSettings = self.World.GetSettings<GameSettings>();
 		}
 
 		void INotifyCreated.Created(Actor self)
@@ -72,19 +74,18 @@ namespace OpenRA.Mods.Common.Traits.Render
 		{
 			var selected = self.World.Selection.Contains(self);
 			var regularWorld = self.World.Type == WorldType.Regular;
-			var statusBars = Game.Settings.Game.StatusBars;
 
 			// Health bars are shown when:
 			//  * actor is selected / in active drag rectangle / under the mouse
 			//  * status bar preference is set to "always show"
 			//  * status bar preference is set to "when damaged" and actor is damaged
-			var displayHealth = selected || (regularWorld && statusBars == StatusBarsType.AlwaysShow)
-				|| (regularWorld && statusBars == StatusBarsType.DamageShow && self.GetDamageState() != DamageState.Undamaged);
+			var displayHealth = selected || (regularWorld && gameSettings.StatusBars == StatusBarsType.AlwaysShow)
+				|| (regularWorld && gameSettings.StatusBars == StatusBarsType.DamageShow && self.GetDamageState() != DamageState.Undamaged);
 
 			// Extra bars are shown when:
 			//  * actor is selected / in active drag rectangle / under the mouse
 			//  * status bar preference is set to "always show" or "when damaged"
-			var displayExtra = selected || (regularWorld && statusBars != StatusBarsType.Standard);
+			var displayExtra = selected || (regularWorld && gameSettings.StatusBars != StatusBarsType.Standard);
 
 			// PERF: Only search rollover enumerable if needed.
 			if (!displayHealth || !displayExtra)

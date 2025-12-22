@@ -25,10 +25,10 @@ namespace OpenRA.Mods.Common.Widgets
 		int2 location;
 
 		[ObjectCreator.UseCtor]
-		public MouseAttachmentWidget(WorldRenderer worldRenderer)
+		public MouseAttachmentWidget(ModData modData, WorldRenderer worldRenderer)
 		{
 			this.worldRenderer = worldRenderer;
-			graphicSettings = Game.Settings.Graphics;
+			graphicSettings = modData.GetSettings<GraphicSettings>();
 		}
 
 		public override void Draw()

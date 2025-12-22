@@ -28,6 +28,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		public ColorPickerLogic(Widget widget, ModData modData, World world, Color initialColor, Action<Color> onChange, Action<Widget> extraLogic,
 			Dictionary<string, MiniYaml> logicArgs)
 		{
+			var playerSettings = modData.GetSettings<PlayerSettings>();
 			var mixer = widget.Get<ColorMixerWidget>("MIXER");
 			var hueSlider = widget.Get<HueSliderWidget>("HUE_SLIDER");
 
@@ -140,8 +141,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					var newSwatch = customColorTemplate.Clone();
 					var getColor = new CachedTransform<Color, Color>(c => colorManager.MakeValid(c, world.LocalRandom, [], []));
 
-					newSwatch.GetColor = () => getColor.Update(Game.Settings.Player.CustomColors[colorIndex]);
-					newSwatch.IsVisible = () => Game.Settings.Player.CustomColors.Length > colorIndex;
+					newSwatch.GetColor = () => getColor.Update(playerSettings.CustomColors[colorIndex]);
+					newSwatch.IsVisible = () => playerSettings.CustomColors.Length > colorIndex;
 					newSwatch.Bounds.X = i * newSwatch.Bounds.Width;
 					newSwatch.Bounds.Y = j * newSwatch.Bounds.Height;
 					newSwatch.OnMouseUp = m =>
@@ -165,12 +166,12 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					//  - Remove any duplicates of the new color
 					//  - Add the new color to the end
 					//  - Save the last N colors
-					Game.Settings.Player.CustomColors = Game.Settings.Player.CustomColors
+					playerSettings.CustomColors = playerSettings.CustomColors
 						.Where(c => c != mixer.Color)
 						.Append(mixer.Color)
 						.Reverse().Take(paletteCustomRows * paletteCols).Reverse()
 						.ToImmutableArray();
-					Game.Settings.Save();
+					playerSettings.Save();
 
 					// Flash the palette tab to show players that something has happened
 					if (!paletteTabOpenedLast)

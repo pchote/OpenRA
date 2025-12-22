@@ -122,6 +122,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly int joinButtonY;
 
 		readonly Action<GameServer> onJoin;
+		readonly GameSettings gameSettings;
 
 		GameServer currentServer;
 		MapPreview currentMap;
@@ -160,6 +161,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		{
 			this.modData = modData;
 			this.onJoin = onJoin;
+			gameSettings = modData.GetSettings<GameSettings>();
 
 			playing = FluentProvider.GetMessage(Playing);
 			waiting = FluentProvider.GetMessage(Waiting);
@@ -234,11 +236,10 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			progressText.IsVisible = () => searchStatus != SearchStatus.Hidden;
 			progressText.GetText = ProgressLabelText;
 
-			var gs = Game.Settings.Game;
 			void ToggleFilterFlag(MPGameFilters f)
 			{
-				gs.MPGameFilters ^= f;
-				Game.Settings.Save();
+				gameSettings.MPGameFilters ^= f;
+				gameSettings.Save();
 				RefreshServerList();
 			}
 
@@ -254,35 +255,35 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				var showWaitingCheckbox = filtersPanel.GetOrNull<CheckboxWidget>("WAITING_FOR_PLAYERS");
 				if (showWaitingCheckbox != null)
 				{
-					showWaitingCheckbox.IsChecked = () => gs.MPGameFilters.HasFlag(MPGameFilters.Waiting);
+					showWaitingCheckbox.IsChecked = () => gameSettings.MPGameFilters.HasFlag(MPGameFilters.Waiting);
 					showWaitingCheckbox.OnClick = () => ToggleFilterFlag(MPGameFilters.Waiting);
 				}
 
 				var showEmptyCheckbox = filtersPanel.GetOrNull<CheckboxWidget>("EMPTY");
 				if (showEmptyCheckbox != null)
 				{
-					showEmptyCheckbox.IsChecked = () => gs.MPGameFilters.HasFlag(MPGameFilters.Empty);
+					showEmptyCheckbox.IsChecked = () => gameSettings.MPGameFilters.HasFlag(MPGameFilters.Empty);
 					showEmptyCheckbox.OnClick = () => ToggleFilterFlag(MPGameFilters.Empty);
 				}
 
 				var showAlreadyStartedCheckbox = filtersPanel.GetOrNull<CheckboxWidget>("ALREADY_STARTED");
 				if (showAlreadyStartedCheckbox != null)
 				{
-					showAlreadyStartedCheckbox.IsChecked = () => gs.MPGameFilters.HasFlag(MPGameFilters.Started);
+					showAlreadyStartedCheckbox.IsChecked = () => gameSettings.MPGameFilters.HasFlag(MPGameFilters.Started);
 					showAlreadyStartedCheckbox.OnClick = () => ToggleFilterFlag(MPGameFilters.Started);
 				}
 
 				var showProtectedCheckbox = filtersPanel.GetOrNull<CheckboxWidget>("PASSWORD_PROTECTED");
 				if (showProtectedCheckbox != null)
 				{
-					showProtectedCheckbox.IsChecked = () => gs.MPGameFilters.HasFlag(MPGameFilters.Protected);
+					showProtectedCheckbox.IsChecked = () => gameSettings.MPGameFilters.HasFlag(MPGameFilters.Protected);
 					showProtectedCheckbox.OnClick = () => ToggleFilterFlag(MPGameFilters.Protected);
 				}
 
 				var showIncompatibleCheckbox = filtersPanel.GetOrNull<CheckboxWidget>("INCOMPATIBLE_VERSION");
 				if (showIncompatibleCheckbox != null)
 				{
-					showIncompatibleCheckbox.IsChecked = () => gs.MPGameFilters.HasFlag(MPGameFilters.Incompatible);
+					showIncompatibleCheckbox.IsChecked = () => gameSettings.MPGameFilters.HasFlag(MPGameFilters.Incompatible);
 					showIncompatibleCheckbox.OnClick = () => ToggleFilterFlag(MPGameFilters.Incompatible);
 				}
 
@@ -674,7 +675,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				searchStatus = SearchStatus.Hidden;
 
 				// Search for any unknown maps
-				if (Game.Settings.Game.AllowDownloading)
+				if (gameSettings.AllowDownloading)
 					modData.MapCache.QueryRemoteMapDetails(services.MapRepository, games.Where(g => !Filtered(g)).Select(g => g.Map));
 
 				foreach (var row in rows)
@@ -858,7 +859,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		bool Filtered(GameServer game)
 		{
-			var filters = Game.Settings.Game.MPGameFilters;
+			var filters = gameSettings.MPGameFilters;
 			if (game.State == (int)ServerState.GameStarted && !filters.HasFlag(MPGameFilters.Started))
 				return true;
 

@@ -31,9 +31,10 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		MusicInfo currentSong = null;
 
 		[ObjectCreator.UseCtor]
-		public MusicPlayerLogic(Widget widget, World world, ModData modData, Action onExit)
+		public MusicPlayerLogic(Widget widget, World world, Action onExit)
 		{
 			var panel = widget;
+			var soundSettings = world.GetSettings<SoundSettings>();
 
 			musicList = panel.Get<ScrollPanelWidget>("MUSIC_LIST");
 			itemTemplate = musicList.Get<ScrollItemWidget>("MUSIC_TEMPLATE");
@@ -48,7 +49,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			{
 				panel.Get<LabelWidget>("MUTE_LABEL").GetText = () =>
 				{
-					if (Game.Settings.Sound.Mute)
+					if (soundSettings.Mute)
 						return FluentProvider.GetMessage(SoundMuted);
 
 					return "";
@@ -78,13 +79,13 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			prevButton.IsDisabled = NoMusic;
 
 			var shuffleCheckbox = panel.Get<CheckboxWidget>("SHUFFLE");
-			shuffleCheckbox.IsChecked = () => Game.Settings.Sound.Shuffle;
-			shuffleCheckbox.OnClick = () => Game.Settings.Sound.Shuffle ^= true;
+			shuffleCheckbox.IsChecked = () => soundSettings.Shuffle;
+			shuffleCheckbox.OnClick = () => soundSettings.Shuffle ^= true;
 			shuffleCheckbox.IsDisabled = () => musicPlaylist.CurrentSongIsBackground;
 
 			var repeatCheckbox = panel.Get<CheckboxWidget>("REPEAT");
-			repeatCheckbox.IsChecked = () => Game.Settings.Sound.Repeat;
-			repeatCheckbox.OnClick = () => Game.Sound.SetMusicLooped(!Game.Settings.Sound.Repeat);
+			repeatCheckbox.IsChecked = () => soundSettings.Repeat;
+			repeatCheckbox.OnClick = () => Game.Sound.SetMusicLooped(!soundSettings.Repeat);
 			repeatCheckbox.IsDisabled = () => musicPlaylist.CurrentSongIsBackground;
 
 			panel.Get<LabelWidget>("TIME_LABEL").GetText = () =>
@@ -127,7 +128,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			var backButton = panel.GetOrNull<ButtonWidget>("BACK_BUTTON");
 			if (backButton != null)
-				backButton.OnClick = () => { Game.Settings.Save(); Ui.CloseWindow(); onExit(); };
+				backButton.OnClick = () => { soundSettings.Save(); Ui.CloseWindow(); onExit(); };
 		}
 
 		public void BuildMusicTable()
