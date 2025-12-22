@@ -47,6 +47,7 @@ namespace OpenRA.Mods.Common.Traits
 		readonly ModularBotInfo info;
 		readonly World world;
 		readonly Queue<Order> orders = [];
+		readonly DebugSettings debugSettings;
 
 		Player player;
 
@@ -60,6 +61,7 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			this.info = info;
 			world = init.World;
+			debugSettings = world.GetSettings<DebugSettings>();
 		}
 
 		// Called by the host's player creation code
@@ -83,6 +85,12 @@ namespace OpenRA.Mods.Common.Traits
 			orders.Enqueue(order);
 		}
 
+		void IBot.Debug(string message)
+		{
+			if (debugSettings.BotDebug)
+				TextNotificationsManager.Debug(message);
+		}
+
 		void ITick.Tick(Actor self)
 		{
 			if (!IsEnabled || self.World.IsLoadingGameSave)
@@ -90,7 +98,7 @@ namespace OpenRA.Mods.Common.Traits
 
 			using (new PerfSample("bot_tick"))
 			{
-				Sync.RunUnsynced(Game.Settings.Debug.SyncCheckBotModuleCode, world, () =>
+				Sync.RunUnsynced(debugSettings.SyncCheckBotModuleCode, world, () =>
 				{
 					foreach (var t in tickModules)
 						if (t.IsTraitEnabled())
@@ -110,7 +118,7 @@ namespace OpenRA.Mods.Common.Traits
 
 			using (new PerfSample("bot_attack_response"))
 			{
-				Sync.RunUnsynced(Game.Settings.Debug.SyncCheckBotModuleCode, world, () =>
+				Sync.RunUnsynced(debugSettings.SyncCheckBotModuleCode, world, () =>
 				{
 					foreach (var t in attackResponseModules)
 						if (t.IsTraitEnabled())

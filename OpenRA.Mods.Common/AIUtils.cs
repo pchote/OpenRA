@@ -54,12 +54,6 @@ namespace OpenRA.Mods.Common
 			return actorIndex.Actors.Count(a => !a.IsDead);
 		}
 
-		public static void BotDebug(string format, params object[] args)
-		{
-			if (Game.Settings.Debug.BotDebug)
-				TextNotificationsManager.Debug(format, args);
-		}
-
 		public static IEnumerable<Order> ClearBlockersOrders(List<CPos> tiles, Player owner, Actor ignoreActor = null)
 		{
 			var world = owner.World;

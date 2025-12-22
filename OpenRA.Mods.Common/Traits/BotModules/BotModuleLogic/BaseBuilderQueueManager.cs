@@ -158,7 +158,7 @@ namespace OpenRA.Mods.Common.Traits
 				if (playerResources.GetCashAndResources() < baseBuilder.Info.ProductionMinCashRequirement || itemQueuedThisTick)
 					return false;
 
-				var item = ChooseBuildingToBuild(queue);
+				var item = ChooseBuildingToBuild(bot, queue);
 				if (item == null)
 					return false;
 
@@ -207,7 +207,7 @@ namespace OpenRA.Mods.Common.Traits
 					// If we just reached the maximum fail count, cache the number of current structures
 					if (++failCount >= baseBuilder.Info.MaximumFailedPlacementAttempts)
 					{
-						AIUtils.BotDebug($"{player} has nowhere to place {currentBuilding.Item}");
+						bot.Debug($"{player} has nowhere to place {currentBuilding.Item}");
 						bot.QueueOrder(Order.CancelProduction(queue.Actor, currentBuilding.Item, 1));
 						if (baseBuilder.BaseExpansionModules == null)
 						{
@@ -288,7 +288,7 @@ namespace OpenRA.Mods.Common.Traits
 				.Sum(p => p.Amount) + playerPower.ExcessPower >= baseBuilder.Info.MinimumExcessPower;
 		}
 
-		ActorInfo ChooseBuildingToBuild(ProductionQueue queue)
+		ActorInfo ChooseBuildingToBuild(IBot bot, ProductionQueue queue)
 		{
 			var buildableThings = queue.BuildableItems().ToList();
 
@@ -300,7 +300,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (playerPower != null && playerPower.ExcessPower < minimumExcessPower &&
 				power != null && power.TraitInfos<PowerInfo>().Where(i => i.EnabledByDefault).Sum(p => p.Amount) > 0)
 			{
-				AIUtils.BotDebug("{0} decided to build {1}: Priority override (low power)", queue.Actor.Owner, power.Name);
+				bot.Debug($"{queue.Actor.Owner} decided to build {power.Name}: Priority override (low power)");
 				return power;
 			}
 
@@ -310,13 +310,13 @@ namespace OpenRA.Mods.Common.Traits
 				var refinery = GetProducibleBuilding(baseBuilder.Info.RefineryTypes, buildableThings);
 				if (refinery != null && HasSufficientPowerForActor(refinery))
 				{
-					AIUtils.BotDebug("{0} decided to build {1}: Priority override (refinery)", queue.Actor.Owner, refinery.Name);
+					bot.Debug($"{queue.Actor.Owner} decided to build {refinery.Name}: Priority override (refinery)");
 					return refinery;
 				}
 
 				if (power != null && refinery != null && !HasSufficientPowerForActor(refinery))
 				{
-					AIUtils.BotDebug("{0} decided to build {1}: Priority override (would be low power)", queue.Actor.Owner, power.Name);
+					bot.Debug($"{queue.Actor.Owner} decided to build {power.Name}: Priority override (would be low power)");
 					return power;
 				}
 			}
@@ -328,13 +328,13 @@ namespace OpenRA.Mods.Common.Traits
 				var production = GetProducibleBuilding(baseBuilder.Info.ProductionTypes, buildableThings);
 				if (production != null && HasSufficientPowerForActor(production))
 				{
-					AIUtils.BotDebug("{0} decided to build {1}: Priority override (production)", queue.Actor.Owner, production.Name);
+					bot.Debug($"{queue.Actor.Owner} decided to build {production.Name}: Priority override (production)");
 					return production;
 				}
 
 				if (power != null && production != null && !HasSufficientPowerForActor(production))
 				{
-					AIUtils.BotDebug("{0} decided to build {1}: Priority override (would be low power)", queue.Actor.Owner, power.Name);
+					bot.Debug($"{queue.Actor.Owner} decided to build {power.Name}: Priority override (would be low power)");
 					return power;
 				}
 			}
@@ -347,13 +347,13 @@ namespace OpenRA.Mods.Common.Traits
 				var navalproduction = GetProducibleBuilding(baseBuilder.Info.NavalProductionTypes, buildableThings);
 				if (navalproduction != null && HasSufficientPowerForActor(navalproduction))
 				{
-					AIUtils.BotDebug("{0} decided to build {1}: Priority override (navalproduction)", queue.Actor.Owner, navalproduction.Name);
+					bot.Debug($"{queue.Actor.Owner} decided to build {navalproduction.Name}: Priority override (navalproduction)");
 					return navalproduction;
 				}
 
 				if (power != null && navalproduction != null && !HasSufficientPowerForActor(navalproduction))
 				{
-					AIUtils.BotDebug("{0} decided to build {1}: Priority override (would be low power)", queue.Actor.Owner, power.Name);
+					bot.Debug($"{queue.Actor.Owner} decided to build {power.Name}: Priority override (would be low power)");
 					return power;
 				}
 			}
@@ -364,13 +364,13 @@ namespace OpenRA.Mods.Common.Traits
 				var silo = GetProducibleBuilding(baseBuilder.Info.SiloTypes, buildableThings);
 				if (silo != null && HasSufficientPowerForActor(silo))
 				{
-					AIUtils.BotDebug("{0} decided to build {1}: Priority override (silo)", queue.Actor.Owner, silo.Name);
+					bot.Debug($"{queue.Actor.Owner} decided to build {silo.Name}: Priority override (silo)");
 					return silo;
 				}
 
 				if (power != null && silo != null && !HasSufficientPowerForActor(silo))
 				{
-					AIUtils.BotDebug("{0} decided to build {1}: Priority override (would be low power)", queue.Actor.Owner, power.Name);
+					bot.Debug($"{queue.Actor.Owner} decided to build {power.Name}: Priority override (would be low power)");
 					return power;
 				}
 			}
@@ -422,22 +422,23 @@ namespace OpenRA.Mods.Common.Traits
 					if (power != null && power.TraitInfos<PowerInfo>().Where(i => i.EnabledByDefault).Sum(pi => pi.Amount) > 0)
 					{
 						if (playerPower.PowerOutageRemainingTicks > 0)
-							AIUtils.BotDebug("{0} decided to build {1}: Priority override (is low power)", queue.Actor.Owner, power.Name);
+							bot.Debug($"{queue.Actor.Owner} decided to build {power.Name}: Priority override (is low power)");
 						else
-							AIUtils.BotDebug("{0} decided to build {1}: Priority override (would be low power)", queue.Actor.Owner, power.Name);
+							bot.Debug($"{queue.Actor.Owner} decided to build {power.Name}: Priority override (would be low power)");
 
 						return power;
 					}
 				}
 
 				// Lets build this
-				AIUtils.BotDebug("{0} decided to build {1}: Desired is {2} ({3} / {4}); current is {5} / {4}",
-					queue.Actor.Owner, name, frac.Value, frac.Value * playerBuildings.Length, playerBuildings.Length, count);
+				bot.Debug($"{queue.Actor.Owner} decided to build {name}: " +
+					$"Desired is {frac.Value} ({frac.Value * playerBuildings.Length} / {playerBuildings.Length}); " +
+					$"current is {count} / {playerBuildings.Length}");
 				return actor;
 			}
 
 			// Too spammy to keep enabled all the time, but very useful when debugging specific issues.
-			// AIUtils.BotDebug("{0} couldn't decide what to build for queue {1}.", queue.Actor.Owner, queue.Info.Group);
+			// bot.Debug($"{queue.Actor.Owner} couldn't decide what to build for queue {queue.Info.Group}.");
 			return null;
 		}
 

@@ -414,6 +414,7 @@ namespace OpenRA.Traits
 	{
 		void Activate(Player p);
 		void QueueOrder(Order order);
+		void Debug(string message);
 		IBotInfo Info { get; }
 		Player Player { get; }
 	}

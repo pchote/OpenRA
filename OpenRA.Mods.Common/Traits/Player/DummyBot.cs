@@ -51,6 +51,7 @@ namespace OpenRA.Mods.Common.Traits
 		}
 
 		void IBot.QueueOrder(Order order) { }
+		void IBot.Debug(string message) { }
 
 		IBotInfo IBot.Info => info;
 		Player IBot.Player => player;

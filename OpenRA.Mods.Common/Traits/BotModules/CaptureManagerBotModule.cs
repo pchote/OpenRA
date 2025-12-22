@@ -152,7 +152,7 @@ namespace OpenRA.Mods.Common.Traits
 					continue;
 
 				bot.QueueOrder(new Order("CaptureActor", capturer.Actor, Target.FromActor(targetActor), true));
-				AIUtils.BotDebug("AI ({0}): Ordered {1} to capture {2}", player.ClientIndex, capturer.Actor, targetActor);
+				bot.Debug($"AI ({player.ClientIndex}): Ordered {capturer.Actor} to capture {targetActor}");
 				activeCapturers.Add(capturer.Actor);
 			}
 		}

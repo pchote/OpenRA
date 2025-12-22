@@ -407,7 +407,7 @@ namespace OpenRA.Mods.Common.Traits
 
 			if (needsRallyPoint)
 			{
-				bot.QueueOrder(new Order("SetRallyPoint", rp.Actor, Target.FromCell(world, ChooseRallyLocationNear(rp.Actor)), false)
+				bot.QueueOrder(new Order("SetRallyPoint", rp.Actor, Target.FromCell(world, ChooseRallyLocationNear(bot, rp.Actor)), false)
 				{
 					SuppressVisualFeedback = true
 				});
@@ -415,7 +415,7 @@ namespace OpenRA.Mods.Common.Traits
 		}
 
 		// Won't work for shipyards...
-		CPos ChooseRallyLocationNear(Actor producer)
+		CPos ChooseRallyLocationNear(IBot bot, Actor producer)
 		{
 			var locomotors = LocomotorsForProducibles(producer);
 			var possibleRallyPoints = world.Map.FindTilesInCircle(producer.Location, Info.RallyPointScanRadius)
@@ -424,7 +424,7 @@ namespace OpenRA.Mods.Common.Traits
 
 			if (possibleRallyPoints.Count == 0)
 			{
-				AIUtils.BotDebug("{0} has no possible rallypoint near {1}", producer.Owner, producer.Location);
+				bot.Debug($"{producer.Owner} has no possible rallypoint near {producer.Location}");
 				return producer.Location;
 			}
 

@@ -153,7 +153,7 @@ namespace OpenRA.Mods.Common.Traits
 								minelayer.Actor, [minelayer.Actor.Location], enemy.Location, BlockedByActor.Immovable, laneBias: false);
 							if (cells != null && cells.Count != 0)
 							{
-								AIUtils.BotDebug($"{player}: try find a location to lay mine.");
+								bot.Debug($"{player}: try find a location to lay mine.");
 								EnqueueConflictPosition(cells[cells.Count / 2]);
 
 								// We don't do other things in this tick, just find new location and abort
@@ -217,14 +217,14 @@ namespace OpenRA.Mods.Common.Traits
 				{
 					if (useFavoritePosition)
 					{
-						AIUtils.BotDebug($"{player}: Use favorite position {minelayingPosition} at index {currentFavoritePositionIndex}");
+						bot.Debug($"{player}: Use favorite position {minelayingPosition} at index {currentFavoritePositionIndex}");
 						NextFavoritePositionIndex();
 					}
 					else
 					{
 						DequeueFirstConflictPosition();
 						AddPositionToFavoritePositions(minelayingPosition);
-						AIUtils.BotDebug($"{player}: Use in time conflict position {minelayingPosition}");
+						bot.Debug($"{player}: Use in time conflict position {minelayingPosition}");
 					}
 
 					var vec = new CVec(Info.MineFieldRadius, Info.MineFieldRadius);

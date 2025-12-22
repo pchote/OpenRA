@@ -84,31 +84,31 @@ namespace OpenRA.Mods.Common.Traits
 				{
 					if (powerDecision == null)
 					{
-						AIUtils.BotDebug($"{player.ResolvedPlayerName} couldn't find powerDecision for {sp.Info.OrderName}");
+						bot.Debug($"{player.ResolvedPlayerName} couldn't find powerDecision for {sp.Info.OrderName}");
 						continue;
 					}
 
-					var attackLocation = FindCoarseAttackLocationToSupportPower(sp);
+					var attackLocation = FindCoarseAttackLocationToSupportPower(bot, sp);
 					if (attackLocation == null)
 					{
-						AIUtils.BotDebug($"{player.ResolvedPlayerName} can't find suitable coarse attack location for support power {sp.Info.OrderName}. Delaying rescan.");
+						bot.Debug($"{player.ResolvedPlayerName} can't find suitable coarse attack location for support power {sp.Info.OrderName}. Delaying rescan.");
 						waitingPowers[sp] += powerDecision.GetNextScanTime(world);
 
 						continue;
 					}
 
 					// Found a target location, check for precise target
-					attackLocation = FindFineAttackLocationToSupportPower(sp, (CPos)attackLocation);
+					attackLocation = FindFineAttackLocationToSupportPower(bot, sp, (CPos)attackLocation);
 					if (attackLocation == null)
 					{
-						AIUtils.BotDebug($"{player.ResolvedPlayerName} can't find suitable final attack location for support power {sp.Info.OrderName}. Delaying rescan.");
+						bot.Debug($"{player.ResolvedPlayerName} can't find suitable final attack location for support power {sp.Info.OrderName}. Delaying rescan.");
 						waitingPowers[sp] += powerDecision.GetNextScanTime(world);
 
 						continue;
 					}
 
 					// Valid target found, delay by a few ticks to avoid rescanning before power fires via order
-					AIUtils.BotDebug($"{player.ResolvedPlayerName} found new target location {attackLocation} for support power {sp.Info.OrderName}.");
+					bot.Debug($"{player.ResolvedPlayerName} found new target location {attackLocation} for support power {sp.Info.OrderName}.");
 					waitingPowers[sp] += 10;
 
 					// Note: SelectDirectionalTarget uses uint.MaxValue in ExtraData to indicate that the player did not pick a direction.
@@ -127,12 +127,12 @@ namespace OpenRA.Mods.Common.Traits
 		}
 
 		/// <summary>Scans the map in chunks, evaluating all actors in each.</summary>
-		CPos? FindCoarseAttackLocationToSupportPower(SupportPowerInstance readyPower)
+		CPos? FindCoarseAttackLocationToSupportPower(IBot bot, SupportPowerInstance readyPower)
 		{
 			var powerDecision = powerDecisions[readyPower.Info.OrderName];
 			if (powerDecision == null)
 			{
-				AIUtils.BotDebug($"{player.ResolvedPlayerName} couldn't find powerDecision for {readyPower.Info.OrderName}");
+				bot.Debug($"{player.ResolvedPlayerName} couldn't find powerDecision for {readyPower.Info.OrderName}");
 				return null;
 			}
 
@@ -175,14 +175,14 @@ namespace OpenRA.Mods.Common.Traits
 		}
 
 		/// <summary>Detail scans an area, evaluating positions.</summary>
-		CPos? FindFineAttackLocationToSupportPower(SupportPowerInstance readyPower, CPos checkPos, int extendedRange = 1)
+		CPos? FindFineAttackLocationToSupportPower(IBot bot, SupportPowerInstance readyPower, CPos checkPos, int extendedRange = 1)
 		{
 			CPos? bestLocation = null;
 			var bestAttractiveness = 0;
 			var powerDecision = powerDecisions[readyPower.Info.OrderName];
 			if (powerDecision == null)
 			{
-				AIUtils.BotDebug($"{player.ResolvedPlayerName} couldn't find powerDecision for {readyPower.Info.OrderName}");
+				bot.Debug($"{player.ResolvedPlayerName} couldn't find powerDecision for {readyPower.Info.OrderName}");
 				return null;
 			}
 

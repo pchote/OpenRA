@@ -67,8 +67,7 @@ namespace OpenRA.Mods.Common.Traits
 			var rb = self.TraitOrDefault<RepairableBuilding>();
 			if (rb != null && e.DamageState > DamageState.Light && e.PreviousDamageState <= DamageState.Light && !rb.RepairActive)
 			{
-				AIUtils.BotDebug("{0} noticed damage {1} {2}->{3}, repairing.",
-					self.Owner, self, e.PreviousDamageState, e.DamageState);
+				bot.Debug($"{self.Owner} noticed damage {self} {e.PreviousDamageState}->{e.DamageState}, repairing.");
 				bot.QueueOrder(new Order("RepairBuilding", self.Owner.PlayerActor, Target.FromActor(self), false));
 			}
 		}
