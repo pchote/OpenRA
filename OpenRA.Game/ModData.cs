@@ -65,7 +65,7 @@ namespace OpenRA
 
 			FileSystemLoader = ObjectCreator.GetLoader<IFileSystemLoader>(Manifest.FileSystem.Value, "filesystem");
 			FieldLoader.Load(FileSystemLoader, Manifest.FileSystem);
-			FileSystemLoader.Mount(ModFiles, ObjectCreator);
+			FileSystemLoader.Mount(Manifest, ModFiles, ObjectCreator);
 			ModFiles.TrimExcess();
 
 			foreach (var kv in Manifest.GlobalModData)
@@ -253,6 +253,6 @@ namespace OpenRA
 
 	public interface IFileSystemLoader
 	{
-		void Mount(FS fileSystem, ObjectCreator objectCreator);
+		void Mount(Manifest manifest, FS fileSystem, ObjectCreator objectCreator);
 	}
 }
