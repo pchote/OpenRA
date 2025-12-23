@@ -67,7 +67,7 @@ namespace OpenRA.Mods.Common.FileSystem
 			return packages.ToImmutableArray();
 		}
 
-		public void Mount(OpenRA.FileSystem.FileSystem fileSystem, ObjectCreator objectCreator)
+		public void Mount(Manifest manifest, OpenRA.FileSystem.FileSystem fileSystem, ObjectCreator objectCreator)
 		{
 			foreach (var kv in SystemPackages)
 				fileSystem.Mount(kv.Key, kv.Value);
