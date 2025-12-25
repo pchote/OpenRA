@@ -304,6 +304,8 @@ namespace OpenRA.Mods.Common.Lint
 						ExtractFluentKeys(modData, v, prefix, keys);
 				}
 			}
+			else
+				ExtractFluentKeys(modData, fieldValue, prefix, keys);
 		}
 
 		static void ExtractChromeFluentKeys(ModData modData, Keys usedKeys)
