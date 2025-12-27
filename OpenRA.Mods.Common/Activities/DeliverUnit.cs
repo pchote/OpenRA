@@ -46,7 +46,7 @@ namespace OpenRA.Mods.Common.Activities
 			// In case this activity was queued (either via queued order of via AutoCarryall)
 			// something might have happened to the cargo in the time between the activity being
 			// queued and being run, so short out if it is no longer valid.
-			if (carryall.Carryable == null)
+			if (carryall.Carryable == null || carryall.State != Carryall.CarryallState.Carrying)
 				return;
 
 			if (assignTargetOnFirstRun)
