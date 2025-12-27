@@ -326,7 +326,7 @@ namespace OpenRA.Mods.Common.Server
 					return true;
 				}
 
-				if (server.LobbyInfo.Slots.All(sl => server.LobbyInfo.ClientInSlot(sl.Key) == null))
+				if (server.LobbyInfo.Slots.All(sl => server.LobbyInfo.ClientInSlot(sl.Key)?.State is null or Session.ClientState.Invalid))
 				{
 					server.SendFluentMessageTo(conn, NoStartWithoutPlayers);
 					return true;
