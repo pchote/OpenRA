@@ -105,6 +105,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		MapPreview map;
 		Session.MapStatus mapStatus;
 		MapGenerationArgs lastGeneratedMap;
+		bool gameStarting;
 
 		bool chatEnabled;
 		bool disableTeamChat;
@@ -232,7 +233,6 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			foreach (var f in modRules.Actors[SystemActors.World].TraitInfos<FactionInfo>())
 				factions.Add(f.InternalName, new LobbyFaction { Selectable = f.Selectable, Name = f.Name, Side = f.Side, Description = f.Description });
 
-			var gameStarting = false;
 			Func<bool> configurationDisabled = () => !Game.IsHost || gameStarting ||
 				panel == PanelType.Kick || panel == PanelType.ForceStart || !MapIsPlayable ||
 				orderManager.LocalClient == null || orderManager.LocalClient.IsReady;
@@ -966,6 +966,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		void UpdateOptions()
 		{
+			gameStarting = false;
 			if (map == null || map.WorldActorInfo == null)
 				return;
 
