@@ -163,6 +163,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					var p = modData.MapCache[generatedMapArgs.Uid];
 					if (p.Status != MapStatus.Available && package is ZipFileLoader.ReadWriteZipFile zipPackage)
 					{
+						p.UpdateFromGenerationArgs(generatedMapArgs);
 						p.UpdateFromMap(zipPackage, MapClassification.Generated);
 
 						// UpdateFromMap took ownership of the package.

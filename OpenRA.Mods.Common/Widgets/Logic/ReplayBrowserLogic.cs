@@ -706,7 +706,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		void SelectReplay(ReplayMetadata replay)
 		{
 			selectedReplay = replay;
-			map = selectedReplay != null ? selectedReplay.GameInfo.MapPreview : MapCache.UnknownMap;
+			map = selectedReplay != null ? selectedReplay.GameInfo.GetMapPreview(modData) : MapCache.UnknownMap;
 
 			if (replay == null)
 				return;

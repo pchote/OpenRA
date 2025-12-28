@@ -14,7 +14,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using OpenRA.FileSystem;
 using OpenRA.Network;
 using OpenRA.Widgets;
 
@@ -72,7 +71,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly string baseSavePath;
 
 		readonly string defaultSaveFilename;
-		string selectedSave;
+		string selectedPath;
+		GameSave selectedSave;
 
 		[ObjectCreator.UseCtor]
 		public GameSaveBrowserLogic(Widget widget, ModData modData, Action onExit, Action onStart, bool isSavePanel, World world)
@@ -127,7 +127,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				panel.Get("LOAD_TITLE").IsVisible = () => true;
 				var loadButton = panel.Get<ButtonWidget>("LOAD_BUTTON");
 				loadButton.IsVisible = () => true;
-				loadButton.IsDisabled = () => selectedSave == null;
+				loadButton.IsDisabled = () => selectedSave == null || modData.MapCache[selectedSave.GlobalSettings.Map].Status != MapStatus.Available;
 				loadButton.OnClick = Load;
 			}
 
@@ -138,7 +138,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			renameButton.IsDisabled = () => selectedSave == null;
 			renameButton.OnClick = () =>
 			{
-				var initialName = Path.GetFileNameWithoutExtension(selectedSave);
+				var initialName = Path.GetFileNameWithoutExtension(selectedPath);
 				var invalidChars = Path.GetInvalidFileNameChars();
 
 				ConfirmationDialogs.TextInputPrompt(modData,
@@ -174,10 +174,10 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				ConfirmationDialogs.ButtonPrompt(modData,
 					title: DeleteSaveTitle,
 					text: DeleteSavePrompt,
-					textArguments: ["save", Path.GetFileNameWithoutExtension(selectedSave)],
+					textArguments: ["save", Path.GetFileNameWithoutExtension(selectedPath)],
 					onConfirm: () =>
 					{
-						Delete(selectedSave);
+						Delete(selectedPath);
 
 						if (games.Count == 0 && !isSavePanel)
 						{
@@ -239,7 +239,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				var item = gameTemplate.Clone();
 				item.ItemKey = savePath;
 				item.IsVisible = () => true;
-				item.IsSelected = () => selectedSave == item.ItemKey;
+				item.IsSelected = () => selectedPath == item.ItemKey;
 				item.OnClick = () => Select(item.ItemKey);
 
 				if (isSavePanel)
@@ -276,8 +276,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					item.Get<LabelWidget>("TITLE").GetText = () => newName;
 				}
 
-				if (selectedSave == oldPath)
-					selectedSave = newPath;
+				if (selectedPath == oldPath)
+					selectedPath = newPath;
 			}
 			catch (Exception ex)
 			{
@@ -299,7 +299,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				return;
 			}
 
-			if (savePath == selectedSave)
+			if (savePath == selectedPath)
 				Select(null);
 
 			var item = gameList.Children
@@ -322,7 +322,16 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		void Select(string savePath)
 		{
-			selectedSave = savePath;
+			selectedPath = savePath;
+			selectedSave = new GameSave(savePath);
+
+			var map = modData.MapCache[selectedSave.GlobalSettings.Map];
+			if (map.Status != MapStatus.Available && selectedSave.MapGenerationArgs != null)
+			{
+				// Add to the MapCache so the server will accept the map
+				modData.MapCache.GenerateMap(modData, selectedSave.MapGenerationArgs);
+			}
+
 			if (isSavePanel)
 			{
 				saveTextField.Text = savePath == null ? defaultSaveFilename : Path.GetFileNameWithoutExtension(savePath);
@@ -335,17 +344,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			if (selectedSave == null)
 				return;
 
-			// Parse the save to find the map UID
-			var save = new GameSave(selectedSave);
-
-			var map = Game.ModData.MapCache[save.GlobalSettings.Map];
-			if (map.Status != MapStatus.Available && save.MapData != null)
-			{
-				// Add to the MapCache so the server will accept the map
-				var package = ZipFileLoader.ReadWriteZipFile.FromBase64String(save.MapData);
-				map.UpdateFromMap(package, MapClassification.Generated);
-			}
-
+			var map = modData.MapCache[selectedSave.GlobalSettings.Map];
 			if (map.Status != MapStatus.Available)
 				return;
 
@@ -353,7 +352,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			var orders = new List<Order>()
 			{
-				Order.FromTargetString("LoadGameSave", Path.GetFileName(selectedSave), true),
+				Order.FromTargetString("LoadGameSave", Path.GetFileName(selectedPath), true),
 				Order.Command($"state {Session.ClientState.Ready}")
 			};
 

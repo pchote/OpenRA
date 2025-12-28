@@ -84,6 +84,7 @@ namespace OpenRA
 			public MapClassification Class;
 			public MapVisibility Visibility;
 			public DateTime ModifiedDate;
+			public MapGenerationArgs GenerationArgs;
 
 			public MiniYaml RuleDefinitions;
 			public MiniYaml WeaponDefinitions;
@@ -219,19 +220,6 @@ namespace OpenRA
 				return new Map(modData, package);
 		}
 
-		public string ToBase64String()
-		{
-			LoadPackage();
-			if (package is not ZipFileLoader.ReadWriteZipFile p)
-			{
-				var map = new Map(modData, package);
-				p = new ZipFileLoader.ReadWriteZipFile();
-				map.Save(p);
-			}
-
-			return p.ToBase64String();
-		}
-
 		IReadOnlyPackage parentPackage;
 
 		volatile InnerData innerData;
@@ -258,6 +246,8 @@ namespace OpenRA
 		public ActorInfo WorldActorInfo => innerData.WorldActorInfo;
 		public ActorInfo PlayerActorInfo => innerData.PlayerActorInfo;
 		public DateTime ModifiedDate => innerData.ModifiedDate;
+
+		public MapGenerationArgs GenerationArgs => innerData.GenerationArgs;
 
 		public long DownloadBytes { get; private set; }
 		public int DownloadPercentage { get; private set; }
@@ -482,6 +472,7 @@ namespace OpenRA
 				newData.Status = MapStatus.Generating;
 				newData.Title = args.Title;
 				newData.Author = args.Author;
+				newData.GenerationArgs = args;
 			}
 			else
 				newData.Status = MapStatus.Unavailable;

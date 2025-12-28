@@ -1356,7 +1356,7 @@ namespace OpenRA.Server
 				};
 
 				if (Map.Class == MapClassification.Generated)
-					gameInfo.MapData = Map.ToBase64String();
+					gameInfo.MapGenerationArgs = Map.GenerationArgs;
 
 				// Replay metadata should only include the playable players
 				foreach (var p in worldPlayers)
