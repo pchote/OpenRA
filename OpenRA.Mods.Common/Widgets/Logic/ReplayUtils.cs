@@ -63,7 +63,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			if (Game.Mods[mod].Metadata.Version != version)
 				return IncompatibleReplayDialog(modData, onCancel, IncompatibleVersion, "version", version);
 
-			if (replayMeta.GameInfo.MapPreview.Status != MapStatus.Available)
+			if (replayMeta.GameInfo.GetMapPreview(modData).Status != MapStatus.Available)
 				return IncompatibleReplayDialog(modData, onCancel, UnvailableMap, "map", replayMeta.GameInfo.MapUid);
 
 			return true;

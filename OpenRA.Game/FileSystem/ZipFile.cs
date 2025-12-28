@@ -158,16 +158,6 @@ namespace OpenRA.FileSystem
 				pkg.CommitUpdate();
 				Commit();
 			}
-
-			public static ReadWriteZipFile FromBase64String(string data)
-			{
-				return new ReadWriteZipFile(Convert.FromBase64String(data));
-			}
-
-			public string ToBase64String()
-			{
-				return Convert.ToBase64String(pkgStream.ToArray());
-			}
 		}
 
 		sealed class ZipFolder : IReadOnlyPackage

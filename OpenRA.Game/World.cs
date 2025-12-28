@@ -228,7 +228,7 @@ namespace OpenRA
 
 			var preview = modData.MapCache[Map.Uid];
 			if (preview.Class == MapClassification.Generated)
-				gameInfo.MapData = preview.ToBase64String();
+				gameInfo.MapGenerationArgs = preview.GenerationArgs;
 
 			RulesContainTemporaryBlocker = Map.Rules.Actors.Any(a => a.Value.HasTraitInfo<ITemporaryBlockerInfo>());
 			gameSettings = GetSettings<GameSettings>();
