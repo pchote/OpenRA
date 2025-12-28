@@ -28,7 +28,7 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Tooltip description for the starting cash option in the lobby.")]
 		public readonly string DefaultCashDropdownDescription = "The amount of cash that players start with";
 
-		[Desc("Starting cash options that are available in the lobby options.")]
+		[Desc("Starting cash options that are available in the lobby options. DefaultCash will be included if not specified.")]
 		public readonly ImmutableArray<int> SelectableCash = [2500, 5000, 10000, 20000];
 
 		[Desc("Default starting cash option: should be one of the SelectableCash options.")]
@@ -65,7 +65,9 @@ namespace OpenRA.Mods.Common.Traits
 
 		IEnumerable<LobbyOption> ILobbyOptions.LobbyOptions(MapPreview map)
 		{
-			var startingCash = SelectableCash.ToDictionary(c => c.ToStringInvariant(), c => "$" + c.ToString(NumberFormatInfo.CurrentInfo));
+			// Make sure that DefaultCash is included in the available options
+			var startingCash = SelectableCash.Append(DefaultCash).ToHashSet()
+				.ToDictionary(c => c.ToStringInvariant(), c => "$" + c.ToString(NumberFormatInfo.CurrentInfo));
 
 			if (startingCash.Count > 0)
 				yield return new LobbyOption(map, "startingcash",
