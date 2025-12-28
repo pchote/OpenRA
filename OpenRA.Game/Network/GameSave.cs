@@ -314,7 +314,7 @@ namespace OpenRA.Network
 					.ToList();
 				file.WriteLengthPrefixedString(Encoding.UTF8, slotClientNodes.WriteToString());
 
-				file.WriteLengthPrefixedString(Encoding.UTF8, MapGenerationArgs?.Serialize() ?? string.Empty);
+				file.WriteLengthPrefixedString(Encoding.UTF8, MapGenerationArgs?.Serialize().WriteToString() ?? string.Empty);
 
 				var traitDataOffset = file.Length;
 				file.Write(TraitDataMarker);
