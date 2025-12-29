@@ -38,15 +38,10 @@ namespace OpenRA.Graphics
 			Size = scale * new float3(bounds.Size.Width, bounds.Size.Height, bounds.Size.Height * zRamp);
 			BlendMode = blendMode;
 
-			// Some GPUs suffer from precision issues when rendering into non 1:1 framebuffers that result
-			// in rendering a line of texels that sample outside the sprite rectangle.
-			// Insetting the texture coordinates by a small fraction of a pixel avoids this
-			// with negligible impact on the 1:1 rendering case.
-			const float Inset = 1 / 128f;
-			Left = (Math.Min(bounds.Left, bounds.Right) + Inset) / sheet.Size.Width;
-			Top = (Math.Min(bounds.Top, bounds.Bottom) + Inset) / sheet.Size.Height;
-			Right = (Math.Max(bounds.Left, bounds.Right) - Inset) / sheet.Size.Width;
-			Bottom = (Math.Max(bounds.Top, bounds.Bottom) - Inset) / sheet.Size.Height;
+			Left = (float)Math.Min(bounds.Left, bounds.Right) / sheet.Size.Width;
+			Top = (float)Math.Min(bounds.Top, bounds.Bottom) / sheet.Size.Height;
+			Right = (float)Math.Max(bounds.Left, bounds.Right) / sheet.Size.Width;
+			Bottom = (float)Math.Max(bounds.Top, bounds.Bottom) / sheet.Size.Height;
 		}
 	}
 
