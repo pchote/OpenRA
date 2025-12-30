@@ -88,38 +88,31 @@ namespace OpenRA.Mods.Cnc.SpriteLoaders
 			{
 				var origData = header.Data;
 				var origSize = header.Size;
-				var top = origSize.Height - 1;
-				var bottom = 0;
-				var left = origSize.Width - 1;
-				var right = 0;
 
-				// Scan frame data to find left-, top-, right-, bottom-most
-				// rows/columns with non-zero pixel data.
+				var trimCols = origSize.Width / 2;
+				var trimRows = origSize.Height / 2;
+
+				// Scan frame data to count the number of empty rows and columns
+				// that can be trimmed from the edges of the frame.
+				// This is done symmetrically to avoid issues
+				// caused by non-zero frame Offsets.
 				var i = 0;
 				for (var y = 0; y < origSize.Height; y++)
 				{
 					for (var x = 0; x < origSize.Width; x++, i++)
 					{
-						if (origData[i] != 0)
+						if (origData[i] != 0 || origData[origData.Length - i - 1] != 0)
 						{
-							top = Math.Min(y, top);
-							bottom = Math.Max(y, bottom);
-							left = Math.Min(x, left);
-							right = Math.Max(x, right);
+							trimRows = Math.Min(y, trimRows);
+							trimCols = Math.Min(x, trimCols);
 						}
 					}
 				}
 
-				var trimmedWidth = right - left + 1;
-				var trimmedHeight = bottom - top + 1;
+				var destWidth = origSize.Width - 2 * trimCols;
+				var destHeight = origSize.Height - 2 * trimRows;
 
-				// Pad the dimensions to an even number to avoid issues with half-integer offsets.
-				var widthFudge = trimmedWidth % 2;
-				var heightFudge = trimmedHeight % 2;
-				var destWidth = trimmedWidth + widthFudge;
-				var destHeight = trimmedHeight + heightFudge;
-
-				if (trimmedWidth == origSize.Width && trimmedHeight == origSize.Height)
+				if (trimRows == 0 && trimCols == 0)
 				{
 					// Nothing to trim, so copy old data directly.
 					Size = header.Size;
@@ -127,18 +120,16 @@ namespace OpenRA.Mods.Cnc.SpriteLoaders
 					Offset = header.Offset;
 					Data = header.Data;
 				}
-				else if (trimmedWidth > 0 && trimmedHeight > 0)
+				else
 				{
 					// Trim frame.
 					Data = new byte[destWidth * destHeight];
-					for (var y = 0; y < trimmedHeight; y++)
-						Array.Copy(origData, (y + top) * origSize.Width + left, Data, y * destWidth, trimmedWidth);
+					for (var y = 0; y < destHeight; y++)
+						Array.Copy(origData, (y + trimRows) * origSize.Width + trimCols, Data, y * destWidth, destWidth);
 
 					Size = new Size(destWidth, destHeight);
 					FrameSize = origSize;
-					Offset = 0.5f * new float2(
-						left + right + widthFudge - origSize.Width + 1,
-						top + bottom + heightFudge - origSize.Height + 1);
+					Offset = header.Offset;
 				}
 			}
 		}
