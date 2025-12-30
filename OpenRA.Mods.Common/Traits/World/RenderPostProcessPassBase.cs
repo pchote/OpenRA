@@ -43,10 +43,7 @@ namespace OpenRA.Mods.Common.Traits
 		bool IRenderPostProcessPass.Enabled => Enabled;
 		void IRenderPostProcessPass.Draw(WorldRenderer wr)
 		{
-			if (type == PostProcessPassType.AfterAnnotations)
-				shader.SetTexture("WorldTexture", Game.Renderer.ScreenBufferSnapshot());
-			else
-				shader.SetTexture("WorldTexture", Game.Renderer.WorldBufferSnapshot());
+			shader.SetTexture("SourceTexture", Game.Renderer.GetRenderBufferSnapshot());
 
 			PrepareRender(wr, shader);
 			shader.PrepareRender();

@@ -113,6 +113,9 @@ namespace OpenRA.Platforms.Default
 
 		public void SetDataFromReadBuffer(Rectangle rect)
 		{
+			if (!Exts.IsPowerOf2(rect.Width) || !Exts.IsPowerOf2(rect.Height))
+				throw new InvalidDataException($"Non-power-of-two rectangle {rect.Width}x{rect.Height}");
+
 			VerifyThreadAffinity();
 			PrepareTexture();
 

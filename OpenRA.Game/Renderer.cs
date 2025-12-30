@@ -61,20 +61,12 @@ namespace OpenRA
 		public int WorldDownscaleFactor { get; private set; } = 1;
 
 		/// <summary>
-		/// Copies and returns the currently rendered world state as a temporary texture.
+		/// Copies and returns the currently rendered state as a temporary texture.
 		/// </summary>
-		public ITexture WorldBufferSnapshot()
+		public ITexture GetRenderBufferSnapshot()
 		{
-			bufferSnapshot.SetDataFromReadBuffer(new Rectangle(int2.Zero, worldSheet.Size));
-			return bufferSnapshot;
-		}
-
-		/// <summary>
-		/// Copies and returns the currently rendered screen state as a temporary texture.
-		/// </summary>
-		public ITexture ScreenBufferSnapshot()
-		{
-			bufferSnapshot.SetDataFromReadBuffer(new Rectangle(int2.Zero, Window.SurfaceSize));
+			var size = renderType == RenderType.World ? worldSheet.Size : Window.SurfaceSize.NextPowerOf2();
+			bufferSnapshot.SetDataFromReadBuffer(new Rectangle(int2.Zero, size));
 			return bufferSnapshot;
 		}
 
