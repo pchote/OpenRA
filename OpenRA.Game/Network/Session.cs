@@ -213,9 +213,10 @@ namespace OpenRA.Network
 			public bool AllowSpectators = true;
 			public string GameUid;
 			public bool EnableSingleplayer;
+			public bool EnableMapGeneration;
+			public bool EnableGameSaves;
 			public bool EnableSyncReports;
 			public bool Dedicated;
-			public bool GameSavesEnabled;
 
 			// 120ms network frame interval for 40ms local tick
 			public int NetFrameInterval = 3;

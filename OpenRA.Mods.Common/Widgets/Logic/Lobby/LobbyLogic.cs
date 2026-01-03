@@ -272,6 +272,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					// Check for updated maps, if the user has edited a map we'll preselect it for them
 					modData.MapCache.UpdateMaps();
 
+					var enableMapGenerator = Game.IsHost && orderManager.LobbyInfo.GlobalSettings.EnableMapGeneration;
 					Ui.OpenWindow("MAPCHOOSER_PANEL", new WidgetArgs()
 					{
 						{ "initialMap", modData.MapCache.PickLastModifiedMap(MapVisibility.Lobby) ?? map.Uid },
@@ -280,7 +281,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 						{ "initialTab", MapClassification.System },
 						{ "onExit", modData.MapCache.UpdateMaps },
 						{ "onSelect", Game.IsHost ? onSelect : null },
-						{ "onSelectGenerated", Game.IsHost ? onSelectGenerated : null },
+						{ "onSelectGenerated", enableMapGenerator ? onSelectGenerated : null },
 						{ "filter", MapVisibility.Lobby },
 					});
 				};

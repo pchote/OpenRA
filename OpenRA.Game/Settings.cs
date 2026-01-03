@@ -129,6 +129,9 @@ namespace OpenRA
 		[Desc("For dedicated servers only, controls whether a game can be started with just one human player in the lobby.")]
 		public bool EnableSingleplayer = false;
 
+		[Desc("Controls whether generated maps can be used.")]
+		public bool EnableMapGeneration = true;
+
 		[Desc("Query map information from the Resource Center if they are not available locally.")]
 		public bool QueryMapRepository = true;
 
