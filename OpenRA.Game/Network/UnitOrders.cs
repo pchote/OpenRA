@@ -393,7 +393,14 @@ namespace OpenRA.Network
 				case "GenerateMap":
 				{
 					var yaml = new MiniYaml(order.OrderString, MiniYaml.FromString(order.TargetString, order.OrderString));
-					Game.ModData.MapCache.GenerateMap(Game.ModData, FieldLoader.Load<MapGenerationArgs>(yaml));
+					var args = FieldLoader.Load<MapGenerationArgs>(yaml);
+					var preview = Game.ModData.MapCache[args.Uid];
+					if (preview.Status != MapStatus.Available && preview.Class != MapClassification.Generated)
+					{
+						preview.UpdateFromGenerationArgs(args);
+						preview.Generate();
+					}
+
 					break;
 				}
 

@@ -656,23 +656,8 @@ namespace OpenRA.Mods.Common.Server
 				}
 
 				var m = server.ModData.MapCache[s];
-				if (m.Status == MapStatus.Available || m.Status == MapStatus.DownloadAvailable)
+				if (m.Status is MapStatus.Available or MapStatus.DownloadAvailable or MapStatus.Generatable or MapStatus.Generating)
 					SelectMap(m);
-				else if (m.Class == MapClassification.Generated)
-				{
-					if (m.Status == MapStatus.Generating)
-					{
-						// Wait up to 5 seconds for the map to be generated
-						var stopwatch = Stopwatch.StartNew();
-						while (m.Status == MapStatus.Generating && stopwatch.ElapsedMilliseconds < 5000)
-							Thread.Sleep(100);
-					}
-
-					if (m.Status == MapStatus.Available)
-						SelectMap(m);
-					else
-						QueryFailed();
-				}
 				else if (server.Settings.QueryMapRepository)
 				{
 					server.SendFluentMessageTo(conn, SearchingMap);

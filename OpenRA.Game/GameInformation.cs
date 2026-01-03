@@ -60,7 +60,10 @@ namespace OpenRA
 		{
 			var preview = modData.MapCache[MapUid];
 			if (preview.Status != MapStatus.Available && MapGenerationArgs != null)
-				modData.MapCache.GenerateMap(modData, MapGenerationArgs);
+			{
+				preview.UpdateFromGenerationArgs(MapGenerationArgs);
+				preview.Generate();
+			}
 
 			return preview;
 		}

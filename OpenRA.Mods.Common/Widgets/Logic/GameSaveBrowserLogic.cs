@@ -327,11 +327,12 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			if (savePath != null)
 			{
 				selectedSave = new GameSave(savePath);
-				var map = modData.MapCache[selectedSave.GlobalSettings.Map];
-				if (map.Status != MapStatus.Available && selectedSave.MapGenerationArgs != null)
+				var preview = modData.MapCache[selectedSave.GlobalSettings.Map];
+				if (preview.Status != MapStatus.Available && selectedSave.MapGenerationArgs != null)
 				{
 					// Add to the MapCache so the server will accept the map
-					modData.MapCache.GenerateMap(modData, selectedSave.MapGenerationArgs);
+					preview.UpdateFromGenerationArgs(selectedSave.MapGenerationArgs);
+					preview.Generate();
 				}
 			}
 			else
