@@ -331,6 +331,7 @@ namespace OpenRA.Server
 					RandomSeed = randomSeed,
 					ServerName = settings.Name,
 					EnableSingleplayer = settings.EnableSingleplayer || Type != ServerType.Dedicated,
+					EnableMapGeneration = settings.EnableMapGeneration,
 					EnableSyncReports = settings.EnableSyncReports,
 					GameUid = Guid.NewGuid().ToString(),
 					Dedicated = Type == ServerType.Dedicated
@@ -1122,6 +1123,9 @@ namespace OpenRA.Server
 						if (!GetClient(conn).IsAdmin || State >= ServerState.GameStarted)
 							break;
 
+						if (!LobbyInfo.GlobalSettings.EnableMapGeneration)
+							break;
+
 						try
 						{
 							var yaml = new MiniYaml(o.OrderString, MiniYaml.FromString(o.TargetString, o.OrderString));
@@ -1336,7 +1340,7 @@ namespace OpenRA.Server
 
 				// Enable game saves for singleplayer missions only
 				// TODO: Enable for multiplayer (non-dedicated servers only) once the lobby UI has been created
-				LobbyInfo.GlobalSettings.GameSavesEnabled = Type != ServerType.Dedicated && LobbyInfo.NonBotClients.Count() == 1;
+				LobbyInfo.GlobalSettings.EnableGameSaves = Type != ServerType.Dedicated && LobbyInfo.NonBotClients.Count() == 1;
 
 				// Player list for win/loss tracking
 				// HACK: NonCombatant and non-Playable players are set to null to simplify replay tracking
@@ -1381,7 +1385,7 @@ namespace OpenRA.Server
 				if (IsMultiplayer)
 					OrderLatency = gameSpeed.OrderLatency;
 
-				if (GameSave == null && LobbyInfo.GlobalSettings.GameSavesEnabled)
+				if (GameSave == null && LobbyInfo.GlobalSettings.EnableGameSaves)
 					GameSave = new GameSave();
 
 				var startGameData = "";
