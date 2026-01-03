@@ -9,6 +9,7 @@
  */
 #endregion
 
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using OpenRA.Mods.Common.MapGenerator;
@@ -91,6 +92,14 @@ namespace OpenRA.Mods.Common.Traits
 			terraformer.BakeMap();
 
 			return map;
+		}
+
+		public bool TryGenerateMetadata(ModData modData, MapGenerationArgs args, out MapPlayers players, out Dictionary<string, MiniYaml> ruleDefinitions)
+		{
+			ruleDefinitions = [];
+			players = new MapPlayers(modData.DefaultRules, 0);
+
+			return true;
 		}
 
 		public override object Create(ActorInitializer init)

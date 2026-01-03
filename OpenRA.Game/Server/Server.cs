@@ -1127,8 +1127,8 @@ namespace OpenRA.Server
 							var yaml = new MiniYaml(o.OrderString, MiniYaml.FromString(o.TargetString, o.OrderString));
 							var args = FieldLoader.Load<MapGenerationArgs>(yaml);
 							var preview = ModData.MapCache[args.Uid];
-							if (preview.Status != MapStatus.Available)
-								ModData.MapCache.GenerateMap(ModData, args);
+							if (preview.Status != MapStatus.Available && preview.Class != MapClassification.Generated)
+								preview.UpdateFromGenerationArgs(args);
 
 							GeneratedMapData = o.TargetString;
 							DispatchServerOrdersToClients(Order.FromTargetString("GenerateMap", o.TargetString, true));

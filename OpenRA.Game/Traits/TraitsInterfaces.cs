@@ -659,5 +659,6 @@ namespace OpenRA.Traits
 		string MapTitle { get; }
 
 		Map Generate(ModData modData, MapGenerationArgs args);
+		bool TryGenerateMetadata(ModData modData, MapGenerationArgs args, out MapPlayers players, out Dictionary<string, MiniYaml> rules);
 	}
 }

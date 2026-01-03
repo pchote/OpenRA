@@ -616,6 +616,26 @@ namespace OpenRA.Mods.D2k.Traits
 			return map;
 		}
 
+		public bool TryGenerateMetadata(ModData modData, MapGenerationArgs args, out MapPlayers players, out Dictionary<string, MiniYaml> ruleDefinitions)
+		{
+			try
+			{
+				var playerCount = FieldLoader.GetValue<int>("Players", args.Settings.NodeWithKey("Players").Value.Value);
+
+				// Generated maps use the default ruleset
+				ruleDefinitions = [];
+				players = new MapPlayers(modData.DefaultRules, playerCount);
+
+				return true;
+			}
+			catch
+			{
+				players = null;
+				ruleDefinitions = null;
+				return false;
+			}
+		}
+
 		public override object Create(ActorInitializer init)
 		{
 			return new D2kMapGenerator(this);
