@@ -263,7 +263,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 							return;
 
 						lastGeneratedMap = args;
-						orderManager.IssueOrder(Order.FromTargetString("GenerateMap", args.Serialize(), true));
+						orderManager.IssueOrder(Order.FromTargetString("GenerateMap", args.Serialize().WriteToString(), true));
 						orderManager.IssueOrder(Order.Command("map " + args.Uid));
 						Game.Settings.Server.Map = args.Uid;
 						Game.Settings.Save();
@@ -703,6 +703,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				return;
 
 			map = modData.MapCache[uid];
+			if (map.GenerationArgs != null)
+				lastGeneratedMap = map.GenerationArgs;
 
 			// Tell the server that we have the map
 			mapAvailable = map.Status == MapStatus.Available;

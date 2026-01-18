@@ -76,8 +76,19 @@ namespace OpenRA.Mods.Common.Server
 			// Only set players and options if the map is available
 			if (server.LobbyInfo.GlobalSettings.Map != mapNode.Value.Value)
 			{
-				var map = server.ModData.MapCache[mapNode.Value.Value];
-				if (map.Status != MapStatus.Available || !server.InterpretCommand($"map {map.Uid}", conn))
+				var preview = server.ModData.MapCache[mapNode.Value.Value];
+				if (preview.Status != MapStatus.Available)
+				{
+					if (mapNode.Value.Nodes.Length == 0)
+						return false;
+
+					var args = FieldLoader.Load<MapGenerationArgs>(mapNode.Value);
+					preview.UpdateFromGenerationArgs(args);
+					preview.Generate();
+					server.GeneratedMapData = mapNode.Value.Nodes.WriteToString();
+				}
+
+				if (!server.InterpretCommand($"map {preview.Uid}", conn))
 					return false;
 			}
 
@@ -157,9 +168,10 @@ namespace OpenRA.Mods.Common.Server
 				return;
 
 			var playerClient = server.LobbyInfo.NonBotClients.First();
+			var map = server.ModData.MapCache[server.LobbyInfo.GlobalSettings.Map];
 			var nodes = new List<MiniYamlNode>
 			{
-				new("Map", server.LobbyInfo.GlobalSettings.Map),
+				new("Map", server.LobbyInfo.GlobalSettings.Map, map.GenerationArgs?.Serialize() ?? []),
 				new("Options", new MiniYaml("", server.LobbyInfo.GlobalSettings.LobbyOptions
 					.Select(kv => new MiniYamlNode(kv.Key, kv.Value.Value)))),
 				new("Player", new SkirmishSlot(playerClient).ToYaml()),

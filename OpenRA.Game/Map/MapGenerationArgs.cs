@@ -41,10 +41,10 @@ namespace OpenRA
 			return yaml.NodeWithKey("Settings").Value;
 		}
 
-		public string Serialize()
+		public List<MiniYamlNode> Serialize()
 		{
-			return new List<MiniYamlNode>()
-			{
+			return
+			[
 				new("Uid", Uid),
 				new("Generator", Generator),
 				new("Tileset", Tileset),
@@ -52,7 +52,7 @@ namespace OpenRA
 				new("Settings", Settings),
 				new("Title", Title),
 				new("Author", Author)
-			}.WriteToString();
+			];
 		}
 	}
 }
