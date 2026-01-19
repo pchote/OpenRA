@@ -159,7 +159,7 @@ namespace OpenRA.Mods.Common.UtilityCommands
 			{
 				CheckRules(modData, map.Rules);
 				if (map.SequenceDefinitions != null)
-					CheckSequences(modData, modData.DefaultRules, map.Sequences);
+					CheckSequences(modData, map.Rules, map.Sequences);
 			}
 
 			// Run all map-level checks here.
