@@ -659,8 +659,24 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			switch (notification.Pool)
 			{
 				case TextNotificationPool.Chat:
+				{
+					var profileTooltip = chatLine.GetOrNull<ClientTooltipRegionWidget>("PROFILE_TOOLTIP");
+					var prefix = chatLine.GetOrNull("PREFIX");
+					var c = orderManager.LobbyInfo.ClientWithIndex(notification.ClientId);
+					if (profileTooltip != null && prefix != null && c != null)
+					{
+						profileTooltip.Bounds = prefix.Bounds;
+						if (c.Fingerprint != null)
+							profileTooltip.Template = "REGISTERED_PLAYER_TOOLTIP";
+
+						profileTooltip.IsVisible = () => true;
+						profileTooltip.Bind(orderManager, worldRenderer, c);
+					}
+
 					Game.Sound.PlayNotification(modRules, null, "Sounds", chatLineSound, null);
 					break;
+				}
+
 				case TextNotificationPool.System:
 					Game.Sound.PlayNotification(modRules, null, "Sounds", lobbyOptionChangedSound, null);
 					break;
